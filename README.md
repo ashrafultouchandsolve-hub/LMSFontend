@@ -19,10 +19,10 @@ Smart Task Management API is built with ASP.NET Core (.NET 8) using Onion Archit
 - Background Service to mark overdue tasks (`IsOverdue`)
 - Swagger + Bearer token support
   
-Default Admin Login
-•	Email: admin@smarttask.com
-•	Password: Admin@123
-•	Role: Admin
+##Default Admin Login
+-	Email: admin@smarttask.com
+-	Password: Admin@123
+-	Role: Admin
 
 ## Business Rules
 1. Soft delete only (hard delete না)
