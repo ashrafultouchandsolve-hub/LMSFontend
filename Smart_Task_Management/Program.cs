@@ -1,7 +1,10 @@
-using SmartTaskManagement.Infrastructure.DependencyInjection;
+﻿using SmartTaskManagement.Infrastructure.DependencyInjection;
 using SmartTaskManagement.Application.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Smart_Task_Management.Middleware;
+using Microsoft.EntityFrameworkCore;
+using SmartTaskManagement.Infrastructure.Persistence;
+using SmartTaskManagement.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -28,7 +31,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Bearer {token} ???? token ???"
+        Description = "Bearer {token} লিখে token দাও"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -51,12 +54,14 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
+//using var serviceScope = app.Services.CreateScope();
+//using var dbContext = serviceScope.ServiceProvider.GetService<AppDbContext>();
+//dbContext?.Database.Migrate();
+//await AdminSeedService.SeedAdminAsync(serviceScope.ServiceProvider);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
