@@ -38,7 +38,7 @@ namespace SmartTaskManagement.Infrastructure.Persistence
                 entity.Property(x => x.Description).HasMaxLength(2000);
                 entity.Property(x => x.DeadLine).IsRequired();
                 entity.Property(x => x.Status).IsRequired();
-
+                entity.Property(x => x.IsOverdue).IsRequired();
                 entity.HasQueryFilter(x => !x.IsDeleted);
 
                 entity.HasOne(x => x.CreatedByUser)

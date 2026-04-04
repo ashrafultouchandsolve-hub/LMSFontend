@@ -9,9 +9,10 @@ namespace SmartTaskManagement.Application.Interfaces.Tasks
 {
     public interface ITaskService
     {
-        Task<List<TaskResponseDto>> GetTasksAsync();
+        Task<List<TaskResponseDto>> GetTasksAsync(Guid userId);
         Task<TaskResponseDto> CreateAsync(CreateTaskRequestDto request,Guid userid,string userName);
         Task<TaskResponseDto> UpdateAsync(Guid id, UpdateTaskRequestDto request, Guid userId, string userName);
+        Task<TaskResponseDto> UpdateStatusAsync(Guid id ,string status, Guid userId, string userName);
         Task DeleteAsync(Guid id, Guid userId, string userName);
     }
 }

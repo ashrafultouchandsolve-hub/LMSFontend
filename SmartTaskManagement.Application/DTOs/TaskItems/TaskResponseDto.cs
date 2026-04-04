@@ -14,5 +14,6 @@ namespace SmartTaskManagement.Application.DTOs.TaskItems
         public DateTime DeadLine { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime CreateAt { get; set; }
+        public bool IsOverdue { get; set; }
     }
 }

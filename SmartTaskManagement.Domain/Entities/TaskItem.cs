@@ -13,6 +13,7 @@ namespace SmartTaskManagement.Domain.Entities
         public TaskItemStatus Status { get; set; } = TaskItemStatus.Pending;
         public Guid CreatedByUserId { get; set; }
         public AppUser? CreatedByUser { get; set; }
+        public bool IsOverdue { get; set; } = false;
 
     }
 }
