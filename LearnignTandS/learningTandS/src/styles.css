@@ -1,0 +1,40 @@
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	scroll-behavior: smooth;
+	background:
+		radial-gradient(circle at top left, rgba(26, 97, 255, 0.22), transparent 28%),
+		radial-gradient(circle at top right, rgba(78, 182, 255, 0.16), transparent 24%),
+		linear-gradient(180deg, #05070d 0%, #07101e 55%, #03050a 100%);
+	color: #f3f7ff;
+	font-family: "Segoe UI Variable", "Segoe UI", "Trebuchet MS", sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.card-surface {
+	position: relative;
+	border: 1px solid rgba(110, 168, 255, 0.16);
+	background: linear-gradient(180deg, rgba(10, 14, 28, 0.92), rgba(7, 10, 20, 0.86));
+	box-shadow:
+		0 22px 70px rgba(0, 0, 0, 0.45),
+		inset 0 1px 0 rgba(255, 255, 255, 0.03);
+	backdrop-filter: blur(16px);
+}
+
+a {
+	color: inherit;
+}
+
+::selection {
+	background: rgba(78, 182, 255, 0.28);
+	color: #ffffff;
+}
