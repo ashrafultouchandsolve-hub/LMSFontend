@@ -1,0 +1,134 @@
+<main class="home-page">
+	<div class="ambient ambient-left"></div>
+	<div class="ambient ambient-right"></div>
+
+	<header class="topbar card-surface reveal-up">
+		<a class="brand" routerLink="/homepage" aria-label="Learning platform home">
+			<span class="brand-mark">LT</span>
+			<span class="brand-text">
+				<strong>LearningTandS</strong>
+				<small>Touch And Solve Learning</small>
+			</span>
+		</a>
+
+		<nav class="topbar-nav" aria-label="Primary navigation">
+			<a href="#tracks">Tracks</a>
+			<a href="#platform-identity">Vision</a>
+		</nav>
+
+		<div class="topbar-actions">
+			@if (isLoggedIn()) {
+				<div class="user-chip" aria-label="Logged in user">
+					<span class="user-avatar">{{ userInitial() }}</span>
+					<span class="user-name">Hi, {{ userName() }}</span>
+				</div>
+				<button type="button" class="nav-button nav-button-ghost" (click)="logout()">Logout</button>
+			} @else {
+				<a routerLink="/login" class="nav-button nav-button-ghost">Login</a>
+				<a routerLink="/register" class="nav-button nav-button-primary">Register</a>
+			}
+		</div>
+	</header>
+
+	<section class="hero card-surface">
+		<div class="hero-copy reveal-up">
+			<p class="eyebrow">Trusted learning ecosystem</p>
+			<h1>Learn in-demand skills with structured paths, projects, and measurable progress.</h1>
+			<p class="lead">
+				Grow from fundamentals to advanced implementation through mentor-guided modules and
+				hands-on labs designed for real-world outcomes.
+			</p>
+
+			<div class="actions">
+				<a href="#tracks" class="primary-action">Explore programs</a>
+				<a href="#platform-identity" class="secondary-action">Why choose us</a>
+			</div>
+
+			<div class="stats" aria-label="Platform highlights">
+				@for (stat of stats; track stat.label) {
+					<article class="stat-pill">
+						<strong>{{ stat.value }}</strong>
+						<span>{{ stat.label }}</span>
+					</article>
+				}
+			</div>
+		</div>
+
+		<aside class="hero-panel reveal-up delay-1" aria-label="Learning dashboard preview">
+			<div class="panel-header">
+				<div>
+					<p class="panel-label">Student dashboard</p>
+					<h2>Weekly performance overview</h2>
+				</div>
+				<span class="live-badge">Live</span>
+			</div>
+
+			<div class="progress-ring">
+				<div class="ring-core">
+					<strong>87%</strong>
+					<span>weekly completion</span>
+				</div>
+			</div>
+
+			<div class="dashboard-list">
+				<div class="dashboard-row">
+					<span>Angular module assessments</span>
+					<strong>Completed</strong>
+				</div>
+				<div class="dashboard-row">
+					<span>Hands-on coding time</span>
+					<strong>6.8 hrs</strong>
+				</div>
+				<div class="dashboard-row">
+					<span>Consistency streak</span>
+					<strong>21 days</strong>
+				</div>
+			</div>
+		</aside>
+	</section>
+
+	<section class="section-head reveal-up delay-2">
+		<p class="eyebrow">Programs</p>
+		<h2 id="tracks">Career-focused learning paths for every stage</h2>
+		<p>
+			Choose a pathway based on your current level and progress with curated lessons, challenges,
+			and project-based milestones.
+		</p>
+	</section>
+
+	<section class="track-grid">
+		@for (track of learningTracks; track track.title) {
+			<article class="track-card card-surface reveal-up delay-2">
+				<span class="track-badge">{{ track.badge }}</span>
+				<h3>{{ track.title }}</h3>
+				<p>{{ track.description }}</p>
+			</article>
+		}
+	</section>
+
+	<section class="feature-layout">
+		<div class="feature-list">
+			@for (highlight of highlights; track highlight.title) {
+				<article class="feature-card card-surface reveal-up delay-3">
+					<span class="feature-mark"></span>
+					<div>
+						<h3>{{ highlight.title }}</h3>
+						<p>{{ highlight.description }}</p>
+					</div>
+				</article>
+			}
+		</div>
+
+		<aside id="platform-identity" class="quote-card card-surface reveal-up delay-3">
+			<p class="quote-label">Our commitment</p>
+			<blockquote>
+				“Every learner deserves a clear roadmap, measurable progress, and practical skills that
+				translate directly into real opportunities.”
+			</blockquote>
+			<div class="quote-footer">
+				<span>Industry-ready curriculum</span>
+				<span>Project-first learning model</span>
+			</div>
+		</aside>
+	</section>
+</main>

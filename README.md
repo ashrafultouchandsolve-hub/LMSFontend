@@ -1,59 +1,115 @@
-# LearningTandS
+# Smart Task Management API
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+Smart Task Management API is built with ASP.NET Core (.NET 8) using Onion Architecture for clean separation, scalability, and maintainability.
 
-## Development server
+## Architecture
+- `SmartTaskManagement.Domain`
+- `SmartTaskManagement.Application`
+- `SmartTaskManagement.Infrastructure`
+- `Smart_Task_Management` (API)
 
-To start a local development server, run:
+## Features
+- User Registration & Login (JWT)
+- Task CRUD
+- Role claim-based authorization
+- Soft Delete (`IsDeleted`)
+- Task Status Flow: `Pending -> InProgress -> Completed`
+- Deadline Validation
+- Audit fields (`CreateAt`, `UpdateAt`, `CreatedBy`, `UpdatedBy`)
+- Background Service to mark overdue tasks (`IsOverdue`)
+- Swagger + Bearer token support
+  
+## Default Admin Login
+-	Email: admin@smarttask.com
+-	Password: Admin@123
+-	Role: Admin
 
-```bash
-ng serve
-```
+## Business Rules
+1. Soft delete only (hard delete না)
+2. Deadline past হলে task create/update reject
+3. Status flow strictly enforced:
+   - Pending -> InProgress
+   - InProgress -> Completed
+   - Completed -> no further change
+4. Overdue tasks are automatically marked by hosted background service
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Tech Stack
+- ASP.NET Core Web API (.NET 8)
+- Entity Framework Core
+- SQL Server
+- JWT Authentication
+- Swagger (OpenAPI)
 
-## Code scaffolding
+## NuGet Packages
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### API (`Smart_Task_Management`)
+- `Microsoft.AspNetCore.Authentication.JwtBearer` `8.0.0`
+- `Microsoft.EntityFrameworkCore.Tools` `8.0.0`
+- `Swashbuckle.AspNetCore` `6.4.0`
 
-```bash
-ng generate component component-name
-```
+### Application (`SmartTaskManagement.Application`)
+- `BCrypt.Net-Next` `4.1.0`
+- `Microsoft.Extensions.DependencyInjection.Abstractions` `8.0.0`
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Infrastructure (`SmartTaskManagement.Infrastructure`)
+- `Microsoft.AspNetCore.Authentication.JwtBearer` `8.0.0`
+- `Microsoft.EntityFrameworkCore` `8.0.0`
+- `Microsoft.EntityFrameworkCore.Design` `8.0.0`
+- `Microsoft.EntityFrameworkCore.SqlServer` `8.0.0`
+- `Microsoft.Extensions.Configuration.Abstractions` `8.0.0`
+- `Microsoft.Extensions.DependencyInjection.Abstractions` `8.0.0`
+- `Microsoft.IdentityModel.Tokens` `7.1.2`
 
-```bash
-ng generate --help
-```
+### Domain (`SmartTaskManagement.Domain`)
+- No external packages
 
-## Building
+## Prerequisites
+- .NET 8 SDK
+- SQL Server / SQL Server Express
+- Visual Studio 2022 (recommended)
 
-To build the project run:
+## Setup Instructions
+1. Clone repository
+2. Open solution in Visual Studio
+3. Update connection string in `appsettings.json`
+4. Apply migration / update database
+5. Run API project (`Smart_Task_Management`)
 
-```bash
-ng build
-```
+## Database Configuration
+`appsettings.json`:
+"ConnectionStrings": { "DefaultConnection": "Server=.\SQLEXPRESS;Database=SmartTaskManagementDb;Trusted_Connection=True;TrustServerCertificate=True" }
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## JWT Configuration
+`appsettings.json`:
+"JwtSettings": { "Key": "MySuperSecurityKey_ThisMustBeAtLeast32Chars_2026!", "Issuer": "SmartTaskManagementAPI", "Audience": "SmartTaskManagementClient", "ExpiryMinutes": 120 }
 
-## Running unit tests
+## Run
+- Set `Smart_Task_Management` as startup project
+- Run with IIS Express / Kestrel
+- Swagger URL: `https://localhost:7144/swagger` (may vary by machine)
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Authentication Flow
+1. `POST /api/Auth/register`
+2. `POST /api/Auth/login`
+3. Copy token
+4. Swagger `Authorize` -> `Bearer <token>`
 
-```bash
-ng test
-```
+## Main Endpoints
 
-## Running end-to-end tests
+### Auth
+- `POST /api/Auth/register`
+- `POST /api/Auth/login`
 
-For end-to-end (e2e) testing, run:
+### Tasks (Authorized)
+- `GET /api/Tasks`
+- `POST /api/Tasks`
+- `PUT /api/Tasks/{id}`
+- `PATCH /api/Tasks/{id}/status`
+- `DELETE /api/Tasks/{id}`
 
-```bash
-ng e2e
-```
+## Submission
+- GitHub Repository: `<<ADD_LINK>>`
+- Live URL (if deployed): `<<ADD_LINK>>`
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Author
+- Ashraful Anam Alve
