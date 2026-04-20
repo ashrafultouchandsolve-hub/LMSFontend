@@ -1,0 +1,56 @@
+<main class="teacher-page">
+  <header class="topbar card-surface reveal-up">
+    <a class="brand" href="/homepage" aria-label="Learning platform home">
+      <span class="brand-mark">LT</span>
+      <span class="brand-text">
+        <strong>LearningTandS</strong>
+        <small>Touch And Solve Learning</small>
+      </span>
+    </a>
+
+    <nav class="topbar-nav" aria-label="Primary navigation">
+      <a href="/homepage#tracks">Tracks</a>
+      <a href="/homepage#platform-identity">Vision</a>
+    </nav>
+
+    <div class="topbar-actions">
+      @if (isLoggedIn()) {
+        <details class="user-menu">
+          <summary class="user-chip" aria-label="Logged in user menu">
+            <span class="user-avatar">{{ userInitial() }}</span>
+            <span class="user-name">Hi, {{ userName() }}</span>
+            <span class="menu-caret" aria-hidden="true">▾</span>
+          </summary>
+          <div class="user-menu-list" role="menu">
+            <a href="/profile" class="user-menu-link" role="menuitem">Profile</a>
+            @if (isTeacher()) {
+              <a href="/teacher" class="user-menu-link" role="menuitem">Teacher</a>
+            }
+          </div>
+        </details>
+        <button type="button" class="nav-button nav-button-ghost" (click)="logout()">Logout</button>
+      } @else {
+        <a href="/login" class="nav-button nav-button-ghost">Login</a>
+        <a href="/register" class="nav-button nav-button-primary">Register</a>
+      }
+    </div>
+  </header>
+  <section class="teacher-shell">
+    <header class="teacher-head">
+      <button type="button" class="back-link" (click)="goToHome()">Back to home</button>
+      <h1>Teacher Dashboard</h1>
+      <p>This page is a demo. Teacher tools will be available soon.</p>
+    </header>
+
+    <section class="teacher-card" aria-label="Teacher capabilities">
+      <h2>What a teacher can do</h2>
+      <p>All options are currently in Coming Soon mode.</p>
+
+      <div class="action-grid">
+        @for (action of teacherActions; track action) {
+          <button type="button" class="teacher-action">{{ action }}</button>
+        }
+      </div>
+    </section>
+  </section>
+</main>

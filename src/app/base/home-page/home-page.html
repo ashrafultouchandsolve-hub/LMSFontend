@@ -18,10 +18,19 @@
 
 		<div class="topbar-actions">
 			@if (isLoggedIn()) {
-				<div class="user-chip" aria-label="Logged in user">
-					<span class="user-avatar">{{ userInitial() }}</span>
-					<span class="user-name">Hi, {{ userName() }}</span>
-				</div>
+				<details class="user-menu">
+					<summary class="user-chip" aria-label="Logged in user menu">
+						<span class="user-avatar">{{ userInitial() }}</span>
+						<span class="user-name">Hi, {{ userName() }}</span>
+						<span class="menu-caret" aria-hidden="true">▾</span>
+					</summary>
+					<div class="user-menu-list" role="menu">
+						<a routerLink="/profile" class="user-menu-link" role="menuitem">Profile</a>
+						@if (isTeacher()) {
+							<a routerLink="/teacher" class="user-menu-link" role="menuitem">Teacher</a>
+						}
+					</div>
+				</details>
 				<button type="button" class="nav-button nav-button-ghost" (click)="logout()">Logout</button>
 			} @else {
 				<a routerLink="/login" class="nav-button nav-button-ghost">Login</a>

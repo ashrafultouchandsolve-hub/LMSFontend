@@ -1,0 +1,98 @@
+.teacher-page {
+  min-height: 100vh;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(29, 128, 92, 0.24), transparent 40%),
+    radial-gradient(circle at 92% 22%, rgba(93, 209, 168, 0.18), transparent 38%),
+    linear-gradient(180deg, #061611, #04110d);
+  color: #e9fff7;
+}
+
+.teacher-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+}
+
+.teacher-head,
+.teacher-card {
+  padding: 22px;
+  border-radius: 20px;
+  border: 1px solid rgba(110, 214, 175, 0.18);
+  background: linear-gradient(180deg, rgba(9, 27, 21, 0.92), rgba(7, 19, 15, 0.92));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
+.teacher-head {
+  display: grid;
+  gap: 10px;
+}
+
+.teacher-head h1,
+.teacher-head p,
+.teacher-card h2,
+.teacher-card p {
+  margin: 0;
+}
+
+.teacher-head p,
+.teacher-card p {
+  color: rgba(222, 255, 244, 0.74);
+  line-height: 1.65;
+}
+
+.back-link {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 214, 175, 0.25);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d8fff1;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.teacher-card {
+  display: grid;
+  gap: 14px;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.teacher-action {
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(110, 214, 175, 0.27);
+  background: rgba(255, 255, 255, 0.03);
+  color: #defff4;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.teacher-action:hover,
+.teacher-action:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(93, 209, 168, 0.17);
+  outline: none;
+}
+
+@media (max-width: 720px) {
+  .teacher-page {
+    padding: 16px;
+  }
+
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+}

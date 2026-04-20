@@ -25,6 +25,8 @@ export class HomePage implements OnInit {
 
   protected readonly isLoggedIn = signal(false);
   protected readonly userName = signal('');
+  protected readonly userRole = signal<number | null>(null);
+  protected readonly isTeacher = computed(() => this.userRole() === 1);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
 
   protected readonly stats = [
@@ -76,12 +78,15 @@ export class HomePage implements OnInit {
       if (user && user.fullName) {
         this.userName.set(user.fullName);
       }
+
+      this.userRole.set(typeof user?.role === 'number' ? user.role : null);
     });
 
     // Check current state
     const user = this.authService.getCurrentUser();
     if (user) {
       this.userName.set(user.fullName || user.email);
+      this.userRole.set(typeof user.role === 'number' ? user.role : null);
     }
   }
 
