@@ -1,5 +1,6 @@
-import { Component, computed, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../Service/auth.service';
 
 type LearningTrack = {
   title: string;
@@ -18,9 +19,12 @@ type LearningHighlight = {
   templateUrl: './home-page.html',
   styleUrl: './home-page.css',
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   protected readonly isLoggedIn = signal(false);
-  protected readonly userName = signal('Guest');
+  protected readonly userName = signal('');
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
 
   protected readonly stats = [
@@ -62,38 +66,28 @@ export class HomePage {
     },
   ];
 
-  constructor() {
-    this.syncAuthState();
+  ngOnInit(): void {
+    // Subscribe to auth state changes
+    this.authService.isLoggedIn$.subscribe((isLoggedIn) => {
+      this.isLoggedIn.set(isLoggedIn);
+    });
+
+    this.authService.currentUser$.subscribe((user) => {
+      if (user && user.fullName) {
+        this.userName.set(user.fullName);
+      }
+    });
+
+    // Check current state
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.userName.set(user.fullName || user.email);
+    }
   }
 
   protected logout(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_logged_in');
-    localStorage.removeItem('auth_user_email');
-    this.syncAuthState();
-  }
-
-  private syncAuthState(): void {
-    const token = localStorage.getItem('auth_token');
-    const loginFlag = localStorage.getItem('auth_logged_in');
-    const email = localStorage.getItem('auth_user_email');
-
-    this.isLoggedIn.set(Boolean(token || loginFlag || email));
-
-    if (email) {
-      this.userName.set(this.formatUserName(email));
-      return;
-    }
-
-    this.userName.set(token ? 'Learner' : 'Guest');
-  }
-
-  private formatUserName(email: string): string {
-    const prefix = email.split('@')[0]?.trim();
-    if (!prefix) {
-      return 'Learner';
-    }
-
-    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
   }
 }
+

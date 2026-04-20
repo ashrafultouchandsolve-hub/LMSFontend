@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Service } from '../../Service/service';
+import { AuthService } from '../../Service/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -11,7 +11,7 @@ import { Service } from '../../Service/service';
   styleUrl: './register.css',
 })
 export class Register {
-  private readonly authService = inject(Service);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   protected readonly isSubmitting = signal(false);
@@ -59,17 +59,19 @@ export class Register {
     this.isSubmitting.set(true);
 
     this.authService
-      .register({
-        FullName: value.fullname,
-        Email: value.email,
-        Password: value.password,
-        Role: Number(value.role),
-      })
+      .register(
+        value.fullname,
+        value.email,
+        value.password,
+        Number(value.role)
+      )
       .subscribe({
         next: (response) => {
           this.isSubmitting.set(false);
-          this.apiMessage.set(response.message ?? 'Registration successful! Redirecting to login...');
-          this.router.navigateByUrl('/login');
+          this.apiMessage.set(response.message ?? 'Registration successful! Redirecting to dashboard...');
+          setTimeout(() => {
+            this.router.navigateByUrl('/homepage');
+          }, 2000);
         },
         error: (error: HttpErrorResponse) => {
           this.isSubmitting.set(false);

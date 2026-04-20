@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { Service } from '../../Service/service';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../Service/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,8 +10,9 @@ import { Service } from '../../Service/service';
   styleUrl: './login.css',
 })
 export class Login {
-  private readonly authService = inject(Service);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isSubmitting = signal(false);
   protected readonly isRedirecting = signal(false);
@@ -39,25 +40,22 @@ export class Login {
     this.isSubmitting.set(true);
     this.apiMessage.set('');
 
-    this.authService.login(payload).subscribe({
+    this.authService.login(payload.email, payload.password).subscribe({
       next: async (response) => {
         this.isSubmitting.set(false);
         this.apiMessage.set(response.message ?? 'Login successful. Preparing your dashboard...');
 
-        if (response.token) {
-          localStorage.setItem('auth_token', response.token);
-        }
-
-        localStorage.setItem('auth_logged_in', 'true');
-        localStorage.setItem('auth_user_email', payload.email);
-
         this.isRedirecting.set(true);
-        await this.delay(4000);
-        await this.router.navigateByUrl('/homepage');
+        await this.delay(2000);
+        
+        // Return URL থেকে redirect করুন অথবা homepage এ যান
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+        await this.router.navigateByUrl(returnUrl || '/homepage');
       },
-      error: () => {
-        this.isSubmitting.set(false);  
-        this.apiMessage.set('Login failed. Please check your credentials and try again.');
+      error: (error) => {
+        this.isSubmitting.set(false);
+        const errorMessage = error.error?.message || 'Login failed. Please check your credentials and try again.';
+        this.apiMessage.set(errorMessage);
       },
     });
   }

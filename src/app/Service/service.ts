@@ -15,8 +15,12 @@ export type RegisterRequest = {
 };
 
 export type LoginResponse = {
-  token?: string;
   message?: string;
+  token?: string;
+  userId?: number;
+  email?: string;
+  fullName?: string;
+  role?: number;
 };
 
 @Injectable({
