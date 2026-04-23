@@ -28,8 +28,8 @@ export type LoginResponse = {
 })
 export class Service {
   private readonly http = inject(HttpClient);
-  private readonly loginUrl = 'https://localhost:7236/api/Register/Login';
-  private readonly registerUrl = 'https://localhost:7236/api/Register/Register';
+  private readonly loginUrl = 'https://localhost:7002/api/register/login';
+  private readonly registerUrl = 'https://localhost:7002/api/register/register';
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(this.loginUrl, payload);

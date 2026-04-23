@@ -1,56 +1,319 @@
 <main class="teacher-page">
-  <header class="topbar card-surface reveal-up">
-    <a class="brand" href="/homepage" aria-label="Learning platform home">
-      <span class="brand-mark">LT</span>
-      <span class="brand-text">
-        <strong>LearningTandS</strong>
-        <small>Touch And Solve Learning</small>
-      </span>
-    </a>
+  <aside class="sidebar" aria-label="Teacher dashboard navigation">
+    <div class="sidebar-head">
+      <h2>⚙ Admin Panel</h2>
+    </div>
 
-    <nav class="topbar-nav" aria-label="Primary navigation">
-      <a href="/homepage#tracks">Tracks</a>
-      <a href="/homepage#platform-identity">Vision</a>
+    <nav class="sidebar-nav">
+      @for (item of sidebarItems; track item.key) {
+        <button
+          type="button"
+          class="side-link"
+          [class.active]="item.key === activeSidebarKey()"
+          (click)="selectSidebar(item.key)">
+          <span class="icon">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
     </nav>
 
-    <div class="topbar-actions">
-      @if (isLoggedIn()) {
-        <details class="user-menu">
-          <summary class="user-chip" aria-label="Logged in user menu">
-            <span class="user-avatar">{{ userInitial() }}</span>
-            <span class="user-name">Hi, {{ userName() }}</span>
-            <span class="menu-caret" aria-hidden="true">▾</span>
-          </summary>
-          <div class="user-menu-list" role="menu">
-            <a href="/profile" class="user-menu-link" role="menuitem">Profile</a>
-            @if (isTeacher()) {
-              <a href="/teacher" class="user-menu-link" role="menuitem">Teacher</a>
-            }
-          </div>
-        </details>
-        <button type="button" class="nav-button nav-button-ghost" (click)="logout()">Logout</button>
-      } @else {
-        <a href="/login" class="nav-button nav-button-ghost">Login</a>
-        <a href="/register" class="nav-button nav-button-primary">Register</a>
-      }
-    </div>
-  </header>
-  <section class="teacher-shell">
-    <header class="teacher-head">
-      <button type="button" class="back-link" (click)="goToHome()">Back to home</button>
-      <h1>Teacher Dashboard</h1>
-      <p>This page is a demo. Teacher tools will be available soon.</p>
-    </header>
+    <button type="button" class="back-site" (click)="goToHome()">← Back to Site</button>
+  </aside>
 
-    <section class="teacher-card" aria-label="Teacher capabilities">
-      <h2>What a teacher can do</h2>
-      <p>All options are currently in Coming Soon mode.</p>
+  <section class="dashboard-area">
+    @if (notice()) {
+      <div class="notice" [class.notice-error]="noticeType() === 'error'">{{ notice() }}</div>
+    }
 
-      <div class="action-grid">
-        @for (action of teacherActions; track action) {
-          <button type="button" class="teacher-action">{{ action }}</button>
+    @if (selectedCourse() === null) {
+      <header class="toolbar">
+        <div>
+          <h1>Courses</h1>
+          <p>Manage course content, thumbnails, and publish status.</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="openNewCourseModal()">+ New Course</button>
+      </header>
+
+      <section class="panel" aria-label="Course list">
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Search courses..."
+          [value]="searchTerm()"
+          (input)="updateSearchTerm($any($event.target).value)" />
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Level</th>
+                <th>Price</th>
+                <th>Lessons</th>
+                <th>Students</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (course of filteredCourses(); track course.id) {
+                <tr>
+                  <td>
+                    <div class="course-title-cell">
+                      <!-- @if (canRenderThumbnail(course.thumbnailUrl)) {
+                        <img [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" class="thumb" />
+                      } @else { -->
+                        <div class="thumb placeholder">{{ course.title.charAt(0) }}</div>
+                      <!-- } -->
+                      <span>{{ course.title }}</span>
+                    </div>
+                  </td>
+                  <td><span class="chip">{{ course.category }}</span></td>
+                  <td>{{ course.level }}</td>
+                  <td>{{ formatPrice(course.price) }}</td>
+                  <td>{{ course.lessonCount }}</td>
+                  <td>{{ course.students }}</td>
+                  <td>
+                    <span class="status" [class.live]="course.published">
+                      {{ course.published ? 'Published' : 'Draft' }}
+                    </span>
+                  </td>
+                  <td class="actions-cell">
+                    <button type="button" class="btn btn-outline" (click)="openLessons(course.id)">Lessons</button>
+                    <button type="button" class="btn btn-ghost" (click)="openEditCourseModal(course.id)">Edit</button>
+                    <button type="button" class="btn btn-danger" (click)="deleteCourse(course.id)">Delete</button>
+                  </td>
+                </tr>
+              }
+
+              @if (!isLoadingCourses() && filteredCourses().length === 0) {
+                <tr>
+                  <td colspan="8" class="empty-state">No course found.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (isLoadingCourses()) {
+          <p class="loading-text">Loading courses...</p>
         }
-      </div>
-    </section>
+      </section>
+    } @else {
+      <header class="toolbar">
+        <div>
+          <button type="button" class="link-btn" (click)="closeLessonsView()">← Back to Courses</button>
+          <h1>Lessons for {{ currentCourseName() }}</h1>
+          <p>Add or edit lesson videos and resources from this panel.</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ Add Lesson</button>
+      </header>
+
+      <section class="panel lesson-list" aria-label="Lesson list">
+        @if (isLoadingLessons()) {
+          <p class="loading-text">Loading lessons...</p>
+        }
+
+        @for (lesson of sortedLessons(); track lesson.id) {
+          <article class="lesson-item">
+            <div class="lesson-order">{{ lesson.orderIndex }}</div>
+            <div class="lesson-content">
+              <h3>{{ lesson.title }}</h3>
+              @if (lesson.description) {
+                <p>{{ lesson.description }}</p>
+              }
+              <div class="lesson-meta">
+                <span>{{ lesson.videoType }}</span>
+                <span>{{ lesson.durationMinutes }}min</span>
+                @if (lesson.isPreview) {
+                  <span class="chip">Preview</span>
+                }
+              </div>
+            </div>
+            <div class="lesson-actions">
+              @if (lesson.videoUrl) {
+                <a class="btn btn-outline" [href]="lesson.videoUrl" target="_blank" rel="noopener noreferrer">
+                  Open Video
+                </a>
+              }
+              @if (lesson.thumbnailUrl) {
+                <a class="btn btn-outline" [href]="lesson.thumbnailUrl" target="_blank" rel="noopener noreferrer">
+                  Thumbnail
+                </a>
+              }
+              <button type="button" class="btn btn-ghost" (click)="openEditLessonModal(lesson.id)">Edit</button>
+              <button type="button" class="btn btn-danger" (click)="deleteLesson(lesson.id)">Delete</button>
+            </div>
+          </article>
+        }
+
+        @if (!isLoadingLessons() && sortedLessons().length === 0) {
+          <p class="empty-state">No lesson found for this course.</p>
+        }
+      </section>
+    }
   </section>
+
+  @if (isCourseEditorOpen()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Course editor dialog">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>{{ courseModalTitle() }}</h2>
+          <button type="button" class="icon-btn" (click)="closeCourseModal()">✕</button>
+        </div>
+
+        <form class="form-grid" [formGroup]="courseForm" (ngSubmit)="saveCourse()">
+          <label>
+            <span>Title *</span>
+            <input type="text" formControlName="title" />
+          </label>
+
+          <label>
+            <span>Category *</span>
+            <input type="text" formControlName="category" />
+          </label>
+
+          <label class="full">
+            <span>Description *</span>
+            <textarea rows="3" formControlName="description"></textarea>
+          </label>
+
+          <label>
+            <span>Instructor Name</span>
+            <input type="text" formControlName="instructorName" />
+          </label>
+
+          <label>
+            <span>Level</span>
+            <select formControlName="level">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Price (0 = Free)</span>
+            <input type="number" formControlName="price" />
+          </label>
+
+          <label>
+            <span>Duration (minutes)</span>
+            <input type="number" formControlName="durationMinutes" />
+          </label>
+
+          <label class="full">
+            <span>Thumbnail URL</span>
+            <input type="url" formControlName="thumbnailUrl" placeholder="https://example.com/thumbnail.jpg" />
+          </label>
+
+          <label class="full upload-field">
+            <span>Or Upload Thumbnail Image</span>
+            <input type="file" accept="image/*" (change)="onThumbnailSelected($event)" />
+          </label>
+
+          @if (canRenderThumbnail(resolveCoursePreviewThumbnail())) {
+            <div class="full preview-wrap">
+              <img
+                class="thumb-preview"
+                [src]="resolveCoursePreviewThumbnail()"
+                alt="Selected thumbnail preview" />
+            </div>
+          }
+
+          <label class="checkbox full">
+            <input type="checkbox" formControlName="published" />
+            <span>Publish course</span>
+          </label>
+
+          <div class="modal-actions full">
+            <button type="button" class="btn btn-ghost" (click)="closeCourseModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isCourseFormInvalid()">Save Course</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (isLessonEditorOpen()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Lesson editor dialog">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>{{ lessonModalTitle() }}</h2>
+          <button type="button" class="icon-btn" (click)="closeLessonModal()">✕</button>
+        </div>
+
+        <form class="form-grid" [formGroup]="lessonForm" (ngSubmit)="saveLesson()">
+          <label class="full">
+            <span>Lesson Title *</span>
+            <input type="text" formControlName="title" />
+          </label>
+
+          <label class="full">
+            <span>Description</span>
+            <textarea rows="3" formControlName="description"></textarea>
+          </label>
+
+          <label>
+            <span>Video Type</span>
+            <select formControlName="videoType">
+              <option value="YouTube">YouTube</option>
+              <option value="Vimeo">Vimeo</option>
+              <option value="Direct URL">Direct URL</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Order Index</span>
+            <input type="number" formControlName="orderIndex" />
+          </label>
+
+          <label class="full">
+            <span>Video URL</span>
+            <input type="url" formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=..." />
+          </label>
+
+          <label class="full upload-field">
+            <span>Or Upload Video File</span>
+            <input type="file" accept="video/*" (change)="onLessonVideoFileSelected($event)" />
+          </label>
+
+          <label class="full upload-field">
+            <span>Lesson Thumbnail (optional)</span>
+            <input type="file" accept="image/*" (change)="onLessonThumbnailSelected($event)" />
+          </label>
+
+          @if (canRenderThumbnail(resolveLessonPreviewThumbnail())) {
+            <div class="full preview-wrap">
+              <img
+                class="thumb-preview"
+                [src]="resolveLessonPreviewThumbnail()"
+                alt="Selected lesson thumbnail preview" />
+            </div>
+          }
+
+          <label>
+            <span>Duration (minutes)</span>
+            <input type="number" formControlName="durationMinutes" />
+          </label>
+
+          <label>
+            <span>Resource URL (optional)</span>
+            <input type="url" formControlName="resourceUrl" />
+          </label>
+
+          <label class="checkbox full">
+            <input type="checkbox" formControlName="isPreview" />
+            <span>Free preview lesson</span>
+          </label>
+
+          <div class="modal-actions full">
+            <button type="button" class="btn btn-ghost" (click)="closeLessonModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isLessonFormInvalid()">Save Lesson</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 </main>

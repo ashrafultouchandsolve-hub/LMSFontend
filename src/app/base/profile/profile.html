@@ -41,7 +41,6 @@
 			<h1>My Profile</h1>
 			<p>Your account details and upcoming learning tools.</p>
 		</header>
-
 		<section class="info-card" aria-label="User profile details">
 			<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
 			<div class="user-info">
@@ -50,6 +49,62 @@
 				<span class="role-badge">Role: {{ userRole() }}</span>
 			</div>
 		</section>
+
+		<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
+			<div class="panel-header">
+				<div>
+					<p class="panel-label">Student dashboard</p>
+					<h2>Weekly performance</h2>
+				</div>
+				<span class="live-badge">
+					<span class="live-dot" aria-hidden="true"></span>
+					Live
+				</span>
+			</div>
+
+			<div class="ring-wrap">
+				<div class="progress-ring" role="img" aria-label="87% weekly completion">
+					<svg class="ring-svg" viewBox="0 0 120 120">
+						<circle cx="60" cy="60" r="50" class="ring-track" />
+						<circle cx="60" cy="60" r="50" class="ring-fill" />
+					</svg>
+					<div class="ring-core">
+						<strong>87%</strong>
+						<span>completion</span>
+					</div>
+				</div>
+
+				<div class="ring-legend">
+					<div class="legend-item">
+						<span class="legend-dot legend-done" aria-hidden="true"></span>
+						<span>Completed</span>
+					</div>
+					<div class="legend-item">
+						<span class="legend-dot legend-remain" aria-hidden="true"></span>
+						<span>Remaining</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="dashboard-list">
+				<div class="dashboard-row">
+					<span class="row-icon" aria-hidden="true">📐</span>
+					<span>Angular assessments</span>
+					<strong class="row-value row-ok">Completed</strong>
+				</div>
+				<div class="dashboard-row">
+					<span class="row-icon" aria-hidden="true">⏱</span>
+					<span>Coding time this week</span>
+					<strong class="row-value">6.8 hrs</strong>
+				</div>
+				<div class="dashboard-row">
+					<span class="row-icon" aria-hidden="true">🔥</span>
+					<span>Consistency streak</span>
+					<strong class="row-value row-streak">21 days</strong>
+				</div>
+			</div>
+		</aside>
+
 
 		<section class="future-card" aria-label="Future learning features">
 			<h3>Coming Soon</h3>
