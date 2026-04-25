@@ -61,7 +61,7 @@
 			</section>
 
 			<aside class="course-side-card">
-				<!-- @if (imageAvailable()) {
+				@if (imageAvailable()) {
 					<img
 						class="course-image"
 						[src]="selectedCourse.thumbnailUrl"
@@ -72,7 +72,7 @@
 					<div class="course-image-placeholder" role="img" aria-label="No image available">
 						<span>No Image</span>
 					</div>
-				} -->
+				}
 
 				<div class="price-wrap">
 					<p class="current-price">{{ formatPrice(selectedCourse.price) }}</p>
@@ -84,7 +84,7 @@
 					@if (isCheckingEnrollment()) {
 						<button type="button" class="enroll-button enroll-button-muted" disabled>Checking enrollment...</button>
 					} @else if (isEnrolled()) {
-						<button type="button" class="enroll-button enroll-button-success" disabled>You are enrolled in this course</button>
+						<a [routerLink]="['/enrolled-course', selectedCourse.id]" class="enroll-button enroll-button-success enroll-link">You are enrolled in this course</a>
 					} @else {
 						<a
 							[routerLink]="['/payment']"

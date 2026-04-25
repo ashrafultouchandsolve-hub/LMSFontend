@@ -10,6 +10,13 @@ import { JwtService } from './jwt.service';
 export class AuthService {
   private readonly service = inject(Service);
   private readonly jwtService = inject(JwtService);
+  private readonly legacyAuthKeys: readonly string[] = [
+    'auth_logged_in',
+    'auth_user_email',
+    'refreshToken',
+    'token',
+    'user',
+  ];
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(
     this.jwtService.hasToken() && !this.jwtService.isTokenExpired()
@@ -18,6 +25,10 @@ export class AuthService {
 
   private currentUserSubject = new BehaviorSubject<any>(this.jwtService.getUser());
   public currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor() {
+    this.cleanupLegacyAuthStorage();
+  }
 
   // Login করুন
   login(email: string, password: string): Observable<LoginResponse> {
@@ -34,6 +45,7 @@ export class AuthService {
             role: response.role
           };
           this.jwtService.setUser(user);
+          this.cleanupLegacyAuthStorage();
           this.currentUserSubject.next(user);
           this.isLoggedInSubject.next(true);
         }
@@ -61,6 +73,7 @@ export class AuthService {
             role: response.role
           };
           this.jwtService.setUser(user);
+          this.cleanupLegacyAuthStorage();
           this.currentUserSubject.next(user);
           this.isLoggedInSubject.next(true);
         }
@@ -71,6 +84,8 @@ export class AuthService {
   // Logout করুন
   logout(): void {
     this.jwtService.clear();
+    this.cleanupLegacyAuthStorage();
+    this.clearLocalEnrollmentCache();
     this.isLoggedInSubject.next(false);
     this.currentUserSubject.next(null);
   }
@@ -88,5 +103,33 @@ export class AuthService {
   // Token get করুন
   getToken(): string | null {
     return this.jwtService.getToken();
+  }
+
+  private hasLocalStorage(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+  }
+
+  private cleanupLegacyAuthStorage(): void {
+    if (!this.hasLocalStorage()) {
+      return;
+    }
+
+    for (const key of this.legacyAuthKeys) {
+      localStorage.removeItem(key);
+    }
+  }
+
+  private clearLocalEnrollmentCache(): void {
+    if (!this.hasLocalStorage()) {
+      return;
+    }
+
+    const enrollmentPrefix = 'enrolled_course_ids_';
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(enrollmentPrefix)) {
+        localStorage.removeItem(key);
+      }
+    }
   }
 }

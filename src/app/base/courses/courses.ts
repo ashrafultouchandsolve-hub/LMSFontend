@@ -15,6 +15,7 @@ type CoursesViewItem = {
   durationMinutes: number;
   price: number;
   isEnrolled: boolean;
+  thumbnailUrl: string;
 };
 
 @Component({
@@ -29,8 +30,31 @@ export class Courses {
   private readonly learningApi = inject(LearningApiService);
 
   protected readonly isLoadingCourses = signal(false);
+  protected readonly searchTerm = signal('');
   protected readonly courses = signal<CoursesViewItem[]>([]);
   protected readonly hasCourses = computed(() => this.courses().length > 0);
+  protected readonly filteredCourses = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+
+    if (!term) {
+      return this.courses();
+    }
+
+    return this.courses().filter((course) => {
+      const searchableText = [
+        course.title,
+        course.description,
+        course.category,
+        course.instructorName,
+        course.level,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(term);
+    });
+  });
+  protected readonly hasFilteredCourses = computed(() => this.filteredCourses().length > 0);
 
   constructor() {
     void this.loadAllCourses();
@@ -52,6 +76,10 @@ export class Courses {
     };
   }
 
+  protected updateSearchTerm(term: string): void {
+    this.searchTerm.set(term);
+  }
+
   protected getLevelClass(level: CoursesViewItem['level']): string {
     if (level === 'Advanced') {
       return 'course-badge-adv';
@@ -67,6 +95,31 @@ export class Courses {
   protected getCardToneClass(index: number): string {
     const tones = ['course-card-tone-1', 'course-card-tone-2', 'course-card-tone-3', 'course-card-tone-4'];
     return tones[index % tones.length];
+  }
+
+  protected getImageClass(level: CoursesViewItem['level']): string {
+    if (level === 'Advanced') {
+      return 'track-img-adv';
+    }
+
+    if (level === 'Intermediate') {
+      return 'track-img-int';
+    }
+
+    return 'track-img-beg';
+  }
+
+  protected getImageUrl(thumbnailPath: string | null): string {
+    if (!thumbnailPath) {
+      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+    }
+
+    return this.learningApi.buildDownloadUrl(thumbnailPath);
+  }
+
+  protected onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = this.getImageUrl(null);
   }
 
   private async loadAllCourses(): Promise<void> {
@@ -100,6 +153,7 @@ export class Courses {
       durationMinutes: dto.durationMinutes,
       price: dto.price,
       isEnrolled: false,
+      thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
     };
   }
 

@@ -1,0 +1,82 @@
+<main class="onboarding-page">
+  <section class="onboarding-card">
+    <header class="card-head">
+      <p class="step-label">Step {{ step() }} of {{ totalSteps }}</p>
+      <button type="button" class="skip-button" (click)="skipStep()">Skip</button>
+    </header>
+
+    <div class="progress-bar" aria-hidden="true">
+      <span class="progress-fill" [style.width.%]="(step() / totalSteps) * 100"></span>
+    </div>
+
+    @if (step() === 1) {
+      <section class="step-block" aria-label="Skill level selection">
+        <h1>🎯 Step 1: Skill Level</h1>
+        <p>আপনার বর্তমান skill level সিলেক্ট করুন।</p>
+
+        <div class="option-grid">
+          @for (option of skillLevelOptions; track option) {
+            <button type="button" class="option-card" (click)="selectSkillLevel(option)">
+              {{ option }}
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (step() === 2) {
+      <section class="step-block" aria-label="Goal selection">
+        <h1>🎯 Step 2: Goal</h1>
+        <p>শিখে আপনি কোন goal অর্জন করতে চান?</p>
+
+        <div class="option-grid">
+          @for (option of goalOptions; track option) {
+            <button type="button" class="option-card" (click)="selectGoal(option)">
+              {{ option }}
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (step() === 3) {
+      <section class="step-block" aria-label="Language selection">
+        <h1>🎯 Step 3: Language</h1>
+        <p>কোন ভাষায় শিখতে কমফোর্টেবল?</p>
+
+        <div class="option-grid">
+          @for (option of languageOptions; track option) {
+            <button type="button" class="option-card" (click)="selectLanguage(option)">
+              {{ option }}
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (step() === 4) {
+      <section class="step-block" aria-label="Interest selection">
+        <h1>🎯 Step 4: Interests (Multiple Select)</h1>
+        <p>আপনার interest যত খুশি সিলেক্ট করুন, তারপর continue দিন।</p>
+
+        <div class="option-grid">
+          @for (option of interestOptions; track option) {
+            <button
+              type="button"
+              class="option-card"
+              [class.option-card-active]="isInterestSelected(option)"
+              (click)="toggleInterest(option)"
+            >
+              {{ option }}
+            </button>
+          }
+        </div>
+
+        <div class="footer-actions">
+          <button type="button" class="skip-button" (click)="skipStep()">Skip</button>
+          <button type="button" class="next-button" (click)="finishOnboarding()">Continue</button>
+        </div>
+      </section>
+    }
+  </section>
+</main>

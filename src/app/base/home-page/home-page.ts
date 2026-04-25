@@ -166,9 +166,6 @@ export class HomePage implements OnInit, AfterViewInit {
 
   protected onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    // Log the failed URL for debugging
-    console.warn('Thumbnail failed to load:', img.src);
-    // Set to placeholder on error
     img.src = this.getImageUrl(null);
   }
 

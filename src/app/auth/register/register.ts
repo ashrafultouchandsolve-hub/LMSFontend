@@ -68,9 +68,9 @@ export class Register {
       .subscribe({
         next: (response) => {
           this.isSubmitting.set(false);
-          this.apiMessage.set(response.message ?? 'Registration successful! Redirecting to dashboard...');
+          this.apiMessage.set(response.message ?? 'Registration successful! Redirecting to onboarding...');
           setTimeout(() => {
-            this.router.navigateByUrl('/homepage');
+            this.router.navigateByUrl('/onboarding-preferences');
           }, 2000);
         },
         error: (error: HttpErrorResponse) => {

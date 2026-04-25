@@ -1,0 +1,108 @@
+<section class="enrolled-shell">
+  <main class="enrolled-page">
+
+    <a [routerLink]="courseId() ? ['/course-details', courseId()] : ['/courses']" class="back-link">← Back to Course</a>
+
+    <!-- HEADER -->
+    @if (courseMeta(); as meta) {
+      <header class="page-head">
+        <h1>{{ meta.title }}</h1>
+        <p>Enrolled learning dashboard</p>
+      </header>
+    }
+
+    <!-- MAIN LAYOUT -->
+    <div class="lesson-layout">
+
+      <!-- VIDEO PANEL -->
+      <section class="video-panel">
+
+        @if (selectedLesson(); as currentLesson) {
+
+          <!-- VIDEO -->
+          @if (isYoutube(selectedVideoUrl())) {
+            <iframe
+              class="lesson-player"
+              [src]="getSafeYoutubeUrl(selectedVideoUrl())"
+              frameborder="0"
+              allowfullscreen>
+            </iframe>
+          } @else {
+            <video
+              class="lesson-player"
+              [src]="selectedVideoUrl()"
+              controls>
+            </video>
+          }
+
+          <!-- DETAILS -->
+          <div class="lesson-details">
+            <h3>{{ currentLesson.title }}</h3>
+            <p>{{ currentLesson.description }}</p>
+          </div>
+
+        } @else {
+          <div class="video-fallback">
+            <h2>No lesson selected</h2>
+          </div>
+        }
+
+        <!-- 🔥 LESSON SLIDER -->
+        <div class="lesson-slider">
+          @for (lesson of lessons(); track lesson.id) {
+            <button
+              class="slide-card"
+              [class.active]="lesson.id === selectedLessonId()"
+              (click)="selectLesson(lesson.id)"
+              type="button"
+            >
+              <div class="slide-thumb">▶</div>
+              <p class="slide-title">{{ lesson.title }}</p>
+            </button>
+          }
+        </div>
+
+      </section>
+
+      <!-- SIDEBAR -->
+      <aside class="lesson-sidebar">
+        <h3 class="lesson-sidebar-Header">Lessons ({{ lessons().length }})</h3>
+
+        @for (lesson of lessons(); track lesson.id) {
+          <button
+            class="lesson-item"
+            [class.lesson-item-active]="lesson.id === selectedLessonId()"
+            (click)="selectLesson(lesson.id)"
+            [attr.title]="lesson.title + ' - ' + (lesson.description || 'No description')"
+            type="button"
+          >
+            <span class="lesson-order">{{ lesson.orderIndex }}</span>
+
+            <span class="lesson-content">
+              <span class="lesson-head-row">
+                <strong class="lesson-title">{{ lesson.title }}</strong>
+                <small class="lesson-duration">{{ formatDuration(lesson.durationMinutes) }}</small>
+              </span>
+
+              <span class="lesson-desc" [attr.title]="lesson.description || ''">
+                {{ lesson.description || 'No description available' }}
+              </span>
+            </span>
+          </button>
+        }
+
+      </aside>
+
+    </div>
+
+    <!-- TEACHER -->
+    <section class="teacher-card">
+      <div class="teacher-avatar">{{ instructorInitial() }}</div>
+      <div>
+        <p class="teacher-name">{{ courseMeta()?.instructorName }}</p>
+        <p class="teacher-role">Instructor</p>
+      </div>
+    </section>
+
+  </main>
+</section>

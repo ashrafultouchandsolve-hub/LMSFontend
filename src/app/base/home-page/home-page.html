@@ -10,16 +10,7 @@
   <!-- ─── TOPBAR ─────────────────────────────────── -->
   <header class="topbar reveal-down">
     <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-      <span class="brand-mark" aria-hidden="true">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2L18 6V10C18 14.4 14.4 18 10 19C5.6 18 2 14.4 2 10V6L10 2Z" fill="currentColor" opacity="0.9"/>
-          <path d="M7 10L9 12L13 8" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span class="brand-text">
-        <strong>T&amp;SLearning</strong>
-        <small>Touch &amp; Solve Learning</small>
-      </span>
+      <img src="/touch-solve-logo.jpg" alt="Touch & Solve Learning Platform" class="brand-logo" />
     </a>
 
     <nav class="topbar-nav" aria-label="Primary navigation">
@@ -184,7 +175,7 @@
         <div #courseTrackViewport class="track-grid track-viewport">
           @for (course of courses(); track course.id; let i = $index) {
             <article [class]="'track-card reveal-up delay-2 ' + getCardToneClass(i)">
-              <!-- <div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
+              <div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
                 <img
                   class="track-thumbnail"
                   [src]="getImageUrl(course.thumbnailUrl)"
@@ -192,22 +183,7 @@
                   loading="lazy"
                   (error)="onImageError($event)"
                 />
-                <!-- Fallback SVG shown when image fails or hidden by error -->
-                  <!-- <svg width="90" height="90" viewBox="0 0 90 90" fill="none">
-                    <rect x="10" y="16" width="70" height="52" rx="7" fill="#bae6fd" stroke="#7dd3fc" stroke-width="1.5"/>
-                    <rect x="10" y="16" width="70" height="14" rx="7" fill="#7dd3fc"/>
-                    <rect x="10" y="23" width="70" height="7" fill="#7dd3fc"/>
-                    <circle cx="18" cy="23" r="3" fill="white" opacity=".7"/>
-                    <circle cx="27" cy="23" r="3" fill="white" opacity=".7"/>
-                    <circle cx="36" cy="23" r="3" fill="white" opacity=".7"/>
-                    <rect x="44" y="19" width="30" height="8" rx="4" fill="white" opacity=".35"/>
-                    <rect x="18" y="38" width="22" height="4" rx="2" fill="#0284c7" opacity=".55"/>
-                    <rect x="18" y="46" width="36" height="4" rx="2" fill="#0ea5e9" opacity=".4"/>
-                    <rect x="18" y="54" width="28" height="4" rx="2" fill="#0284c7" opacity=".3"/>
-                    <rect x="52" y="36" width="22" height="22" rx="5" fill="#0369a1" opacity=".18"/>
-                    <text x="63" y="51" text-anchor="middle" font-size="13" fill="#0369a1" font-family="monospace" font-weight="700">&lt;/&gt;</text>
-                  </svg> -->
-              <!-- </div> -->
+              </div>
 
               <div class="track-card-inner">
                 <span class="track-badge" [class]="'track-badge ' + getLevelClass(course.level)">{{ course.level }}</span>
