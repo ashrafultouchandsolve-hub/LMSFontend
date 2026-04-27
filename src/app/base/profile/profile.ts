@@ -23,13 +23,6 @@ export class Profile {
 
   protected readonly user = signal<ProfileUser | null>(null);
 
-  protected readonly quickActions = [
-    'My Classes',
-    'My Courses',
-    'Assignments',
-    'Certificates',
-  ] as const;
-
   protected readonly userName = computed(() => this.user()?.fullName || 'Student');
   protected readonly userEmail = computed(() => this.user()?.email || 'No email found');
   protected readonly isLoggedIn = computed(() => !!this.user());

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { Service } from '../../Service/service';
 
 @Component({
   selector: 'app-onboarding-preferences',
@@ -9,6 +10,7 @@ import { Router } from '@angular/router';
 })
 export class OnboardingPreferences {
   private readonly router = inject(Router);
+  private readonly service = inject(Service);
 
   protected readonly step = signal(1);
 
@@ -72,6 +74,21 @@ export class OnboardingPreferences {
   }
 
   protected finishOnboarding(): void {
-    this.router.navigateByUrl('/homepage');
+    const Payload = {
+      skillLevel: this.selectedSkillLevel(),
+      goal: this.selectedGoal(),
+      Language: this.selectedLanguage(),
+      interests: this.selectedInterests(),
+    };
+
+    this.service.savePreferences(Payload).subscribe({
+      next: () => {
+        this.router.navigateByUrl('/home');
+      },
+      error: (err) => {
+        console.error('Error saving preferences:', err);
+        // Optionally, show an error message to the user
+      },
+    });
   }
 }

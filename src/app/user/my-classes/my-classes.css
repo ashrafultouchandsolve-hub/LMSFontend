@@ -1,0 +1,103 @@
+
+.my-classes-page {
+	min-height: 100vh;
+	padding: 32px 12px;
+	background: linear-gradient(120deg, #f7faff 60%, #eaf1fb 100%);
+	color: #1a2a3a;
+}
+
+.class-header {
+	text-align: center;
+	margin-bottom: 28px;
+}
+.class-header h1 {
+	font-size: 2.1rem;
+	margin: 0 0 8px;
+}
+.class-header p {
+	color: #4a6a8a;
+	margin: 0;
+}
+
+.class-list {
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+	align-items: center;
+}
+
+.class-card {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 6px 24px rgba(30, 108, 244, 0.08);
+	padding: 18px 28px;
+	min-width: 320px;
+	max-width: 420px;
+	width: 100%;
+	border: 1px solid #e3eaf5;
+}
+.class-icon {
+	font-size: 2.5rem;
+	background: #eaf1fb;
+	border-radius: 50%;
+	width: 54px;
+	height: 54px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.class-info {
+	flex: 1;
+}
+.class-info h2 {
+	margin: 0 0 4px;
+	font-size: 1.18rem;
+}
+.class-info p {
+	margin: 0 0 2px;
+	color: #3a4a5a;
+	font-size: 0.98rem;
+}
+.class-status {
+	font-size: 0.85rem;
+	color: #1e6cf4;
+	font-weight: 700;
+}
+.class-btn {
+	background: #1e6cf4;
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	padding: 8px 18px;
+	font-weight: 700;
+	font-size: 1rem;
+	cursor: not-allowed;
+	opacity: 0.7;
+}
+
+.class-empty {
+	text-align: center;
+	margin-top: 18px;
+	color: #6a7a8a;
+}
+.class-empty h3 {
+	margin: 0 0 4px;
+	font-size: 1.1rem;
+}
+.class-empty p {
+	margin: 0;
+	font-size: 0.98rem;
+}
+
+@media (max-width: 600px) {
+	.class-card {
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 14px 10px;
+		min-width: 0;
+		max-width: 100%;
+	}
+}

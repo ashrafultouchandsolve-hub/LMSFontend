@@ -5,6 +5,10 @@
 	display: grid;
 	place-items: center;
 	overflow: hidden;
+	background:
+		radial-gradient(circle at 12% 10%, rgba(43, 130, 255, 0.12) 0%, rgba(43, 130, 255, 0) 35%),
+		radial-gradient(circle at 88% 88%, rgba(25, 155, 255, 0.1) 0%, rgba(25, 155, 255, 0) 38%),
+		#ffffff;
 }
 
 .auth-glow {
@@ -20,7 +24,7 @@
 	left: -80px;
 	width: 280px;
 	height: 280px;
-	background: radial-gradient(circle, rgba(26, 97, 255, 0.45) 0%, rgba(5, 8, 20, 0) 72%);
+	background: radial-gradient(circle, rgba(26, 97, 255, 0.2) 0%, rgba(26, 97, 255, 0) 72%);
 }
 
 .auth-glow-right {
@@ -28,7 +32,7 @@
 	bottom: 40px;
 	width: 340px;
 	height: 340px;
-	background: radial-gradient(circle, rgba(78, 182, 255, 0.22) 0%, rgba(5, 8, 20, 0) 72%);
+	background: radial-gradient(circle, rgba(78, 182, 255, 0.18) 0%, rgba(78, 182, 255, 0) 72%);
 }
 
 .auth-card {
@@ -37,6 +41,10 @@
 	width: min(1120px, 100%);
 	padding: 34px;
 	border-radius: 28px;
+	background: rgba(255, 255, 255, 0.96);
+	border: 1px solid #e4ecf7;
+	box-shadow: 0 18px 42px rgba(28, 70, 130, 0.12);
+	color: #172334;
 }
 
 .auth-copy {
@@ -50,7 +58,7 @@
 	font-weight: 700;
 	letter-spacing: 0.22em;
 	text-transform: uppercase;
-	color: #74a9ff;
+	color: #2e6fd8;
 }
 
 .auth-copy h1 {
@@ -58,11 +66,12 @@
 	font-size: clamp(2.2rem, 4vw, 4rem);
 	line-height: 0.98;
 	letter-spacing: -0.05em;
+	color: #102030;
 }
 
 .lead {
 	max-width: 64ch;
-	color: rgba(226, 236, 255, 0.74);
+	color: #4a5f77;
 	line-height: 1.75;
 }
 
@@ -75,8 +84,8 @@
 .auth-panel,
 .auth-form {
 	border-radius: 24px;
-	background: rgba(255, 255, 255, 0.03);
-	border: 1px solid rgba(122, 177, 255, 0.14);
+	background: #ffffff;
+	border: 1px solid #dce8f8;
 }
 
 .auth-panel {
@@ -99,18 +108,18 @@
 .feature-list li {
 	padding: 16px;
 	border-radius: 18px;
-	background: rgba(9, 12, 25, 0.45);
-	border: 1px solid rgba(122, 177, 255, 0.08);
+	background: #f7fbff;
+	border: 1px solid #dce8f8;
 }
 
 .feature-list strong {
 	display: block;
 	margin-bottom: 6px;
-	color: #f6f9ff;
+	color: #16314f;
 }
 
 .feature-list span {
-	color: rgba(223, 234, 255, 0.72);
+	color: #4f647a;
 	line-height: 1.6;
 }
 
@@ -129,7 +138,7 @@
 
 .field label {
 	font-weight: 700;
-	color: #edf4ff;
+	color: #1f3b57;
 }
 
 .field input {
@@ -137,9 +146,9 @@
 	min-height: 52px;
 	padding: 0 16px;
 	border-radius: 16px;
-	border: 1px solid rgba(122, 177, 255, 0.16);
-	background: rgba(5, 8, 18, 0.85);
-	color: #f3f7ff;
+	border: 1px solid #c9d9ee;
+	background: #ffffff;
+	color: #0f2439;
 	outline: none;
 	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -150,7 +159,7 @@
 }
 
 .field input::placeholder {
-	color: rgba(223, 234, 255, 0.42);
+	color: #7a8fa7;
 }
 
 .field-error {
@@ -170,12 +179,12 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	color: rgba(231, 240, 255, 0.84);
+	color: #41566f;
 }
 
 .forgot-link,
 .auth-footer a {
-	color: #8cc5ff;
+	color: #1c67d5;
 	text-decoration: none;
 	font-weight: 700;
 }
@@ -199,7 +208,7 @@
 
 .auth-footer {
 	margin: 0;
-	color: rgba(223, 234, 255, 0.76);
+	color: #4e637b;
 	text-align: center;
 }
 

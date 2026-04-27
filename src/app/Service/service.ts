@@ -38,4 +38,8 @@ export class Service {
   register(payload: RegisterRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(this.registerUrl, payload);
   }
-}
+  savePreferences(data: any){
+    return this.http.post('https://localhost:7002/api/UserPreference', data);
+    }
+
+  }

@@ -1,0 +1,254 @@
+.my-courses-page {
+	--bg: #f4f8ff;
+	--surface: #ffffff;
+	--line: #d9e5f6;
+	--text: #11243a;
+	--muted: #566a82;
+	--primary: #1e6cf4;
+	--primary-strong: #1455c8;
+	min-height: 100vh;
+	padding: 28px;
+	background:
+		radial-gradient(circle at 0% 0%, rgba(30, 108, 244, 0.1), transparent 34%),
+		radial-gradient(circle at 100% 100%, rgba(36, 167, 255, 0.1), transparent 38%),
+		var(--bg);
+	color: var(--text);
+}
+
+.hero {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.eyebrow {
+	margin: 0;
+	font-size: 0.78rem;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	font-weight: 700;
+	color: #2b62bd;
+}
+
+.hero h1 {
+	margin: 10px 0;
+	font-size: clamp(1.8rem, 4vw, 2.6rem);
+	line-height: 1.05;
+}
+
+.subtitle {
+	margin: 0;
+	color: var(--muted);
+	max-width: 62ch;
+}
+
+.hero-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.btn {
+	min-height: 44px;
+	padding: 0 16px;
+	border-radius: 12px;
+	border: 1px solid transparent;
+	text-decoration: none;
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn:hover {
+	transform: translateY(-1px);
+}
+
+.btn.solid {
+	background: var(--primary);
+	color: #ffffff;
+	box-shadow: 0 8px 18px rgba(24, 90, 204, 0.28);
+}
+
+.btn.solid:hover {
+	background: var(--primary-strong);
+}
+
+.btn.ghost {
+	background: #ffffff;
+	color: #21456f;
+	border-color: var(--line);
+}
+
+.stats {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.stat-card {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	padding: 14px;
+	box-shadow: 0 12px 24px rgba(25, 64, 122, 0.08);
+}
+
+.stat-card p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--muted);
+}
+
+.stat-card h3 {
+	margin: 10px 0 0;
+	font-size: 1.5rem;
+	line-height: 1;
+}
+
+.search-wrap {
+	margin-bottom: 16px;
+}
+
+.search-field {
+	display: grid;
+	gap: 8px;
+}
+
+.search-label {
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: #2a4563;
+}
+
+.search-field input {
+	min-height: 48px;
+	border-radius: 12px;
+	border: 1px solid var(--line);
+	padding: 0 14px;
+	background: #ffffff;
+	color: #172d45;
+	outline: none;
+}
+
+.search-field input:focus {
+	border-color: #5ca2ff;
+	box-shadow: 0 0 0 4px rgba(51, 128, 255, 0.14);
+}
+
+.state-block {
+	background: #ffffff;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	padding: 22px;
+	box-shadow: 0 14px 30px rgba(25, 64, 122, 0.08);
+	display: grid;
+	gap: 8px;
+	justify-items: start;
+}
+
+.state-block h2,
+.state-block p {
+	margin: 0;
+}
+
+.state-block p {
+	color: var(--muted);
+}
+
+.state-block.error {
+	border-color: #f1c4cb;
+	background: #fffafb;
+}
+
+.course-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 14px;
+}
+
+.course-card {
+	background: #ffffff;
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	padding: 16px;
+	box-shadow: 0 14px 28px rgba(25, 64, 122, 0.1);
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.course-top-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.badge,
+.tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 5px 10px;
+	border-radius: 999px;
+	font-size: 0.78rem;
+	font-weight: 700;
+}
+
+.badge {
+	background: #e8f0ff;
+	color: #1f4e9c;
+}
+
+.tag {
+	background: #eef8ff;
+	color: #186087;
+}
+
+.course-card h3 {
+	margin: 0;
+	font-size: 1.24rem;
+	line-height: 1.2;
+}
+
+.desc {
+	margin: 0;
+	color: var(--muted);
+	line-height: 1.55;
+}
+
+.meta {
+	list-style: none;
+	margin: 2px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+	color: #38506d;
+	font-size: 0.95rem;
+}
+
+.card-actions {
+	margin-top: auto;
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+	.my-courses-page {
+		padding: 18px;
+	}
+
+	.hero {
+		flex-direction: column;
+	}
+
+	.stats {
+		grid-template-columns: 1fr;
+	}
+}

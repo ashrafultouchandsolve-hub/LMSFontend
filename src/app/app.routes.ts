@@ -10,6 +10,10 @@ import { CourseDetails } from './base/course-details/course-details';
 import { Payment } from './shared/payment/payment';
 import { Courses } from './base/courses/courses';
 import { EnrolledCourse } from './base/enrolled-course/enrolled-course';
+import { MyCourses } from './user/my-courses/my-courses';
+import { Assignment } from './user/assignment/assignment';
+import { MyClasses } from './user/my-classes/my-classes';
+import { Certificates } from './user/certificates/certificates';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'homepage', pathMatch: 'full'},
@@ -27,5 +31,9 @@ export const routes: Routes = [
         { path: 'course-details/:id', component: CourseDetails },
         { path: 'enrolled-course/:id', component: EnrolledCourse, canActivate: [authGuard] },
         { path: 'payment', component: Payment, canActivate: [authGuard] },
+        {path: 'my-courses',component: MyCourses, canActivate: [authGuard]},
+        {path:'assignments', component:Assignment, canActivate: [authGuard]},
+        {path:'myClasses', component:MyClasses, canActivate: [authGuard]},
+        {path:'certificates',component:Certificates, canActivate: [authGuard]},
         {path: '**', redirectTo: 'homepage'},
 ];

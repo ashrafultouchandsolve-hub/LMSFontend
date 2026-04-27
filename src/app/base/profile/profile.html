@@ -32,11 +32,11 @@
 		</div>
 	</header>
 	<section class="profile-shell">
-		<header class="profile-head">
+		<!-- <header class="profile-head">
 			<button type="button" class="back-link" (click)="goToHome()">Back to home</button>
 			<h1>My Profile</h1>
 			<p>Your account details and upcoming learning tools.</p>
-		</header>
+		</header> -->
 		<section class="info-card" aria-label="User profile details">
 			<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
 			<div class="user-info">
@@ -103,13 +103,14 @@
 
 
 		<section class="future-card" aria-label="Future learning features">
-			<h3>Coming Soon</h3>
+			<h3>Activaty</h3>
 			<p>These options will be activated in future updates.</p>
 
 			<div class="action-grid">
-				@for (action of quickActions; track action) {
-					<button type="button" class="future-btn">{{ action }}</button>
-				}
+				<button type="button" routerLink="/myClasses" class="future-btn">My Classes</button>
+				<button type="button" routerLink="/my-courses" class="future-btn">My Courses</button>
+				<button type="button" routerLink="/assignments" class="future-btn">Assignments</button>
+				<button type="button" routerLink="/certificates" class="future-btn">Certificates</button>
 			</div>
 		</section>
 	</section>
