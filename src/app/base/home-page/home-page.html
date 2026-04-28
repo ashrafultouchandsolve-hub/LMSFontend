@@ -14,37 +14,48 @@
     </a>
 
     <nav class="topbar-nav" aria-label="Primary navigation">
-      <a href="#tracks">Tracks</a>
-      <a routerLink="/courses">Courses</a>
-      <a href="#platform-identity">Vision</a>
+      <a href="#tracks">{{ lang.t().navTracks }}</a>
+      <a routerLink="/courses">{{ lang.t().navCourses }}</a>
+      <a href="#platform-identity">{{ lang.t().navVision }}</a>
     </nav>
 
     <div class="topbar-actions">
+      <!-- ─── LANGUAGE TOGGLE BUTTON ─── -->
+      <button
+        type="button"
+        class="lang-toggle-btn"
+        (click)="lang.toggle()"
+        [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'"
+      >
+        <span class="lang-icon">🌐</span>
+        <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+      </button>
+
       @if (isLoggedIn()) {
         <details class="user-menu">
           <summary class="user-chip" aria-label="Logged in user menu">
             <span class="user-avatar">{{ userInitial() }}</span>
-            <span class="user-name">Hi, {{ userName() }}</span>
+            <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
             <span class="menu-caret" aria-hidden="true">
               <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1L5 5L9 1"/></svg>
             </span>
           </summary>
           <div class="user-menu-list" role="menu">
             <a routerLink="/profile" class="user-menu-link" role="menuitem">
-              <span class="menu-icon">👤</span> Profile
+              <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
             </a>
             @if (isTeacher()) {
               <a routerLink="/teacher" class="user-menu-link" role="menuitem">
-                <span class="menu-icon">🎓</span> Teacher
+                <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
               </a>
             }
           </div>
         </details>
-        <button type="button" class="nav-button nav-button-ghost" (click)="logout()">Logout</button>
+        <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
       } @else {
-        <a routerLink="/login" class="nav-button nav-button-ghost">Login</a>
+        <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
         <a routerLink="/register" class="nav-button nav-button-primary">
-          <span>Get started</span>
+          <span>{{ lang.t().navGetStarted }}</span>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M3 7H11M11 7L8 4M11 7L8 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -58,44 +69,47 @@
     <div class="hero-copy reveal-up">
       <div class="eyebrow-wrap">
         <span class="eyebrow-dot" aria-hidden="true"></span>
-        <p class="eyebrow">Trusted learning ecosystem</p>
+        <p class="eyebrow">{{ lang.t().heroEyebrow }}</p>
       </div>
 
       <h1>
-        Learn in-demand
-        <span class="h1-accent">skills</span>
-        <br>with structured paths.
+        {{ lang.t().heroH1Part1 }}
+        <span class="h1-accent">{{ lang.t().heroH1Accent }}</span>
+        <br>{{ lang.t().heroH1Part2 }}
       </h1>
 
-      <p class="lead">
-        Grow from fundamentals to advanced implementation through
-        mentor-guided modules and hands-on labs designed for real-world outcomes.
-      </p>
+      <p class="lead">{{ lang.t().heroLead }}</p>
 
       <div class="actions">
         <a href="#tracks" class="primary-action">
-          Explore programs
+          {{ lang.t().heroExplore }}
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
-        <a href="#platform-identity" class="secondary-action">Why choose us</a>
+        <a href="#platform-identity" class="secondary-action">{{ lang.t().heroWhyUs }}</a>
       </div>
 
       <div class="stats" aria-label="Platform highlights">
-        @for (stat of stats; track stat.label) {
-          <article class="stat-pill">
-            <strong>{{ stat.value }}</strong>
-            <span>{{ stat.label }}</span>
-          </article>
-        }
+        <article class="stat-pill">
+          <strong>350+</strong>
+          <span>{{ lang.t().statLessons }}</span>
+        </article>
+        <article class="stat-pill">
+          <strong>42k+</strong>
+          <span>{{ lang.t().statLearners }}</span>
+        </article>
+        <article class="stat-pill">
+          <strong>1.2M+</strong>
+          <span>{{ lang.t().statSubmissions }}</span>
+        </article>
       </div>
     </div>
 
     <!-- Education showcase panel -->
     <aside class="hero-showcase reveal-up delay-1" aria-label="Educational showcase">
       <div class="showcase-media">
-        <div class="showcase-badge">Education Spotlight</div>
+        <div class="showcase-badge">{{ lang.t().showcaseBadge }}</div>
         <svg class="showcase-illustration" viewBox="0 0 320 260" role="img" aria-label="Students learning on modern devices">
           <defs>
             <linearGradient id="showcaseBg" x1="0" x2="1" y1="0" y2="1">
@@ -124,18 +138,15 @@
       </div>
 
       <div class="showcase-copy">
-        <p class="panel-label">Future ready learning</p>
-        <h2>Explore a visual learning journey</h2>
-        <p>
-          From structured lessons to project-based milestones, the platform is designed to keep
-          every learner focused, active, and progressing.
-        </p>
+        <p class="panel-label">{{ lang.t().showcaseLabel }}</p>
+        <h2>{{ lang.t().showcaseH2 }}</h2>
+        <p>{{ lang.t().showcaseDesc }}</p>
 
         <div class="showcase-chips" aria-label="Learning highlights">
-          <span>Live classes</span>
-          <span>Mentor support</span>
-          <span>Project labs</span>
-          <span>Career paths</span>
+          <span>{{ lang.t().showcaseChip1 }}</span>
+          <span>{{ lang.t().showcaseChip2 }}</span>
+          <span>{{ lang.t().showcaseChip3 }}</span>
+          <span>{{ lang.t().showcaseChip4 }}</span>
         </div>
       </div>
     </aside>
@@ -145,26 +156,23 @@
   <section class="section-head reveal-up delay-2">
     <div class="section-label-wrap">
       <span class="section-line" aria-hidden="true"></span>
-      <p class="eyebrow">Programs</p>
+      <p class="eyebrow">{{ lang.t().sectionPrograms }}</p>
     </div>
-    <h2 id="tracks">Career-focused learning paths<br>for every stage</h2>
-    <p>
-      Choose a pathway based on your current level and progress with curated lessons,
-      challenges, and project-based milestones.
-    </p>
+    <h2 id="tracks">{{ lang.t().sectionH2Line1 }}<br>{{ lang.t().sectionH2Line2 }}</h2>
+    <p>{{ lang.t().sectionDesc }}</p>
   </section>
 
   <!-- ─── TRACK GRID ─────────────────────────────── -->
   <section class="track-carousel" aria-label="Learning tracks">
     @if (isLoadingCourses()) {
       <article class="track-empty-state">
-        <h3>Courses loading...</h3>
-        <p>দয়া করে একটু অপেক্ষা করুন, কোর্সগুলো লোড হচ্ছে।</p>
+        <h3>{{ lang.t().coursesLoading }}</h3>
+        <p>{{ lang.t().coursesLoadingDesc }}</p>
       </article>
     } @else if (courses().length === 0) {
       <article class="track-empty-state">
-        <h3>No course available</h3>
-        <p>এখনও কোনো কোর্স publish করা হয়নি। পরে আবার চেক করুন।</p>
+        <h3>{{ lang.t().coursesNone }}</h3>
+        <p>{{ lang.t().coursesNoneDesc }}</p>
       </article>
     } @else {
       <div class="track-carousel-shell">
@@ -183,30 +191,33 @@
                   loading="lazy"
                   (error)="onImageError($event)"
                 />
+                
               </div>
 
               <div class="track-card-inner">
-                <span class="track-badge" [class]="'track-badge ' + getLevelClass(course.level)">{{ course.level }}</span>
+                <span class="track-badge" [class]="'track-badge ' + getLevelClass(course.level)">
+                  {{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
+                </span>
                 <h3>{{ course.title }}</h3>
                 <p class="track-description">{{ course.description }}</p>
-                <a [routerLink]="['/course-details', course.id]" class="see-more-button">See more</a>
+                <a [routerLink]="['/course-details', course.id]" class="see-more-button">{{ lang.t().courseSeeMore }}</a>
 
                 <ul class="course-points" aria-label="Course details">
-                  <li><strong>Category:</strong> {{ course.category }}</li>
-                  <li><strong>Instructor:</strong> {{ course.instructorName }}</li>
-                  <li><strong>Lessons:</strong> {{ course.lessonCount }}</li>
-                  <li><strong>Duration:</strong> {{ course.durationMinutes }} min</li>
-                  <li><strong>Price:</strong> {{ formatPrice(course.price) }}</li>
+                  <li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
+                  <li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
+                  <li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
+                  <li><strong>{{ lang.t().courseDuration }}</strong> {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
+                  <li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
                 </ul>
 
                 <div class="track-footer">
                   @if (course.isEnrolled) {
-                    <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">Enrolled</a>
+                    <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
                   } @else {
-                    <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">Enroll Now</a>
+                    <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
                   }
                   <a [routerLink]="['/course-details', course.id]" class="track-cta">
-                    Start learning
+                    {{ lang.t().courseStartLearning }}
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                       <path d="M2 6H10M10 6L7 3M10 6L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -228,31 +239,44 @@
   <!-- ─── FEATURE LAYOUT ─────────────────────────── -->
   <section class="feature-layout">
     <div class="feature-list">
-      @for (highlight of highlights; track highlight.title) {
-        <article class="feature-card reveal-up delay-3">
-          <div class="feature-icon-wrap" aria-hidden="true">
-            <div class="feature-icon"></div>
-          </div>
-          <div class="feature-body">
-            <h3>{{ highlight.title }}</h3>
-            <p>{{ highlight.description }}</p>
-          </div>
-        </article>
-      }
+      <article class="feature-card reveal-up delay-3">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <div class="feature-icon"></div>
+        </div>
+        <div class="feature-body">
+          <h3>{{ lang.t().feature1Title }}</h3>
+          <p>{{ lang.t().feature1Desc }}</p>
+        </div>
+      </article>
+      <article class="feature-card reveal-up delay-3">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <div class="feature-icon"></div>
+        </div>
+        <div class="feature-body">
+          <h3>{{ lang.t().feature2Title }}</h3>
+          <p>{{ lang.t().feature2Desc }}</p>
+        </div>
+      </article>
+      <article class="feature-card reveal-up delay-3">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <div class="feature-icon"></div>
+        </div>
+        <div class="feature-body">
+          <h3>{{ lang.t().feature3Title }}</h3>
+          <p>{{ lang.t().feature3Desc }}</p>
+        </div>
+      </article>
     </div>
 
     <aside id="platform-identity" class="quote-card reveal-up delay-3">
       <div class="quote-top">
-        <p class="quote-label">Our commitment</p>
+        <p class="quote-label">{{ lang.t().quoteLabel }}</p>
         <div class="quote-mark" aria-hidden="true">"</div>
       </div>
-      <blockquote>
-        Every learner deserves a clear roadmap, measurable progress, and practical
-        skills that translate directly into real opportunities.
-      </blockquote>
+      <blockquote>{{ lang.t().quoteText }}</blockquote>
       <div class="quote-footer">
-        <span>Industry-ready curriculum</span>
-        <span>Project-first learning model</span>
+        <span>{{ lang.t().quoteFooter1 }}</span>
+        <span>{{ lang.t().quoteFooter2 }}</span>
       </div>
     </aside>
   </section>

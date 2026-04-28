@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ export class Login {
   protected readonly isSubmitting = signal(false);
   protected readonly isRedirecting = signal(false);
   protected readonly apiMessage = signal('');
+  readonly lang = inject(LanguageService);
 
   protected readonly loginForm = new FormGroup({
     email: new FormControl('', {

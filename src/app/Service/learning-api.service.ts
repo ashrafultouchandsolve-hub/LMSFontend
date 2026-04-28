@@ -149,11 +149,11 @@ export class LearningApiService {
     );
   }
 
-  getLessonsByCourse(courseId: string): Observable<ApiResponse<LessonDto[]>> {
-    return this.withFallback((baseUrl) =>
-      this.http.get<ApiResponse<LessonDto[]>>(`${baseUrl}/lesson/getbycourse/${courseId}`),
-    );
-  }
+getLessonsByCourse(courseId: string): Observable<any> {
+  return this.withFallback((baseUrl) =>
+    this.http.get<any>(`${baseUrl}/lesson/getbycourse/${courseId}`),
+  );
+}
 
   createLesson(payload: SaveLessonPayload): Observable<ApiResponse<string>> {
     return this.withFallback((baseUrl) =>
@@ -285,25 +285,26 @@ export class LearningApiService {
     return `${this.localEnrollmentKeyPrefix}_${userId}`;
   }
 
-  buildDownloadUrl(path: string | null): string {
-    if (!path) {
-      return '';
-    }
+ buildDownloadUrl(path: string | null): string {
+  if (!path) {
+    return '';
+  }
 
-    // Backend serves uploads outside /api path.
-    // Extract base URL without /api (e.g., https://localhost:7002)
-    const baseWithoutApi = this.activeBaseUrl.replace('/api', '');
-    
-    if (path.startsWith('/')) {
-      return `${baseWithoutApi}${path}`;
-    }
+  const baseWithoutApi = this.activeBaseUrl.replace('/api', '');
 
-    if (!path.startsWith('http://') && !path.startsWith('https://')) {
-      return `${baseWithoutApi}/${path}`;
-    }
-
+  // already full URL হলে সেটাই return করো
+  if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
+
+  // /uploads/ দিয়ে শুরু হলে সরাসরি base যোগ করো
+  if (path.startsWith('/uploads/')) {
+    return `${baseWithoutApi}${path}`;
+  }
+
+  // Images/ বা Videos/ দিয়ে শুরু হলে /uploads/ যোগ করো
+  return `${baseWithoutApi}/uploads/${path}`;
+}
 
   buildStreamUrl(path: string | null): string {
     if (!path) {

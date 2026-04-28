@@ -2,93 +2,70 @@
 	<div class="auth-glow auth-glow-left"></div>
 	<div class="auth-glow auth-glow-right"></div>
 
+	<div style="position:fixed;top:16px;right:16px;z-index:999;">
+		<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+			<span>🌐</span>
+			<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+		</button>
+	</div>
+
 	@if (!isRedirecting()) {
 		<section class="auth-card card-surface">
 			<header class="auth-copy">
-				<p class="eyebrow">Welcome back</p>
-				<h1>Login to continue your learning journey.</h1>
-				<p class="lead">
-					Access your lessons, progress dashboard, and skill streaks from one focused workspace.
-				</p>
+				<p class="eyebrow">{{ lang.t().loginEyebrow }}</p>
+				<h1>{{ lang.t().loginTitle }}</h1>
+				<p class="lead">{{ lang.t().loginLead }}</p>
 			</header>
 
 			<div class="auth-layout">
 				<aside class="auth-panel">
 					<div class="auth-panel-header">
-						<span class="panel-pill">Secure access</span>
-						<h2>Black-blue learning mode</h2>
+						<span class="panel-pill">{{ lang.t().loginSecure }}</span>
+						<h2>{{ lang.t().loginMode }}</h2>
 					</div>
-
-					<ul class="feature-list" aria-label="Login benefits">
-						<li>
-							<strong>Fast resume</strong>
-							<span>Jump back into your saved course path instantly.</span>
-						</li>
-						<li>
-							<strong>Progress sync</strong>
-							<span>Keep streaks, scores, and milestones in one place.</span>
-						</li>
-						<li>
-							<strong>Clean focus</strong>
-							<span>Dark interface with sharp blue accents for low distraction.</span>
-						</li>
+					<ul class="feature-list">
+						<li><strong>{{ lang.t().loginF1Title }}</strong><span>{{ lang.t().loginF1Desc }}</span></li>
+						<li><strong>{{ lang.t().loginF2Title }}</strong><span>{{ lang.t().loginF2Desc }}</span></li>
+						<li><strong>{{ lang.t().loginF3Title }}</strong><span>{{ lang.t().loginF3Desc }}</span></li>
 					</ul>
 				</aside>
 
 				<form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submit()">
 					<div class="field">
-						<label for="email">Email address</label>
+						<label for="email">{{ lang.t().loginEmail }}</label>
 						<input id="email" type="email" formControlName="email" placeholder="you@example.com" />
 						@if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
-							<p class="field-error">Enter a valid email address.</p>
+							<p class="field-error">{{ lang.t().loginEmailError }}</p>
 						}
 					</div>
-
 					<div class="field">
-						<label for="password">Password</label>
+						<label for="password">{{ lang.t().loginPassword }}</label>
 						<input id="password" type="password" formControlName="password" placeholder="••••••••" />
 						@if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
-							<p class="field-error">Password must be at least 6 characters.</p>
+							<p class="field-error">{{ lang.t().loginPasswordError }}</p>
 						}
 					</div>
-
 					<div class="form-row">
-						<label class="remember">
-							<input type="checkbox" />
-							<span>Remember me</span>
-						</label>
-
-						<a href="#" class="forgot-link">Forgot password?</a>
+						<label class="remember"><input type="checkbox" /><span>{{ lang.t().loginRemember }}</span></label>
+						<a href="#" class="forgot-link">{{ lang.t().loginForgot }}</a>
 					</div>
-
 					<button type="submit" class="submit-button" [disabled]="isSubmitting()">
-						@if (isSubmitting()) {
-							Logging in...
-						} @else {
-							Login now
-						}
+						@if (isSubmitting()) { {{ lang.t().loginLoggingIn }} } @else { {{ lang.t().loginBtn }} }
 					</button>
-
-					@if (apiMessage()) {
-						<p class="auth-footer">{{ apiMessage() }}</p>
-					}
-
-					<p class="auth-footer">
-						Don't have an account?
-						<a routerLink="/register">Create one</a>
-					</p>
+					@if (apiMessage()) { <p class="auth-footer">{{ apiMessage() }}</p> }
+					<p class="auth-footer">{{ lang.t().loginNoAccount }} <a routerLink="/register">{{ lang.t().loginCreateOne }}</a></p>
 				</form>
 			</div>
 		</section>
 	}
 
 	@if (isRedirecting()) {
-		<section class="redirect-loader" aria-live="polite" aria-label="Loading your home page">
+		<section class="redirect-loader" aria-live="polite">
 			<div class="loader-rail" aria-hidden="true">
 				<div class="loader-line"></div>
 				<div class="loader-orb"></div>
 			</div>
-			<p>Logging in and launching your home page...</p>
+			<p>{{ lang.t().loginRedirecting }}</p>
 		</section>
 	}
 </main>

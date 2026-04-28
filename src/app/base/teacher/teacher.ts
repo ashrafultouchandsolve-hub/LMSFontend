@@ -567,7 +567,11 @@ export class Teacher implements OnInit {
 
     try {
       const response = await firstValueFrom(this.learningApi.getLessonsByCourse(courseId));
-      const lessons = Array.isArray(response?.data) ? response.data.map((lesson) => this.mapLesson(lesson)) : [];
+     const anyRes = response as any;
+const lessonArray = Array.isArray(anyRes?.data) ? anyRes.data
+  : Array.isArray(anyRes?.Data) ? anyRes.Data
+  : [];
+const lessons = lessonArray.map((lesson: any) => this.mapLesson(lesson));
 
       this.courses.update((existingCourses) => {
         return existingCourses.map((course) => {

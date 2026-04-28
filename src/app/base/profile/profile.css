@@ -17,6 +17,32 @@
 	display: grid;
 	gap: 18px;
 }
+.lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1.5px solid #2563eb;
+  border-radius: 999px;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, transform 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.lang-toggle-btn:hover {
+  background: #2563eb;
+  color: #fff;
+  transform: scale(1.04);
+}
+
+.lang-toggle-btn:active {
+  transform: scale(0.97);
+}
 
 .hero-panel {
 	padding: 22px;

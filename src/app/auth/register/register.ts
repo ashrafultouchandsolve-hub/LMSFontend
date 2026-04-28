@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 
 @Component({
   selector: 'app-register',
@@ -16,6 +17,7 @@ export class Register {
 
   protected readonly isSubmitting = signal(false);
   protected readonly apiMessage = signal('');
+  readonly lang = inject(LanguageService);
 
   protected readonly registerForm = new FormGroup({
     fullname: new FormControl('', {

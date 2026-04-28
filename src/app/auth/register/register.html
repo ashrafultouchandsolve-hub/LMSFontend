@@ -2,115 +2,82 @@
 	<div class="register-glow register-glow-left"></div>
 	<div class="register-glow register-glow-right"></div>
 
+	<div style="position:fixed;top:16px;right:16px;z-index:999;">
+		<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+			<span>🌐</span>
+			<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+		</button>
+	</div>
+
 	<section class="register-card card-surface">
 		<header class="register-copy">
-			<p class="eyebrow">Create account</p>
-			<h1>Join the learning platform.</h1>
-			<p class="lead">
-				Set up your profile to track lessons, practice streaks, and progress inside the same dark
-				blue workspace.
-			</p>
+			<p class="eyebrow">{{ lang.t().registerEyebrow }}</p>
+			<h1>{{ lang.t().registerTitle }}</h1>
+			<p class="lead">{{ lang.t().registerLead }}</p>
 		</header>
 
 		<div class="register-layout">
 			<aside class="register-panel">
 				<div class="panel-header">
-					<span class="panel-pill">New learner</span>
-					<h2>Start strong from day one</h2>
+					<span class="panel-pill">{{ lang.t().registerNewLearner }}</span>
+					<h2>{{ lang.t().registerStartStrong }}</h2>
 				</div>
-
-				<ul class="feature-list" aria-label="Register benefits">
-					<li>
-						<strong>Personal dashboard</strong>
-						<span>Get a clean progress view for every learning path you join.</span>
-					</li>
-					<li>
-						<strong>Structured onboarding</strong>
-						<span>Move into a guided setup flow with a focused interface.</span>
-					</li>
-					<li>
-						<strong>Black-blue identity</strong>
-						<span>Consistent with the home and login pages, visually and functionally.</span>
-					</li>
+				<ul class="feature-list">
+					<li><strong>{{ lang.t().registerF1Title }}</strong><span>{{ lang.t().registerF1Desc }}</span></li>
+					<li><strong>{{ lang.t().registerF2Title }}</strong><span>{{ lang.t().registerF2Desc }}</span></li>
+					<li><strong>{{ lang.t().registerF3Title }}</strong><span>{{ lang.t().registerF3Desc }}</span></li>
 				</ul>
 			</aside>
 
 			<form class="register-form" [formGroup]="registerForm" (ngSubmit)="submit()">
 				<div class="field">
-					<label for="fullname">Full name</label>
-					<input id="fullname" type="text" formControlName="fullname" placeholder="Your name" />
+					<label for="fullname">{{ lang.t().registerFullName }}</label>
+					<input id="fullname" type="text" formControlName="fullname" [placeholder]="lang.t().registerFullNamePlaceholder" />
 					@if (registerForm.controls.fullname.touched && registerForm.controls.fullname.invalid) {
-						<p class="field-error">Enter your full name.</p>
+						<p class="field-error">{{ lang.t().registerFullNameError }}</p>
 					}
 				</div>
-
 				<div class="field">
-					<label for="role">Select role</label>
+					<label for="role">{{ lang.t().registerRole }}</label>
 					<select id="role" formControlName="role">
-						<option value="" disabled>Select one</option>
-						<option value="0">Student</option>
-						<option value="1">Teacher</option>
+						<option value="" disabled>{{ lang.t().registerRolePlaceholder }}</option>
+						<option value="0">{{ lang.t().registerStudent }}</option>
+						<option value="1">{{ lang.t().registerTeacher }}</option>
 					</select>
 					@if (registerForm.controls.role.touched && registerForm.controls.role.invalid) {
-						<p class="field-error">Please select Student or Teacher.</p>
+						<p class="field-error">{{ lang.t().registerRoleError }}</p>
 					}
 				</div>
-
 				<div class="field">
-					<label for="email">Email address</label>
+					<label for="email">{{ lang.t().loginEmail }}</label>
 					<input id="email" type="email" formControlName="email" placeholder="you@example.com" />
 					@if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
-						<p class="field-error">Enter a valid email address.</p>
+						<p class="field-error">{{ lang.t().loginEmailError }}</p>
 					}
 				</div>
-
 				<div class="field-grid">
 					<div class="field">
-						<label for="password">Password</label>
-						<input id="password" type="password" formControlName="password" placeholder="Create a password" />
+						<label for="password">{{ lang.t().loginPassword }}</label>
+						<input id="password" type="password" formControlName="password" [placeholder]="lang.t().registerPasswordPlaceholder" />
 						@if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
-							<p class="field-error">Password must be at least 6 characters.</p>
+							<p class="field-error">{{ lang.t().loginPasswordError }}</p>
 						}
 					</div>
-
 					<div class="field">
-						<label for="confirmPassword">Confirm password</label>
-						<input
-							id="confirmPassword"
-							type="password"
-							formControlName="confirmPassword"
-							placeholder="Repeat password"
-						/>
+						<label for="confirmPassword">{{ lang.t().registerConfirmPassword }}</label>
+						<input id="confirmPassword" type="password" formControlName="confirmPassword" [placeholder]="lang.t().registerRepeatPassword" />
 						@if (registerForm.controls.confirmPassword.touched && registerForm.controls.confirmPassword.invalid) {
-							<p class="field-error">Confirm your password.</p>
+							<p class="field-error">{{ lang.t().registerConfirmPasswordError }}</p>
 						}
 					</div>
 				</div>
-
-				<label class="terms">
-					<input type="checkbox" />
-					<span>I agree to the learning platform terms.</span>
-				</label>
-
+				<label class="terms"><input type="checkbox" /><span>{{ lang.t().registerTerms }}</span></label>
 				<button type="submit" class="submit-button" [disabled]="isSubmitting()">
-					@if (isSubmitting()) {
-						Submitting...
-					} @else {
-						Create account
-					}
+					@if (isSubmitting()) { {{ lang.t().registerSubmitting }} } @else { {{ lang.t().registerBtn }} }
 				</button>
-
-				@if (apiMessage()) {
-					<p class="auth-footer">{{ apiMessage() }}</p>
-				}
-
-				<p class="auth-footer">
-					Already have an account?
-					<a routerLink="/login">Login here</a>
-				</p>
-				<p class="auth-footer">
-					<a routerLink="/homepage">Go Home</a>
-				</p>
+				@if (apiMessage()) { <p class="auth-footer">{{ apiMessage() }}</p> }
+				<p class="auth-footer">{{ lang.t().registerHaveAccount }} <a routerLink="/login">{{ lang.t().registerLoginHere }}</a></p>
+				<p class="auth-footer"><a routerLink="/homepage">{{ lang.t().registerGoHome }}</a></p>
 			</form>
 		</div>
 	</section>

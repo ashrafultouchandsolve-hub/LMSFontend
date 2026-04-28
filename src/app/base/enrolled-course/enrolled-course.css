@@ -26,6 +26,12 @@
   margin: auto;
   padding: 0 1.5rem;
 }
+.slide-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
 
 /* HEADER */
 .page-head {
@@ -157,12 +163,12 @@
 }
 
 .lesson-player {
-  width: 100%;
+  width: 90%;
+  aspect-ratio: 16 / 9;
   border-radius: 12px;
-  min-height: 500px;
-  object-fit: cover;
   background: #000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: block;
 }
 
 /* DETAILS */

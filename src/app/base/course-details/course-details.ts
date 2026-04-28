@@ -9,6 +9,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
+import { LanguageService } from '../../Service/language.service';
 
 type CourseDetailsView = {
   id: string;
@@ -45,7 +46,7 @@ export class CourseDetails {
   protected readonly isLoggedIn = signal(false);
   protected readonly isEnrolled = signal(false);
   protected readonly isCheckingEnrollment = signal(false);
-
+readonly lang = inject(LanguageService);
   protected readonly shortDescriptionLimit = 280;
 
   protected readonly imageAvailable = computed(() => {

@@ -13,6 +13,8 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
+import { LanguageService } from '../../Service/language.service';
+
 
 type LearningHighlight = {
   title: string;
@@ -44,6 +46,7 @@ export class HomePage implements OnInit, AfterViewInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly learningApi = inject(LearningApiService);
+   readonly lang = inject(LanguageService);
 
   @ViewChild('courseTrackViewport')
   private courseTrackViewport?: ElementRef<HTMLDivElement>;
@@ -161,7 +164,7 @@ export class HomePage implements OnInit, AfterViewInit {
       return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
     }
 
-    return `https://localhost:7002${thumbnailPath}`;
+   return this.learningApi.buildDownloadUrl(thumbnailPath);
   }
 
   protected onImageError(event: Event): void {

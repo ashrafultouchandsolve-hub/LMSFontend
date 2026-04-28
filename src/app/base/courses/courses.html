@@ -1,20 +1,26 @@
 <main class="courses-page">
 	<header class="courses-header">
 		<div>
-			<p class="courses-eyebrow">Programs</p>
-			<h1>All Courses</h1>
-			<p class="courses-subtitle">Search by title, category, instructor, level, or description.</p>
+			<p class="courses-eyebrow">{{ lang.t().sectionPrograms }}</p>
+			<h1>{{ lang.t().coursesAllTitle }}</h1>
+			<p class="courses-subtitle">{{ lang.t().coursesSearchHint }}</p>
 		</div>
-		<a href="/homepage" class="back-home-link">Back To Home</a>
+		<div style="display:flex;gap:10px;align-items:center;">
+			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+				<span>🌐</span>
+				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+			</button>
+			<a href="/homepage" class="back-home-link">{{ lang.t().coursesBackHome }}</a>
+		</div>
 	</header>
 
 	<section class="courses-search" aria-label="Search courses">
 		<label class="search-field">
-			<span class="search-label">Search courses</span>
+			<span class="search-label">{{ lang.t().coursesSearchLabel }}</span>
 			<input
 				type="search"
 				class="search-input"
-				placeholder="Type a course name, category, or instructor..."
+				[placeholder]="lang.t().coursesSearchPlaceholder"
 				[value]="searchTerm()"
 				(input)="updateSearchTerm($any($event.target).value)"
 			/>
@@ -23,55 +29,47 @@
 
 	@if (isLoadingCourses()) {
 		<article class="courses-empty-state">
-			<h3>Courses loading...</h3>
-			<p>দয়া করে একটু অপেক্ষা করুন, কোর্সগুলো লোড হচ্ছে।</p>
+			<h3>{{ lang.t().coursesLoading }}</h3>
+			<p>{{ lang.t().coursesLoadingDesc }}</p>
 		</article>
 	} @else if (!hasCourses()) {
 		<article class="courses-empty-state">
-			<h3>No course available</h3>
-			<p>এখনও কোনো কোর্স publish করা হয়নি। পরে আবার চেক করুন।</p>
+			<h3>{{ lang.t().coursesNone }}</h3>
+			<p>{{ lang.t().coursesNoneDesc }}</p>
 		</article>
 	} @else if (!hasFilteredCourses()) {
 		<article class="courses-empty-state">
-			<h3>No matching course found</h3>
-			<p>আপনার search term-এর সাথে মিলে এমন কোনো course পাওয়া যায়নি।</p>
+			<h3>{{ lang.t().coursesNoMatch }}</h3>
+			<p>{{ lang.t().coursesNoMatchDesc }}</p>
 		</article>
 	} @else {
 		<section class="courses-grid" aria-label="All courses list">
 			@for (course of filteredCourses(); track course.id; let i = $index) {
 				<article [class]="'course-card ' + getCardToneClass(i)">
-
 					<div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
-						<img
-							class="track-thumbnail"
-							[src]="getImageUrl(course.thumbnailUrl)"
-							[alt]="course.title + ' thumbnail'"
-							loading="lazy"
-							(error)="onImageError($event)"
-						/>
+						<img class="track-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
 					</div>
-
 					<div class="course-card-inner">
-						<span [class]="'course-badge ' + getLevelClass(course.level)">{{ course.level }}</span>
+						<span [class]="'course-badge ' + getLevelClass(course.level)">
+							{{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
+						</span>
 						<h3>{{ course.title }}</h3>
 						<p class="course-description">{{ course.description }}</p>
-						<a [routerLink]="['/course-details', course.id]" class="see-more-button">See more</a>
-
-						<ul class="course-points" aria-label="Course details">
-							<li><strong>Category:</strong> {{ course.category }}</li>
-							<li><strong>Instructor:</strong> {{ course.instructorName }}</li>
-							<li><strong>Lessons:</strong> {{ course.lessonCount }}</li>
-							<li><strong>Duration:</strong> {{ course.durationMinutes }} min</li>
-							<li><strong>Price:</strong> {{ formatPrice(course.price) }}</li>
+						<a [routerLink]="['/course-details', course.id]" class="see-more-button">{{ lang.t().courseSeeMore }}</a>
+						<ul class="course-points">
+							<li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
+							<li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
+							<li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
+							<li><strong>{{ lang.t().courseDuration }}</strong> {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
+							<li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
 						</ul>
-
 						<div class="course-footer">
 							@if (course.isEnrolled) {
-								<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">Enrolled</a>
+								<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
 							} @else {
-								<a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">Enroll Now</a>
+								<a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
 							}
-							<a [routerLink]="['/course-details', course.id]" class="track-cta">Start learning</a>
+							<a [routerLink]="['/course-details', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
 						</div>
 					</div>
 				</article>

@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LearningApiService, LessonDto } from '../../Service/learning-api.service';
 import { DomSanitizer } from '@angular/platform-browser';
+import { LanguageService } from '../../Service/language.service';
 
 type LessonView = {
   id: string;
@@ -12,6 +13,7 @@ type LessonView = {
   orderIndex: number;
   durationMinutes: number;
   videoUrl: string;
+  thumbnailUrl: string;  // ← এটা যোগ করো
 };
 
 type CourseMetaView = {
@@ -30,7 +32,7 @@ export class EnrolledCourse {
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
-
+readonly lang = inject(LanguageService);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
   protected readonly courseId = signal('');
@@ -106,10 +108,10 @@ export class EnrolledCourse {
       this.courseMeta.set(await this.loadCourseMeta(id));
 
       const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));
-      const responseWithAlternativeShape = response as { Data?: LessonDto[] };
-      const rawLessons = Array.isArray(response.data)
-        ? response.data
-        : (Array.isArray(responseWithAlternativeShape.Data) ? responseWithAlternativeShape.Data : []);
+ const anyRes = response as any;
+const rawLessons = Array.isArray(anyRes?.data) ? anyRes.data
+  : Array.isArray(anyRes?.Data) ? anyRes.Data
+  : [];
 
       const orderedLessons = [...rawLessons].sort((a, b) => a.orderIndex - b.orderIndex);
       const mappedLessons = orderedLessons.map((lesson) => this.mapLessonForView(lesson));
@@ -146,21 +148,28 @@ export class EnrolledCourse {
     }
   }
 
-  private mapLessonForView(lesson: LessonDto): LessonView {
-    const hasExternalVideo = typeof lesson.videoUrl === 'string' && lesson.videoUrl.length > 0;
-    const hasUploadedVideo = typeof lesson.videoPath === 'string' && lesson.videoPath.length > 0;
+private mapLessonForView(lesson: any): LessonView {
+  const videoPath = lesson.videoPath ?? lesson.VideoPath ?? null;
+  const videoUrl = lesson.videoUrl ?? lesson.VideoUrl ?? null;
+  const thumbnailPath = lesson.thumbnailPath ?? lesson.ThumbnailPath ?? null;
 
-    return {
-      id: lesson.id,
-      title: lesson.title,
-      description: lesson.description,
-      orderIndex: lesson.orderIndex,
-      durationMinutes: lesson.durationMinutes,
-      videoUrl: hasExternalVideo
-        ? lesson.videoUrl as string
-        : (hasUploadedVideo ? this.learningApi.buildDownloadUrl(lesson.videoPath) : ''),
-    };
-  }
+  const hasUploadedVideo = typeof videoPath === 'string' && videoPath.length > 0;
+  const hasExternalVideo = typeof videoUrl === 'string' &&
+    videoUrl.length > 0 &&
+    (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || videoUrl.startsWith('http'));
+
+  return {
+    id: lesson.id ?? lesson.Id,
+    title: lesson.title ?? lesson.Title,
+    description: lesson.description ?? lesson.Description ?? '',
+    orderIndex: lesson.orderIndex ?? lesson.OrderIndex ?? 0,
+    durationMinutes: lesson.durationMinutes ?? lesson.DurationMinutes ?? 0,
+    videoUrl: hasUploadedVideo
+      ? this.learningApi.buildDownloadUrl(videoPath)
+      : (hasExternalVideo ? videoUrl : ''),
+    thumbnailUrl: this.learningApi.buildDownloadUrl(thumbnailPath),
+  };
+}
 
   isYoutube(url: string): boolean {
   return url?.includes('youtube.com') || url?.includes('youtu.be');

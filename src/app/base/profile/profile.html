@@ -3,61 +3,58 @@
 		<a class="brand" routerLink="/homepage" aria-label="Learning platform home">
 			<img src="/touch-solve-logo.jpg" alt="Touch & Solve Learning Platform" class="brand-logo" />
 		</a>
-
 		<nav class="topbar-nav" aria-label="Primary navigation">
-			<a href="#tracks">Tracks</a>
-			<a href="#platform-identity">Vision</a>
+			<a href="#tracks">{{ lang.t().navTracks }}</a>
+			<a href="#platform-identity">{{ lang.t().navVision }}</a>
 		</nav>
-
 		<div class="topbar-actions">
+			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+				<span>🌐</span>
+				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+			</button>
 			@if (isLoggedIn()) {
 				<details class="user-menu">
-					<summary class="user-chip" aria-label="Logged in user menu">
+					<summary class="user-chip">
 						<span class="user-avatar">{{ userInitial() }}</span>
-						<span class="user-name">Hi, {{ userName() }}</span>
+						<span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
 						<span class="menu-caret" aria-hidden="true">▾</span>
 					</summary>
 					<div class="user-menu-list" role="menu">
-						<a routerLink="/profile" class="user-menu-link" role="menuitem">Profile</a>
+						<a routerLink="/profile" class="user-menu-link" role="menuitem">{{ lang.t().navProfile }}</a>
 						@if (isTeacher()) {
-							<a routerLink="/teacher" class="user-menu-link" role="menuitem">Teacher</a>
+							<a routerLink="/teacher" class="user-menu-link" role="menuitem">{{ lang.t().navTeacher }}</a>
 						}
 					</div>
 				</details>
-				<button type="button" class="nav-button nav-button-ghost" (click)="logout()">Logout</button>
+				<button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
 			} @else {
-				<a routerLink="/login" class="nav-button nav-button-ghost">Login</a>
-				<a routerLink="/register" class="nav-button nav-button-primary">Register</a>
+				<a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
+				<a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
 			}
 		</div>
 	</header>
+
 	<section class="profile-shell">
-		<!-- <header class="profile-head">
-			<button type="button" class="back-link" (click)="goToHome()">Back to home</button>
-			<h1>My Profile</h1>
-			<p>Your account details and upcoming learning tools.</p>
-		</header> -->
 		<section class="info-card" aria-label="User profile details">
 			<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
 			<div class="user-info">
 				<h2>{{ userName() }}</h2>
 				<p>{{ userEmail() }}</p>
-				<span class="role-badge">Role: {{ userRole() }}</span>
+				<span class="role-badge">{{ lang.t().profileRole }}: {{ userRole() }}</span>
 			</div>
 		</section>
 
 		<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
 			<div class="panel-header">
 				<div>
-					<p class="panel-label">Student dashboard</p>
-					<h2>Weekly performance</h2>
+					<p class="panel-label">{{ lang.t().profileDashboard }}</p>
+					<h2>{{ lang.t().profileWeekly }}</h2>
 				</div>
 				<span class="live-badge">
 					<span class="live-dot" aria-hidden="true"></span>
-					Live
+					{{ lang.t().profileLive }}
 				</span>
 			</div>
-
 			<div class="ring-wrap">
 				<div class="progress-ring" role="img" aria-label="87% weekly completion">
 					<svg class="ring-svg" viewBox="0 0 120 120">
@@ -66,51 +63,47 @@
 					</svg>
 					<div class="ring-core">
 						<strong>87%</strong>
-						<span>completion</span>
+						<span>{{ lang.t().profileCompletion }}</span>
 					</div>
 				</div>
-
 				<div class="ring-legend">
 					<div class="legend-item">
 						<span class="legend-dot legend-done" aria-hidden="true"></span>
-						<span>Completed</span>
+						<span>{{ lang.t().profileCompleted }}</span>
 					</div>
 					<div class="legend-item">
 						<span class="legend-dot legend-remain" aria-hidden="true"></span>
-						<span>Remaining</span>
+						<span>{{ lang.t().profileRemaining }}</span>
 					</div>
 				</div>
 			</div>
-
 			<div class="dashboard-list">
 				<div class="dashboard-row">
 					<span class="row-icon" aria-hidden="true">📐</span>
-					<span>Angular assessments</span>
-					<strong class="row-value row-ok">Completed</strong>
+					<span>{{ lang.t().profileAssessments }}</span>
+					<strong class="row-value row-ok">{{ lang.t().profileCompleted }}</strong>
 				</div>
 				<div class="dashboard-row">
 					<span class="row-icon" aria-hidden="true">⏱</span>
-					<span>Coding time this week</span>
+					<span>{{ lang.t().profileCodingTime }}</span>
 					<strong class="row-value">6.8 hrs</strong>
 				</div>
 				<div class="dashboard-row">
 					<span class="row-icon" aria-hidden="true">🔥</span>
-					<span>Consistency streak</span>
-					<strong class="row-value row-streak">21 days</strong>
+					<span>{{ lang.t().profileStreak }}</span>
+					<strong class="row-value row-streak">21 {{ lang.t().profileDays }}</strong>
 				</div>
 			</div>
 		</aside>
 
-
 		<section class="future-card" aria-label="Future learning features">
-			<h3>Activaty</h3>
-			<p>These options will be activated in future updates.</p>
-
+			<h3>{{ lang.t().profileActivity }}</h3>
+			<p>{{ lang.t().profileActivityDesc }}</p>
 			<div class="action-grid">
-				<button type="button" routerLink="/myClasses" class="future-btn">My Classes</button>
-				<button type="button" routerLink="/my-courses" class="future-btn">My Courses</button>
-				<button type="button" routerLink="/assignments" class="future-btn">Assignments</button>
-				<button type="button" routerLink="/certificates" class="future-btn">Certificates</button>
+				<button type="button" routerLink="/myClasses" class="future-btn">{{ lang.t().profileMyClasses }}</button>
+				<button type="button" routerLink="/my-courses" class="future-btn">{{ lang.t().profileMyCourses }}</button>
+				<button type="button" routerLink="/assignments" class="future-btn">{{ lang.t().profileAssignments }}</button>
+				<button type="button" routerLink="/certificates" class="future-btn">{{ lang.t().profileCertificates }}</button>
 			</div>
 		</section>
 	</section>
