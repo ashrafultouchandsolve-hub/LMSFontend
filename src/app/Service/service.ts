@@ -29,7 +29,11 @@ export type LoginResponse = {
 export class Service {
   private readonly http = inject(HttpClient);
   private readonly loginUrl = 'https://localhost:7002/api/register/login';
-  private readonly registerUrl = 'https://localhost:7002/api/register/register';
+   private readonly registerUrl = 'https://localhost:7002/api/register/register';
+
+  //   private readonly loginUrl = 'http://lmslands.runasp.net/api/register/login';
+  // private readonly registerUrl = 'http://lmslands.runasp.net/api/register/register';
+
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(this.loginUrl, payload);
@@ -40,6 +44,7 @@ export class Service {
   }
   savePreferences(data: any){
     return this.http.post('https://localhost:7002/api/UserPreference', data);
+    //return this.http.post('http://lmslands.runasp.net/api/UserPreference', data);
     }
 
   }

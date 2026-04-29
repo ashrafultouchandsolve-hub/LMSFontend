@@ -540,27 +540,40 @@ export class Teacher implements OnInit {
     this.router.navigateByUrl('/login');
   }
 
-  private async loadTeacherCourses(): Promise<void> {
-    this.isLoadingCourses.set(true);
+private async loadTeacherCourses(): Promise<void> {
+  this.isLoadingCourses.set(true);
 
-    try {
-      const existingCourses = this.courses();
-      const existingLessonsByCourseId = new Map(existingCourses.map((course) => [course.id, course.lessons]));
-      const response = await firstValueFrom(this.learningApi.getTeacherCourses());
-      const courseDtos = response.data;
-      const mapped = courseDtos.map((course) => this.mapCourse(course, existingLessonsByCourseId.get(course.id) ?? []));
-      this.courses.set(mapped);
+  try {
+    const existingCourses = this.courses();
+    const existingLessonsByCourseId = new Map(existingCourses.map((course) => [course.id, course.lessons]));
 
-      if (this.selectedCourseId() && !mapped.some((course) => course.id === this.selectedCourseId())) {
-        this.selectedCourseId.set(null);
-      }
-    } catch (error) {
-      this.courses.set([]);
-      this.setNotice(this.extractApiErrorMessage(error, 'কোর্স লোড করা যায়নি। Backend URL এবং token চেক করুন।'), 'error');
-    } finally {
-      this.isLoadingCourses.set(false);
-    }
+    const response = await firstValueFrom(this.learningApi.getTeacherCourses());
+    const courseDtos = response.data;
+
+    // 🔥 NEW: fetch enrollment count for each course
+    const mapped = await Promise.all(
+      courseDtos.map(async (course) => {
+        const countRes = await firstValueFrom(
+          this.learningApi.getEnrollmentCount(course.id)
+        );
+
+        return this.mapCourse(
+          course,
+          existingLessonsByCourseId.get(course.id) ?? [],
+          countRes.totalEnrollment // 👈 pass count
+        );
+      })
+    );
+
+    this.courses.set(mapped);
+
+  } catch (error) {
+    this.courses.set([]);
+    this.setNotice(this.extractApiErrorMessage(error, 'কোর্স লোড করা যায়নি।'), 'error');
+  } finally {
+    this.isLoadingCourses.set(false);
   }
+}
 
   private async loadLessons(courseId: string): Promise<void> {
     this.isLoadingLessons.set(true);
@@ -593,23 +606,27 @@ const lessons = lessonArray.map((lesson: any) => this.mapLesson(lesson));
     }
   }
 
-  private mapCourse(dto: CourseDto, existingLessons: Lesson[] = []): Course {
-    return {
-      id: dto.id,
-      title: dto.title,
-      category: dto.category,
-      description: dto.description,
-      instructorName: dto.instructorName,
-      level: this.normalizeLevel(dto.level),
-      price: dto.price,
-      durationMinutes: dto.durationMinutes,
-      thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
-      published: dto.isPublished,
-      students: 0,
-      lessonCount: dto.lessonCount ?? existingLessons.length,
-      lessons: existingLessons,
-    };
-  }
+private mapCourse(
+  dto: CourseDto,
+  existingLessons: Lesson[] = [],
+  studentCount: number = 0   
+): Course {
+  return {
+    id: dto.id,
+    title: dto.title,
+    category: dto.category,
+    description: dto.description,
+    instructorName: dto.instructorName,
+    level: this.normalizeLevel(dto.level),
+    price: dto.price,
+    durationMinutes: dto.durationMinutes,
+    thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
+    published: dto.isPublished,
+    students: studentCount, // 👈 এখানে use করো
+    lessonCount: dto.lessonCount ?? existingLessons.length,
+    lessons: existingLessons,
+  };
+}
 
   private mapLesson(dto: LessonDto): Lesson {
     return {

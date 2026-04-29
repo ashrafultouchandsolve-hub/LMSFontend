@@ -82,8 +82,13 @@ export type SaveEnrollmentPayload = {
 export class LearningApiService {
   private readonly http = inject(HttpClient);
   private readonly jwtService = inject(JwtService);
-  private readonly primaryBaseUrl = 'https://localhost:7002/api';
+   private readonly primaryBaseUrl = 'https://localhost:7002/api';
   private readonly fallbackBaseUrl = 'https://localhost:7236/api';
+
+  //  private readonly primaryBaseUrl = 'http://lmslands.runasp.net/api';
+  //private readonly fallbackBaseUrl = 'http://lmslands.runasp.net/api/';
+
+
   private activeBaseUrl = this.primaryBaseUrl;
   private readonly localEnrollmentKeyPrefix = 'enrolled_course_ids';
   private enrollmentByCourseEndpointAvailable: boolean | null = null;
@@ -152,6 +157,14 @@ export class LearningApiService {
 getLessonsByCourse(courseId: string): Observable<any> {
   return this.withFallback((baseUrl) =>
     this.http.get<any>(`${baseUrl}/lesson/getbycourse/${courseId}`),
+  );
+}
+
+getEnrollmentCount(courseId: string): Observable<{ courseId: string; totalEnrollment: number }> {
+  return this.withFallback((baseUrl) =>
+    this.http.get<{ courseId: string; totalEnrollment: number }>(
+      `${baseUrl}/enrollment/count/${courseId}`
+    )
   );
 }
 

@@ -1,245 +1,210 @@
-<!-- home-page.html — Angular template, paste as-is -->
-
 <main class="home-page">
 
-  <!-- Subtle dot-grid background -->
-  <div class="bg-dots" aria-hidden="true"></div>
-  <div class="bg-blob bg-blob-1" aria-hidden="true"></div>
-  <div class="bg-blob bg-blob-2" aria-hidden="true"></div>
-
-  <!-- ─── TOPBAR ─────────────────────────────────── -->
-  <header class="topbar reveal-down">
+  <!-- ─── TOPBAR ──────────────────────────────────── -->
+  <header class="topbar">
     <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-      <img src="/touch-solve-logo.jpg" alt="Touch & Solve Learning Platform" class="brand-logo" />
+      <img src="/touch-solve-logo.jpg" alt="Touch & Solve" class="brand-logo" />
     </a>
-
     <nav class="topbar-nav" aria-label="Primary navigation">
       <a href="#tracks">{{ lang.t().navTracks }}</a>
       <a routerLink="/courses">{{ lang.t().navCourses }}</a>
       <a href="#platform-identity">{{ lang.t().navVision }}</a>
     </nav>
-
     <div class="topbar-actions">
-      <!-- ─── LANGUAGE TOGGLE BUTTON ─── -->
-      <button
-        type="button"
-        class="lang-toggle-btn"
-        (click)="lang.toggle()"
-        [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'"
-      >
+      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()"
+        [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'">
         <span class="lang-icon">🌐</span>
         <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
       </button>
-
       @if (isLoggedIn()) {
-        <details class="user-menu">
-          <summary class="user-chip" aria-label="Logged in user menu">
-            <span class="user-avatar">{{ userInitial() }}</span>
-            <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
-            <span class="menu-caret" aria-hidden="true">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M1 1L5 5L9 1"/></svg>
-            </span>
-          </summary>
-          <div class="user-menu-list" role="menu">
-            <a routerLink="/profile" class="user-menu-link" role="menuitem">
-              <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
-            </a>
-            @if (isTeacher()) {
-              <a routerLink="/teacher" class="user-menu-link" role="menuitem">
-                <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
-              </a>
-            }
-          </div>
-        </details>
-        <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
+      <details class="user-menu">
+        <summary class="user-chip" aria-label="User menu">
+          <span class="user-avatar">{{ userInitial() }}</span>
+          <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
+          <span class="menu-caret" aria-hidden="true">
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+              <path d="M1 1L5 5L9 1" />
+            </svg>
+          </span>
+        </summary>
+        <div class="user-menu-list" role="menu">
+          <a routerLink="/profile" class="user-menu-link" role="menuitem">
+            <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
+          </a>
+          @if (isTeacher()) {
+          <a routerLink="/teacher" class="user-menu-link" role="menuitem">
+            <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
+          </a>
+          }
+        </div>
+      </details>
+      <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
       } @else {
-        <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
-        <a routerLink="/register" class="nav-button nav-button-primary">
-          <span>{{ lang.t().navGetStarted }}</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M3 7H11M11 7L8 4M11 7L8 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
+      <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
+      <a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
       }
     </div>
   </header>
 
-  <!-- ─── HERO ──────────────────────────────────── -->
+  <!-- ─── HERO ─────────────────────────────────────── -->
   <section class="hero">
-    <div class="hero-copy reveal-up">
-      <div class="eyebrow-wrap">
-        <span class="eyebrow-dot" aria-hidden="true"></span>
-        <p class="eyebrow">{{ lang.t().heroEyebrow }}</p>
-      </div>
 
+    <!-- Left: copy -->
+    <div class="hero-copy">
       <h1>
-        {{ lang.t().heroH1Part1 }}
+        {{ lang.t().heroH1Part1 }}<br>
+        {{ lang.t().heroH1Part2 }}<br>
         <span class="h1-accent">{{ lang.t().heroH1Accent }}</span>
-        <br>{{ lang.t().heroH1Part2 }}
       </h1>
-
       <p class="lead">{{ lang.t().heroLead }}</p>
-
       <div class="actions">
-        <a href="#tracks" class="primary-action">
-          {{ lang.t().heroExplore }}
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-        <a href="#platform-identity" class="secondary-action">{{ lang.t().heroWhyUs }}</a>
-      </div>
-
-      <div class="stats" aria-label="Platform highlights">
-        <article class="stat-pill">
-          <strong>350+</strong>
-          <span>{{ lang.t().statLessons }}</span>
-        </article>
-        <article class="stat-pill">
-          <strong>42k+</strong>
-          <span>{{ lang.t().statLearners }}</span>
-        </article>
-        <article class="stat-pill">
-          <strong>1.2M+</strong>
-          <span>{{ lang.t().statSubmissions }}</span>
-        </article>
-      </div>
-    </div>
-
-    <!-- Education showcase panel -->
-    <aside class="hero-showcase reveal-up delay-1" aria-label="Educational showcase">
-      <div class="showcase-media">
-        <div class="showcase-badge">{{ lang.t().showcaseBadge }}</div>
-        <svg class="showcase-illustration" viewBox="0 0 320 260" role="img" aria-label="Students learning on modern devices">
-          <defs>
-            <linearGradient id="showcaseBg" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stop-color="#eff6ff"/>
-              <stop offset="100%" stop-color="#dbeafe"/>
-            </linearGradient>
-            <linearGradient id="deviceBlue" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stop-color="#2563eb"/>
-              <stop offset="100%" stop-color="#0ea5e9"/>
-            </linearGradient>
-          </defs>
-          <rect x="0" y="0" width="320" height="260" rx="28" fill="url(#showcaseBg)"/>
-          <circle cx="70" cy="52" r="22" fill="#bfdbfe"/>
-          <circle cx="248" cy="56" r="16" fill="#bae6fd"/>
-          <rect x="52" y="92" width="124" height="84" rx="14" fill="#ffffff" stroke="#c7ddff"/>
-          <rect x="64" y="104" width="100" height="54" rx="8" fill="url(#deviceBlue)" opacity="0.95"/>
-          <rect x="78" y="118" width="72" height="8" rx="4" fill="#ffffff" opacity="0.88"/>
-          <rect x="78" y="134" width="52" height="8" rx="4" fill="#ffffff" opacity="0.78"/>
-          <rect x="186" y="78" width="92" height="120" rx="20" fill="#ffffff" stroke="#c7ddff"/>
-          <rect x="198" y="94" width="68" height="88" rx="12" fill="#f8fafc" stroke="#d6e2fb"/>
-          <path d="M214 152C214 142 221 134 230 134C239 134 246 142 246 152V168H214V152Z" fill="#93c5fd"/>
-          <circle cx="230" cy="121" r="10" fill="#bfdbfe"/>
-          <rect x="34" y="198" width="250" height="28" rx="14" fill="#ffffff" stroke="#dbe7ff"/>
-          <text x="160" y="217" text-anchor="middle" font-size="14" fill="#2563eb" font-family="sans-serif" font-weight="700">Interactive learning, labs, and guided practice</text>
-        </svg>
-      </div>
-
-      <div class="showcase-copy">
-        <p class="panel-label">{{ lang.t().showcaseLabel }}</p>
-        <h2>{{ lang.t().showcaseH2 }}</h2>
-        <p>{{ lang.t().showcaseDesc }}</p>
-
-        <div class="showcase-chips" aria-label="Learning highlights">
-          <span>{{ lang.t().showcaseChip1 }}</span>
-          <span>{{ lang.t().showcaseChip2 }}</span>
-          <span>{{ lang.t().showcaseChip3 }}</span>
-          <span>{{ lang.t().showcaseChip4 }}</span>
+        <a href="#tracks" class="primary-action">{{ lang.t().heroExplore }}</a>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <strong>50+</strong>
+            <span>{{ lang.t().statLessons }}</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <strong>1M+</strong>
+            <span>{{ lang.t().statLearners }}</span>
+          </div>
         </div>
       </div>
-    </aside>
-  </section>
-
-  <!-- ─── SECTION HEAD ──────────────────────────── -->
-  <section class="section-head reveal-up delay-2">
-    <div class="section-label-wrap">
-      <span class="section-line" aria-hidden="true"></span>
-      <p class="eyebrow">{{ lang.t().sectionPrograms }}</p>
     </div>
-    <h2 id="tracks">{{ lang.t().sectionH2Line1 }}<br>{{ lang.t().sectionH2Line2 }}</h2>
-    <p>{{ lang.t().sectionDesc }}</p>
+
+    <!-- Right: visual -->
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-blob"></div>
+
+      <!-- Top floating card -->
+      <div class="hero-float-card hero-float-card--top">
+        <span class="hero-float-icon">👨‍🎓</span>
+        <div>
+          <strong>175K</strong>
+          <span>Assisted Students</span>
+        </div>
+      </div>
+
+      <!-- Student image -->
+      <img src="images/student.jpg.jpg" alt="Student" class="hero-student-img" />
+      <!-- Bottom chart card -->
+      <div class="hero-float-card hero-float-card--bottom">
+        <div class="chart-label">Learning Chart</div>
+        <div class="mini-chart">
+          <div class="bar" style="height:28px;background:#f472b6"></div>
+          <div class="bar" style="height:42px;background:#60a5fa"></div>
+          <div class="bar" style="height:36px;background:#818cf8"></div>
+          <div class="bar" style="height:52px;background:#fbbf24"></div>
+          <div class="bar" style="height:44px;background:#34d399"></div>
+        </div>
+        <div class="chart-ticks">
+          <span>20k</span><span>10k</span><span>1k</span>
+        </div>
+      </div>
+    </div>
+
   </section>
 
-  <!-- ─── TRACK GRID ─────────────────────────────── -->
-  <section class="track-carousel" aria-label="Learning tracks">
+  <!-- ─── COURSES ───────────────────────────────────── -->
+  <section class="cats-section" id="tracks">
+    <h2 class="cats-title">
+      {{ lang.t().sectionH2Line1 }}<br>
+      {{ lang.t().sectionH2Line2 }}
+    </h2>
+
     @if (isLoadingCourses()) {
-      <article class="track-empty-state">
-        <h3>{{ lang.t().coursesLoading }}</h3>
-        <p>{{ lang.t().coursesLoadingDesc }}</p>
-      </article>
+    <article class="track-empty-state">
+      <h3>{{ lang.t().coursesLoading }}</h3>
+      <p>{{ lang.t().coursesLoadingDesc }}</p>
+    </article>
     } @else if (courses().length === 0) {
-      <article class="track-empty-state">
-        <h3>{{ lang.t().coursesNone }}</h3>
-        <p>{{ lang.t().coursesNoneDesc }}</p>
-      </article>
+    <article class="track-empty-state">
+      <h3>{{ lang.t().coursesNone }}</h3>
+      <p>{{ lang.t().coursesNoneDesc }}</p>
+    </article>
     } @else {
-      <div class="track-carousel-shell">
-        <button type="button" class="track-carousel-button track-carousel-button-prev" (click)="scrollCourses('previous')" aria-label="Scroll courses left">
-          <span aria-hidden="true">‹</span>
-        </button>
+    <div class="cats-carousel-shell">
+      <button type="button" class="cats-arrow cats-arrow--prev" (click)="scrollCourses('previous')"
+        aria-label="Scroll left">‹</button>
 
-        <div #courseTrackViewport class="track-grid track-viewport">
-          @for (course of courses(); track course.id; let i = $index) {
-            <article [class]="'track-card reveal-up delay-2 ' + getCardToneClass(i)">
-              <div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
-                <img
-                  class="track-thumbnail"
-                  [src]="getImageUrl(course.thumbnailUrl)"
-                  [alt]="course.title + ' thumbnail'"
-                  loading="lazy"
-                  (error)="onImageError($event)"
-                />
-                
-              </div>
+      <div #courseTrackViewport class="cats-viewport">
 
-              <div class="track-card-inner">
-                <span class="track-badge" [class]="'track-badge ' + getLevelClass(course.level)">
-                  {{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
-                </span>
-                <h3>{{ course.title }}</h3>
-                <p class="track-description">{{ course.description }}</p>
-                <a [routerLink]="['/course-details', course.id]" class="see-more-button">{{ lang.t().courseSeeMore }}</a>
+        @for (course of courses(); track course.id; let i = $index) {
+        <article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
 
-                <ul class="course-points" aria-label="Course details">
-                  <li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
-                  <li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
-                  <li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
-                  <li><strong>{{ lang.t().courseDuration }}</strong> {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
-                  <li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
-                </ul>
+          <!-- Thumbnail -->
+          <div class="cat-img-wrap">
+            <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title" loading="eager"
+              (error)="onImageError($event)" />
+            <div class="cat-icon-fallback" aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none" width="36" height="36">
+                <rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.2)" />
+                <path d="M12 28V14l8-4 8 4v14l-8 4-8-4z" stroke="white" stroke-width="2" stroke-linejoin="round" />
+                <path d="M20 10v18M12 14l8 4 8-4" stroke="white" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
 
-                <div class="track-footer">
-                  @if (course.isEnrolled) {
-                    <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
-                  } @else {
-                    <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
-                  }
-                  <a [routerLink]="['/course-details', course.id]" class="track-cta">
-                    {{ lang.t().courseStartLearning }}
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <path d="M2 6H10M10 6L7 3M10 6L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </article>
-          }
-        </div>
+          <!-- Body -->
+          <div class="cat-body">
+            <span class="cat-badge">
+              {{ course.level === 'Beginner' ? lang.t().levelBeginner
+              : course.level === 'Intermediate' ? lang.t().levelIntermediate
+              : lang.t().levelAdvanced }}
+            </span>
 
-        <button type="button" class="track-carousel-button track-carousel-button-next" (click)="scrollCourses('next')" aria-label="Scroll courses right">
-          <span aria-hidden="true">›</span>
-        </button>
+            <h3>{{ course.title }}</h3>
+            <p class="cat-desc">{{ course.description }}</p>
+
+            <ul class="cat-meta">
+              <li>📚 {{ course.lessonCount }} {{ lang.t().courseLessons }}</li>
+              <li>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
+              <li>💰 {{ formatPrice(course.price) }}</li>
+            </ul>
+
+            <div class="cat-footer">
+              @if (course.isEnrolled) {
+              <a [routerLink]="['/course-details', course.id]" class="cat-btn cat-btn--enrolled">{{
+                lang.t().courseEnrolled }}</a>
+              } @else {
+              <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)"
+                class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
+              }
+              <a [routerLink]="['/course-details', course.id]" class="cat-link">
+                {{ lang.t().courseStartLearning }} →
+              </a>
+            </div>
+          </div>
+
+        </article>
+        }
+
+        <!-- Browse All -->
+        <article class="cat-card cat-card--browse">
+          <a routerLink="/courses" class="browse-all-link">
+            <div class="browse-all-circle">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path d="M6 14H22M22 14L16 8M22 14L16 20" stroke="#6d28d9" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+            <span>Browse All</span>
+          </a>
+        </article>
+
       </div>
-    }
 
+      <button type="button" class="cats-arrow cats-arrow--next" (click)="scrollCourses('next')"
+        aria-label="Scroll right">›</button>
+    </div>
+    }
   </section>
 
-  <!-- ─── FEATURE LAYOUT ─────────────────────────── -->
-  <section class="feature-layout">
+  <!-- ─── FEATURES + QUOTE ──────────────────────── -->
+  <section class="feature-layout" id="platform-identity">
     <div class="feature-list">
-      <article class="feature-card reveal-up delay-3">
+      <article class="feature-card">
         <div class="feature-icon-wrap" aria-hidden="true">
           <div class="feature-icon"></div>
         </div>
@@ -248,7 +213,7 @@
           <p>{{ lang.t().feature1Desc }}</p>
         </div>
       </article>
-      <article class="feature-card reveal-up delay-3">
+      <article class="feature-card">
         <div class="feature-icon-wrap" aria-hidden="true">
           <div class="feature-icon"></div>
         </div>
@@ -257,7 +222,7 @@
           <p>{{ lang.t().feature2Desc }}</p>
         </div>
       </article>
-      <article class="feature-card reveal-up delay-3">
+      <article class="feature-card">
         <div class="feature-icon-wrap" aria-hidden="true">
           <div class="feature-icon"></div>
         </div>
@@ -268,7 +233,7 @@
       </article>
     </div>
 
-    <aside id="platform-identity" class="quote-card reveal-up delay-3">
+    <aside class="quote-card">
       <div class="quote-top">
         <p class="quote-label">{{ lang.t().quoteLabel }}</p>
         <div class="quote-mark" aria-hidden="true">"</div>

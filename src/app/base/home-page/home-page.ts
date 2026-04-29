@@ -142,6 +142,21 @@ export class HomePage implements OnInit, AfterViewInit {
     return tones[index % tones.length];
   }
 
+protected getCardColor(index: number): string {
+  const colors = [
+    '#ec4899', // pink
+    '#7c3aed', // violet
+    '#06b6d4', // cyan
+    '#f97316', // orange
+    '#10b981', // emerald
+    '#3b82f6', // blue
+    '#f59e0b', // amber
+    '#8b5cf6', // purple
+  ];
+  return colors[index % colors.length];
+}
+ 
+
   protected buildPaymentQueryParams(course: HomeCourse): Record<string, string | number> {
     return {
       courseId: course.id,
