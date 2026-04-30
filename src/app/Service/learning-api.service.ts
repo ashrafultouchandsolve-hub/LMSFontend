@@ -115,6 +115,38 @@ export class LearningApiService {
       }),
     );
   }
+            //quiz
+getQuizzesByLesson(lessonId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/quiz/getbylesson/${lessonId}`)
+  );
+}
+
+addQuiz(lessonId: string, dto: any): Observable<any> {
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/quiz/add/${lessonId}`, dto)
+  );
+}
+
+deleteQuiz(quizId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.delete<any>(`${base}/quiz/delete/${quizId}`)
+  );
+}
+
+hasAttemptedQuiz(lessonId: string, userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/quiz/hasattempted/${lessonId}/${userId}`)
+  );
+}
+
+submitQuiz(lessonId: string, dto: any): Observable<any> {
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/quiz/submit/${lessonId}`, dto)
+  );
+}
+
+
 
   getTeacherCourses(): Observable<ApiResponse<CourseDto[]>> {
     return this.withFallback((baseUrl) =>

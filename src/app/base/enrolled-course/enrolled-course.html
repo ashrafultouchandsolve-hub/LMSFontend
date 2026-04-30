@@ -1,59 +1,82 @@
 <section class="enrolled-shell">
   <main class="enrolled-page">
-    <a [routerLink]="courseId() ? ['/course-details', courseId()] : ['/courses']" class="back-link">{{ lang.t().ecBack }}</a>
+    <a [routerLink]="courseId() ? ['/course-details', courseId()] : ['/courses']" class="back-link">{{ lang.t().ecBack
+      }}</a>
 
     @if (courseMeta(); as meta) {
-      <header class="page-head">
-        <h1>{{ meta.title }}</h1>
-        <p>{{ lang.t().ecLessons }} {{ lang.t().profileDashboard }}</p>
-      </header>
+    <header class="page-head">
+      <h1>{{ meta.title }}</h1>
+      <p>{{ lang.t().ecLessons }} {{ lang.t().profileDashboard }}</p>
+    </header>
     }
 
     <div class="lesson-layout">
       <section class="video-panel">
-        @if (selectedLesson(); as currentLesson) {
-          @if (isYoutube(selectedVideoUrl())) {
-            <iframe class="lesson-player" [src]="getSafeYoutubeUrl(selectedVideoUrl())" frameborder="0" allowfullscreen></iframe>
-          } @else {
-            <video class="lesson-player" [src]="selectedVideoUrl()" controls></video>
-          }
-          <div class="lesson-details">
-            <h3>{{ currentLesson.title }}</h3>
-            <p>{{ currentLesson.description }}</p>
-          </div>
-        } @else {
-          <div class="video-fallback"><h2>{{ lang.t().ecNoLesson }}</h2></div>
-        }
-
-        <div class="lesson-slider">
-          @for (lesson of lessons(); track lesson.id) {
-           <button class="slide-card" [class.active]="lesson.id === selectedLessonId()" (click)="selectLesson(lesson.id)" type="button">
-  <div class="slide-thumb">
-    @if (lesson.thumbnailUrl) {
-      <img [src]="lesson.thumbnailUrl" [alt]="lesson.title" class="slide-thumb-img" />
+  @if (selectedLesson(); as currentLesson) {
+    
+    @if (isYoutube(selectedVideoUrl())) {
+      <iframe class="lesson-player" [src]="getSafeYoutubeUrl(selectedVideoUrl())" 
+        frameborder="0" allowfullscreen></iframe>
     } @else {
-      ▶
+      <video class="lesson-player" [src]="selectedVideoUrl()" controls></video>
     }
-  </div>
-  <p class="slide-title">{{ lesson.title }}</p>
-</button>
+
+    <!-- Lesson title & description -->
+    <div class="lesson-details">
+      <h3>{{ currentLesson.title }}</h3>
+      <p>{{ currentLesson.description }}</p>
+    </div>
+
+    <!-- ✅ Quiz button — lesson details এর ঠিক নিচে -->
+@if (selectedLesson()?.hasQuiz) {
+  <a [routerLink]="['/quiz', selectedLesson()?.id]"
+     [queryParams]="{ title: selectedLesson()?.title }"
+     class="start-quiz-btn"
+     [class.disabled]="selectedLesson()?.QuizAttempted">
+    {{ selectedLesson()?.QuizAttempted ? '🔒 Quiz Completed' : '📝 Start Quiz' }}
+  </a>
+}
+  } @else {
+    <div class="video-fallback">
+      <h2>{{ lang.t().ecNoLesson }}</h2>
+    </div>
+  }
+
+  <!-- Lesson slider — সবার নিচে -->
+  <div class="lesson-slider">
+    @for (lesson of lessons(); track lesson.id) {
+      <button class="slide-card" 
+        [class.active]="lesson.id === selectedLessonId()" 
+        (click)="selectLesson(lesson.id)" 
+        type="button">
+        <div class="slide-thumb">
+          @if (lesson.thumbnailUrl) {
+            <img [src]="lesson.thumbnailUrl" [alt]="lesson.title" class="slide-thumb-img" />
+          } @else {
+            ▶
           }
         </div>
-      </section>
+        <p class="slide-title">{{ lesson.title }}</p>
+      </button>
+    }
+  </div>
+
+</section>
 
       <aside class="lesson-sidebar">
         <h3 class="lesson-sidebar-Header">{{ lang.t().ecLessons }} ({{ lessons().length }})</h3>
         @for (lesson of lessons(); track lesson.id) {
-          <button class="lesson-item" [class.lesson-item-active]="lesson.id === selectedLessonId()" (click)="selectLesson(lesson.id)" [attr.title]="lesson.title" type="button">
-            <span class="lesson-order">{{ lesson.orderIndex }}</span>
-            <span class="lesson-content">
-              <span class="lesson-head-row">
-                <strong class="lesson-title">{{ lesson.title }}</strong>
-                <small class="lesson-duration">{{ formatDuration(lesson.durationMinutes) }}</small>
-              </span>
-              <span class="lesson-desc">{{ lesson.description || 'No description available' }}</span>
+        <button class="lesson-item" [class.lesson-item-active]="lesson.id === selectedLessonId()"
+          (click)="selectLesson(lesson.id)" [attr.title]="lesson.title" type="button">
+          <span class="lesson-order">{{ lesson.orderIndex }}</span>
+          <span class="lesson-content">
+            <span class="lesson-head-row">
+              <strong class="lesson-title">{{ lesson.title }}</strong>
+              <small class="lesson-duration">{{ formatDuration(lesson.durationMinutes) }}</small>
             </span>
-          </button>
+            <span class="lesson-desc">{{ lesson.description || 'No description available' }}</span>
+          </span>
+        </button>
         }
       </aside>
     </div>

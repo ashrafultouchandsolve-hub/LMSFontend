@@ -102,34 +102,27 @@ h1 { font-size: clamp(2.6rem, 4.5vw, 4rem); font-weight: 800; line-height: 1.08;
 /* ─── HERO VISUAL ────────────────────────────────────────────── */
 .hero-visual {
   position: relative;
-  display: flex; align-items: flex-end; justify-content: center;
-  min-height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  overflow: visible;
 }
 
-/* Purple blob */
+/* Circle সরিয়ে দাও — image এর ভেতরেই circle আছে */
 .hero-blob {
-  position: absolute;
-  width: 360px; height: 360px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  z-index: 0;
+  display: none;
 }
 
-/* Real student photo */
+/* Image পুরোটা দেখাবে */
 .hero-student-img {
   position: relative;
   z-index: 1;
-  width: 320px;
-  height: 420px;
-  object-fit: cover;
-  object-position: top center;
-  /* cut out white background via multiply — works on white bg images */
-  mix-blend-mode: multiply;
-  /* bottom-aligned so feet sit on the blob */
+  width: 460px;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: normal;
   display: block;
-  margin-bottom: 0;
 }
 
 /* Floating cards */
@@ -147,13 +140,13 @@ h1 { font-size: clamp(2.6rem, 4.5vw, 4rem); font-weight: 800; line-height: 1.08;
 /* 175K card — top LEFT of visual */
 .hero-float-card--top {
   top: 20px;
-  left: -10px;
+  left: 160px;
 }
 
 /* Chart card — bottom LEFT of visual */
 .hero-float-card--bottom {
   bottom: 30px;
-  left: -10px;
+  left: 160px;
   flex-direction: column;
   align-items: flex-start;
   padding: 14px 18px;

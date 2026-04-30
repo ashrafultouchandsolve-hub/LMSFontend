@@ -1,17 +1,23 @@
 <main class="courses-page">
+		<nav class="top-navbar">
+  <a class="brand" routerLink="/homepage">
+    <img src="/touch-solve-logo.jpg" alt="Touch & Solve" class="brand-logo" />
+  </a>
+  <div class="topbar-nav">
+    <a routerLink="/homepage">Home</a>
+    <a routerLink="/courses">Courses</a>
+  </div>
+  <div class="topbar-actions">
+    <button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+      <span>🌐</span>
+      <span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+    </button>
+    <a href="/homepage" class="nav-button nav-button-ghost">{{ lang.t().coursesBackHome }}</a>
+  </div>
+</nav>
 	<header class="courses-header">
-		<div>
-			<p class="courses-eyebrow">{{ lang.t().sectionPrograms }}</p>
-			<h1>{{ lang.t().coursesAllTitle }}</h1>
-			<p class="courses-subtitle">{{ lang.t().coursesSearchHint }}</p>
-		</div>
-		<div style="display:flex;gap:10px;align-items:center;">
-			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
-				<span>🌐</span>
-				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
-			</button>
-			<a href="/homepage" class="back-home-link">{{ lang.t().coursesBackHome }}</a>
-		</div>
+	
+		
 	</header>
 
 	<section class="courses-search" aria-label="Search courses">
@@ -45,7 +51,7 @@
 	} @else {
 		<section class="courses-grid" aria-label="All courses list">
 			@for (course of filteredCourses(); track course.id; let i = $index) {
-				<article [class]="'course-card ' + getCardToneClass(i)">
+				<article class="course-card" [style]="'--card-color:' + getCardColor(i)">
 					<div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
 						<img class="track-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
 					</div>

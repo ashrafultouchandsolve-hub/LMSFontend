@@ -14,6 +14,8 @@ import { MyCourses } from './user/my-courses/my-courses';
 import { Assignment } from './user/assignment/assignment';
 import { MyClasses } from './user/my-classes/my-classes';
 import { Certificates } from './user/certificates/certificates';
+import { QuizEditorComponent } from './base/quiz-editor/quiz-editor';
+import { QuizAttemptComponent } from './base/quiz-attempt/quiz-attempt';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'homepage', pathMatch: 'full'},
@@ -35,5 +37,7 @@ export const routes: Routes = [
         {path:'assignments', component:Assignment, canActivate: [authGuard]},
         {path:'myClasses', component:MyClasses, canActivate: [authGuard]},
         {path:'certificates',component:Certificates, canActivate: [authGuard]},
+        {path:'quiz-editor/:lessonId',component:QuizEditorComponent, canActivate: [authGuard, teacherGuard]},
+        { path: 'quiz/:lessonId', component: QuizAttemptComponent,canActivate: [authGuard] },
         {path: '**', redirectTo: 'homepage'},
 ];

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../Service/auth.service';
@@ -12,6 +12,7 @@ import {
   SaveCoursePayload,
   SaveLessonPayload,
 } from '../../Service/learning-api.service';
+import { CommonModule } from '@angular/common';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
@@ -48,7 +49,7 @@ type Course = {
 
 @Component({
   selector: 'app-teacher',
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './teacher.html',
   styleUrl: './teacher.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

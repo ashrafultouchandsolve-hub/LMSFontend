@@ -1,4 +1,19 @@
+<div class="teacher-root">
+<nav class="top-navbar top-navbar--teacher">
+  <a class="brand" routerLink="/homepage">
+    <img src="/touch-solve-logo.jpg" alt="Touch & Solve" class="brand-logo" />
+  </a>
+  <div class="topbar-nav">
+    <a routerLink="/homepage">Home</a>
+    <a routerLink="/courses">Courses</a>
+  </div>
+  <div class="topbar-actions">
+    <button type="button" class="nav-button nav-button-ghost" routerLink="/home-page">← Back to Site</button>
+  </div>
+</nav>
 <main class="teacher-page">
+  <!-- NAVBAR -->
+
   <aside class="sidebar" aria-label="Teacher dashboard navigation">
     <div class="sidebar-head">
       <h2>⚙ Admin Panel</h2>
@@ -108,6 +123,7 @@
           <p>Add or edit lesson videos and resources from this panel.</p>
         </div>
         <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ Add Lesson</button>
+        
       </header>
 
       <section class="panel lesson-list" aria-label="Lesson list">
@@ -144,6 +160,8 @@
               }
               <button type="button" class="btn btn-ghost" (click)="openEditLessonModal(lesson.id)">Edit</button>
               <button type="button" class="btn btn-danger" (click)="deleteLesson(lesson.id)">Delete</button>
+
+                 <a [routerLink]="['/quiz-editor', lesson.id]" [queryParams]="{ title: lesson.title }" class="btn btn-quiz">Add Quiz</a>
             </div>
           </article>
         }
@@ -317,3 +335,4 @@
     </div>
   }
 </main>
+</div>

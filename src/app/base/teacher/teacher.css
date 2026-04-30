@@ -1,9 +1,70 @@
 .teacher-page {
+  flex: 1;
+  padding-top: 0;
   min-height: 100vh;
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   background: #eef0f6;
   color: #171b2f;
+}
+/* ─── TOP NAVBAR ─────────────────────────────────── */
+.top-navbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  margin-bottom: 24px;
+  border-radius: 30px;
+  border: 1px solid rgba(17,24,39,0.09);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+}
+.btn-quiz {
+  background: white;
+  color: rgb(137, 27, 226);
+  border: 1px solid rgb(137, 27, 226) !important;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.btn-quiz:hover {
+  background: rgb(137, 27, 226);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(137, 27, 226, 0.30);
+}
+.top-navbar .brand { display: inline-flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+.top-navbar .brand-logo { height: 38px; width: auto; max-width: 160px; object-fit: contain; }
+.top-navbar .topbar-nav { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.top-navbar .topbar-nav a { padding: 7px 14px; border-radius: 999px; text-decoration: none; font-size: 0.87rem; font-weight: 500; color: rgba(17,24,39,0.60); transition: background 0.18s, color 0.18s; }
+.top-navbar .topbar-nav a:hover { background: #eff6ff; color: #2563eb; }
+.top-navbar .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.top-navbar .nav-button { display: inline-flex; align-items: center; min-height: 36px; padding: 0 16px; border-radius: 999px; font-size: 0.87rem; font-weight: 600; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform 0.18s, background 0.18s; }
+.top-navbar .nav-button-ghost { border-color: rgba(17,24,39,0.09); color: rgba(17,24,39,0.60); background: transparent; }
+.top-navbar .nav-button-ghost:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+/* Teacher page এ navbar full width */
+.top-navbar--teacher {
+  border-radius: 0;
+  margin-bottom: 0;
+  top: 0;
+  width: 100%;
+}
+.teacher-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .sidebar {

@@ -13,7 +13,9 @@ type LessonView = {
   orderIndex: number;
   durationMinutes: number;
   videoUrl: string;
-  thumbnailUrl: string;  // ← এটা যোগ করো
+  thumbnailUrl: string;
+  hasQuiz:boolean;
+ QuizAttempted: boolean; 
 };
 
 type CourseMetaView = {
@@ -78,53 +80,86 @@ readonly lang = inject(LanguageService);
     return `${hours} hr ${minutes} min`;
   }
 
-  private async loadLessons(): Promise<void> {
-    if (!this.authService.isLoggedIn()) {
-      this.errorMessage.set('Please login first to view enrolled course lessons.');
-      this.isLoading.set(false);
-      return;
-    }
-
-    const id = this.route?.snapshot.paramMap.get('id') ?? this.route?.snapshot.queryParamMap.get('id') ?? '';
-
-    if (!id) {
-      this.errorMessage.set('Course ID পাওয়া যায়নি। আবার চেষ্টা করুন।');
-      this.isLoading.set(false);
-      return;
-    }
-
-    this.courseId.set(id);
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    try {
-      const isEnrolled = await firstValueFrom(this.learningApi.checkMyEnrollment(id));
-      if (!isEnrolled) {
-        this.errorMessage.set('You are not enrolled in this course yet.');
-        this.lessons.set([]);
-        return;
-      }
-
-      this.courseMeta.set(await this.loadCourseMeta(id));
-
-      const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));
- const anyRes = response as any;
-const rawLessons = Array.isArray(anyRes?.data) ? anyRes.data
-  : Array.isArray(anyRes?.Data) ? anyRes.Data
-  : [];
-
-      const orderedLessons = [...rawLessons].sort((a, b) => a.orderIndex - b.orderIndex);
-      const mappedLessons = orderedLessons.map((lesson) => this.mapLessonForView(lesson));
-
-      this.lessons.set(mappedLessons);
-      this.selectedLessonId.set(mappedLessons[0]?.id ?? '');
-    } catch {
-      this.errorMessage.set('Lessons লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।');
-      this.lessons.set([]);
-    } finally {
-      this.isLoading.set(false);
-    }
+private async loadLessons(): Promise<void> {
+  if (!this.authService.isLoggedIn()) {
+    this.errorMessage.set('Please login first.');
+    this.isLoading.set(false);
+    return;
   }
+
+  const id = this.route?.snapshot.paramMap.get('id') ??
+    this.route?.snapshot.queryParamMap.get('id') ?? '';
+
+  if (!id) {
+    this.errorMessage.set('Course ID পাওয়া যায়নি।');
+    this.isLoading.set(false);
+    return;
+  }
+
+  this.courseId.set(id);
+  this.isLoading.set(true);
+  this.errorMessage.set('');
+
+  try {
+    const isEnrolled = await firstValueFrom(this.learningApi.checkMyEnrollment(id));
+    if (!isEnrolled) {
+      this.errorMessage.set('You are not enrolled in this course yet.');
+      this.lessons.set([]);
+      return;
+    }
+
+    this.courseMeta.set(await this.loadCourseMeta(id));
+
+    const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));
+    const anyRes = response as any;
+    const rawLessons = Array.isArray(anyRes?.data) ? anyRes.data
+      : Array.isArray(anyRes?.Data) ? anyRes.Data : [];
+
+    const orderedLessons = [...rawLessons].sort((a, b) => a.orderIndex - b.orderIndex);
+    const mappedLessons = orderedLessons.map((lesson) => this.mapLessonForView(lesson));
+
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+
+    // প্রতিটি lesson এর quiz আছে কিনা এবং attempt হয়েছে কিনা check করো
+    const lessonsWithQuizInfo = await Promise.all(
+      mappedLessons.map(async (lesson) => {
+        try {
+          // quiz count check
+          const quizRes = await firstValueFrom(
+            this.learningApi.getQuizzesByLesson(lesson.id)
+          );
+          const quizData = (quizRes as any)?.Data ?? (quizRes as any)?.data ?? [];
+          const hasQuiz = Array.isArray(quizData) && quizData.length > 0;
+
+          // attempt check — quiz থাকলেই check করো
+          let quizAttempted = false;
+          if (hasQuiz && userId) {
+            const attemptRes = await firstValueFrom(
+              this.learningApi.hasAttemptedQuiz(lesson.id, userId)
+            );
+            quizAttempted = (attemptRes as any)?.Data ?? false;
+          }
+
+          return { ...lesson, hasQuiz, QuizAttempted: quizAttempted };
+        } catch {
+          return { ...lesson, hasQuiz: false, QuizAttempted: false };
+        }
+      })
+    );
+
+    this.lessons.set(lessonsWithQuizInfo);
+    this.selectedLessonId.set(lessonsWithQuizInfo[0]?.id ?? '');
+
+  } catch {
+    this.errorMessage.set('Lessons লোড করা যায়নি।');
+    this.lessons.set([]);
+  } finally {
+    this.isLoading.set(false);
+  }
+}
+
+
+
 
   private async loadCourseMeta(id: string): Promise<CourseMetaView | null> {
     try {
@@ -152,7 +187,7 @@ private mapLessonForView(lesson: any): LessonView {
   const videoPath = lesson.videoPath ?? lesson.VideoPath ?? null;
   const videoUrl = lesson.videoUrl ?? lesson.VideoUrl ?? null;
   const thumbnailPath = lesson.thumbnailPath ?? lesson.ThumbnailPath ?? null;
-
+  
   const hasUploadedVideo = typeof videoPath === 'string' && videoPath.length > 0;
   const hasExternalVideo = typeof videoUrl === 'string' &&
     videoUrl.length > 0 &&
@@ -168,7 +203,10 @@ private mapLessonForView(lesson: any): LessonView {
       ? this.learningApi.buildDownloadUrl(videoPath)
       : (hasExternalVideo ? videoUrl : ''),
     thumbnailUrl: this.learningApi.buildDownloadUrl(thumbnailPath),
+   hasQuiz: false,
+  QuizAttempted: false
   };
+  
 }
 
   isYoutube(url: string): boolean {

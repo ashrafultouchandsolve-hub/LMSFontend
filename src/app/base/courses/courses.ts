@@ -55,6 +55,11 @@ readonly lang = inject(LanguageService);
       return searchableText.includes(term);
     });
   });
+
+  protected getCardColor(index: number): string {
+  const colors = ['#ec4899','#7c3aed','#06b6d4','#f97316','#10b981','#3b82f6','#f59e0b','#8b5cf6'];
+  return colors[index % colors.length];
+}
   protected readonly hasFilteredCourses = computed(() => this.filteredCourses().length > 0);
 
   constructor() {
