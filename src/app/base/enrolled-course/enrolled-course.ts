@@ -59,6 +59,8 @@ readonly lang = inject(LanguageService);
 
   protected selectLesson(lessonId: string): void {
     this.selectedLessonId.set(lessonId);
+    // Store the lesson ID for profile page to use
+    localStorage.setItem('lastViewedLessonId', lessonId);
   }
 
   protected formatDuration(totalMinutes: number): string {

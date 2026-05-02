@@ -12,55 +12,100 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 20px;
-  margin-bottom: 24px;
-  border-radius: 30px;
-  border: 1px solid rgba(17,24,39,0.09);
-  background: rgba(255,255,255,0.92);
+  padding: 10px 18px;
+  margin: 12px;
+  margin-bottom: 0;
+  border-radius: 32px;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  background: white;
   backdrop-filter: blur(20px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 2px 24px rgba(37, 99, 235, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
   position: sticky;
   top: 12px;
   z-index: 50;
 }
-.btn-quiz {
-  background: white;
-  color: rgb(137, 27, 226);
-  border: 1px solid rgb(137, 27, 226) !important;
-  padding: 7px 14px;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-decoration: none;
+
+/* Teacher page navbar - full width with margin */
+.top-navbar--teacher {
+  margin-left: 12px;
+  margin-right: 12px;
+  width: calc(100% - 24px);
+}
+
+.top-navbar .brand {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  transition: transform 0.18s, box-shadow 0.18s;
+  gap: 11px;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
-.btn-quiz:hover {
-  background: rgb(137, 27, 226);
-  color: white;
+.top-navbar .brand-logo {
+  height: 40px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.top-navbar .topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.top-navbar .topbar-nav a {
+  padding: 7px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(17, 24, 39, 0.65);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.top-navbar .topbar-nav a:hover {
+  background: rgba(37, 99, 235, 0.07);
+  color: #2563eb;
+}
+
+.top-navbar .topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.top-navbar .nav-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 0.87rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.18s, background 0.18s, border-color 0.18s;
+}
+
+.top-navbar .nav-button-ghost {
+  border-color: rgba(17, 24, 39, 0.1);
+  color: rgba(17, 24, 39, 0.65);
+  background: transparent;
+}
+
+.top-navbar .nav-button-ghost:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.07);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(137, 27, 226, 0.30);
 }
-.top-navbar .brand { display: inline-flex; align-items: center; text-decoration: none; flex-shrink: 0; }
-.top-navbar .brand-logo { height: 38px; width: auto; max-width: 160px; object-fit: contain; }
-.top-navbar .topbar-nav { display: flex; align-items: center; gap: 2px; margin-left: auto; }
-.top-navbar .topbar-nav a { padding: 7px 14px; border-radius: 999px; text-decoration: none; font-size: 0.87rem; font-weight: 500; color: rgba(17,24,39,0.60); transition: background 0.18s, color 0.18s; }
-.top-navbar .topbar-nav a:hover { background: #eff6ff; color: #2563eb; }
-.top-navbar .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.top-navbar .nav-button { display: inline-flex; align-items: center; min-height: 36px; padding: 0 16px; border-radius: 999px; font-size: 0.87rem; font-weight: 600; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform 0.18s, background 0.18s; }
-.top-navbar .nav-button-ghost { border-color: rgba(17,24,39,0.09); color: rgba(17,24,39,0.60); background: transparent; }
-.top-navbar .nav-button-ghost:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
 
-/* Teacher page এ navbar full width */
-.top-navbar--teacher {
-  border-radius: 0;
-  margin-bottom: 0;
-  top: 0;
-  width: 100%;
-}
 .teacher-root {
   display: flex;
   flex-direction: column;

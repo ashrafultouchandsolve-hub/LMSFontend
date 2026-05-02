@@ -146,6 +146,18 @@ submitQuiz(lessonId: string, dto: any): Observable<any> {
   );
 }
 
+getQuizProgress(lessonId: string, userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/quiz/progress/${lessonId}/${userId}`)
+  );
+}
+
+getOverallQuizProgress(userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/quiz/overall-progress/${userId}`)
+  );
+}
+
 
 
   getTeacherCourses(): Observable<ApiResponse<CourseDto[]>> {

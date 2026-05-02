@@ -29,12 +29,17 @@
 
     <!-- ✅ Quiz button — lesson details এর ঠিক নিচে -->
 @if (selectedLesson()?.hasQuiz) {
-  <a [routerLink]="['/quiz', selectedLesson()?.id]"
-     [queryParams]="{ title: selectedLesson()?.title }"
-     class="start-quiz-btn"
-     [class.disabled]="selectedLesson()?.QuizAttempted">
-    {{ selectedLesson()?.QuizAttempted ? '🔒 Quiz Completed' : '📝 Start Quiz' }}
-  </a>
+  @if (selectedLesson()?.QuizAttempted) {
+    <button type="button" class="start-quiz-btn disabled" disabled>
+      🔒 Quiz Completed
+    </button>
+  } @else {
+    <a [routerLink]="['/quiz', selectedLesson()?.id]"
+       [queryParams]="{ title: selectedLesson()?.title, courseId: courseId() }"
+       class="start-quiz-btn">
+      📝 Start Quiz
+    </a>
+  }
 }
   } @else {
     <div class="video-fallback">

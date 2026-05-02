@@ -48,7 +48,7 @@
 			<div class="panel-header">
 				<div>
 					<p class="panel-label">{{ lang.t().profileDashboard }}</p>
-					<h2>{{ lang.t().profileWeekly }}</h2>
+					<h2>Performance</h2>
 				</div>
 				<span class="live-badge">
 					<span class="live-dot" aria-hidden="true"></span>
@@ -56,42 +56,42 @@
 				</span>
 			</div>
 			<div class="ring-wrap">
-				<div class="progress-ring" role="img" aria-label="87% weekly completion">
+				<div class="progress-ring" [attr.role]="'img'" [attr.aria-label]="percentageScore() + '% quiz completion'">
 					<svg class="ring-svg" viewBox="0 0 120 120">
 						<circle cx="60" cy="60" r="50" class="ring-track" />
-						<circle cx="60" cy="60" r="50" class="ring-fill" />
+						<circle cx="60" cy="60" r="50" class="ring-fill" [style.--percentage]="percentageScore() + '%'" />
 					</svg>
 					<div class="ring-core">
-						<strong>87%</strong>
+						<strong>{{ percentageScore() | number: '1.0-0' }}%</strong>
 						<span>{{ lang.t().profileCompletion }}</span>
 					</div>
 				</div>
 				<div class="ring-legend">
 					<div class="legend-item">
 						<span class="legend-dot legend-done" aria-hidden="true"></span>
-						<span>{{ lang.t().profileCompleted }}</span>
+						<span>Correct ({{ correctAnswers() }})</span>
 					</div>
 					<div class="legend-item">
 						<span class="legend-dot legend-remain" aria-hidden="true"></span>
-						<span>{{ lang.t().profileRemaining }}</span>
+						<span>Wrong ({{ wrongAnswers() }})</span>
 					</div>
 				</div>
 			</div>
 			<div class="dashboard-list">
 				<div class="dashboard-row">
-					<span class="row-icon" aria-hidden="true">📐</span>
-					<span>{{ lang.t().profileAssessments }}</span>
-					<strong class="row-value row-ok">{{ lang.t().profileCompleted }}</strong>
+					<span class="row-icon" aria-hidden="true">✅</span>
+					<span>Correct Answers</span>
+					<strong class="row-value row-ok">{{ correctAnswers() }}</strong>
 				</div>
 				<div class="dashboard-row">
-					<span class="row-icon" aria-hidden="true">⏱</span>
-					<span>{{ lang.t().profileCodingTime }}</span>
-					<strong class="row-value">6.8 hrs</strong>
+					<span class="row-icon" aria-hidden="true">❌</span>
+					<span>Wrong Answers</span>
+					<strong class="row-value row-err">{{ wrongAnswers() }}</strong>
 				</div>
 				<div class="dashboard-row">
-					<span class="row-icon" aria-hidden="true">🔥</span>
-					<span>{{ lang.t().profileStreak }}</span>
-					<strong class="row-value row-streak">21 {{ lang.t().profileDays }}</strong>
+					<span class="row-icon" aria-hidden="true">📊</span>
+					<span>Score</span>
+					<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
 				</div>
 			</div>
 		</aside>

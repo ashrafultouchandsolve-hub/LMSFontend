@@ -9,46 +9,51 @@
     <div class="qa-done">
       <div class="qa-done-icon">🔒</div>
       <h2>Quiz ইতিমধ্যে সম্পন্ন হয়েছে</h2>
-      <p>এই lesson এর quiz আপনি আগেই দিয়েছেন।</p>
+      <p>এই lesson এর quiz আপনি আগেই দিয়েছেন। আবার attempt করা যাবে না।</p>
       <button type="button" class="qa-back-btn" (click)="goBack()">← Back to Lesson</button>
     </div>
   }
 
-@else if (isSubmitted()) {
-  <div class="qa-result">
-    @if (result()) {
-      <div class="qa-score-circle">
-        <strong>{{ result().score }}</strong>
-        <span>/ {{ result().totalQuestions }}</span>
-      </div>
-      <h2>Quiz শেষ!</h2>
-      <p class="qa-score-label">
-        {{ result().score }} টি সঠিক, {{ result().totalQuestions - result().score }} টি ভুল
-      </p>
-      <div class="qa-results-list">
-        @for (r of result().results; track r.quizId; let i = $index) {
-          <div class="qa-result-card" [class.correct]="r.isCorrect" [class.wrong]="!r.isCorrect">
-            <div class="qa-result-header">
-              <span class="qa-result-num">Q{{ i + 1 }}</span>
-              <span class="qa-result-icon">{{ r.isCorrect ? '✓' : '✗' }}</span>
-            </div>
-            <p class="qa-result-q">{{ r.question }}</p>
-            <div class="qa-result-ans">
-              <span>তোমার উত্তর: <strong>{{ r.selectedAnswer || 'দেওয়া হয়নি' }}</strong></span>
-              @if (!r.isCorrect) {
-                <span class="correct-ans">সঠিক উত্তর: <strong>{{ r.correctAnswer }}</strong></span>
-              }
-            </div>
+  @else if (isSubmitted()) {
+    <div class="qa-result">
+      @if (result()) {
+        @if (result().alreadyAttempted) {
+          <div class="qa-previous-attempt-banner">
+            <p>📋 আপনার স্কোর</p>
           </div>
         }
-      </div>
-    } @else {
-      <h2>Quiz জমা হয়েছে!</h2>
-    }
-    <!-- ← এটা সবসময় দেখাবে -->
-<button [routerLink]="['/enrolled-course', lessonId()]" class="qa-back-btn">← Back to Lesson</button>
-  </div>
-}
+        <div class="qa-score-circle">
+          <strong>{{ result().score }}</strong>
+          <span>/ {{ result().totalQuestions }}</span>
+        </div>
+        <h2>Quiz শেষ!</h2>
+        <p class="qa-score-label">
+          {{ result().score }} টি সঠিক, {{ result().totalQuestions - result().score }} টি ভুল
+        </p>
+        <div class="qa-results-list">
+          @for (r of result().results; track r.quizId; let i = $index) {
+            <div class="qa-result-card" [class.correct]="r.isCorrect" [class.wrong]="!r.isCorrect">
+              <div class="qa-result-header">
+                <span class="qa-result-num">Q{{ i + 1 }}</span>
+                <span class="qa-result-icon">{{ r.isCorrect ? '✓' : '✗' }}</span>
+              </div>
+              <p class="qa-result-q">{{ r.question }}</p>
+              <div class="qa-result-ans">
+                <span>তোমার উত্তর: <strong>{{ r.selectedAnswer || 'দেওয়া হয়নি' }}</strong></span>
+                @if (!r.isCorrect) {
+                  <span class="correct-ans">সঠিক উত্তর: <strong>{{ r.correctAnswer }}</strong></span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <h2>Quiz জমা হয়েছে!</h2>
+      }
+      <!-- Back button -->
+      <button type="button" (click)="goBack()" class="qa-back-btn">← Back to Lesson</button>
+    </div>
+  }
 
   @else if (quizzes().length === 0) {
     <div class="qa-done">
@@ -118,9 +123,9 @@
     <button
       type="button"
       class="qa-submit-btn"
-      [disabled]="isSubmitted() || timeLeft() === 0"
+      [disabled]="isSubmitted() || timeLeft() === 0 || alreadyAttempted()"
       (click)="submitQuiz()">
-      {{ isSubmitted() ? '✓ Submitted' : '📤 Submit Quiz' }}
+      {{ isSubmitted() ? '✓ Submitted' : alreadyAttempted() ? '🔒 Already Completed' : '📤 Submit Quiz' }}
     </button>
   }
 

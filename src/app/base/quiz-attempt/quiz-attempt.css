@@ -57,6 +57,9 @@
 .qa-result h2 { text-align: center; font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
 .qa-score-label { text-align: center; color: rgba(17,24,39,0.55); margin-bottom: 28px; }
 
+.qa-previous-attempt-banner { background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 14px 16px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.20); }
+.qa-previous-attempt-banner p { color: white; font-weight: 700; margin: 0; font-size: 0.95rem; }
+
 .qa-results-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
 .qa-result-card { padding: 16px 18px; border-radius: 14px; border: 1.5px solid rgba(17,24,39,0.10); background: white; }
 .qa-result-card.correct { border-color: #10b981; background: #f0fdf4; }
