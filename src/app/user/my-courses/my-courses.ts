@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
+import { LanguageService } from '../../Service/language.service';
 
 type EnrolledCourseView = {
   id: string;
@@ -26,6 +27,7 @@ type EnrolledCourseView = {
 export class MyCourses {
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
+  protected readonly lang = inject(LanguageService);
 
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');

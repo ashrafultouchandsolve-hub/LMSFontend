@@ -371,4 +371,59 @@ getEnrollmentCount(courseId: string): Observable<{ courseId: string; totalEnroll
     const params = new HttpParams().set('path', path);
     return `${this.activeBaseUrl}/files/stream?${params.toString()}`;
   }
+
+  saveVideoProgress(lessonId: string, dto: { userId: string; watchedSeconds: number; totalSeconds: number }): Observable<any> {
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/videoprogress/save/${lessonId}`, dto)
+  );
+}
+
+getVideoProgress(lessonId: string, userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/videoprogress/get/${lessonId}/${userId}`)
+  );
+}
+
+getVideoHistory(userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/videoprogress/history/${userId}`)
+  );
+}
+
+// ─── RATING ENDPOINTS ─────────────────────────────────
+addOrUpdateRating(courseId: string, userId: string, rating: number, feedback: string = ''): Observable<any> {
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/courserating/add`, {
+      courseId,
+      userId,
+      rating,
+      feedback
+    })
+  );
+}
+
+getRatingSummary(courseId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/courserating/summary/${courseId}`)
+  );
+}
+
+getMyRatings(userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/courserating/my-ratings/${userId}`)
+  );
+}
+
+getUserCourseRating(courseId: string, userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/courserating/${courseId}/${userId}`)
+  );
+}
+
+deleteRating(ratingId: string, userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.delete<any>(`${base}/courserating/${ratingId}/${userId}`)
+  );
+}
+
 }

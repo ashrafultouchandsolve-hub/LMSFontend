@@ -46,6 +46,16 @@ export class CourseDetails {
   protected readonly isLoggedIn = signal(false);
   protected readonly isEnrolled = signal(false);
   protected readonly isCheckingEnrollment = signal(false);
+  
+  // Rating signals
+  protected readonly averageRating = signal(0);
+  protected readonly totalRatings = signal(0);
+  protected readonly userRating = signal(0);
+  protected readonly userFeedback = signal('');
+  protected readonly isSubmittingRating = signal(false);
+  protected readonly showRatingForm = signal(false);
+  protected readonly ratingMessage = signal('');
+  
 readonly lang = inject(LanguageService);
   protected readonly shortDescriptionLimit = 280;
 
@@ -151,8 +161,12 @@ readonly lang = inject(LanguageService);
       this.course.set(this.mapCourseForView(matchedCourse));
       this.isImageBroken.set(false);
 
+      // Load ratings
+      await this.loadRatingSummary(courseId);
+
       if (this.isLoggedIn()) {
         await this.checkEnrollment(courseId);
+        await this.loadUserRating(courseId);
       }
     } catch {
       this.errorMessage.set('Course details লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।');
@@ -190,5 +204,92 @@ readonly lang = inject(LanguageService);
     } finally {
       this.isCheckingEnrollment.set(false);
     }
+  }
+
+  protected setRating(stars: number): void {
+    this.userRating.set(stars);
+  }
+
+  protected async loadRatingSummary(courseId: string): Promise<void> {
+    try {
+      const res = await firstValueFrom(this.learningApi.getRatingSummary(courseId));
+      const data = (res as any)?.data ?? (res as any)?.Data;
+      if (data) {
+        this.averageRating.set(parseFloat(data.averageRating) || 0);
+        this.totalRatings.set(data.totalRatings || 0);
+      }
+    } catch (error) {
+      console.error('Error loading rating summary:', error);
+    }
+  }
+
+  protected async loadUserRating(courseId: string): Promise<void> {
+    if (!this.isLoggedIn()) return;
+    
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    if (!userId) return;
+
+    try {
+      // Use my-ratings list to avoid 404 for courses that are not rated yet.
+      const res = await firstValueFrom(this.learningApi.getMyRatings(userId));
+      const list = ((res as any)?.data ?? (res as any)?.Data ?? []) as Array<any>;
+      const found = Array.isArray(list)
+        ? list.find((item) => item?.courseId === courseId)
+        : null;
+
+      if (found) {
+        this.userRating.set(found.rating ?? 0);
+        this.userFeedback.set(found.feedback || '');
+      } else {
+        this.userRating.set(0);
+        this.userFeedback.set('');
+      }
+    } catch {
+      // No rating yet, that's fine
+    }
+  }
+
+  protected async submitRating(courseId: string): Promise<void> {
+    if (!this.isEnrolled()) {
+      this.ratingMessage.set('You must be enrolled to rate this course.');
+      return;
+    }
+
+    if (this.userRating() === 0) {
+      this.ratingMessage.set('Please select at least 1 star.');
+      return;
+    }
+
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    if (!userId) {
+      this.ratingMessage.set('Please login to rate.');
+      return;
+    }
+
+    this.isSubmittingRating.set(true);
+    this.ratingMessage.set('');
+
+    try {
+      await firstValueFrom(
+        this.learningApi.addOrUpdateRating(
+          courseId,
+          userId,
+          this.userRating(),
+          this.userFeedback()
+        )
+      );
+      this.ratingMessage.set('✅ Your rating has been saved successfully!');
+      this.showRatingForm.set(false);
+      await this.loadRatingSummary(courseId);
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      this.ratingMessage.set('❌ An error occurred while saving your rating.');
+    } finally {
+      this.isSubmittingRating.set(false);
+    }
+  }
+
+  protected getStarArray(count: number = 5): number[] {
+    return Array.from({ length: count }, (_, i) => i + 1);
   }
 }

@@ -336,6 +336,24 @@ tr:last-child td {
   font-size: 0.76rem;
 }
 
+.rating-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff7e6;
+  border: 1px solid #f8d08a;
+  color: #9a6700;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.rating-pill-empty {
+  background: #f8fafc;
+  border-color: #d9e1ee;
+  color: #64748b;
+}
+
 .status {
   display: inline-flex;
   align-items: center;

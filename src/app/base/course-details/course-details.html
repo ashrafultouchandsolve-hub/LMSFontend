@@ -60,10 +60,75 @@
 				} @else {
 					<div class="course-image-placeholder" role="img" aria-label="No image available"><span>No Image</span></div>
 				}
+				
+				<!-- Rating Section -->
+				<div class="rating-section">
+					<div class="rating-summary">
+						<div class="rating-stars">
+							{{ averageRating().toFixed(1) }} ⭐
+						</div>
+							<p class="rating-count">({{ totalRatings() }} ratings)</p>
+					</div>
+				</div>
+
 				<div class="price-wrap">
 					<p class="current-price">{{ formatPrice(selectedCourse.price) }}</p>
 				</div>
-				<button type="button" class="coupon-button">{{ lang.t().cdCoupon }}</button>
+				
+				<!-- Rating Form Button -->
+				@if (isLoggedIn() && isEnrolled()) {
+					<button type="button" class="coupon-button" (click)="showRatingForm.set(!showRatingForm())">
+						{{ showRatingForm() ? '✕ Close' : '⭐ Rate Course' }}
+					</button>
+					
+					<!-- Rating Form -->
+					@if (showRatingForm()) {
+						<div class="rating-form">
+							<h4>What do you think about this course?</h4>
+							
+							<div class="stars-input">
+								@for (star of getStarArray(); track star) {
+									<button 
+										type="button" 
+										class="star-btn" 
+										[class.active]="star <= userRating()"
+										(click)="setRating(star)"
+										[attr.aria-label]="'Rate ' + star + ' stars'">
+										★
+									</button>
+								}
+							</div>
+
+							<textarea 
+								class="feedback-input"
+								placeholder="Share your feedback (optional)"
+								[value]="userFeedback()"
+								(input)="userFeedback.set($any($event.target).value)"
+								rows="3">
+							</textarea>
+
+							@if (ratingMessage()) {
+								<p class="rating-message">{{ ratingMessage() }}</p>
+							}
+
+							<button 
+								type="button" 
+								class="submit-btn"
+								(click)="submitRating(selectedCourse.id)"
+								[disabled]="isSubmittingRating()">
+								{{ isSubmittingRating() ? 'Saving...' : 'Submit Rating' }}
+							</button>
+						</div>
+					}
+				} @else {
+					<button type="button" class="coupon-button" disabled>
+						{{ !isLoggedIn() ? 'Login to Rate' : 'Enroll to Rate' }}
+					</button>
+				}
+				
+				@if (!isLoggedIn() && !isEnrolled()) {
+					<button type="button" class="coupon-button">{{ lang.t().cdCoupon }}</button>
+				}
 				@if (isLoggedIn()) {
 					@if (isCheckingEnrollment()) {
 						<button type="button" class="enroll-button enroll-button-muted" disabled>{{ lang.t().cdCheckingEnrollment }}</button>
@@ -75,6 +140,7 @@
 				} @else {
 					<a routerLink="/login" class="enroll-button enroll-link">{{ lang.t().cdLoginToEnroll }}</a>
 				}
+				<button type="button" class="wishlist-button">♡ Add to Wishlist</button>
 				<ul class="course-meta" aria-label="Course meta information">
 					<li><span>{{ lang.t().cdCategory }}</span><strong>{{ selectedCourse.category }}</strong></li>
 					<li><span>{{ lang.t().cdLevel }}</span><strong>{{ selectedCourse.level }}</strong></li>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
@@ -30,7 +30,7 @@ type CourseMetaView = {
   styleUrl: './enrolled-course.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EnrolledCourse {
+export class EnrolledCourse implements OnDestroy {
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
@@ -41,6 +41,7 @@ readonly lang = inject(LanguageService);
   protected readonly lessons = signal<LessonView[]>([]);
   protected readonly selectedLessonId = signal('');
   protected readonly courseMeta = signal<CourseMetaView | null>(null);
+  private saveProgressInterval: any;
 
   protected readonly selectedLesson = computed(() => {
     const currentSelectedId = this.selectedLessonId();
@@ -56,12 +57,15 @@ readonly lang = inject(LanguageService);
   constructor(private readonly sanitizer: DomSanitizer) {
     void this.loadLessons();
   }
+  ngOnDestroy() {
+  clearInterval(this.saveProgressInterval);
+}
 
-  protected selectLesson(lessonId: string): void {
-    this.selectedLessonId.set(lessonId);
-    // Store the lesson ID for profile page to use
-    localStorage.setItem('lastViewedLessonId', lessonId);
-  }
+protected selectLesson(lessonId: string): void {
+  // আগের interval clear করো
+  clearInterval(this.saveProgressInterval);
+  this.selectedLessonId.set(lessonId);
+}
 
   protected formatDuration(totalMinutes: number): string {
     if (totalMinutes <= 0) {
@@ -150,7 +154,14 @@ private async loadLessons(): Promise<void> {
     );
 
     this.lessons.set(lessonsWithQuizInfo);
-    this.selectedLessonId.set(lessonsWithQuizInfo[0]?.id ?? '');
+    
+    // Check if lessonId is in query params (coming from video history resume)
+    const resumeLessonId = this.route?.snapshot.queryParamMap.get('lessonId') ?? '';
+    if (resumeLessonId && lessonsWithQuizInfo.some(l => l.id === resumeLessonId)) {
+      this.selectedLessonId.set(resumeLessonId);
+    } else {
+      this.selectedLessonId.set(lessonsWithQuizInfo[0]?.id ?? '');
+    }
 
   } catch {
     this.errorMessage.set('Lessons লোড করা যায়নি।');
@@ -226,5 +237,78 @@ extractVideoId(url: string): string {
   const regExp = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/;
   const match = url.match(regExp);
   return match ? match[1] : '';
+}
+
+
+@ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
+
+// Video load হলে saved position থেকে শুরু
+async onVideoLoaded(event: Event, lessonId: string): Promise<void> {
+  const video = event.target as HTMLVideoElement;
+  const userId = this.authService.getCurrentUser()?.id ?? '';
+  if (!userId) return;
+
+  // আগের interval clear করো
+  clearInterval(this.saveProgressInterval);
+
+  try {
+    // Check if resumeAt query param exists (coming from video history)
+    const resumeAtParam = this.route?.snapshot.queryParamMap.get('resumeAt');
+    let resumeSeconds = resumeAtParam ? parseFloat(resumeAtParam) : null;
+
+    // If no query param, get from saved progress
+    if (resumeSeconds === null || isNaN(resumeSeconds)) {
+      const res = await firstValueFrom(
+        this.learningApi.getVideoProgress(lessonId, userId)
+      );
+      const progress = (res as any)?.Data;
+      resumeSeconds = progress?.watchedSeconds ?? null;
+    }
+
+    if (resumeSeconds !== null && resumeSeconds > 5) {
+      // seeked event দিয়ে নিশ্চিত করো
+      const trySetTime = () => {
+        if (video.readyState >= 2) {
+          video.currentTime = resumeSeconds;
+        } else {
+          video.addEventListener('canplay', () => {
+            video.currentTime = resumeSeconds;
+          }, { once: true });
+        }
+      };
+      trySetTime();
+    }
+  } catch { }
+
+  // প্রতি ৫ সেকেন্ডে save
+  this.saveProgressInterval = setInterval(async () => {
+    if (video.paused || video.ended) return;
+    const uid = this.authService.getCurrentUser()?.id ?? '';
+    if (!uid) return;
+    await firstValueFrom(
+      this.learningApi.saveVideoProgress(lessonId, {
+        userId: uid,
+        watchedSeconds: video.currentTime,
+        totalSeconds: video.duration || 0
+      })
+    ).catch(() => {});
+  }, 5000);
+}
+
+// Video শেষ হলে complete mark করো
+async onVideoEnded(event: Event, lessonId: string): Promise<void> {
+  const video = event.target as HTMLVideoElement;
+  const userId = this.authService.getCurrentUser()?.id ?? '';
+  if (!userId) return;
+
+  await firstValueFrom(
+    this.learningApi.saveVideoProgress(lessonId, {
+      userId,
+      watchedSeconds: video.duration,
+      totalSeconds: video.duration
+    })
+  ).catch(() => {});
+
+  clearInterval(this.saveProgressInterval);
 }
 }

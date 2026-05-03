@@ -69,12 +69,24 @@
 							<li><strong>{{ lang.t().courseDuration }}</strong> {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
 							<li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
 						</ul>
+						
+						<!-- Rating Display -->
+						@if (course.totalRatings && course.totalRatings > 0) {
+							<div class="course-rating">
+								<span class="rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+								<span class="rating-count">({{ course.totalRatings }} ratings)</span>
+							</div>
+						}
+						
 						<div class="course-footer">
-							@if (course.isEnrolled) {
-								<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
-							} @else {
-								<a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
-							}
+							<div class="course-footer-actions">
+								@if (course.isEnrolled) {
+									<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
+								} @else {
+									<a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
+								}
+								<button type="button" class="enrolled-button wishlist-button">♡ Wishlist</button>
+							</div>
 							<a [routerLink]="['/course-details', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
 						</div>
 					</div>

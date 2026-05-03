@@ -9,6 +9,9 @@
       <a href="#tracks">{{ lang.t().navTracks }}</a>
       <a routerLink="/courses">{{ lang.t().navCourses }}</a>
       <a href="#platform-identity">{{ lang.t().navVision }}</a>
+      @if(isLoggedIn()) {
+        <a routerLink="/history">Video History</a>
+      }
     </nav>
     <div class="topbar-actions">
       <button type="button" class="lang-toggle-btn" (click)="lang.toggle()"
@@ -162,6 +165,14 @@
               <li>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
               <li>💰 {{ formatPrice(course.price) }}</li>
             </ul>
+
+            <!-- Rating Display -->
+            @if (course.totalRatings && course.totalRatings > 0) {
+              <div class="cat-rating">
+                <span class="cat-rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+                <span class="cat-rating-count">({{ course.totalRatings }} ratings)</span>
+              </div>
+            }
 
             <div class="cat-footer">
               @if (course.isEnrolled) {

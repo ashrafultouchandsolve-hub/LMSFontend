@@ -18,7 +18,14 @@
       <iframe class="lesson-player" [src]="getSafeYoutubeUrl(selectedVideoUrl())" 
         frameborder="0" allowfullscreen></iframe>
     } @else {
-      <video class="lesson-player" [src]="selectedVideoUrl()" controls></video>
+<video
+  class="lesson-player"
+  [src]="selectedVideoUrl()"
+  [attr.data-lesson-id]="selectedLesson()!.id"
+  controls
+  (loadedmetadata)="onVideoLoaded($event, selectedLesson()!.id)"
+  (ended)="onVideoEnded($event, selectedLesson()!.id)">
+</video>
     }
 
     <!-- Lesson title & description -->

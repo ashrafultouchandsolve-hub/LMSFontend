@@ -67,6 +67,7 @@
                 <th>Price</th>
                 <th>Lessons</th>
                 <th>Students</th>
+                <th>Rating</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -90,6 +91,13 @@
                   <td>{{ course.lessonCount }}</td>
                   <td>{{ course.students }}</td>
                   <td>
+                    @if (course.totalRatings > 0) {
+                      <span class="rating-pill">⭐ {{ course.averageRating.toFixed(1) }} ({{ course.totalRatings }})</span>
+                    } @else {
+                      <span class="rating-pill rating-pill-empty">No ratings</span>
+                    }
+                  </td>
+                  <td>
                     <span class="status" [class.live]="course.published">
                       {{ course.published ? 'Published' : 'Draft' }}
                     </span>
@@ -104,7 +112,7 @@
 
               @if (!isLoadingCourses() && filteredCourses().length === 0) {
                 <tr>
-                  <td colspan="8" class="empty-state">No course found.</td>
+                  <td colspan="9" class="empty-state">No course found.</td>
                 </tr>
               }
             </tbody>

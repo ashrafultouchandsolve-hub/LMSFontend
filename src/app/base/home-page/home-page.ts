@@ -33,6 +33,8 @@ type HomeCourse = {
   price: number;
   thumbnailUrl: string;
   isEnrolled: boolean;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 @Component({
@@ -212,7 +214,9 @@ protected getCardColor(index: number): string {
         : (Array.isArray(responseWithAlternativeShape.Data) ? responseWithAlternativeShape.Data : []);
 
       const mappedCourses = rawCourses.map((course) => this.mapCourseForHome(course));
-      this.courses.set(await this.attachEnrollmentState(mappedCourses));
+      let coursesWithEnrollment = await this.attachEnrollmentState(mappedCourses);
+      coursesWithEnrollment = await this.attachRatings(coursesWithEnrollment);
+      this.courses.set(coursesWithEnrollment);
     } catch {
       this.courses.set([]);
     } finally {
@@ -266,6 +270,27 @@ protected getCardColor(index: number): string {
             isEnrolled: false,
           };
         }
+      }),
+    );
+  }
+
+  private async attachRatings(courses: HomeCourse[]): Promise<HomeCourse[]> {
+    return Promise.all(
+      courses.map(async (course) => {
+        try {
+          const response = await firstValueFrom(this.learningApi.getRatingSummary(course.id));
+          const data = (response as any)?.data ?? (response as any)?.Data;
+          if (data) {
+            return {
+              ...course,
+              averageRating: parseFloat(data.averageRating) || 0,
+              totalRatings: data.totalRatings || 0,
+            };
+          }
+        } catch {
+          // No ratings yet, that's fine
+        }
+        return course;
       }),
     );
   }

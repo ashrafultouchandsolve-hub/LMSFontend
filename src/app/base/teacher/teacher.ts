@@ -43,6 +43,8 @@ type Course = {
   thumbnailUrl: string;
   published: boolean;
   students: number;
+  averageRating: number;
+  totalRatings: number;
   lessonCount: number;
   lessons: Lesson[];
 };
@@ -554,14 +556,21 @@ private async loadTeacherCourses(): Promise<void> {
     // 🔥 NEW: fetch enrollment count for each course
     const mapped = await Promise.all(
       courseDtos.map(async (course) => {
-        const countRes = await firstValueFrom(
-          this.learningApi.getEnrollmentCount(course.id)
-        );
+        const [countRes, ratingSummaryRes] = await Promise.all([
+          firstValueFrom(this.learningApi.getEnrollmentCount(course.id)).catch(() => ({ totalEnrollment: 0 })),
+          firstValueFrom(this.learningApi.getRatingSummary(course.id)).catch(() => null),
+        ]);
+
+        const ratingData = (ratingSummaryRes as any)?.data ?? (ratingSummaryRes as any)?.Data ?? null;
+        const averageRating = ratingData ? Number(ratingData.averageRating || 0) : 0;
+        const totalRatings = ratingData ? Number(ratingData.totalRatings || 0) : 0;
 
         return this.mapCourse(
           course,
           existingLessonsByCourseId.get(course.id) ?? [],
-          countRes.totalEnrollment // 👈 pass count
+          countRes.totalEnrollment,
+          averageRating,
+          totalRatings,
         );
       })
     );
@@ -610,7 +619,9 @@ const lessons = lessonArray.map((lesson: any) => this.mapLesson(lesson));
 private mapCourse(
   dto: CourseDto,
   existingLessons: Lesson[] = [],
-  studentCount: number = 0   
+  studentCount: number = 0,
+  averageRating: number = 0,
+  totalRatings: number = 0,
 ): Course {
   return {
     id: dto.id,
@@ -623,7 +634,9 @@ private mapCourse(
     durationMinutes: dto.durationMinutes,
     thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
     published: dto.isPublished,
-    students: studentCount, // 👈 এখানে use করো
+    students: studentCount,
+    averageRating,
+    totalRatings,
     lessonCount: dto.lessonCount ?? existingLessons.length,
     lessons: existingLessons,
   };

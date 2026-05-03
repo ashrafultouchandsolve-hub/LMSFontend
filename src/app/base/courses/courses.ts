@@ -17,6 +17,8 @@ type CoursesViewItem = {
   price: number;
   isEnrolled: boolean;
   thumbnailUrl: string;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 @Component({
@@ -139,7 +141,9 @@ readonly lang = inject(LanguageService);
         : (Array.isArray(responseWithAlternativeShape.Data) ? responseWithAlternativeShape.Data : []);
 
       const mappedCourses = rawCourses.map((course) => this.mapCourseForView(course));
-      this.courses.set(await this.attachEnrollmentState(mappedCourses));
+      let coursesWithEnrollment = await this.attachEnrollmentState(mappedCourses);
+      coursesWithEnrollment = await this.attachRatings(coursesWithEnrollment);
+      this.courses.set(coursesWithEnrollment);
     } catch {
       this.courses.set([]);
     } finally {
@@ -182,6 +186,27 @@ readonly lang = inject(LanguageService);
             isEnrolled: false,
           };
         }
+      }),
+    );
+  }
+
+  private async attachRatings(courses: CoursesViewItem[]): Promise<CoursesViewItem[]> {
+    return Promise.all(
+      courses.map(async (course) => {
+        try {
+          const response = await firstValueFrom(this.learningApi.getRatingSummary(course.id));
+          const data = (response as any)?.data ?? (response as any)?.Data;
+          if (data) {
+            return {
+              ...course,
+              averageRating: parseFloat(data.averageRating) || 0,
+              totalRatings: data.totalRatings || 0,
+            };
+          }
+        } catch {
+          // No ratings yet, that's fine
+        }
+        return course;
       }),
     );
   }
