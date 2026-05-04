@@ -63,7 +63,7 @@ export interface Translations {
 
 const EN: Translations = {
   navTracks: 'Tracks', navCourses: 'Courses', navVision: 'Vision', navLogin: 'Login',
-  navGetStarted: 'Get started', navLogout: 'Logout', navProfile: 'Profile', navTeacher: 'Teacher', navHi: 'Hi,',
+  navGetStarted: 'Get started', navLogout: 'Logout', navProfile: 'Profile', navTeacher: 'Instructor', navHi: 'Hi,',
   heroEyebrow: 'Trusted learning ecosystem', heroH1Part1: 'Learn in-demand', heroH1Accent: 'skills', heroH1Part2: 'with structured paths.',
   heroLead: 'Grow from fundamentals to advanced implementation through mentor-guided modules and hands-on labs designed for real-world outcomes.',
   heroExplore: 'Explore programs', heroWhyUs: 'Why choose us',

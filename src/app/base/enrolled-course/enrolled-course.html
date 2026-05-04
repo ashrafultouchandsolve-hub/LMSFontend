@@ -100,5 +100,86 @@
         <p class="teacher-role">{{ lang.t().ecInstructor }}</p>
       </div>
     </section>
+
+    <section class="comments-card">
+      <div class="comments-header">
+        <div>
+          <p class="comments-label">Comment System</p>
+          <h2>Course Comments</h2>
+        </div>
+        <span class="comments-count">{{ comments().length }} comments</span>
+      </div>
+
+      @if (commentError()) {
+        <div class="comment-alert comment-alert-error">{{ commentError() }}</div>
+      }
+
+      @if (commentMessage()) {
+        <div class="comment-alert comment-alert-success">{{ commentMessage() }}</div>
+      }
+
+      <div class="comment-form">
+        @if (canComment()) {
+          <textarea
+            class="comment-input"
+            rows="3"
+            placeholder="Write a comment..."
+            [value]="commentText()"
+            (input)="commentText.set($any($event.target).value)"></textarea>
+          <button
+            type="button"
+            class="comment-submit-btn"
+            [disabled]="isSubmittingComment()"
+            (click)="submitComment()">
+            {{ isSubmittingComment() ? 'Posting...' : 'Post Comment' }}
+          </button>
+        } @else {
+          <div class="comment-login-note">
+            Please login to comment.
+          </div>
+        }
+      </div>
+
+      <div class="comments-list">
+        @if (isLoadingComments()) {
+          <div class="comments-empty">Loading comments...</div>
+        } @else if (comments().length === 0) {
+          <div class="comments-empty">No comments yet. Be the first to share your thoughts.</div>
+        } @else {
+          @for (comment of comments(); track comment.id) {
+            <article class="comment-item">
+              <div class="comment-top">
+                <div class="comment-meta">
+                  <strong>{{ comment.userName }}</strong>
+                  <span>{{ formatCommentDate(comment.createdAt) }}</span>
+                </div>
+                @if (isMyComment(comment)) {
+                  <div class="comment-actions">
+                    <button type="button" class="comment-link-btn" (click)="beginEditComment(comment)">Edit</button>
+                    <button type="button" class="comment-link-btn comment-link-danger" (click)="deleteComment(comment.id)">Delete</button>
+                  </div>
+                }
+              </div>
+
+              @if (editingCommentId() === comment.id) {
+                <textarea
+                  class="comment-input comment-edit-input"
+                  rows="3"
+                  [value]="editingCommentText()"
+                  (input)="editingCommentText.set($any($event.target).value)"></textarea>
+                <div class="comment-edit-actions">
+                  <button type="button" class="comment-submit-btn" (click)="saveComment(comment)" [disabled]="isSubmittingComment()">
+                    {{ isSubmittingComment() ? 'Saving...' : 'Save' }}
+                  </button>
+                  <button type="button" class="comment-cancel-btn" (click)="cancelEditComment()">Cancel</button>
+                </div>
+              } @else {
+                <p class="comment-content">{{ comment.content }}</p>
+              }
+            </article>
+          }
+        }
+      </div>
+    </section>
   </main>
 </section>

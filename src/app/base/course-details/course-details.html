@@ -1,9 +1,19 @@
 <main class="course-details-page">
-	<a routerLink="/courses" class="back-link">{{ lang.t().cdBack }}</a>
 
-		<button type="button" class="lang-toggle-btn" (click)="lang.toggle()" style="margin-left:auto;">
-						<span>🌐</span><span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
-					</button>
+	<nav class="top-navbar top-navbar--teacher">
+	  <a class="brand" routerLink="/homepage">
+		<img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+	  </a>
+	  <div class="topbar-nav">
+		<a routerLink="/homepage">Home</a>
+		<a routerLink="/courses">Courses</a>
+	  </div>
+	  <div class="topbar-actions">
+		<button type="button" class="nav-button nav-button-ghost" routerLink="/home-page">← Back to Site</button>
+	  </div>
+	</nav>
+
+	<a routerLink="/courses" class="back-link">{{ lang.t().cdBack }}</a>
 
 	@if (isLoading()) {
 		<section class="info-card loading-state" aria-live="polite">
@@ -140,7 +150,19 @@
 				} @else {
 					<a routerLink="/login" class="enroll-button enroll-link">{{ lang.t().cdLoginToEnroll }}</a>
 				}
-				<button type="button" class="wishlist-button">♡ Add to Wishlist</button>
+				<button
+					type="button"
+					class="wishlist-button"
+					[class.wishlisted]="isWishlisted()"
+					[class.is-toggling]="isTogglingWishlist()"
+					[disabled]="isTogglingWishlist()"
+					(click)="toggleWishlist()">
+					@if (isWishlisted()) {
+						{{ isTogglingWishlist() ? 'Updating...' : '✓ In Wishlist' }}
+					} @else {
+						{{ isTogglingWishlist() ? 'Adding...' : '♡ Add to Wishlist' }}
+					}
+				</button>
 				<ul class="course-meta" aria-label="Course meta information">
 					<li><span>{{ lang.t().cdCategory }}</span><strong>{{ selectedCourse.category }}</strong></li>
 					<li><span>{{ lang.t().cdLevel }}</span><strong>{{ selectedCourse.level }}</strong></li>

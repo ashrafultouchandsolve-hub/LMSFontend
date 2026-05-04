@@ -1,7 +1,7 @@
 <main class="profile-page">
 	<header class="topbar card-surface reveal-up">
 		<a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-			<img src="/touch-solve-logo.jpg" alt="Touch & Solve Learning Platform" class="brand-logo" />
+			<img src="/Logo2.png" alt="Touch & Solve Learning Platform" class="brand-logo" />
 		</a>
 		<nav class="topbar-nav" aria-label="Primary navigation">
 			<a href="#tracks">{{ lang.t().navTracks }}</a>
@@ -106,5 +106,75 @@
 				<button type="button" routerLink="/certificates" class="future-btn">{{ lang.t().profileCertificates }}</button>
 			</div>
 		</section>
+
+		<!-- Tab buttons -->
+<div class="profile-tabs">
+  <button type="button"
+    class="profile-tab"
+    [class.active]="activeTab() === 'profile'"
+    (click)="switchTab('profile')">
+    👤 Profile
+  </button>
+  <button type="button"
+    class="profile-tab"
+    [class.active]="activeTab() === 'wishlist'"
+    (click)="switchTab('wishlist')">
+    ♥ Wishlist
+    @if (wishlist().length > 0) {
+      <span class="tab-badge">{{ wishlist().length }}</span>
+    }
+  </button>
+</div>
+
+<!-- Profile content -->
+@if (activeTab() === 'profile') {
+  <!-- আগের profile content এখানে -->
+}
+
+<!-- Wishlist content -->
+@if (activeTab() === 'wishlist') {
+  <section class="wishlist-section">
+
+    @if (isLoadingWishlist()) {
+      <div class="wishlist-loading">Loading...</div>
+    } @else if (wishlist().length === 0) {
+      <div class="wishlist-empty">
+        <div class="wishlist-empty-icon">💔</div>
+        <h3>Wishlist খালি</h3>
+        <p>কোনো course wishlist এ নেই।</p>
+        <a routerLink="/courses" class="browse-btn">Browse Courses</a>
+      </div>
+    } @else {
+      <div class="wishlist-grid">
+        @for (item of wishlist(); track item.courseId) {
+          <div class="wishlist-card">
+            <div class="wishlist-thumb">
+              <img [src]="getImageUrl(item.thumbnailPath)"
+                [alt]="item.title"
+                (error)="$any($event.target).style.display='none'" />
+            </div>
+            <div class="wishlist-card-body">
+              <span class="wishlist-level">{{ item.level }}</span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.instructorName }}</p>
+              <div class="wishlist-card-footer">
+                <strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
+							<div class="wishlist-actions">
+								<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View Course</a>
+								@if (item.isEnrolled) {
+									<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled</a>
+								} @else {
+									<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enrolled-btn wishlist-enroll-btn">Enroll Now</a>
+								}
+							</div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </section>
+}
 	</section>
 </main>

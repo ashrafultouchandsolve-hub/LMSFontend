@@ -72,6 +72,22 @@ export type EnrollmentDto = {
   status: 'Active' | 'Completed' | 'Dropped';
 };
 
+export type CourseCommentDto = {
+  id: string;
+  courseId: string;
+  userId: string;
+  userName?: string;
+  content: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type SaveCourseCommentPayload = {
+  courseId: string;
+  userId: string;
+  content: string;
+};
+
 export type SaveEnrollmentPayload = {
   courseId: string;
 };
@@ -426,4 +442,57 @@ deleteRating(ratingId: string, userId: string): Observable<any> {
   );
 }
 
+getCourseComments(courseId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/coursecomment/course/${courseId}`)
+  );
+}
+
+getCourseComment(commentId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/coursecomment/${commentId}`)
+  );
+}
+
+getUserComments(userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/coursecomment/user/${userId}`)
+  );
+}
+
+addCourseComment(payload: SaveCourseCommentPayload): Observable<any> {
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/coursecomment/add`, payload)
+  );
+}
+
+updateCourseComment(commentId: string, payload: Partial<SaveCourseCommentPayload>): Observable<any> {
+  return this.withFallback(base =>
+    this.http.put<any>(`${base}/coursecomment/update/${commentId}`, payload)
+  );
+}
+
+deleteCourseComment(commentId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.delete<any>(`${base}/coursecomment/delete/${commentId}`)
+  );
+}
+
+checkWishlist(courseId:string ,userId: string):Observable<any>{
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/wishlist/check/${courseId}/${userId}`)
+  );
+}
+
+toggleWishlist(courseId:string ,userId: string):Observable<any>{
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/wishlist/toggle/${courseId}/${userId}`,{})
+  );
+}
+getWishlist(userId: string): Observable<any>{
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/wishlist/${userId}`)
+  );
+
+}
 }

@@ -23,6 +23,16 @@ type CourseMetaView = {
   instructorName: string;
 };
 
+type CourseCommentView = {
+  id: string;
+  courseId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
 @Component({
   selector: 'app-enrolled-course',
   imports: [RouterLink],
@@ -41,6 +51,15 @@ readonly lang = inject(LanguageService);
   protected readonly lessons = signal<LessonView[]>([]);
   protected readonly selectedLessonId = signal('');
   protected readonly courseMeta = signal<CourseMetaView | null>(null);
+  protected readonly canComment = computed(() => this.authService.isLoggedIn());
+  protected readonly comments = signal<CourseCommentView[]>([]);
+  protected readonly isLoadingComments = signal(false);
+  protected readonly commentText = signal('');
+  protected readonly editingCommentId = signal('');
+  protected readonly editingCommentText = signal('');
+  protected readonly isSubmittingComment = signal(false);
+  protected readonly commentMessage = signal('');
+  protected readonly commentError = signal('');
   private saveProgressInterval: any;
 
   protected readonly selectedLesson = computed(() => {
@@ -115,6 +134,7 @@ private async loadLessons(): Promise<void> {
     }
 
     this.courseMeta.set(await this.loadCourseMeta(id));
+    await this.loadComments(id);
 
     const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));
     const anyRes = response as any;
@@ -194,6 +214,155 @@ private async loadLessons(): Promise<void> {
     } catch {
       return null;
     }
+  }
+
+  private normalizeComment(comment: any): CourseCommentView {
+    return {
+      id: String(comment?.id ?? comment?.Id ?? ''),
+      courseId: String(comment?.courseId ?? comment?.CourseId ?? this.courseId() ?? ''),
+      userId: String(comment?.userId ?? comment?.UserId ?? ''),
+      userName: String(comment?.userName ?? comment?.UserName ?? comment?.fullName ?? comment?.FullName ?? 'User'),
+      content: String(comment?.content ?? comment?.Content ?? ''),
+      createdAt: comment?.createdAt ?? comment?.CreatedAt ?? null,
+      updatedAt: comment?.updatedAt ?? comment?.UpdatedAt ?? null,
+    };
+  }
+
+  private async loadComments(courseId: string): Promise<void> {
+    this.isLoadingComments.set(true);
+    this.commentError.set('');
+
+    try {
+      const response = await firstValueFrom(this.learningApi.getCourseComments(courseId));
+      const payload = response as any;
+      const rawComments = Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.Data)
+          ? payload.Data
+          : Array.isArray(payload)
+            ? payload
+            : [];
+
+      this.comments.set(rawComments.map((comment: any) => this.normalizeComment(comment)));
+    } catch (error) {
+      console.error('Error loading comments:', error);
+      this.comments.set([]);
+      this.commentError.set('Comments লোড করা যায়নি।');
+    } finally {
+      this.isLoadingComments.set(false);
+    }
+    console.log('FINAL COMMENTS:', this.comments());
+  }
+
+  protected beginEditComment(comment: CourseCommentView): void {
+    this.editingCommentId.set(comment.id);
+    this.editingCommentText.set(comment.content);
+    this.commentMessage.set('');
+    this.commentError.set('');
+  }
+
+  protected cancelEditComment(): void {
+    this.editingCommentId.set('');
+    this.editingCommentText.set('');
+  }
+
+  protected async submitComment(): Promise<void> {
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    const currentCourseId = this.courseId();
+    const content = this.commentText().trim();
+
+    if (!userId) {
+      this.commentError.set('Comment করতে login করুন।');
+      return;
+    }
+
+    if (!content) {
+      this.commentError.set('Comment text দিন।');
+      return;
+    }
+
+    if (!currentCourseId) {
+      this.commentError.set('Course পাওয়া যায়নি।');
+      return;
+    }
+
+    this.isSubmittingComment.set(true);
+    this.commentError.set('');
+
+    try {
+      await firstValueFrom(this.learningApi.addCourseComment({
+        courseId: currentCourseId,
+        userId: String(userId),
+        content,
+      }));
+
+      this.commentText.set('');
+      this.commentMessage.set('Comment added successfully.');
+      await this.loadComments(currentCourseId);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      this.commentError.set('Comment add করা যায়নি।');
+    } finally {
+      this.isSubmittingComment.set(false);
+    }
+  }
+
+  protected async saveComment(comment: CourseCommentView): Promise<void> {
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    const content = this.editingCommentText().trim();
+
+    if (!userId || !content) {
+      this.commentError.set('Comment text দিন।');
+      return;
+    }
+
+    this.isSubmittingComment.set(true);
+    this.commentError.set('');
+
+    try {
+      await firstValueFrom(this.learningApi.updateCourseComment(comment.id, { content, userId: String(userId) }));
+      this.editingCommentId.set('');
+      this.editingCommentText.set('');
+      this.commentMessage.set('Comment updated successfully.');
+      await this.loadComments(this.courseId());
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      this.commentError.set('Comment update করা যায়নি।');
+    } finally {
+      this.isSubmittingComment.set(false);
+    }
+  }
+
+  protected async deleteComment(commentId: string): Promise<void> {
+    if (!globalThis.confirm('Delete this comment?')) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.learningApi.deleteCourseComment(commentId));
+      await this.loadComments(this.courseId());
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      this.commentError.set('Comment delete করা যায়নি।');
+    }
+  }
+
+  protected isMyComment(comment: CourseCommentView): boolean {
+    const userId = this.authService.getCurrentUser()?.id;
+    return userId != null && String(userId) === comment.userId;
+  }
+
+  protected formatCommentDate(value: string | null): string {
+    if (!value) {
+      return 'Just now';
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return 'Just now';
+    }
+
+    return parsed.toLocaleString();
   }
 
 private mapLessonForView(lesson: any): LessonView {

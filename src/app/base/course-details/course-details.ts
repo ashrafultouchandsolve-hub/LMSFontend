@@ -5,7 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
@@ -37,6 +37,7 @@ export class CourseDetails {
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
@@ -44,6 +45,10 @@ export class CourseDetails {
   protected readonly isDescriptionExpanded = signal(false);
   protected readonly isImageBroken = signal(false);
   protected readonly isLoggedIn = signal(false);
+  protected readonly userName = signal('');
+  protected readonly userRole = signal<number | null>(null);
+  protected readonly isTeacher = computed(() => this.userRole() === 1);
+  protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
   protected readonly isEnrolled = signal(false);
   protected readonly isCheckingEnrollment = signal(false);
   
@@ -55,6 +60,8 @@ export class CourseDetails {
   protected readonly isSubmittingRating = signal(false);
   protected readonly showRatingForm = signal(false);
   protected readonly ratingMessage = signal('');
+  protected readonly isWishlisted = signal(false);
+protected readonly isTogglingWishlist = signal(false);
   
 readonly lang = inject(LanguageService);
   protected readonly shortDescriptionLimit = 280;
@@ -87,7 +94,28 @@ readonly lang = inject(LanguageService);
   });
 
   constructor() {
+    // Sync auth state for navbar helpers
+    this.authService.isLoggedIn$.subscribe((v) => this.isLoggedIn.set(v));
+    this.authService.currentUser$.subscribe((u) => {
+      if (u && u.fullName) {
+        this.userName.set(u.fullName);
+      }
+      this.userRole.set(typeof u?.role === 'number' ? u.role : null);
+    });
+
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.userName.set(user.fullName || user.email);
+      this.userRole.set(typeof user.role === 'number' ? user.role : null);
+      this.isLoggedIn.set(this.authService.isLoggedIn());
+    }
+
     void this.loadCourseDetails();
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
   }
 
   protected toggleDescription(): void {
@@ -160,6 +188,16 @@ readonly lang = inject(LanguageService);
 
       this.course.set(this.mapCourseForView(matchedCourse));
       this.isImageBroken.set(false);
+
+      const currentUserId = this.authService.getCurrentUser()?.id ?? '';
+      if (currentUserId) {
+        try {
+          const wishRes = await firstValueFrom(this.learningApi.checkWishlist(courseId, currentUserId));
+          this.isWishlisted.set(Boolean((wishRes as any)?.data ?? (wishRes as any)?.Data));
+        } catch {
+          this.isWishlisted.set(false);
+        }
+      }
 
       // Load ratings
       await this.loadRatingSummary(courseId);
@@ -291,5 +329,26 @@ readonly lang = inject(LanguageService);
 
   protected getStarArray(count: number = 5): number[] {
     return Array.from({ length: count }, (_, i) => i + 1);
+  }
+
+  protected async toggleWishlist(): Promise<void> {
+    const currentCourse = this.course();
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+
+    if (!currentCourse || !userId) {
+      return;
+    }
+
+    this.isTogglingWishlist.set(true);
+
+    try {
+      const res = await firstValueFrom(this.learningApi.toggleWishlist(currentCourse.id, userId));
+      const nextState = (res as any)?.data ?? (res as any)?.Data;
+      this.isWishlisted.set(Boolean(nextState));
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    } finally {
+      this.isTogglingWishlist.set(false);
+    }
   }
 }

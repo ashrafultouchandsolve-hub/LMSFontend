@@ -19,6 +19,16 @@ type QuizProgress = {
   isCompleted: boolean;
 };
 
+type WishlistItem = {
+  courseId: string;
+  title: string;
+  instructorName: string;
+  level: string;
+  price: number;
+  thumbnailPath: string | null;
+  isEnrolled?: boolean;
+};
+
 @Component({
   selector: 'app-profile',
   imports: [RouterLink, CommonModule],
@@ -44,10 +54,22 @@ export class Profile {
   protected readonly correctAnswers = computed(() => this.quizProgress()?.correctAnswers ?? 0);
   protected readonly wrongAnswers = computed(() => this.quizProgress()?.wrongAnswers ?? 0);
 
+  protected readonly wishlist = signal<WishlistItem[]>([]);
+  protected readonly isLoadingWishlist = signal(false);
+  protected readonly activeTab = signal<'profile' | 'wishlist'>('profile');
+
   constructor() {
-    this.authService.currentUser$.pipe(takeUntilDestroyed()).subscribe((currentUser: ProfileUser | null) => { this.user.set(currentUser); });
+    this.authService.currentUser$.pipe(takeUntilDestroyed()).subscribe((currentUser: ProfileUser | null) => {
+      this.user.set(currentUser);
+      if (currentUser?.id) {
+        void this.loadWishlist();
+      }
+    });
     const currentUser = this.authService.getCurrentUser() as ProfileUser | null;
-    if (currentUser) this.user.set(currentUser);
+    if (currentUser) {
+      this.user.set(currentUser);
+      void this.loadWishlist();
+    }
     
     // Load quiz progress - get first lesson ID
     void this.loadQuizProgress();
@@ -71,6 +93,55 @@ export class Profile {
       console.log('Could not load quiz progress:', err);
     }
   }
+
+  async loadWishlist() {
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    if (!userId) {
+      this.wishlist.set([]);
+      return;
+    }
+
+    this.isLoadingWishlist.set(true);
+    try {
+      const res = await firstValueFrom(this.learningApi.getWishlist(userId));
+      const response = res as any;
+      const data = response?.data ?? response?.Data ?? response ?? [];
+
+      const wishlistItems = Array.isArray(data) ? (data as WishlistItem[]) : [];
+      const enrichedItems = await Promise.all(
+        wishlistItems.map(async (item) => {
+          try {
+            const enrolled = await firstValueFrom(this.learningApi.checkMyEnrollment(item.courseId));
+            return { ...item, isEnrolled: Boolean(enrolled) };
+          } catch {
+            return { ...item, isEnrolled: false };
+          }
+        }),
+      );
+
+      this.wishlist.set(enrichedItems);
+    } catch (error) {
+      console.error('Error loading wishlist:', error);
+      this.wishlist.set([]);
+    } finally {
+      this.isLoadingWishlist.set(false);
+    }
+  }
+
+  switchTab(tab: 'profile' | 'wishlist') {
+    this.activeTab.set(tab);
+    if (tab === 'wishlist') {
+      void this.loadWishlist();
+    }
+  }
+
+getImageUrl(path: string | null): string {
+  return this.learningApi.buildDownloadUrl(path);
+}
+
+formatPrice(price: number): string {
+  return price === 0 ? 'Free' : `৳${price.toLocaleString()}`;
+}
 
   protected goToHome(): void { this.router.navigateByUrl('/homepage'); }
   protected logout(): void { this.authService.logout(); this.router.navigateByUrl('/login'); }

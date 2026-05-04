@@ -16,6 +16,7 @@ type CoursesViewItem = {
   durationMinutes: number;
   price: number;
   isEnrolled: boolean;
+  isWishlisted: boolean;
   thumbnailUrl: string;
   averageRating?: number;
   totalRatings?: number;
@@ -35,6 +36,7 @@ readonly lang = inject(LanguageService);
   protected readonly isLoadingCourses = signal(false);
   protected readonly searchTerm = signal('');
   protected readonly courses = signal<CoursesViewItem[]>([]);
+  protected readonly wishlistToggleId = signal<string | null>(null);
   protected readonly hasCourses = computed(() => this.courses().length > 0);
   protected readonly filteredCourses = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -82,6 +84,38 @@ readonly lang = inject(LanguageService);
       courseTitle: course.title,
       amount: course.price,
     };
+  }
+
+  protected async toggleWishlist(course: CoursesViewItem): Promise<void> {
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id != null ? String(currentUser.id) : '';
+
+    if (!userId) {
+      return;
+    }
+
+    this.wishlistToggleId.set(course.id);
+
+    try {
+      const response = await firstValueFrom(this.learningApi.toggleWishlist(course.id, userId));
+      const nextState = (response as any)?.data ?? (response as any)?.Data;
+      const updatedState = typeof nextState === 'boolean' ? nextState : !course.isWishlisted;
+
+      this.courses.update((items) =>
+        items.map((item) =>
+          item.id === course.id
+            ? {
+                ...item,
+                isWishlisted: updatedState,
+              }
+            : item,
+        ),
+      );
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    } finally {
+      this.wishlistToggleId.set(null);
+    }
   }
 
   protected updateSearchTerm(term: string): void {
@@ -142,6 +176,7 @@ readonly lang = inject(LanguageService);
 
       const mappedCourses = rawCourses.map((course) => this.mapCourseForView(course));
       let coursesWithEnrollment = await this.attachEnrollmentState(mappedCourses);
+      coursesWithEnrollment = await this.attachWishlistState(coursesWithEnrollment);
       coursesWithEnrollment = await this.attachRatings(coursesWithEnrollment);
       this.courses.set(coursesWithEnrollment);
     } catch {
@@ -163,6 +198,7 @@ readonly lang = inject(LanguageService);
       durationMinutes: dto.durationMinutes,
       price: dto.price,
       isEnrolled: false,
+      isWishlisted: false,
       thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
     };
   }
@@ -188,6 +224,38 @@ readonly lang = inject(LanguageService);
         }
       }),
     );
+  }
+
+  private async attachWishlistState(courses: CoursesViewItem[]): Promise<CoursesViewItem[]> {
+    if (!this.authService.isLoggedIn()) {
+      return courses;
+    }
+
+    const userId = this.authService.getCurrentUser()?.id;
+    if (userId == null) {
+      return courses;
+    }
+
+    try {
+      const response = await firstValueFrom(this.learningApi.getWishlist(String(userId)));
+      const payload = response as any;
+      const wishlistItems = payload?.data ?? payload?.Data ?? payload ?? [];
+
+      const wishlistCourseIds = new Set<string>(
+        Array.isArray(wishlistItems)
+          ? wishlistItems
+              .map((item: any) => String(item?.courseId ?? item?.id ?? ''))
+              .filter((id: string) => id.length > 0)
+          : [],
+      );
+
+      return courses.map((course) => ({
+        ...course,
+        isWishlisted: wishlistCourseIds.has(course.id),
+      }));
+    } catch {
+      return courses;
+    }
   }
 
   private async attachRatings(courses: CoursesViewItem[]): Promise<CoursesViewItem[]> {

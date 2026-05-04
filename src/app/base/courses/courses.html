@@ -1,7 +1,7 @@
 <main class="courses-page">
 		<nav class="top-navbar">
   <a class="brand" routerLink="/homepage">
-    <img src="/touch-solve-logo.jpg" alt="Touch & Solve" class="brand-logo" />
+    <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
   </a>
   <div class="topbar-nav">
     <a routerLink="/homepage">Home</a>
@@ -85,7 +85,19 @@
 								} @else {
 									<a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
 								}
-								<button type="button" class="enrolled-button wishlist-button">♡ Wishlist</button>
+								<button
+									type="button"
+									class="enrolled-button wishlist-button"
+									[class.wishlisted]="course.isWishlisted"
+									[class.is-toggling]="wishlistToggleId() === course.id"
+									[disabled]="wishlistToggleId() === course.id"
+									(click)="toggleWishlist(course)">
+									@if (course.isWishlisted) {
+										{{ wishlistToggleId() === course.id ? 'Updating...' : '✓ In Wishlist' }}
+									} @else {
+										{{ wishlistToggleId() === course.id ? 'Adding...' : '♡ Wishlist' }}
+									}
+								</button>
 							</div>
 							<a [routerLink]="['/course-details', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
 						</div>
