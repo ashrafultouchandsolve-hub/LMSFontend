@@ -147,12 +147,36 @@
           <div class="comments-empty">No comments yet. Be the first to share your thoughts.</div>
         } @else {
           @for (comment of comments(); track comment.id) {
-            <article class="comment-item">
-              <div class="comment-top">
+            <article class="comment-item" [class.my-comment]="isMyComment(comment)">
+              <!-- Avatar bubble -->
+              <div class="comment-avatar">{{ comment.userName.charAt(0).toUpperCase() }}</div>
+              
+              <!-- Chat bubble container -->
+              <div class="comment-bubble">
+                <!-- Name and time (flip position based on ownership) -->
                 <div class="comment-meta">
                   <strong>{{ comment.userName }}</strong>
-                  <span>{{ formatCommentDate(comment.createdAt) }}</span>
+                  <span class="comment-time">{{ formatCommentDate(comment.createdAt) }}</span>
                 </div>
+
+                <!-- Content or edit form -->
+                @if (editingCommentId() === comment.id) {
+                  <textarea
+                    class="comment-input comment-edit-input"
+                    rows="3"
+                    [value]="editingCommentText()"
+                    (input)="editingCommentText.set($any($event.target).value)"></textarea>
+                  <div class="comment-edit-actions">
+                    <button type="button" class="comment-submit-btn" (click)="saveComment(comment)" [disabled]="isSubmittingComment()">
+                      {{ isSubmittingComment() ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button type="button" class="comment-cancel-btn" (click)="cancelEditComment()">Cancel</button>
+                  </div>
+                } @else {
+                  <p class="comment-content">{{ comment.content }}</p>
+                }
+
+                <!-- Edit/Delete actions for owned comments -->
                 @if (isMyComment(comment)) {
                   <div class="comment-actions">
                     <button type="button" class="comment-link-btn" (click)="beginEditComment(comment)">Edit</button>
@@ -160,22 +184,6 @@
                   </div>
                 }
               </div>
-
-              @if (editingCommentId() === comment.id) {
-                <textarea
-                  class="comment-input comment-edit-input"
-                  rows="3"
-                  [value]="editingCommentText()"
-                  (input)="editingCommentText.set($any($event.target).value)"></textarea>
-                <div class="comment-edit-actions">
-                  <button type="button" class="comment-submit-btn" (click)="saveComment(comment)" [disabled]="isSubmittingComment()">
-                    {{ isSubmittingComment() ? 'Saving...' : 'Save' }}
-                  </button>
-                  <button type="button" class="comment-cancel-btn" (click)="cancelEditComment()">Cancel</button>
-                </div>
-              } @else {
-                <p class="comment-content">{{ comment.content }}</p>
-              }
             </article>
           }
         }

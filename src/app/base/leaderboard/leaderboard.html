@@ -1,0 +1,153 @@
+<main class="lb-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/homepage">
+      <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+    </a>
+    <nav class="topbar-nav">
+      <a routerLink="/homepage">Home</a>
+      <a routerLink="/courses">Courses</a>
+    </nav>
+    <div class="topbar-actions">
+      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+        🌐 {{ lang.isBangla() ? 'EN' : 'বাং' }}
+      </button>
+      <a routerLink="/profile" class="nav-btn">← Profile</a>
+    </div>
+  </header>
+
+  <!-- DARK HERO PODIUM ZONE -->
+  <section class="hero-zone">
+    <div class="hero-glow hero-glow-l"></div>
+    <div class="hero-glow hero-glow-r"></div>
+
+    <div class="hero-title-wrap">
+      <span class="hero-eyebrow">🏆 LEADERBOARD</span>
+      <h1 class="hero-title">Top Performers</h1>
+      <p class="hero-sub">Best students based on performance scores</p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="hero-loading">
+        <div class="spinner"></div>
+        <span>Loading rankings...</span>
+      </div>
+    } @else if (error()) {
+      <div class="hero-error">⚠️ {{ error() }}</div>
+    } @else if (entries().length === 0) {
+      <div class="hero-empty">📭 এখনো কোনো quiz attempt নেই</div>
+    } @else {
+
+      <div class="podium-stage">
+
+        <!-- 2nd place -->
+        @if (topThree().length > 1) {
+          <div class="pcol pcol-2" [class.is-me]="isCurrentUser(topThree()[1].userId)">
+            <div class="p-badge">🥈</div>
+            <div class="p-avatar p-av-2">{{ getInitial(topThree()[1].fullName) }}</div>
+            <div class="p-name">{{ topThree()[1].fullName }}</div>
+            <div class="p-pct">{{ topThree()[1].percentageScore | number:'1.0-1' }}%</div>
+            <div class="p-block p-block-2">
+              <div class="p-block-score">
+                <span>✅ {{ topThree()[1].correctAnswers }} / {{ topThree()[1].totalQuestions }}</span>
+              </div>
+              <div class="p-block-num">2</div>
+            </div>
+          </div>
+        }
+
+        <!-- 1st place -->
+        <div class="pcol pcol-1" [class.is-me]="isCurrentUser(topThree()[0].userId)">
+          <div class="p-crown">👑</div>
+          <div class="p-badge">🥇</div>
+          <div class="p-avatar p-av-1">{{ getInitial(topThree()[0].fullName) }}</div>
+          <div class="p-name p-name-gold">{{ topThree()[0].fullName }}</div>
+          <div class="p-pct p-pct-gold">{{ topThree()[0].percentageScore | number:'1.0-1' }}%</div>
+          <div class="p-block p-block-1">
+            <div class="p-block-score">
+              <span>✅ {{ topThree()[0].correctAnswers }} / {{ topThree()[0].totalQuestions }}</span>
+            </div>
+            <div class="p-block-num">1</div>
+          </div>
+        </div>
+
+        <!-- 3rd place -->
+        @if (topThree().length > 2) {
+          <div class="pcol pcol-3" [class.is-me]="isCurrentUser(topThree()[2].userId)">
+            <div class="p-badge">🥉</div>
+            <div class="p-avatar p-av-3">{{ getInitial(topThree()[2].fullName) }}</div>
+            <div class="p-name">{{ topThree()[2].fullName }}</div>
+            <div class="p-pct">{{ topThree()[2].percentageScore | number:'1.0-1' }}%</div>
+            <div class="p-block p-block-3">
+              <div class="p-block-score">
+                <span>✅ {{ topThree()[2].correctAnswers }} / {{ topThree()[2].totalQuestions }}</span>
+              </div>
+              <div class="p-block-num">3</div>
+            </div>
+          </div>
+        }
+
+      </div>
+    }
+  </section>
+
+  <!-- WHITE LIST ZONE -->
+@if (!isLoading() && entries().length > 0) {
+  <div style="background: #c4c4c4; width: 100%;">
+    <section class="list-zone">
+
+      @if (currentUserId()) {
+        <div class="my-rank-bar">
+          <span>You are ranked <strong>#{{ myRank() }}</strong> out of <strong>{{ entries().length }}</strong> students</span>
+          <span class="my-score-chip">Your score: {{ myScore() | number:'1.0-1' }}%</span>
+        </div>
+      }
+
+      <div class="table-wrap">
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Student</th>
+              <th>Correct</th>
+              <th>Total Q</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of entries(); track entry.userId; let i = $index) {
+              <tr [class.row-gold]="i===0" [class.row-silver]="i===1" [class.row-bronze]="i===2" [class.row-me]="isCurrentUser(entry.userId)">
+                <td class="col-rank">
+                  @if (i === 0) { <span class="medal">🥇</span> }
+                  @else if (i === 1) { <span class="medal">🥈</span> }
+                  @else if (i === 2) { <span class="medal">🥉</span> }
+                  @else { <span class="rank-n">#{{ i + 1 }}</span> }
+                </td>
+                <td class="col-student">
+                  <div class="lst-avatar" [class.lst-av-me]="isCurrentUser(entry.userId)">
+                    {{ getInitial(entry.fullName) }}
+                  </div>
+                  <span class="lst-name">{{ entry.fullName }}</span>
+                  @if (isCurrentUser(entry.userId)) {
+                    <span class="you-chip">You</span>
+                  }
+                </td>
+                <td class="col-correct">{{ entry.correctAnswers }}</td>
+                <td class="col-total">{{ entry.totalQuestions }}</td>
+                <td class="col-score">
+                  <div class="bar-wrap">
+                    <div class="bar-bg">
+                      <div class="bar-fill" [style.width.%]="entry.percentageScore"></div>
+                    </div>
+                    <strong class="bar-label">{{ entry.percentageScore | number:'1.0-1' }}%</strong>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+    </div>
+}
+</main>

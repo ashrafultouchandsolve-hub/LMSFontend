@@ -505,8 +505,8 @@ import {
   ɵɵresetView,
   ɵɵrestoreView
 } from "./chunk-F5JNQASH.js";
-import "./chunk-J46EEYGT.js";
 import "./chunk-4YCCEXQQ.js";
+import "./chunk-J46EEYGT.js";
 import "./chunk-U7EDC2PH.js";
 export {
   ANIMATION_MODULE_TYPE,

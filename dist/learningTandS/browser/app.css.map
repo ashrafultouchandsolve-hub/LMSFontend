@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/app.css"],
-  "sourcesContent": [":host {\r\n\tdisplay: block;\r\n\tmin-height: 100vh;\r\n}\r\n"],
-  "mappings": ";AAAA;AACC,WAAS;AACT,cAAY;AACb;",
-  "names": []
-}

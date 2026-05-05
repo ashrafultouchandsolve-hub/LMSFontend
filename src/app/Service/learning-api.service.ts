@@ -495,4 +495,10 @@ getWishlist(userId: string): Observable<any>{
   );
 
 }
+
+getLeaderboard(): Observable<any>{
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/quiz/leaderboard`)
+  );
+}
 }

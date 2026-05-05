@@ -59,6 +59,10 @@ export interface Translations {
   registerPasswordPlaceholder: string; registerConfirmPassword: string; registerRepeatPassword: string; registerConfirmPasswordError: string;
   registerTerms: string; registerSubmitting: string; registerBtn: string;
   registerHaveAccount: string; registerLoginHere: string; registerGoHome: string;
+  // Leaderboard
+  lbTitle: string; lbSubtitle: string; lbLoading: string; lbEmpty: string;
+  lbTableRank: string; lbTableStudent: string; lbTableCorrect: string; lbTableTotal: string; lbTableScore: string;
+  lbRanked: string; lbOutOf: string; lbStudents: string; lbYourScore: string;
 }
 
 const EN: Translations = {
@@ -122,7 +126,12 @@ const EN: Translations = {
   registerRole: 'Select role', registerRolePlaceholder: 'Select one', registerStudent: 'Student', registerTeacher: 'Teacher', registerRoleError: 'Please select Student or Teacher.',
   registerPasswordPlaceholder: 'Create a password', registerConfirmPassword: 'Confirm password', registerRepeatPassword: 'Repeat password', registerConfirmPasswordError: 'Confirm your password.',
   registerTerms: 'I agree to the learning platform terms.', registerSubmitting: 'Submitting...', registerBtn: 'Create account',
-  registerHaveAccount: 'Already have an account?', registerLoginHere: 'Login here', registerGoHome: 'Go Home',
+  registerHaveAccount: "Don't have an account?", registerLoginHere: 'Create one', registerGoHome: 'Go Home',
+  lbTitle: 'Top Performers', lbSubtitle: 'Best students based on quiz scores',
+  lbLoading: 'Loading rankings...', lbEmpty: 'No quiz attempts yet',
+  lbTableRank: 'Rank', lbTableStudent: 'Student', lbTableCorrect: 'Correct',
+  lbTableTotal: 'Total Q', lbTableScore: 'Score',
+  lbRanked: 'You are ranked', lbOutOf: 'out of', lbStudents: 'students', lbYourScore: 'Your score:',
 };
 
 const BN: Translations = {
@@ -187,6 +196,11 @@ const BN: Translations = {
   registerPasswordPlaceholder: 'পাসওয়ার্ড তৈরি করুন', registerConfirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন', registerRepeatPassword: 'পাসওয়ার্ড পুনরায় দিন', registerConfirmPasswordError: 'আপনার পাসওয়ার্ড নিশ্চিত করুন।',
   registerTerms: 'আমি লার্নিং প্ল্যাটফর্মের শর্তাবলীতে সম্মত।', registerSubmitting: 'জমা হচ্ছে...', registerBtn: 'অ্যাকাউন্ট তৈরি করুন',
   registerHaveAccount: 'ইতিমধ্যে অ্যাকাউন্ট আছে?', registerLoginHere: 'এখানে লগইন করুন', registerGoHome: 'হোমে যান',
+  lbTitle: 'শীর্ষ পারফরমার', lbSubtitle: 'কুইজ স্কোরের ভিত্তিতে সেরা শিক্ষার্থী',
+  lbLoading: 'র‍্যাঙ্কিং লোড হচ্ছে...', lbEmpty: 'এখনও কোনো কুইজ অ্যাটেম্প্ট নেই',
+  lbTableRank: 'র‍্যাঙ্ক', lbTableStudent: 'শিক্ষার্থী', lbTableCorrect: 'সঠিক',
+  lbTableTotal: 'মোট প্র', lbTableScore: 'স্কোর',
+  lbRanked: 'আপনি র‍্যাঙ্ক করছেন', lbOutOf: 'জন', lbStudents: 'শিক্ষার্থীর মধ্যে', lbYourScore: 'আপনার স্কোর:',
 };
 
 @Injectable({ providedIn: 'root' })

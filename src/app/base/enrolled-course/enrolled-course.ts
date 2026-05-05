@@ -235,15 +235,24 @@ private async loadLessons(): Promise<void> {
     try {
       const response = await firstValueFrom(this.learningApi.getCourseComments(courseId));
       const payload = response as any;
-      const rawComments = Array.isArray(payload?.data)
-        ? payload.data
-        : Array.isArray(payload?.Data)
-          ? payload.Data
-          : Array.isArray(payload)
-            ? payload
-            : [];
+      
+      let rawComments: any[] = [];
+      
+    // Handle different response structures
+if (Array.isArray(payload?.data?.comments)) {
+  rawComments = payload.data.comments;       // ✅ এটা এখন match করবে
+} else if (Array.isArray(payload?.data?.data)) {
+  rawComments = payload.data.data;
+} else if (Array.isArray(payload?.data)) {
+  rawComments = payload.data;
+} else if (Array.isArray(payload?.Data?.comments)) {
+  rawComments = payload.Data.comments;
+} else if (Array.isArray(payload)) {
+  rawComments = payload;
+}
 
       this.comments.set(rawComments.map((comment: any) => this.normalizeComment(comment)));
+      console.log('FINAL COMMENTS:', this.comments());
     } catch (error) {
       console.error('Error loading comments:', error);
       this.comments.set([]);
@@ -251,7 +260,6 @@ private async loadLessons(): Promise<void> {
     } finally {
       this.isLoadingComments.set(false);
     }
-    console.log('FINAL COMMENTS:', this.comments());
   }
 
   protected beginEditComment(comment: CourseCommentView): void {

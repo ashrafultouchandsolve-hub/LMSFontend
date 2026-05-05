@@ -17,6 +17,7 @@ import { Certificates } from './user/certificates/certificates';
 import { QuizEditorComponent } from './base/quiz-editor/quiz-editor';
 import { QuizAttemptComponent } from './base/quiz-attempt/quiz-attempt';
 import { VideoHistoryComponent } from './base/video-history/video-history';
+import { Leaderboard } from './base/leaderboard/leaderboard';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'homepage', pathMatch: 'full'},
@@ -41,5 +42,6 @@ export const routes: Routes = [
         {path:'quiz-editor/:lessonId',component:QuizEditorComponent, canActivate: [authGuard, teacherGuard]},
         { path: 'quiz/:lessonId', component: QuizAttemptComponent,canActivate: [authGuard] },
         {path:'history',component: VideoHistoryComponent, canActivate: [authGuard]},
+        { path: 'leaderboard', component: Leaderboard },
         {path: '**', redirectTo: 'homepage'},
 ];

@@ -633,6 +633,7 @@
 .comments-list {
   display: grid;
   gap: 12px;
+  grid-template-columns: 1fr; /* ensure a single full-width column */
 }
 
 .comments-empty {
@@ -644,27 +645,61 @@
 }
 
 .comment-item {
-  padding: 14px 15px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  /* Chat bubble layout: avatar on left, bubble on right */
+  width: auto;
+  max-width: 85%;
+  justify-self: start; /* left align by default */
+  box-sizing: border-box;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.comment-bubble {
+  padding: 12px 14px;
   border-radius: 14px;
   background: linear-gradient(180deg, #ffffff, #f8fbff);
   border: 1px solid #dbeafe;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: grid;
+  gap: 6px;
 }
 
 .comment-top {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .comment-meta {
   display: grid;
   gap: 2px;
+  text-align: left;
 }
 
 .comment-meta strong {
   color: #0f172a;
   font-size: 0.95rem;
+  margin: 0;
 }
 
 .comment-meta span {
@@ -676,13 +711,39 @@
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .comment-content {
   margin: 0;
   color: #334155;
-  line-height: 1.7;
+  line-height: 1.6;
   white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Owned comment variant: flip layout to right side, different color */
+.comment-item.my-comment {
+  flex-direction: row-reverse; /* avatar on right */
+  justify-self: end; /* right align */
+  max-width: 78%;
+}
+
+.comment-item.my-comment .comment-avatar {
+  background: linear-gradient(135deg, #ee0404, #cf5f5f);
+}
+
+.comment-item.my-comment .comment-bubble {
+  background: linear-gradient(180deg, #fff7ed, #fffbf1);
+  border-color: #fde3c7;
+}
+
+.comment-item.my-comment .comment-meta {
+  text-align: right;
+}
+
+.comment-item.my-comment .comment-content {
+  text-align: right;
 }
 
 /* MOBILE */
@@ -704,5 +765,12 @@
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
+  }
+
+  /* On small screens, make all comments full width for readability */
+  .comment-item,
+  .comment-item.my-comment {
+    justify-self: stretch;
+    width: 100%;
   }
 }
