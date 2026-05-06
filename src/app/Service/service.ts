@@ -28,8 +28,11 @@ export type LoginResponse = {
 })
 export class Service {
   private readonly http = inject(HttpClient);
-  private readonly loginUrl = 'https://localhost:7002/api/register/login';
-   private readonly registerUrl = 'https://localhost:7002/api/register/register';
+  private readonly loginUrl = 'http://160.191.150.185:8071/api/register/login';
+  private readonly registerUrl = 'http://160.191.150.185:8071/api/register/register';
+
+  //private readonly loginUrl = 'https://localhost:7002/api/register/login';
+   //private readonly registerUrl = 'https://localhost:7002/api/register/register';
 
   //   private readonly loginUrl = 'http://lmslands.runasp.net/api/register/login';
   // private readonly registerUrl = 'http://lmslands.runasp.net/api/register/register';
@@ -43,7 +46,8 @@ export class Service {
     return this.http.post<LoginResponse>(this.registerUrl, payload);
   }
   savePreferences(data: any){
-    return this.http.post('https://localhost:7002/api/UserPreference', data);
+     return this.http.post('http://160.191.150.185:8071/api/UserPreference', data);
+    //return this.http.post('https://localhost:7002/api/UserPreference', data);
     //return this.http.post('http://lmslands.runasp.net/api/UserPreference', data);
     }
 
