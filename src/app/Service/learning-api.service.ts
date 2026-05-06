@@ -501,4 +501,33 @@ getLeaderboard(): Observable<any>{
     this.http.get<any>(`${base}/quiz/leaderboard`)
   );
 }
+
+// Enrolled students list (teacher এর জন্য)
+getEnrolledStudents(courseId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/enrollment/students/${courseId}`)
+  );
+}
+
+// Certificate issue করা (teacher করবে)
+getMyCertificates(userId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/certificate/my/${userId}`)
+  );
+}
+
+issueCertificate(payload: {
+  userId: string; courseId: string;
+  studentName: string; courseName: string;
+}): Observable<any> {
+  return this.withFallback(base =>
+    this.http.post<any>(`${base}/certificate/issue`, payload)
+  );
+}
+
+getCourseCertificates(courseId: string): Observable<any> {
+  return this.withFallback(base =>
+    this.http.get<any>(`${base}/certificate/course/${courseId}`)
+  );
+}
 }

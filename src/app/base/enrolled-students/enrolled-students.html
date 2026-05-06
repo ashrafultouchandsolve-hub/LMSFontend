@@ -1,0 +1,75 @@
+<main class="es-page">
+
+  <div class="es-header">
+    <a routerLink="/teacher" class="back-btn">← Back to Dashboard</a>
+    <div>
+      <h1>👥 Enrolled Students</h1>
+      <p>এই কোর্সের সকল student এর list এবং certificate issue করুন</p>
+    </div>
+  </div>
+
+  @if (notice()) {
+    <div class="es-notice" [class.success]="noticeType() === 'success'" [class.error]="noticeType() === 'error'">
+      {{ notice() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="es-loading">
+      <div class="es-spinner"></div>
+      <span>Loading students...</span>
+    </div>
+  } @else if (students().length === 0) {
+    <div class="es-empty">
+      <div class="es-empty-icon">📭</div>
+      <h3>কোনো student নেই</h3>
+      <p>এই কোর্সে এখনো কেউ enroll করেনি।</p>
+    </div>
+  } @else {
+    <div class="es-count">মোট <strong>{{ students().length }}</strong> জন student enrolled</div>
+
+    <div class="es-table-wrap">
+      <table class="es-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>Email</th>
+            <th>Enrolled Date</th>
+            <th>Certificate</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of students(); track student.userId; let i = $index) {
+            <tr [class.row-issued]="hasReceived(student.userId)">
+              <td class="td-num">{{ i + 1 }}</td>
+              <td class="td-student">
+                <div class="s-avatar">{{ getInitial(student.fullName) }}</div>
+                <span class="s-name">{{ student.fullName }}</span>
+              </td>
+              <td class="td-email">{{ student.email }}</td>
+              <td class="td-date">{{ student.enrolledAt | date:'mediumDate' }}</td>
+              <td class="td-cert">
+                @if (hasReceived(student.userId)) {
+                  <span class="cert-issued-badge">✅ Issued</span>
+                } @else {
+                  <button
+                    class="issue-btn"
+                    [disabled]="issuingId() === student.userId"
+                    (click)="issueCertificate(student)">
+                    @if (issuingId() === student.userId) {
+                      <span class="btn-loading">...</span>
+                    } @else {
+                      🎓 Issue Certificate
+                    }
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</main>

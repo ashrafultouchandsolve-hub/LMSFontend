@@ -6,11 +6,8 @@ body {
 body {
 	margin: 0;
 	scroll-behavior: smooth;
-	background:
-		radial-gradient(circle at top left, rgba(26, 97, 255, 0.22), transparent 28%),
-		radial-gradient(circle at top right, rgba(78, 182, 255, 0.16), transparent 24%),
-		linear-gradient(180deg, #05070d 0%, #07101e 55%, #03050a 100%);
-	color: #f3f7ff;
+	background: #ffffff;
+	color: #111827;
 	font-family: "Segoe UI Variable", "Segoe UI", "Trebuchet MS", sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;

@@ -1,0 +1,156 @@
+.es-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.es-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s;
+  margin-top: 4px;
+}
+.back-btn:hover { border-color: #2563eb; color: #2563eb; }
+.es-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 4px;
+}
+.es-header p { color: #6b7280; font-size: 0.88rem; margin: 0; }
+
+/* ── Notice ──────────────────────────────────────────── */
+.es-notice {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.es-notice.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.es-notice.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+/* ── Loading / Empty ─────────────────────────────────── */
+.es-loading {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 60px; color: #6b7280;
+}
+.es-spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid #e5e7eb; border-top-color: #2563eb;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.es-empty {
+  text-align: center; padding: 60px 20px;
+}
+.es-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.es-empty h3 { font-size: 1.1rem; font-weight: 700; color: #111827; margin: 0 0 6px; }
+.es-empty p { color: #6b7280; }
+
+/* ── Count ───────────────────────────────────────────── */
+.es-count {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+.es-count strong { color: #111827; }
+
+/* ── Table ───────────────────────────────────────────── */
+.es-table-wrap {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+.es-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.es-table thead tr {
+  background: #1e293b;
+}
+.es-table th {
+  padding: 13px 16px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  text-align: left;
+}
+.es-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  vertical-align: middle;
+}
+.es-table tbody tr:last-child td { border-bottom: none; }
+.es-table tbody tr { background: #fff; transition: background 0.15s; }
+.es-table tbody tr:hover { background: #f9fafb; }
+.row-issued { background: #f0fdf4 !important; }
+.row-issued:hover { background: #dcfce7 !important; }
+
+.td-num { color: #9ca3af; font-weight: 700; width: 40px; }
+
+.td-student { display: flex; align-items: center; gap: 10px; }
+.s-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #0ea5e9);
+  color: #fff; font-weight: 800; font-size: 0.88rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.s-name { font-weight: 600; color: #111827; }
+
+.td-email { color: #6b7280; font-size: 0.84rem; }
+.td-date  { color: #6b7280; font-size: 0.84rem; }
+
+/* ── Certificate column ──────────────────────────────── */
+.cert-issued-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.8rem; font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+.issue-btn {
+  padding: 7px 16px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.issue-btn:hover:not(:disabled) { opacity: 0.85; }
+.issue-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 640px) {
+  .es-table th, .es-table td { padding: 10px 10px; }
+  .td-email { display: none; }
+}

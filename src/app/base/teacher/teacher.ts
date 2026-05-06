@@ -92,6 +92,13 @@ export class Teacher implements OnInit {
   protected readonly isTeacher = computed(() => this.currentUser()?.role === 1);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
 
+
+
+  protected readonly showStudentsPanel = signal(false);
+protected readonly enrolledStudents = signal<any[]>([]);
+protected readonly issuingCertificate = signal<string | null>(null); // userId
+protected readonly issuedCertificates = signal<string[]>([]); // userId list
+
   protected readonly filteredCourses = computed(() => {
     const keyword = this.searchTerm().trim().toLowerCase();
     if (!keyword) {
@@ -743,4 +750,48 @@ private mapCourse(
 
     return noHtml;
   }
+
+// নতুন signals
+
+// Students panel খোলা
+protected async openStudentsPanel(courseId: string): Promise<void> {
+  this.selectedCourseId.set(courseId);
+  this.showStudentsPanel.set(true);
+  const res = await firstValueFrom(this.learningApi.getEnrolledStudents(courseId));
+  const data = res?.data ?? res?.Data ?? [];
+  this.enrolledStudents.set(data);
+
+  // কারা already certificate পেয়েছে সেটা load করো
+  const certRes = await firstValueFrom(
+    this.learningApi.getMyCertificates(courseId)
+  ).catch(() => ({ data: [] }));
+  const certData = (certRes as any)?.data ?? [];
+  this.issuedCertificates.set(certData.map((c: any) => c.userId));
+}
+
+// Certificate issue
+protected async issueCertificate(student: any): Promise<void> {
+  const course = this.selectedCourse();
+  if (!course) return;
+  
+  this.issuingCertificate.set(student.userId);
+  try {
+    await firstValueFrom(this.learningApi.issueCertificate({
+      userId: student.userId,
+      courseId: course.id,
+      studentName: student.fullName,
+      courseName: course.title
+    }));
+    this.issuedCertificates.update(ids => [...ids, student.userId]);
+    this.setNotice(`${student.fullName} কে certificate দেওয়া হয়েছে।`, 'success');
+  } catch {
+    this.setNotice('Certificate দেওয়া যায়নি।', 'error');
+  } finally {
+    this.issuingCertificate.set(null);
+  }
+}
+protected goToStudents(courseId: string): void {
+  this.router.navigateByUrl(`/enrolled-students/${courseId}`);
+}
+  
 }

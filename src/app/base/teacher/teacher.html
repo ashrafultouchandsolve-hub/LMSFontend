@@ -103,6 +103,7 @@
                     </span>
                   </td>
                   <td class="actions-cell">
+                    <button type="button" class="btn btn-students" (click)="goToStudents(course.id)">👥 Students ({{ course.students }})</button>
                     <button type="button" class="btn btn-outline" (click)="openLessons(course.id)">Lessons</button>
                     <button type="button" class="btn btn-ghost" (click)="openEditCourseModal(course.id)">Edit</button>
                     <button type="button" class="btn btn-danger" (click)="deleteCourse(course.id)">Delete</button>
@@ -342,5 +343,51 @@
       </div>
     </div>
   }
+
+  <!-- Course card এ Students button -->
+
+
+<!-- Students Panel Modal -->
+@if (showStudentsPanel()) {
+  <div class="modal-backdrop" (click)="showStudentsPanel.set(false)">
+    <div class="students-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📋 Enrolled Students — {{ selectedCourse()?.title }}</h3>
+        <button (click)="showStudentsPanel.set(false)">✕</button>
+      </div>
+      <table class="students-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Enrolled</th>
+            <th>Certificate</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of enrolledStudents(); track student.userId) {
+            <tr>
+              <td>{{ student.fullName }}</td>
+              <td>{{ student.email }}</td>
+              <td>{{ student.enrolledAt | date:'mediumDate' }}</td>
+              <td>
+                @if (issuedCertificates().includes(student.userId)) {
+                  <span class="cert-issued">✅ Issued</span>
+                } @else {
+                  <button 
+                    class="issue-cert-btn"
+                    [disabled]="issuingCertificate() === student.userId"
+                    (click)="issueCertificate(student)">
+                    {{ issuingCertificate() === student.userId ? '...' : '🎓 Issue' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
 </main>
 </div>

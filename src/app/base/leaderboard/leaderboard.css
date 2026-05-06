@@ -220,8 +220,13 @@
 }
 
 /* ── LIST ZONE (white) ─────────────────────────────────── */
+.list-wrapper {
+  background: linear-gradient(180deg, #f3f4f6 0%, #f9fafb 50%, #ffffff 100%);
+  width: 100%;
+}
+
 .list-zone {
-  background: var(--white);
+  background: transparent;
   padding: 40px 20px 60px;
   max-width: 860px;
   margin: 0 auto;
