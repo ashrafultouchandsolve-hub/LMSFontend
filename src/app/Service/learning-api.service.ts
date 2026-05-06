@@ -98,8 +98,12 @@ export type SaveEnrollmentPayload = {
 export class LearningApiService {
   private readonly http = inject(HttpClient);
   private readonly jwtService = inject(JwtService);
-   private readonly primaryBaseUrl = 'https://localhost:7002/api';
-  private readonly fallbackBaseUrl = 'https://localhost:7236/api';
+
+private readonly primaryBaseUrl = 'http://160.191.150.185:8071/api';
+  private readonly fallbackBaseUrl = 'http://160.191.150.185:8071/api';
+
+  //  private readonly primaryBaseUrl = 'https://localhost:7002/api';
+  // private readonly fallbackBaseUrl = 'https://localhost:7236/api';
 
   //  private readonly primaryBaseUrl = 'http://lmslands.runasp.net/api';
   //private readonly fallbackBaseUrl = 'http://lmslands.runasp.net/api/';
