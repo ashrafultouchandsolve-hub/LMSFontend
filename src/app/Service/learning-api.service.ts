@@ -98,15 +98,15 @@ export type SaveEnrollmentPayload = {
 export class LearningApiService {
   private readonly http = inject(HttpClient);
   private readonly jwtService = inject(JwtService);
-
-private readonly primaryBaseUrl = 'http://160.191.150.185:8071/api';
+  private readonly primaryBaseUrl = 'http://160.191.150.185:8071/api';
   private readonly fallbackBaseUrl = 'http://160.191.150.185:8071/api';
 
   //  private readonly primaryBaseUrl = 'https://localhost:7002/api';
   // private readonly fallbackBaseUrl = 'https://localhost:7236/api';
 
-  //  private readonly primaryBaseUrl = 'http://lmslands.runasp.net/api';
-  //private readonly fallbackBaseUrl = 'http://lmslands.runasp.net/api/';
+  //  private readonly primaryBaseUrl = 'https://localhost:7002/api';
+  // private readonly fallbackBaseUrl = 'https://localhost:7236/api';
+
 
 
   private activeBaseUrl = this.primaryBaseUrl;
@@ -135,48 +135,34 @@ private readonly primaryBaseUrl = 'http://160.191.150.185:8071/api';
       }),
     );
   }
-            //quiz
-getQuizzesByLesson(lessonId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/quiz/getbylesson/${lessonId}`)
-  );
-}
+  // quiz
+  getQuizzesByLesson(lessonId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/quiz/getbylesson/${lessonId}`));
+  }
 
-addQuiz(lessonId: string, dto: any): Observable<any> {
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/quiz/add/${lessonId}`, dto)
-  );
-}
+  addQuiz(lessonId: string, dto: any): Observable<any> {
+    return this.withFallback((base) => this.http.post<any>(`${base}/quiz/add/${lessonId}`, dto));
+  }
 
-deleteQuiz(quizId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.delete<any>(`${base}/quiz/delete/${quizId}`)
-  );
-}
+  deleteQuiz(quizId: string): Observable<any> {
+    return this.withFallback((base) => this.http.delete<any>(`${base}/quiz/delete/${quizId}`));
+  }
 
-hasAttemptedQuiz(lessonId: string, userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/quiz/hasattempted/${lessonId}/${userId}`)
-  );
-}
+  hasAttemptedQuiz(lessonId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/quiz/hasattempted/${lessonId}/${userId}`));
+  }
 
-submitQuiz(lessonId: string, dto: any): Observable<any> {
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/quiz/submit/${lessonId}`, dto)
-  );
-}
+  submitQuiz(lessonId: string, dto: any): Observable<any> {
+    return this.withFallback((base) => this.http.post<any>(`${base}/quiz/submit/${lessonId}`, dto));
+  }
 
-getQuizProgress(lessonId: string, userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/quiz/progress/${lessonId}/${userId}`)
-  );
-}
+  getQuizProgress(lessonId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/quiz/progress/${lessonId}/${userId}`));
+  }
 
-getOverallQuizProgress(userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/quiz/overall-progress/${userId}`)
-  );
-}
+  getOverallQuizProgress(userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/quiz/overall-progress/${userId}`));
+  }
 
 
 
@@ -218,19 +204,15 @@ getOverallQuizProgress(userId: string): Observable<any> {
     );
   }
 
-getLessonsByCourse(courseId: string): Observable<any> {
-  return this.withFallback((baseUrl) =>
-    this.http.get<any>(`${baseUrl}/lesson/getbycourse/${courseId}`),
-  );
-}
+  getLessonsByCourse(courseId: string): Observable<any> {
+    return this.withFallback((baseUrl) => this.http.get<any>(`${baseUrl}/lesson/getbycourse/${courseId}`));
+  }
 
-getEnrollmentCount(courseId: string): Observable<{ courseId: string; totalEnrollment: number }> {
-  return this.withFallback((baseUrl) =>
-    this.http.get<{ courseId: string; totalEnrollment: number }>(
-      `${baseUrl}/enrollment/count/${courseId}`
-    )
-  );
-}
+  getEnrollmentCount(courseId: string): Observable<{ courseId: string; totalEnrollment: number }> {
+    return this.withFallback((baseUrl) =>
+      this.http.get<{ courseId: string; totalEnrollment: number }>(`${baseUrl}/enrollment/count/${courseId}`),
+    );
+  }
 
   createLesson(payload: SaveLessonPayload): Observable<ApiResponse<string>> {
     return this.withFallback((baseUrl) =>
@@ -362,26 +344,23 @@ getEnrollmentCount(courseId: string): Observable<{ courseId: string; totalEnroll
     return `${this.localEnrollmentKeyPrefix}_${userId}`;
   }
 
- buildDownloadUrl(path: string | null): string {
-  if (!path) {
-    return '';
+  buildDownloadUrl(path: string | null): string {
+    if (!path) {
+      return '';
+    }
+
+    const baseWithoutApi = this.activeBaseUrl.replace('/api', '');
+
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    if (path.startsWith('/uploads/')) {
+      return `${baseWithoutApi}${path}`;
+    }
+
+    return `${baseWithoutApi}/uploads/${path}`;
   }
-
-  const baseWithoutApi = this.activeBaseUrl.replace('/api', '');
-
-  // already full URL হলে সেটাই return করো
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-
-  // /uploads/ দিয়ে শুরু হলে সরাসরি base যোগ করো
-  if (path.startsWith('/uploads/')) {
-    return `${baseWithoutApi}${path}`;
-  }
-
-  // Images/ বা Videos/ দিয়ে শুরু হলে /uploads/ যোগ করো
-  return `${baseWithoutApi}/uploads/${path}`;
-}
 
   buildStreamUrl(path: string | null): string {
     if (!path) {
@@ -393,145 +372,107 @@ getEnrollmentCount(courseId: string): Observable<{ courseId: string; totalEnroll
   }
 
   saveVideoProgress(lessonId: string, dto: { userId: string; watchedSeconds: number; totalSeconds: number }): Observable<any> {
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/videoprogress/save/${lessonId}`, dto)
-  );
-}
+    return this.withFallback((base) => this.http.post<any>(`${base}/videoprogress/save/${lessonId}`, dto));
+  }
 
-getVideoProgress(lessonId: string, userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/videoprogress/get/${lessonId}/${userId}`)
-  );
-}
+  getVideoProgress(lessonId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/videoprogress/get/${lessonId}/${userId}`));
+  }
 
-getVideoHistory(userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/videoprogress/history/${userId}`)
-  );
-}
+  getVideoHistory(userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/videoprogress/history/${userId}`));
+  }
 
-// ─── RATING ENDPOINTS ─────────────────────────────────
-addOrUpdateRating(courseId: string, userId: string, rating: number, feedback: string = ''): Observable<any> {
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/courserating/add`, {
-      courseId,
-      userId,
-      rating,
-      feedback
-    })
-  );
-}
+  // ─── RATING ENDPOINTS ─────────────────────────────────
+  addOrUpdateRating(courseId: string, userId: string, rating: number, feedback: string = ''): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.post<any>(`${base}/courserating/add`, {
+        courseId,
+        userId,
+        rating,
+        feedback,
+      }),
+    );
+  }
 
-getRatingSummary(courseId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/courserating/summary/${courseId}`)
-  );
-}
+  getRatingSummary(courseId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/courserating/summary/${courseId}`));
+  }
 
-getMyRatings(userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/courserating/my-ratings/${userId}`)
-  );
-}
+  getMyRatings(userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/courserating/my-ratings/${userId}`));
+  }
 
-getUserCourseRating(courseId: string, userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/courserating/${courseId}/${userId}`)
-  );
-}
+  getUserCourseRating(courseId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/courserating/${courseId}/${userId}`));
+  }
 
-deleteRating(ratingId: string, userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.delete<any>(`${base}/courserating/${ratingId}/${userId}`)
-  );
-}
+  deleteRating(ratingId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.delete<any>(`${base}/courserating/${ratingId}/${userId}`));
+  }
 
-getCourseComments(courseId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/coursecomment/course/${courseId}`)
-  );
-}
+  getCourseComments(courseId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/coursecomment/course/${courseId}`));
+  }
 
-getCourseComment(commentId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/coursecomment/${commentId}`)
-  );
-}
+  getCourseComment(commentId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/coursecomment/${commentId}`));
+  }
 
-getUserComments(userId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/coursecomment/user/${userId}`)
-  );
-}
+  getUserComments(userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/coursecomment/user/${userId}`));
+  }
 
-addCourseComment(payload: SaveCourseCommentPayload): Observable<any> {
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/coursecomment/add`, payload)
-  );
-}
+  addCourseComment(payload: SaveCourseCommentPayload): Observable<any> {
+    return this.withFallback((base) => this.http.post<any>(`${base}/coursecomment/add`, payload));
+  }
 
-updateCourseComment(commentId: string, payload: Partial<SaveCourseCommentPayload>): Observable<any> {
-  return this.withFallback(base =>
-    this.http.put<any>(`${base}/coursecomment/update/${commentId}`, payload)
-  );
-}
+  updateCourseComment(commentId: string, payload: Partial<SaveCourseCommentPayload>): Observable<any> {
+    return this.withFallback((base) => this.http.put<any>(`${base}/coursecomment/update/${commentId}`, payload));
+  }
 
-deleteCourseComment(commentId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.delete<any>(`${base}/coursecomment/delete/${commentId}`)
-  );
-}
+  deleteCourseComment(commentId: string): Observable<any> {
+    return this.withFallback((base) => this.http.delete<any>(`${base}/coursecomment/delete/${commentId}`));
+  }
 
-checkWishlist(courseId:string ,userId: string):Observable<any>{
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/wishlist/check/${courseId}/${userId}`)
-  );
-}
+  checkWishlist(courseId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/wishlist/check/${courseId}/${userId}`));
+  }
 
-toggleWishlist(courseId:string ,userId: string):Observable<any>{
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/wishlist/toggle/${courseId}/${userId}`,{})
-  );
-}
-getWishlist(userId: string): Observable<any>{
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/wishlist/${userId}`)
-  );
+  toggleWishlist(courseId: string, userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.post<any>(`${base}/wishlist/toggle/${courseId}/${userId}`, {}));
+  }
 
-}
+  getWishlist(userId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/wishlist/${userId}`));
+  }
 
-getLeaderboard(): Observable<any>{
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/quiz/leaderboard`)
-  );
-}
+  getLeaderboard(): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/quiz/leaderboard`));
+  }
 
-// Enrolled students list (teacher এর জন্য)
-getEnrolledStudents(courseId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/enrollment/students/${courseId}`)
-  );
-}
+  // Enrolled students list (teacher এর জন্য)
+  getEnrolledStudents(courseId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/enrollment/students/${courseId}`));
+  }
 
-// Certificate issue করা (teacher করবে)
-getMyCertificates(userId: string): Observable<any> {
-  return this.withFallback(base =>
+  // Certificate issue করা (teacher করবে)
+  getMyCertificates(userId: string): Observable<any> {
+    return this.withFallback((base) =>
     this.http.get<any>(`${base}/certificate/my/${userId}`)
-  );
-}
+    );
+  }
 
-issueCertificate(payload: {
-  userId: string; courseId: string;
-  studentName: string; courseName: string;
-}): Observable<any> {
-  return this.withFallback(base =>
-    this.http.post<any>(`${base}/certificate/issue`, payload)
-  );
-}
+  issueCertificate(payload: {
+    userId: string;
+    courseId: string;
+    studentName: string;
+    courseName: string;
+  }): Observable<any> {
+    return this.withFallback((base) => this.http.post<any>(`${base}/certificate/issue`, payload));
+  }
 
-getCourseCertificates(courseId: string): Observable<any> {
-  return this.withFallback(base =>
-    this.http.get<any>(`${base}/certificate/course/${courseId}`)
-  );
-}
+  getCourseCertificates(courseId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/certificate/course/${courseId}`));
+  }
 }
