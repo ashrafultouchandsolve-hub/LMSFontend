@@ -117,7 +117,7 @@ const EN: Translations = {
   loginRemember: 'Remember me', loginForgot: 'Forgot password?', loginLoggingIn: 'Logging in...', loginBtn: 'Login now',
   loginNoAccount: "Don't have an account?", loginCreateOne: 'Create one', loginRedirecting: 'Logging in and launching your home page...',
   registerEyebrow: 'Create account', registerTitle: 'Join the learning platform.',
-  registerLead: 'Set up your profile to track lessons, practice streaks, and progress inside the same dark blue workspace.',
+  registerLead: 'Create your learning profile to track courses, quizzes, assignments, and monitor your progress all in one place.',
   registerNewLearner: 'New learner', registerStartStrong: 'Start strong from day one',
   registerF1Title: 'Personal dashboard', registerF1Desc: 'Get a clean progress view for every learning path you join.',
   registerF2Title: 'Structured onboarding', registerF2Desc: 'Move into a guided setup flow with a focused interface.',

@@ -1,0 +1,281 @@
+<div class="admin-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-text">Admin Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab() === 'dashboard'" (click)="setTab('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'teachers'" (click)="setTab('teachers')">
+        <span class="nav-icon">🎓</span> Teachers
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'students'" (click)="setTab('students')">
+        <span class="nav-icon">👨‍🎓</span> Students
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'courses'" (click)="setTab('courses')">
+        <span class="nav-icon">📚</span> Courses
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'comments'" (click)="setTab('comments')">
+        <span class="nav-icon">💬</span> Comments
+      </button>
+    </nav>
+    <button class="logout-btn" (click)="logout()">
+      <span>🚪</span> Logout
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    @if (message()) {
+    <div class="toast" [class.toast-error]="messageType() === 'error'">{{ message() }}</div>
+    }
+    @if (isLoading()) {
+    <div class="loading-bar"></div>
+    }
+
+    <!-- ========== DASHBOARD ========== -->
+    @if (activeTab() === 'dashboard') {
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Overview of your platform</p>
+    </div>
+    @if (stats()) {
+    <div class="stats-grid">
+      <div class="stat-card stat-blue">
+
+        <div class="stat-value">{{ stats()!.totalStudents }}</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card stat-green">
+
+        <div class="stat-value">{{ stats()!.totalTeachers }}</div>
+        <div class="stat-label">Active Teachers</div>
+      </div>
+      <div class="stat-card stat-orange">
+
+        <div class="stat-value">{{ stats()!.pendingTeachers }}</div>
+        <div class="stat-label">Pending Approvals</div>
+      </div>
+      <div class="stat-card stat-purple">
+
+        <div class="stat-value">{{ stats()!.totalCourses }}</div>
+        <div class="stat-label">Total Courses</div>
+      </div>
+      <div class="stat-card stat-teal">
+
+        <div class="stat-value">{{ stats()!.totalEnrollments }}</div>
+        <div class="stat-label">Total Enrollments</div>
+      </div>
+    </div>
+    @if (stats()!.pendingTeachers > 0) {
+    <div class="alert-banner">
+      <span>⚠️</span>
+      <span>{{ stats()!.pendingTeachers }} teacher(s) waiting for approval.</span>
+      <button class="alert-action" (click)="setTab('teachers')">Review Now →</button>
+    </div>
+    }
+    }
+    }
+
+    <!-- ========== TEACHERS ========== -->
+    @if (activeTab() === 'teachers') {
+    <div class="page-header">
+      <h1>Teachers</h1>
+      <p>Manage teacher accounts and approvals</p>
+    </div>
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search by name or email..."
+        [(ngModel)]="teacherSearch"
+      />
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Courses</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (teacher of filteredTeachers(); track teacher.id) {
+          <tr>
+            <td>{{ teacher.fullName }}</td>
+            <td class="email-cell">{{ teacher.email }}</td>
+            <td>{{ teacher.courseCount }}</td>
+            <td><span class="badge" [class]="'badge-' + teacher.status.toLowerCase()">{{ teacher.status }}</span></td>
+            <td class="actions-cell">
+              @if (teacher.status === 'Pending') {
+              <button class="btn btn-approve" (click)="approveTeacher(teacher.id)">Approve</button>
+              }
+              @if (teacher.status === 'Approved') {
+              <button class="btn btn-block" (click)="blockTeacher(teacher.id)">Block</button>
+              }
+              @if (teacher.status === 'Blocked') {
+              <button class="btn btn-approve" (click)="approveTeacher(teacher.id)">Unblock</button>
+              }
+            </td>
+          </tr>
+          }
+          @empty { <tr>
+            <td colspan="5" class="empty-row">No teachers found.</td>
+          </tr> }
+        </tbody>
+      </table>
+    </div>
+    }
+
+    <!-- ========== STUDENTS ========== -->
+    @if (activeTab() === 'students') {
+    <div class="page-header">
+      <h1>Students</h1>
+      <p>Manage student accounts</p>
+    </div>
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search by name or email..."
+        [(ngModel)]="studentSearch"
+      />
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Enrolled</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of filteredStudents(); track student.id) {
+          <tr>
+            <td>{{ student.fullName }}</td>
+            <td class="email-cell">{{ student.email }}</td>
+            <td>{{ student.enrolledCourses }}</td>
+            <td><span class="badge" [class]="'badge-' + student.status.toLowerCase()">{{ student.status }}</span></td>
+            <td class="actions-cell">
+              @if (student.status === 'Active') {
+              <button class="btn btn-block" (click)="blockStudent(student.id)">Block</button>
+              } @else {
+              <button class="btn btn-approve" (click)="unblockStudent(student.id)">Unblock</button>
+              }
+            </td>
+          </tr>
+          }
+          @empty { <tr>
+            <td colspan="5" class="empty-row">No students found.</td>
+          </tr> }
+        </tbody>
+      </table>
+    </div>
+    }
+
+    <!-- ========== COURSES ========== -->
+    @if (activeTab() === 'courses') {
+    <div class="page-header">
+      <h1>Courses</h1>
+      <p>View and manage all courses</p>
+    </div>
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search by course title or teacher..."
+        [(ngModel)]="courseSearch"
+      />
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Teacher</th>
+            <th>Price</th>
+            <th>Enrollments</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (course of filteredCourses(); track course.id) {
+          <tr>
+            <td>{{ course.title }}</td>
+            <td>{{ course.teacherName }}</td>
+            <td>৳{{ course.price }}</td>
+            <td>{{ course.enrollmentCount }}</td>
+            <td class="actions-cell">
+              <button class="btn btn-delete" (click)="deleteCourse(course.id)">Delete</button>
+            </td>
+          </tr>
+          }
+          @empty { <tr>
+            <td colspan="5" class="empty-row">No courses found.</td>
+          </tr> }
+        </tbody>
+      </table>
+    </div>
+    }
+
+    <!-- ========== COMMENTS ========== -->
+    @if (activeTab() === 'comments') {
+    <div class="page-header">
+      <h1>Comments</h1>
+      <p>Moderate course comments</p>
+    </div>
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search by username, course, or content..."
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+    <div class="comments-list">
+      @for (comment of filteredComments(); track comment.id) {
+      <div class="comment-card" [ngClass]="{ 'flagged-comment': comment.isFlagged }">
+        <div class="comment-meta">
+          <span class="comment-user"> {{ comment.userName }}</span>
+          <span class="comment-course">{{ comment.courseTitle }}</span>
+          <span class="comment-date">{{ comment.createdAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+        </div>
+
+        @if (editingCommentId() === comment.id) {
+        <!-- Edit mode -->
+        <div class="edit-mode">
+          <textarea class="edit-textarea" [(ngModel)]="editingContent" rows="3"></textarea>
+          <div class="edit-actions">
+            <button class="btn btn-approve" (click)="saveEdit(comment.id)">Save</button>
+            <button class="btn btn-block" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </div>
+        } @else {
+        <!-- View mode -->
+        <p class="comment-content">{{ comment.content }}</p>
+        <div class="comment-actions">
+          <button class="btn btn-edit" (click)="startEdit(comment)">Edit</button>
+          <button class="btn btn-delete" (click)="deleteComment(comment.id)">Delete</button>
+        </div>
+        }
+      </div>
+      }
+      @empty {
+      <div class="empty-comments">No comments found.</div>
+      }
+    </div>
+    }
+
+  </main>
+</div>

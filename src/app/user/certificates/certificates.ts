@@ -94,7 +94,7 @@ export class Certificates implements OnInit {
             id: issuedCert?.id || `${course.id}-locked`,
             courseId: course.id,
             courseName: course.title,
-            studentName: this.auth.getCurrentUser()?.name || 'Student',
+            studentName: this.auth.getCurrentUser()?.fullName || this.userName() || 'Student',
             issuedAt: issuedCert?.issuedAt,
             isIssued: !!issuedCert
           };

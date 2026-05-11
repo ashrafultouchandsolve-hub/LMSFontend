@@ -1,8 +1,9 @@
 <main class="auth-shell">
-	<div class="auth-glow auth-glow-left"></div>
-	<div class="auth-glow auth-glow-right"></div>
+	<div class="auth-bg-decor auth-decor-1"></div>
+	<div class="auth-bg-decor auth-decor-2"></div>
+	<div class="auth-bg-decor auth-decor-3"></div>
 
-	<div style="position:fixed;top:16px;right:16px;z-index:999;">
+	<div class="lang-toggle-fixed">
 		<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
 			<span>🌐</span>
 			<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
@@ -10,54 +11,91 @@
 	</div>
 
 	@if (!isRedirecting()) {
-		<section class="auth-card card-surface">
-			<header class="auth-copy">
-				<p class="eyebrow">{{ lang.t().loginEyebrow }}</p>
-				<h1>{{ lang.t().loginTitle }}</h1>
-				<p class="lead">{{ lang.t().loginLead }}</p>
-			</header>
+		<div class="auth-container">
+			<div class="auth-hero animate-hero">
+				<h2 class="hero-title">{{ lang.t().loginTitle }}</h2>
+				<p class="hero-subtitle">{{ lang.t().loginLead }}</p>
+			</div>
 
-			<div class="auth-layout">
-				<aside class="auth-panel">
-					<div class="auth-panel-header">
-						<span class="panel-pill">{{ lang.t().loginSecure }}</span>
-						<h2>{{ lang.t().loginMode }}</h2>
-					</div>
-					<ul class="feature-list">
-						<li><strong>{{ lang.t().loginF1Title }}</strong><span>{{ lang.t().loginF1Desc }}</span></li>
-						<li><strong>{{ lang.t().loginF2Title }}</strong><span>{{ lang.t().loginF2Desc }}</span></li>
-						<li><strong>{{ lang.t().loginF3Title }}</strong><span>{{ lang.t().loginF3Desc }}</span></li>
-					</ul>
-				</aside>
-
+			<div class="auth-card animate-card">
 				<form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submit()">
-					<div class="field">
+					<div class="form-header">
+						<p class="form-label">{{ lang.t().loginEyebrow }}</p>
+					</div>
+
+					<div class="field animate-field" style="--delay: 1">
 						<label for="email">{{ lang.t().loginEmail }}</label>
-						<input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+						<div class="input-wrapper">
+							<input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+						</div>
 						@if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
 							<p class="field-error">{{ lang.t().loginEmailError }}</p>
 						}
 					</div>
-					<div class="field">
+
+					<div class="field animate-field" style="--delay: 2">
 						<label for="password">{{ lang.t().loginPassword }}</label>
-						<input id="password" type="password" formControlName="password" placeholder="••••••••" />
+						<div class="input-wrapper">
+							<input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••" />
+						
+						</div>
 						@if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
 							<p class="field-error">{{ lang.t().loginPasswordError }}</p>
 						}
 					</div>
-					<div class="form-row">
-						<label class="remember"><input type="checkbox" /><span>{{ lang.t().loginRemember }}</span></label>
-						<a href="#" class="forgot-link">{{ lang.t().loginForgot }}</a>
-					</div>
-					<button type="submit" class="submit-button" [disabled]="isSubmitting()">
-						@if (isSubmitting()) { {{ lang.t().loginLoggingIn }} } @else { {{ lang.t().loginBtn }} }
+
+				<div class="form-options animate-field" style="--delay: 3">
+					<label class="remember"><input type="checkbox" /><span>{{ lang.t().loginRemember }}</span></label>
+					<a href="#" class="forgot-link">{{ lang.t().loginForgot }}</a>
+				</div>
+
+					<button type="submit" class="submit-button submit-glow" [disabled]="isSubmitting()" style="--delay: 4">
+						<span class="btn-inner">
+							@if (isSubmitting()) { {{ lang.t().loginLoggingIn }} } @else { {{ lang.t().loginBtn }} }
+						</span>
 					</button>
-					@if (apiMessage()) { <p class="auth-footer">{{ apiMessage() }}</p> }
-					<p class="auth-footer">{{ lang.t().loginNoAccount }} <a routerLink="/register">{{ lang.t().loginCreateOne }}</a></p>
-				</form>
-			</div>
-		</section>
-	}
+
+				@if (apiMessage()) {
+					<p class="auth-message">{{ apiMessage() }}</p>
+				}
+
+				<div class="social-divider animate-field" style="--delay: 5">
+					<span class="divider-line"></span>
+					<span class="divider-text">Or sign in with</span>
+					<span class="divider-line"></span>
+				</div>
+
+				<div class="social-buttons animate-field" style="--delay: 6">
+					<button type="button" class="social-btn google-btn" title="Sign in with Google">
+						<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+							<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+							<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+							<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+							<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+						</svg>
+					</button>
+					<button type="button" class="social-btn facebook-btn" title="Sign in with Facebook">
+						<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+							<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+						</svg>
+					</button>
+					<button type="button" class="social-btn apple-btn" title="Sign in with Apple">
+						<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+							<path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.05 2.29.89 3.04.89.9 0 2.29-1.1 3.86-1.04 1.61.08 3.07.62 3.85 1.84-3.54 2.12-2.84 6.75.4 7.9-1.61 2.38-3.07 3.78-5.15 4.09m-2.88-10.41c-1.02-1.23-.46-2.91 1.12-3.37 1.38-.38 2.73.84 2.83 1.92-.8.73-1.45 1.07-2.72.88-.45-.04-.89-.2-1.23-1.43z"/>
+						</svg>
+					</button>
+				</div>
+
+				<p class="auth-divider animate-field" style="--delay: 7">{{ lang.t().loginNoAccount }}</p>
+				<a routerLink="/register" class="link-register animate-field" style="--delay: 10">Create One→</a>
+					<div class="auth-links">
+					
+					<a routerLink="/homepage" class="link-home animate-field" style="--delay: 10">{{ lang.t().registerGoHome }}→</a>
+				</div>
+			</form>
+		</div>
+	</div>
+}
 
 	@if (isRedirecting()) {
 		<section class="redirect-loader" aria-live="polite">

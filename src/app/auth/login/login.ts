@@ -18,6 +18,7 @@ export class Login {
   protected readonly isSubmitting = signal(false);
   protected readonly isRedirecting = signal(false);
   protected readonly apiMessage = signal('');
+  protected readonly showPassword = signal(false);
   readonly lang = inject(LanguageService);
 
   protected readonly loginForm = new FormGroup({
@@ -46,11 +47,19 @@ export class Login {
       next: async (response) => {
         this.isSubmitting.set(false);
         this.apiMessage.set(response.message ?? 'Login successful. Preparing your dashboard...');
-
         this.isRedirecting.set(true);
-        await this.delay(2000);
-        
-        // Return URL থেকে redirect করুন অথবা homepage এ যান
+        await this.delay(1500);
+
+        // ✅ Role check করে redirect করো
+        const user = this.authService.getCurrentUser() as { role?: number } | null;
+
+        // Admin = 2
+        if (user?.role === 2) {
+          await this.router.navigateByUrl('/admin');
+          return;
+        }
+
+        // অন্যদের জন্য returnUrl বা homepage
         const returnUrl = this.route.snapshot.queryParams['returnUrl'];
         await this.router.navigateByUrl(returnUrl || '/homepage');
       },
@@ -66,5 +75,9 @@ export class Login {
     return new Promise((resolve) => {
       window.setTimeout(() => resolve(), ms);
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(v => !v);
   }
 }

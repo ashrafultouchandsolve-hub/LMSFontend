@@ -17,6 +17,9 @@ export class Register {
 
   protected readonly isSubmitting = signal(false);
   protected readonly apiMessage = signal('');
+  protected readonly isTeacherPending = signal(false); // ✅ Teacher pending state
+  protected readonly showPassword = signal(false);
+  protected readonly showConfirmPassword = signal(false);
   readonly lang = inject(LanguageService);
 
   protected readonly registerForm = new FormGroup({
@@ -61,40 +64,31 @@ export class Register {
     this.isSubmitting.set(true);
 
     this.authService
-      .register(
-        value.fullname,
-        value.email,
-        value.password,
-        Number(value.role)
-      )
+      .register(value.fullname, value.email, value.password, Number(value.role))
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.isSubmitting.set(false);
-          this.apiMessage.set(response.message ?? 'Registration successful! Redirecting to onboarding...');
+
+          // ✅ Teacher register করলে pending message দেখাও
+          if (response.status === 'Pending') {
+            this.isTeacherPending.set(true);
+            this.apiMessage.set('Registration successful! Your account is pending admin approval. You will be able to login once approved.');
+            return;
+          }
+
+          // Student → onboarding এ যাও
+          this.apiMessage.set(response.message ?? 'Registration successful! Redirecting...');
           setTimeout(() => {
             this.router.navigateByUrl('/onboarding-preferences');
           }, 2000);
         },
         error: (error: HttpErrorResponse) => {
           this.isSubmitting.set(false);
-
           const extractedMessage = this.extractErrorMessage(error);
-          if (extractedMessage) {
-            this.apiMessage.set(extractedMessage);
-            return;
-          }
-
-          if (typeof error.error === 'string' && error.error.trim()) {
-            this.apiMessage.set(error.error);
-            return;
-          }
-
+          if (extractedMessage) { this.apiMessage.set(extractedMessage); return; }
+          if (typeof error.error === 'string' && error.error.trim()) { this.apiMessage.set(error.error); return; }
           const serverMessage = error.error?.message as string | undefined;
-          if (serverMessage) {
-            this.apiMessage.set(serverMessage);
-            return;
-          }
-
+          if (serverMessage) { this.apiMessage.set(serverMessage); return; }
           this.apiMessage.set('Registration failed. Please try again.');
         },
       });
@@ -102,16 +96,19 @@ export class Register {
 
   private extractErrorMessage(error: HttpErrorResponse): string {
     const errors = error.error?.errors as Record<string, string[]> | undefined;
-
     if (errors) {
       const firstKey = Object.keys(errors)[0];
       const firstError = firstKey ? errors[firstKey]?.[0] : undefined;
-
-      if (firstError) {
-        return firstError;
-      }
+      if (firstError) return firstError;
     }
-
     return '';
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(v => !v);
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword.update(v => !v);
   }
 }
