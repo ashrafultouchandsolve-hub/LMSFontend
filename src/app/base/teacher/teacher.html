@@ -1,7 +1,7 @@
 <div class="teacher-root">
 <nav class="top-navbar top-navbar--teacher">
   <a class="brand" routerLink="/homepage">
-    <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+    <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" width="180" height="40" />
   </a>
   <div class="topbar-nav">
     <a routerLink="/homepage">Home</a>
@@ -40,7 +40,9 @@
       <div class="notice" [class.notice-error]="noticeType() === 'error'">{{ notice() }}</div>
     }
 
-    @if (selectedCourse() === null) {
+    @if (activeSidebarKey() === 'teacher-profile') {
+      <app-teacher-profile></app-teacher-profile>
+    } @else if (selectedCourse() === null) {
       <header class="toolbar">
         <div>
           <h1>Courses</h1>
@@ -196,9 +198,29 @@
             <input type="text" formControlName="title" />
           </label>
 
-          <label>
+         <label>
             <span>Category *</span>
-            <input type="text" formControlName="category" />
+            <select formControlName="category" class="category-select">
+              <optgroup label="📘 SSC">
+                <option value="SSC 2027">SSC 2027 — Final Preparation</option>
+                <option value="SSC 2026">SSC 2026 — Final Preparation</option>
+              </optgroup>
+              <optgroup label="📗 HSC">
+                <option value="HSC 2027">HSC 2027 — Final Preparation</option>
+                <option value="HSC 2026">HSC 2026 — Final Preparation</option>
+              </optgroup>
+              <optgroup label="🎯 Admission">
+                <option value="Admission English">Admission English</option>
+                <option value="Admission Science">Admission Science</option>
+              </optgroup>
+              <optgroup label="⚡ Skills">
+                <option value="Skills Development">Skills Development</option>
+                <option value="Communication">Communication Skills</option>
+              </optgroup>
+              <optgroup label="📚 Other">
+                <option value="General">General</option>
+              </optgroup>
+            </select>
           </label>
 
           <label class="full">

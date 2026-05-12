@@ -22,6 +22,9 @@
       <button class="nav-item" [class.active]="activeTab() === 'comments'" (click)="setTab('comments')">
         <span class="nav-icon">💬</span> Comments
       </button>
+      <button class="nav-item" [class.active]="activeTab() === 'store-items'" (click)="setTab('store-items')">
+        <span class="nav-icon">🛍️</span> Store Items
+      </button>
     </nav>
     <button class="logout-btn" (click)="logout()">
       <span>🚪</span> Logout
@@ -275,6 +278,11 @@
       <div class="empty-comments">No comments found.</div>
       }
     </div>
+    }
+
+    <!-- ========== STORE ITEMS ========== -->
+    @if (activeTab() === 'store-items') {
+    <app-admin-item></app-admin-item>
     }
 
   </main>

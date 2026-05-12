@@ -20,6 +20,7 @@ import { QuizAttemptComponent } from './base/quiz-attempt/quiz-attempt';
 import { VideoHistoryComponent } from './base/video-history/video-history';
 import { Leaderboard } from './base/leaderboard/leaderboard';
 import { EnrolledStudents } from './base/enrolled-students/enrolled-students';
+import { FreeClass } from './base/free-class/free-class';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'homepage', pathMatch: 'full' },
@@ -51,6 +52,15 @@ export const routes: Routes = [
     { path: 'quiz/:lessonId', component: QuizAttemptComponent, canActivate: [authGuard] },
     { path: 'history', component: VideoHistoryComponent, canActivate: [authGuard] },
     { path: 'enrolled-students/:courseId', component: EnrolledStudents, canActivate: [authGuard, teacherGuard] },
+    {
+  path: 'instructors',
+  loadComponent: () => import('./base/instructors/instructors').then(m => m.Instructors),
+},
+{
+  path: 'store',
+  loadComponent: () => import('./base/store/store').then(m => m.Store),
+},
+{path: 'free-class', component: FreeClass, canActivate: [authGuard]},
     { path: 'leaderboard', component: Leaderboard },
     { path: '**', redirectTo: 'homepage' },
 ];

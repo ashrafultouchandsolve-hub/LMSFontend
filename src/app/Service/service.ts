@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environments';
 
 export type LoginRequest = {
   email: string;
@@ -28,9 +29,9 @@ export type LoginResponse = {
 })
 export class Service {
   private readonly http = inject(HttpClient);
-   private readonly baseUrl = 'https://localhost:7002/api';
 
-  //private readonly baseUrl = 'http://160.191.150.185:8071/api';
+   private readonly baseUrl = environment.baseUrl;
+
 
   private readonly loginUrl = `${this.baseUrl}/register/login`;
   private readonly registerUrl = `${this.baseUrl}/register/register`;

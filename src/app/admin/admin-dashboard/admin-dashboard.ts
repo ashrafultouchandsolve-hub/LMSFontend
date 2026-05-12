@@ -4,12 +4,13 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminService, DashboardStats, AdminTeacher, AdminStudent, AdminCourse, AdminComment } from '../../Service/admin.service';
 import { AuthService } from '../../Service/auth.service';
+import { AdminItem } from '../admin-item/admin-item';
 
-type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'comments';
+type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'comments' | 'store-items';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminItem],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -108,6 +109,7 @@ export class AdminDashboard implements OnInit {
       case 'students':  this.loadStudents();  break;
       case 'courses':   this.loadCourses();   break;
       case 'comments':  this.loadComments();  break;
+      case 'store-items':  break;
     }
   }
 

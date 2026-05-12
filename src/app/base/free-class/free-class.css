@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.free-class-page {
+  min-height: 100vh;
+  background: #f8f9ff;
+  font-family: 'Sora', sans-serif;
+}
+
+/* Navbar */
+.top-navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 6%; height: 60px;
+  background: #fff; border-bottom: 1px solid #e5e7eb;
+}
+.brand-logo { height: 36px; }
+.nav-button { padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; }
+.nav-button-ghost { background: #f3f4f6; color: #374151; }
+
+/* Hero */
+.fc-hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #0d1b0a, #1a3a1a);
+  padding: 80px 8% 60px; text-align: center;
+}
+.fc-hero-content { position: relative; z-index: 2; }
+.fc-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: #86efac; padding: 5px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.fc-hero h1 { font-size: clamp(32px, 4vw, 52px); font-weight: 800; color: #fff; margin-bottom: 14px; letter-spacing: -1px; }
+.fc-accent { background: linear-gradient(90deg, #86efac, #facc15); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.fc-hero p { font-size: 16px; color: rgba(255,255,255,0.7); }
+
+.fc-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.2; }
+.fc-blob--1 { width: 350px; height: 350px; background: #22c55e; top: -100px; right: -80px; }
+.fc-blob--2 { width: 280px; height: 280px; background: #facc15; bottom: -80px; left: -60px; }
+
+/* Body */
+.fc-body { padding: 60px 8%; }
+
+.fc-coming-soon {
+  max-width: 480px; margin: 0 auto;
+  text-align: center;
+  background: #fff; border-radius: 20px;
+  padding: 60px 40px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  border: 1px solid #e5e7eb;
+}
+.fc-icon { font-size: 64px; margin-bottom: 20px; }
+.fc-coming-soon h2 { font-size: 24px; font-weight: 800; color: #0d0f14; margin-bottom: 12px; }
+.fc-coming-soon p { font-size: 15px; color: #6b7280; line-height: 1.7; margin-bottom: 28px; }
+
+.fc-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff; padding: 12px 28px; border-radius: 10px;
+  font-size: 15px; font-weight: 700; text-decoration: none;
+  box-shadow: 0 4px 14px rgba(34,197,94,0.3);
+  transition: transform 0.2s;
+}
+.fc-btn:hover { transform: translateY(-2px); }

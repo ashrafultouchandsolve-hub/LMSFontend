@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, debounce, map, of, tap, throwError } from 'rxjs';
 import { JwtService } from './jwt.service';
+import { environment } from '../../environments/environments';
 
 type ApiResponse<T> = {
   message: string;
@@ -98,10 +99,9 @@ export type SaveEnrollmentPayload = {
 export class LearningApiService {
   private readonly http = inject(HttpClient);
   private readonly jwtService = inject(JwtService);
-  // private readonly primaryBaseUrl = 'http://160.191.150.185:8071/api';
-  // private readonly fallbackBaseUrl = 'http://160.191.150.185:8071/api';
 
-   private readonly primaryBaseUrl = 'https://localhost:7002/api';
+
+   private readonly primaryBaseUrl = environment.baseUrl;
   private readonly fallbackBaseUrl = 'https://localhost:7236/api';
 
 
@@ -472,4 +472,69 @@ export class LearningApiService {
   getCourseCertificates(courseId: string): Observable<any> {
     return this.withFallback((base) => this.http.get<any>(`${base}/certificate/course/${courseId}`));
   }
-}
+
+  // ─── INSTRUCTOR/TEACHER PROFILE ENDPOINTS ─────────────────────────────────
+  getInstructorProfile(teacherId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/instructor/${teacherId}`));
+  }
+
+  updateInstructorProfile(dto: { bio?: string; facebookLink?: string; youTubeLink?: string }): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.put<any>(`${base}/instructor/update-profile`, dto),
+    );
+  }
+
+  uploadInstructorProfileImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.withFallback((base) =>
+      this.http.post<any>(`${base}/instructor/upload-profile-image`, formData),
+    );
+  }
+  // ─── STORE ITEMS ENDPOINTS ───────────────────────────────────────────────────────────────────────────────
+  getStoreItems(category?: string): Observable<any> {
+    let params = new HttpParams();
+    if (category) {
+      params = params.set('category', category);
+    }
+    return this.withFallback((base) => this.http.get<any>(`${base}/store/items`, { params }));
+  }
+
+  addStoreItem(dto: { title: string; description: string; category: string; price: number; fileUrl?: string }): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.post<any>(`${base}/store/add`, dto),
+    );
+  }
+
+  uploadStoreItemImage(itemId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.withFallback((base) =>
+      this.http.post<any>(`${base}/store/upload-image/${itemId}`, formData),
+    );
+  }
+
+  uploadStoreItemPdf(itemId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.withFallback((base) =>
+      this.http.post<any>(`${base}/store/upload-pdf/${itemId}`, formData),
+    );
+  }
+
+  updateStoreItem(itemId: string, dto: { title: string; description: string; category: string; price: number; fileUrl?: string }): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.put<any>(`${base}/store/update/${itemId}`, dto),
+    );
+  }
+
+  deleteStoreItem(itemId: string): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.delete<any>(`${base}/store/delete/${itemId}`),
+    );
+  }
+
+  downloadStoreItemPdf(itemId: string): string {
+    const base = this.activeBaseUrl;
+    return `${base}/store/download-pdf/${itemId}`;
+  }}

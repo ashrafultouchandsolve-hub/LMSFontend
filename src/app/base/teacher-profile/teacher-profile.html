@@ -1,0 +1,156 @@
+<div class="teacher-profile">
+  @if (notice()) {
+    <div class="notice" [class.notice-error]="noticeType() === 'error'">{{ notice() }}</div>
+  }
+
+  @if (profileData()) {
+    <div class="profile-container">
+      <!-- Header -->
+      <header class="profile-header">
+        <div>
+          <h1>My Profile</h1>
+          <p>Manage your teacher profile information.</p>
+        </div>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="toggleEditMode()"
+          [disabled]="isSaving()">
+          @if (!isEditMode()) {
+            ✏️ Edit Profile
+          } @else {
+            ✕ Cancel Edit
+          }
+        </button>
+      </header>
+
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <!-- Profile Image Section -->
+        <div class="profile-image-section">
+          <div class="profile-image-wrapper">
+            @if (profileImagePreview()) {
+              <img [src]="profileImagePreview()" [alt]="profileData().fullName" class="profile-image" />
+            } @else {
+              <div class="profile-image-placeholder">{{ profileData().fullName.charAt(0) }}</div>
+            }
+          </div>
+
+          @if (isEditMode()) {
+            <div class="image-upload-area">
+              <label for="profileImageInput" class="upload-label">
+                📷 Upload Photo
+              </label>
+              <input
+                #profileImageInput
+                type="file"
+                id="profileImageInput"
+                accept=".jpg,.jpeg,.png,.webp"
+                class="file-input"
+                (change)="onImageSelected($event)" />
+
+              @if (selectedProfileImageFile()) {
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  (click)="uploadProfileImage()"
+                  [disabled]="isUploadingImage()">
+                  @if (!isUploadingImage()) {
+                    Upload
+                  } @else {
+                    Uploading...
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Profile Form -->
+        <div class="profile-form-section">
+          <form [formGroup]="profileForm">
+            <!-- Full Name -->
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input
+                type="text"
+                id="fullName"
+                class="form-input"
+                formControlName="fullName"
+                [readonly]="!isEditMode()"
+                placeholder="Your full name" />
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input
+                type="email"
+                id="email"
+                class="form-input"
+                formControlName="email"
+                readonly
+                placeholder="Your email" />
+            </div>
+
+            <!-- Bio -->
+            <div class="form-group">
+              <label for="bio">About Me</label>
+              <textarea
+                id="bio"
+                class="form-textarea"
+                formControlName="bio"
+                [readonly]="!isEditMode()"
+                placeholder="Tell us about yourself..."
+                rows="4"></textarea>
+            </div>
+
+            <!-- Facebook Link -->
+            <div class="form-group">
+              <label for="facebookLink">Facebook Link</label>
+              <input
+                type="url"
+                id="facebookLink"
+                class="form-input"
+                formControlName="facebookLink"
+                [readonly]="!isEditMode()"
+                placeholder="https://facebook.com/..." />
+            </div>
+
+            <!-- YouTube Link -->
+            <div class="form-group">
+              <label for="youTubeLink">YouTube Link</label>
+              <input
+                type="url"
+                id="youTubeLink"
+                class="form-input"
+                formControlName="youTubeLink"
+                [readonly]="!isEditMode()"
+                placeholder="https://youtube.com/..." />
+            </div>
+
+            <!-- Action Buttons -->
+            @if (isEditMode()) {
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="saveProfile()"
+                  [disabled]="isSaving() || profileForm.invalid">
+                  @if (!isSaving()) {
+                    💾 Save
+                  } @else {
+                    Saving...
+                  }
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving()">
+                  Cancel
+                </button>
+              </div>
+            }
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

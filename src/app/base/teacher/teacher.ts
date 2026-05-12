@@ -13,6 +13,7 @@ import {
   SaveLessonPayload,
 } from '../../Service/learning-api.service';
 import { CommonModule } from '@angular/common';
+import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
@@ -51,7 +52,7 @@ type Course = {
 
 @Component({
   selector: 'app-teacher',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, TeacherProfileComponent],
   templateUrl: './teacher.html',
   styleUrl: './teacher.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -173,9 +174,10 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     { key: 'courses', label: 'Courses', icon: '📚' },
     { key: 'users', label: 'Users', icon: '👥' },
     { key: 'enrollments', label: 'Enrollments', icon: '📝' },
+    { key: 'teacher-profile', label: 'My Profile', icon: '👤' },
   ] as const;
 
-  protected readonly activeSidebarKey = signal<'dashboard' | 'courses' | 'users' | 'enrollments'>('courses');
+  protected readonly activeSidebarKey = signal<'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile'>('courses');
 
   ngOnInit(): void {
     void this.loadTeacherCourses();
@@ -185,7 +187,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.searchTerm.set(value);
   }
 
-  protected selectSidebar(key: 'dashboard' | 'courses' | 'users' | 'enrollments'): void {
+  protected selectSidebar(key: 'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile'): void {
     this.activeSidebarKey.set(key);
 
     if (key === 'courses') {

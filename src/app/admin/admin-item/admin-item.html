@@ -1,0 +1,159 @@
+<div class="admin-items">
+  @if (notice()) {
+    <div class="notice" [class.notice-error]="noticeType() === 'error'">{{ notice() }}</div>
+  }
+
+  <header class="toolbar">
+    <div>
+      <h1>Store Items</h1>
+      <p>Manage books, materials, and study resources.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openNewItemModal()">+ Add New Item</button>
+  </header>
+
+  <section class="panel">
+    <div class="filters">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Search items..."
+        [value]="searchTerm()"
+        (input)="updateSearchTerm($any($event.target).value)" />
+
+      <select class="filter-select" [value]="selectedCategory()" (change)="updateCategory($any($event.target).value)">
+        <option value="">All Categories</option>
+        @for (cat of categories; track cat) {
+          <option [value]="cat">{{ cat }}</option>
+        }
+      </select>
+    </div>
+
+    @if (isLoading()) {
+      <p class="loading">Loading items...</p>
+    } @else if (filteredItems().length === 0) {
+      <p class="empty-state">No items found.</p>
+    } @else {
+      <div class="items-grid">
+        @for (item of filteredItems(); track item.id) {
+          <div class="item-card">
+            <!-- Image -->
+            <div class="item-image">
+              @if (item.imagePath) {
+                <img [src]="learningApi.buildDownloadUrl(item.imagePath)" [alt]="item.title" />
+              } @else {
+                <div class="image-placeholder">📦</div>
+              }
+              <div class="item-badge" [class.available]="item.isAvailable">
+                {{ item.isAvailable ? 'Available' : 'Unavailable' }}
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="item-content">
+              <h3>{{ item.title }}</h3>
+              <p class="description">{{ item.description }}</p>
+
+              <div class="item-meta">
+                <span class="category-badge">{{ item.category }}</span>
+                <span class="price">৳ {{ item.price.toFixed(2) }}</span>
+              </div>
+
+              @if (item.fileUrl) {
+                <a [href]="learningApi.downloadStoreItemPdf(item.id)" target="_blank" class="file-link">📥 Download</a>
+              }
+            </div>
+
+            <!-- Actions -->
+            <div class="item-actions">
+              <button type="button" class="btn btn-outline" (click)="openEditItemModal(item)" [disabled]="isSaving()">
+                Edit
+              </button>
+              <button type="button" class="btn btn-danger" (click)="deleteItem(item.id)" [disabled]="isSaving()">
+                Delete
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Add/Edit Modal -->
+  @if (showModal()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>{{ editingItemId() ? 'Edit Item' : 'Add New Item' }}</h2>
+          <button type="button" class="icon-btn" (click)="closeModal()">✕</button>
+        </div>
+
+        <form class="form-grid" [formGroup]="itemForm" (ngSubmit)="saveItem()">
+          <!-- Title -->
+          <label>
+            <span>Title *</span>
+            <input type="text" formControlName="title" placeholder="Enter item title" />
+          </label>
+
+          <!-- Category -->
+          <label>
+            <span>Category *</span>
+            <select formControlName="category">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </label>
+
+          <!-- Price -->
+          <label>
+            <span>Price (৳) *</span>
+            <input type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
+          </label>
+
+          <!-- Description -->
+          <label class="full">
+            <span>Description *</span>
+            <textarea rows="4" formControlName="description" placeholder="Enter item description"></textarea>
+          </label>
+
+          <!-- File URL -->
+          <label class="full">
+            <span>Download File URL</span>
+            <input type="url" formControlName="fileUrl" placeholder="https://example.com/file.pdf" />
+          </label>
+
+          <!-- PDF Upload -->
+          <label class="full upload-field">
+            <span>Upload PDF File</span>
+            <input type="file" accept="application/pdf" (change)="onPdfSelected($event)" />
+            @if (selectedPdfName()) {
+              <div class="file-info">✓ {{ selectedPdfName() }}</div>
+            }
+          </label>
+
+          <!-- Image Upload -->
+          <label class="full upload-field">
+            <span>Item Image</span>
+            <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+          </label>
+
+          @if (selectedImagePreview()) {
+            <div class="full preview-wrap">
+              <img class="preview-image" [src]="selectedImagePreview()" alt="Preview" />
+            </div>
+          }
+
+          <!-- Modal Actions -->
+          <div class="modal-actions full">
+            <button type="button" class="btn btn-ghost" (click)="closeModal()" [disabled]="isSaving()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSaving() || itemForm.invalid">
+              {{ isSaving() ? 'Saving...' : 'Save Item' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
