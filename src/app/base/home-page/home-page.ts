@@ -50,6 +50,8 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   protected readonly courses          = signal<HomeCourse[]>([]);
   protected readonly isTeacher        = computed(() => this.userRole() === 1);
   protected readonly userInitial      = computed(() => this.userName().charAt(0).toUpperCase());
+  protected readonly activeReview = signal(0);
+private reviewInterval: any;
 
   // ✅ Hero Slider state
   protected readonly activeSlide = signal(0);
@@ -57,6 +59,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private readonly TOTAL_SLIDES = 3;
 
   ngOnInit(): void {
+    this.startReviewTimer();
     this.authService.isLoggedIn$.subscribe((v) => this.isLoggedIn.set(v));
     this.authService.currentUser$.subscribe((user) => {
       if (user?.fullName) this.userName.set(user.fullName);
@@ -83,6 +86,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.sliderInterval);
+    clearInterval(this.reviewInterval);
   }
 
   // ── Slider methods ──────────────────────────────
@@ -190,4 +194,72 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     if (level === 'Intermediate' || level === 'Advanced') return level;
     return 'Beginner';
   }
+
+  protected readonly reviews = [
+  {
+    name: 'রাহেলা আক্তার',
+    role: 'SSC 2025 — GPA 5.00',
+    quote: 'অল্প খরচে এত ভালো Teacher, আমাদের স্বপ্নের চেয়ে বেশি, আশার চেয়ে বড়।',
+    rating: 5,
+    image: '',           // ← image URL দাও অথবা খালি রাখো
+    videoUrl: '',        // ← YouTube link দাও অথবা খালি রাখো
+    videoCaption: 'SSC 2025 তে GPA-5 অর্জনের গল্প',
+  },
+  {
+    name: 'তানভীর হোসেন',
+    role: 'HSC 2024 — Golden A+',
+    quote: 'Nirvor Nije Sikhi আমার জীবন পরিবর্তন করে দিয়েছে। শিক্ষকরা অনেক আন্তরিক এবং সবসময় সাহায্য করেন।',
+    rating: 5,
+    image: '',
+    videoUrl: '',
+    videoCaption: 'HSC তে Golden A+ পাওয়ার অভিজ্ঞতা',
+  },
+  {
+    name: 'সুমাইয়া ইসলাম',
+    role: 'Admission — ঢাকা বিশ্ববিদ্যালয়',
+    quote: 'Admission English কোর্সটা না করলে ঢাকা বিশ্ববিদ্যালয়ে চান্স পেতাম না। অসাধারণ পড়ানোর ধরন।',
+    rating: 5,
+    image: '',
+    videoUrl: '',
+    videoCaption: 'ঢাকা বিশ্ববিদ্যালয়ে ভর্তির সাফল্য',
+  },
+  {
+    name: 'মুশফিকের মা',
+    role: 'সুন্দরবনের বেদকামী — SSC ২৫ GPA-5',
+    quote: 'অল্প খরচে এত ভালো টিচার, আমাদের স্বপ্নের চেয়ে বেশি, আশার চেয়ে বড়।',
+    rating: 5,
+    image: '',
+    videoUrl: '',
+    videoCaption: 'সুন্দরবন থেকে নটর ডেম — মুশফিকের স্বপ্ন পূরণের গল্প!',
+  },
+];
+ 
+protected nextReview(): void {
+  this.activeReview.update(s => (s + 1) % this.reviews.length);
+  this.resetReviewTimer();
 }
+ 
+protected prevReview(): void {
+  this.activeReview.update(s => (s - 1 + this.reviews.length) % this.reviews.length);
+  this.resetReviewTimer();
+}
+ 
+protected goToReview(index: number): void {
+  this.activeReview.set(index);
+  this.resetReviewTimer();
+}
+ 
+private startReviewTimer(): void {
+  this.reviewInterval = setInterval(() => {
+    this.activeReview.update(s => (s + 1) % this.reviews.length);
+  }, 6000);
+}
+ 
+private resetReviewTimer(): void {
+  clearInterval(this.reviewInterval);
+  this.startReviewTimer();
+}
+}
+
+
+

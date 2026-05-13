@@ -474,13 +474,17 @@ export class LearningApiService {
   }
 
   // ─── INSTRUCTOR/TEACHER PROFILE ENDPOINTS ─────────────────────────────────
-  getInstructorProfile(teacherId: string): Observable<any> {
-    return this.withFallback((base) => this.http.get<any>(`${base}/instructor/${teacherId}`));
+  getAllInstructors(): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/Instructor/all`));
   }
 
-  updateInstructorProfile(dto: { bio?: string; facebookLink?: string; youTubeLink?: string }): Observable<any> {
+  getInstructorProfile(teacherId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/Instructor/${teacherId}`));
+  }
+
+  updateInstructorProfile(dto: { bio?: string; facebookLink?: string; youtubeLink?: string }): Observable<any> {
     return this.withFallback((base) =>
-      this.http.put<any>(`${base}/instructor/update-profile`, dto),
+      this.http.put<any>(`${base}/Instructor/update-profile`, dto),
     );
   }
 
@@ -488,7 +492,7 @@ export class LearningApiService {
     const formData = new FormData();
     formData.append('file', file);
     return this.withFallback((base) =>
-      this.http.post<any>(`${base}/instructor/upload-profile-image`, formData),
+      this.http.post<any>(`${base}/Instructor/upload-profile-image`, formData),
     );
   }
   // ─── STORE ITEMS ENDPOINTS ───────────────────────────────────────────────────────────────────────────────

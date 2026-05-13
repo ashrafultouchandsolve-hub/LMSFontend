@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, NonNullableFormBuilder, Validators } 
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-teacher-profile',
@@ -36,38 +37,83 @@ export class TeacherProfileComponent implements OnInit {
     email: ['', Validators.required],
     bio: [''],
     facebookLink: [''],
-    youTubeLink: [''],
+    youtubeLink: [''],
   });
 
   protected readonly currentUser = this.authService.getCurrentUser();
 
-  ngOnInit(): void {
-    // Initialize form with current user data
-    this.initializeForm();
+ngOnInit(): void {
+  void this.initializeForm();
+}
+
+private async initializeForm(): Promise<void> {
+  if (!this.currentUser?.id) {
+    return;
   }
 
-  private initializeForm(): void {
-    if (this.currentUser) {
-      this.profileForm.patchValue({
-        fullName: this.currentUser.fullName || '',
-        email: this.currentUser.email || '',
-        bio: '',
-        facebookLink: '',
-        youTubeLink: '',
-      });
-      
-      // Set profile data from current user
+  this.profileForm.patchValue({
+    fullName: this.currentUser.fullName || '',
+    email: this.currentUser.email || '',
+  });
+
+  try {
+    const instructorsResponse = await firstValueFrom(this.learningApi.getAllInstructors());
+    const instructors = instructorsResponse?.data ?? [];
+    const currentUserId = String(this.currentUser.id).trim().toLowerCase();
+    const currentUserName = String(this.currentUser.fullName || '').trim().toLowerCase();
+
+    const matchingInstructor =
+      instructors.find((item: any) => String(item.id).trim().toLowerCase() === currentUserId) ??
+      instructors.find((item: any) => String(item.fullName || '').trim().toLowerCase() === currentUserName);
+
+    if (!matchingInstructor?.id) {
       this.profileData.set({
         id: this.currentUser.id,
         fullName: this.currentUser.fullName,
         email: this.currentUser.email,
         bio: '',
         facebookLink: '',
-        youTubeLink: '',
+        youtubeLink: '',
         profileImagePath: null,
       });
+      return;
     }
+
+    const response = await firstValueFrom(this.learningApi.getInstructorProfile(matchingInstructor.id));
+    const data = response?.data ?? response;
+
+    this.profileForm.patchValue({
+      bio: data?.bio || '',
+      facebookLink: data?.facebookLink || '',
+      youtubeLink: data?.youtubeLink || '',
+    });
+
+    this.profileData.set({
+      id: matchingInstructor.id,
+      fullName: data?.fullName || this.currentUser.fullName,
+      email: this.currentUser.email,
+      bio: data?.bio || '',
+      facebookLink: data?.facebookLink || '',
+      youtubeLink: data?.youtubeLink || '',
+      profileImagePath: data?.profileImagePath || null,
+    });
+
+    if (data?.profileImagePath) {
+      this.profileImagePreview.set(this.learningApi.buildDownloadUrl(data.profileImagePath));
+    }
+  } catch (error) {
+    this.profileData.set({
+      id: this.currentUser.id,
+      fullName: this.currentUser.fullName,
+      email: this.currentUser.email,
+      bio: '',
+      facebookLink: '',
+      youtubeLink: '',
+      profileImagePath: null,
+    });
+    console.error(error);
   }
+}
 
   protected toggleEditMode(): void {
     if (this.isEditMode()) {
@@ -151,7 +197,7 @@ export class TeacherProfileComponent implements OnInit {
       const dto = {
         bio: this.profileForm.value.bio || '',
         facebookLink: this.profileForm.value.facebookLink || '',
-        youTubeLink: this.profileForm.value.youTubeLink || '',
+        youtubeLink: this.profileForm.value.youtubeLink || '',
       };
 
       const response = await this.learningApi.updateInstructorProfile(dto).toPromise();
@@ -162,7 +208,7 @@ export class TeacherProfileComponent implements OnInit {
         ...this.profileData(),
         bio: dto.bio,
         facebookLink: dto.facebookLink,
-        youTubeLink: dto.youTubeLink,
+        youtubeLink: dto.youtubeLink,
       });
       
       this.isEditMode.set(false);

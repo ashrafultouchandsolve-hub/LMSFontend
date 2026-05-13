@@ -42,7 +42,7 @@ export class AuthService {
             id: response.userId,
             email: response.email,
             fullName: response.fullName,
-            role: response.role
+            role: response.role,
           };
           this.jwtService.setUser(user);
           this.cleanupLegacyAuthStorage();
