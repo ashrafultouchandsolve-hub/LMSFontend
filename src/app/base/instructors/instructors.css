@@ -374,7 +374,7 @@
 }
 
 .card-name {
-  font-size: clamp(30px, 2.2vw, 38px);
+  font-size: clamp(15px, 2.2vw, 25px);
   font-weight: 800;
   color: #0f1e34;
   line-height: 1.15;

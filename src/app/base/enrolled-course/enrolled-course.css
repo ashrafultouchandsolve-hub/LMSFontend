@@ -774,3 +774,32 @@
     width: 100%;
   }
 }
+/* ── Plyr Player ── */
+.plyr-wrap {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.plyr {
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* Brand color */
+.plyr--video .plyr__control--overlaid {
+  background: #6366f1;
+}
+.plyr--full-ui input[type=range] {
+  color: #6366f1;
+}
+.plyr__control:hover,
+.plyr__control[aria-expanded=true] {
+  background: #6366f1;
+}
+
+/* Download button hide */
+.plyr__controls [data-plyr="download"] {
+  display: none !important;
+}

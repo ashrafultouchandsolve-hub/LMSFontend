@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed,effect, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LearningApiService, LessonDto } from '../../Service/learning-api.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LanguageService } from '../../Service/language.service';
+
 
 type LessonView = {
   id: string;
@@ -41,6 +42,7 @@ type CourseCommentView = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EnrolledCourse implements OnDestroy {
+  private plyrInstance: any = null;
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
@@ -75,8 +77,20 @@ readonly lang = inject(LanguageService);
 
   constructor(private readonly sanitizer: DomSanitizer) {
     void this.loadLessons();
+    effect(() => {
+  const lesson = this.selectedLesson();
+  if (lesson) {
+    // DOM update এর পরে reinit
+    setTimeout(() => this.initPlyr(), 100);
   }
+});
+  }
+
+  ngAfterViewInit() {
+  this.initPlyr();
+}
   ngOnDestroy() {
+  this.plyrInstance?.destroy();
   clearInterval(this.saveProgressInterval);
 }
 
@@ -86,6 +100,32 @@ protected selectLesson(lessonId: string): void {
   this.selectedLessonId.set(lessonId);
 }
 
+
+private initPlyr() {
+  const videoEl = this.videoPlayer?.nativeElement;
+  if (!videoEl) return;
+
+  if (this.plyrInstance) {
+    this.plyrInstance.destroy();
+    this.plyrInstance = null;
+  }
+
+  const PlyrLib = (window as any).Plyr;
+  if (!PlyrLib) return;
+
+  this.plyrInstance = new PlyrLib(videoEl, {
+    controls: [
+      'play-large', 'play', 'progress',
+      'current-time', 'duration',
+      'mute', 'volume', 'fullscreen',
+    ],
+    settings: ['speed'],
+    speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+    keyboard: { focused: true, global: false },
+    tooltips: { controls: true, seek: true },
+    disableContextMenu: true,
+  });
+}
   protected formatDuration(totalMinutes: number): string {
     if (totalMinutes <= 0) {
       return 'N/A';
@@ -252,7 +292,6 @@ if (Array.isArray(payload?.data?.comments)) {
 }
 
       this.comments.set(rawComments.map((comment: any) => this.normalizeComment(comment)));
-      console.log('FINAL COMMENTS:', this.comments());
     } catch (error) {
       console.error('Error loading comments:', error);
       this.comments.set([]);

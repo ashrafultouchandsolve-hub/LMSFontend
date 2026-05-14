@@ -22,6 +22,9 @@
       <button class="nav-item" [class.active]="activeTab() === 'comments'" (click)="setTab('comments')">
         <span class="nav-icon">💬</span> Comments
       </button>
+      <button class="nav-item" [class.active]="activeTab() === 'announcements'" (click)="setTab('announcements')">
+      <span class="nav-icon">📣</span> Announcements
+      </button>
       <button class="nav-item" [class.active]="activeTab() === 'store-items'" (click)="setTab('store-items')">
         <span class="nav-icon">🛍️</span> Store Items
       </button>
@@ -279,6 +282,133 @@
       }
     </div>
     }
+
+    <!-- ========== Announcements ========== -->
+
+@if (activeTab() === 'announcements') {
+  <div class="page-header">
+    <h1>Announcements</h1>
+    <p>Visible as a banner on everyone's homepage</p>
+  </div>
+
+  <!-- Create Form -->
+  <div class="ann-form-card">
+    <h3 class="ann-form-title">📣 Create New Announcement</h3>
+
+    <div class="ann-form-grid">
+
+      <div class="ann-field">
+        <label>Title <span class="ann-optional">(optional)</span></label>
+        <input
+          type="text"
+          class="ann-input ann-input--title"
+          [value]="annTitle()"
+          (input)="annTitle.set($any($event.target).value)"
+          placeholder="e.g. Happy Eid!" />
+      </div>
+
+      <div class="ann-field">
+        <label>Type</label>
+        <div class="ann-type-group">
+          @for (t of annTypes; track t.value) {
+            <button
+              type="button"
+              class="ann-type-btn"
+              [class.active]="annType() === t.value"
+              [attr.data-value]="t.value"
+              (click)="annType.set(t.value)">
+              {{ t.icon }} {{ t.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="ann-field ann-field--full">
+        <label>Message <span class="ann-required">*</span></label>
+        <textarea
+          class="ann-input ann-textarea ann-input--message"
+          [value]="annMessage()"
+          (input)="annMessage.set($any($event.target).value)"
+          placeholder="Write announcement details..."
+          rows="3">
+        </textarea>
+      </div>
+
+      <div class="ann-field">
+        <label>Expires At <span class="ann-optional"></span></label>
+        <input
+          type="datetime-local"
+          class="ann-input"
+          [value]="annExpiry()"
+          (input)="annExpiry.set($any($event.target).value)" />
+        <span class="ann-hint">⏰ Leave empty to show indefinitely</span>
+      </div>
+
+    </div>
+
+    <!-- Preview -->
+    @if (annMessage()) {
+      <div class="ann-preview" [attr.data-type]="annType()">
+        <span class="ann-preview-label">Preview</span>
+        
+        <div class="ann-preview-inner">
+          <span>{{ getAnnIcon(annType()) }}</span>
+          <div>
+            @if (annTitle()) { <strong>{{ annTitle() }} — </strong> }
+            {{ annMessage() }}
+          </div>
+        </div>
+      </div>
+    }
+    <button
+      class="ann-submit-btn"
+      (click)="createAnnouncement()"
+      [disabled]="annSubmitting() || !annMessage().trim()">
+      @if (annSubmitting()) {
+        <span class="ann-spinner"></span> Publishing...
+      } @else {
+        📣 Publish Announcement
+      }
+    </button>
+  </div>
+
+  <!-- List -->
+  <div class="ann-list">
+    @for (ann of announcements(); track ann.id) {
+      <div class="ann-item" [attr.data-type]="ann.type" [class.ann-item--inactive]="!ann.isActive">
+        <div class="ann-item-left">
+          <div class="ann-item-top">
+            <span class="ann-item-type-badge" [attr.data-type]="ann.type">
+              {{ getAnnTypeLabel(ann.type) }}
+            </span>
+            @if (!ann.isActive) {
+              <span class="ann-inactive-tag">● Inactive</span>
+            }
+          </div>
+          @if (ann.title) {
+            <strong class="ann-item-title">{{ ann.title }}</strong>
+          }
+          <p class="ann-item-msg">{{ ann.message }}</p>
+          @if (ann.expiresAt) {
+            <span class="ann-item-expiry">⏰ Until {{ ann.expiresAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+          }
+        </div>
+        <div class="ann-item-actions">
+          @if (ann.isActive) {
+            <button class="btn btn-block" (click)="deactivateAnn(ann.id)">Deactivate</button>
+          }
+          <button class="btn btn-delete" (click)="deleteAnn(ann.id)">Delete</button>
+        </div>
+      </div>
+    }
+    @empty {
+      <div class="ann-empty">
+        <span>📭</span>
+        <p>No announcements yet.</p>
+      </div>
+    }
+  </div>
+}
 
     <!-- ========== STORE ITEMS ========== -->
     @if (activeTab() === 'store-items') {

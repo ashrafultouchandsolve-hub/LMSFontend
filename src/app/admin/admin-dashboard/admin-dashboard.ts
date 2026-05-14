@@ -5,8 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { AdminService, DashboardStats, AdminTeacher, AdminStudent, AdminCourse, AdminComment } from '../../Service/admin.service';
 import { AuthService } from '../../Service/auth.service';
 import { AdminItem } from '../admin-item/admin-item';
+import { AnnouncementBanner } from '../announcement-banner/announcement-banner';
+import { Announcement, AnnouncementService } from '../../Service/announcement-service';
 
-type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'comments' | 'store-items';
+type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'comments' | 'store-items'|'announcements';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -15,9 +17,36 @@ type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'comments' | 'sto
   styleUrl: './admin-dashboard.css',
 })
 export class AdminDashboard implements OnInit {
+  private readonly tabStorageKey = 'admin_dashboard_active_tab';
+
   private readonly adminService = inject(AdminService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly annSvc = inject(AnnouncementService);
+
+  readonly annTypes = [
+    { value: 'info', label: 'Info', icon: '📢' },
+    { value: 'success', label: 'Success', icon: '✅' },
+    { value: 'warning', label: 'Warning', icon: '⚠️' },
+    { value: 'urgent', label: 'Urgent', icon: '🚨' },
+  ] as const;
+
+getAnnIcon(type: string): string {
+  const map: Record<string, string> = {
+    'info':    '📢',
+    'success': '✅',
+    'warning': '⚠️',
+    'urgent':  '🚨'
+  };
+  return map[type] ?? '📢';
+}
+ 
+announcements  = signal<Announcement[]>([]);
+annTitle       = signal('');
+annMessage     = signal('');
+annType        = signal('info');
+annExpiry      = signal('');
+annSubmitting  = signal(false);
 
   activeTab = signal<Tab>('dashboard');
   isLoading = signal(false);
@@ -96,21 +125,48 @@ export class AdminDashboard implements OnInit {
   editingContent   = signal('');
 
   ngOnInit() {
-    this.loadDashboard();
+    const savedTab = this.getStoredTab();
+    this.activeTab.set(savedTab);
+    this.loadTabData(savedTab);
   }
 
   setTab(tab: Tab) {
     this.activeTab.set(tab);
+    this.saveTab(tab);
     this.message.set('');
     this.editingCommentId.set(null);
+    this.loadTabData(tab);
+  }
+
+  private loadTabData(tab: Tab) {
     switch (tab) {
       case 'dashboard': this.loadDashboard(); break;
-      case 'teachers':  this.loadTeachers();  break;
-      case 'students':  this.loadStudents();  break;
-      case 'courses':   this.loadCourses();   break;
-      case 'comments':  this.loadComments();  break;
-      case 'store-items':  break;
+      case 'teachers': this.loadTeachers(); break;
+      case 'students': this.loadStudents(); break;
+      case 'courses': this.loadCourses(); break;
+      case 'comments': this.loadComments(); break;
+      case 'store-items': break;
+      case 'announcements': this.loadAnnouncements(); break;
     }
+  }
+
+  private getStoredTab(): Tab {
+    const storedTab = localStorage.getItem(this.tabStorageKey);
+    return this.isTab(storedTab) ? storedTab : 'dashboard';
+  }
+
+  private saveTab(tab: Tab) {
+    localStorage.setItem(this.tabStorageKey, tab);
+  }
+
+  private isTab(value: string | null): value is Tab {
+    return value === 'dashboard'
+      || value === 'teachers'
+      || value === 'students'
+      || value === 'courses'
+      || value === 'comments'
+      || value === 'store-items'
+      || value === 'announcements';
   }
 
   loadDashboard() {
@@ -231,4 +287,52 @@ export class AdminDashboard implements OnInit {
     this.messageType.set(type);
     setTimeout(() => this.message.set(''), 3000);
   }
+
+  loadAnnouncements() {
+  this.isLoading.set(true);
+  this.annSvc.getAll().subscribe({
+    next: (r) => { this.announcements.set(r.data ?? []); this.isLoading.set(false); },
+    error: () => this.isLoading.set(false)
+  });
+}
+ 
+createAnnouncement() {
+  if (!this.annMessage().trim()) return;
+  this.annSubmitting.set(true);
+  this.annSvc.create({
+    title: this.annTitle(),
+    message: this.annMessage(),
+    type: this.annType(),
+    expiresAt: this.annExpiry() ? this.annExpiry() + ':00' : null
+  }).subscribe({
+    next: () => {
+      this.showMessage('Announcement created!', 'success');
+      this.annTitle.set(''); this.annMessage.set('');
+      this.annType.set('info'); this.annExpiry.set('');
+      this.annSubmitting.set(false);
+      this.loadAnnouncements();
+    },
+    error: () => { this.showMessage('Failed.', 'error'); this.annSubmitting.set(false); }
+  });
+}
+ 
+deactivateAnn(id: string) {
+  this.annSvc.deactivate(id).subscribe({
+    next: () => { this.showMessage('Deactivated.', 'success'); this.loadAnnouncements(); },
+    error: () => this.showMessage('Failed.', 'error')
+  });
+}
+ 
+deleteAnn(id: string) {
+  if (!confirm('Delete this announcement?')) return;
+  this.annSvc.delete(id).subscribe({
+    next: () => { this.showMessage('Deleted.', 'success'); this.loadAnnouncements(); },
+    error: () => this.showMessage('Failed.', 'error')
+  });
+}
+ 
+getAnnTypeLabel(type: string): string {
+  const m: Record<string, string> = { info: '📢 Info', warning: '⚠️ Warning', success: '✅ Success', urgent: '🚨 Urgent' };
+  return m[type] ?? type;
+}
 }
