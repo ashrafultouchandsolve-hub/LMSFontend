@@ -133,8 +133,10 @@
           <h1>Lessons for {{ currentCourseName() }}</h1>
           <p>Add or edit lesson videos and resources from this panel.</p>
         </div>
-        <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ Add Lesson</button>
-        
+        <div class="toolbar-actions">
+          <button type="button" class="btn btn-outline live-btn" (click)="openLiveModal()">📺 Live Class Schedule করো</button>
+          <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ Add Lesson</button>
+        </div>
       </header>
 
       <section class="panel lesson-list" aria-label="Lesson list">
@@ -181,8 +183,82 @@
           <p class="empty-state">No lesson found for this course.</p>
         }
       </section>
+
+      <section class="panel live-panel" aria-label="Scheduled live classes">
+        <div class="live-panel-head">
+          <div>
+            <h2>Scheduled Live Classes</h2>
+            <p>এই course-এর live session schedule, start, join আর end এখান থেকে manage করো।</p>
+          </div>
+        </div>
+
+        @if (isLoadingLiveClasses()) {
+          <p class="loading-text">Loading live classes...</p>
+        } @else if (liveClasses().length > 0) {
+          <div class="live-list">
+            @for (lc of liveClasses(); track lc.id) {
+              <article class="live-item" [class.active]="lc.isActive">
+                <div class="live-item-info">
+                  <strong>{{ lc.title }}</strong>
+                  <span>{{ lc.scheduledAt | date:'dd MMM, hh:mm a' }}</span>
+                  @if (lc.description) {
+                    <p>{{ lc.description }}</p>
+                  }
+                </div>
+                <div class="live-item-actions">
+                  @if (!lc.isActive && !lc.isEnded) {
+                    <button type="button" class="btn btn-danger" (click)="startLiveClass(lc.id)">🔴 Start</button>
+                  }
+                  @if (lc.isActive) {
+                    <a [routerLink]="['/liveClass', lc.id]" class="btn btn-outline">Join →</a>
+                    <button type="button" class="btn btn-danger" (click)="endLiveClass(lc.id)">End</button>
+                  }
+                  @if (lc.isEnded) {
+                    <span class="chip live-ended">Ended</span>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="empty-state">এখনো কোনো live class schedule করা হয়নি।</p>
+        }
+      </section>
     }
   </section>
+
+  @if (showLiveModal()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Live class dialog" (click)="closeLiveModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h2>📺 Live Class তৈরি করো</h2>
+          <button type="button" class="icon-btn" (click)="closeLiveModal()">✕</button>
+        </div>
+
+        <div class="form-grid">
+          <label class="full">
+            <span>Title *</span>
+            <input type="text" [(ngModel)]="liveTitle" placeholder="e.g. Chapter 5 Discussion" />
+          </label>
+
+          <label class="full">
+            <span>Description</span>
+            <textarea rows="2" [(ngModel)]="liveDesc" placeholder="কী নিয়ে class হবে..."></textarea>
+          </label>
+
+          <label class="full">
+            <span>Scheduled At *</span>
+            <input type="datetime-local" [(ngModel)]="liveScheduledAt" />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="closeLiveModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="createLiveClass()">📺 Create Live Class</button>
+        </div>
+      </div>
+    </div>
+  }
 
   @if (isCourseEditorOpen()) {
     <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Course editor dialog">

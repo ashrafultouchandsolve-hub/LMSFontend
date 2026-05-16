@@ -1,11 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
 import { LearningApiService } from '../../Service/learning-api.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { NotificationService } from '../../Service/notification-service';
 
 type ProfileUser = { id?: number; fullName?: string; email?: string; role?: number; };
 
@@ -31,12 +32,13 @@ type WishlistItem = {
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './profile.html',
-  styleUrl: './profile.css',
+  styleUrls: ['./profile.css'],
 })
-export class Profile {
+export class Profile implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly notifsvc = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly learningApi = inject(LearningApiService);
   readonly lang = inject(LanguageService);
@@ -58,6 +60,10 @@ export class Profile {
   protected readonly isLoadingWishlist = signal(false);
   protected readonly activeTab = signal<'profile' | 'wishlist'>('profile');
 
+  readonly lessonNotifCount = signal(0);
+readonly quizNotifCount   = signal(0);
+readonly certNotifCount   = signal(0);
+
   constructor() {
     this.authService.currentUser$.pipe(takeUntilDestroyed()).subscribe((currentUser: ProfileUser | null) => {
       this.user.set(currentUser);
@@ -74,6 +80,38 @@ export class Profile {
     // Load quiz progress - get first lesson ID
     void this.loadQuizProgress();
   }
+ngOnInit(): void {
+  // ✅ Login check করো আগে
+  if (this.authService.isLoggedIn()) {
+    this.loadNotifCounts();
+  }
+}
+
+private loadNotifCounts(): void {
+  this.notifsvc.getAll().subscribe({
+    next: (res) => {
+      const raw  = (res as any).data ?? (res as any).Data ?? [];
+      const data = Array.isArray(raw) ? raw : [];
+      const unread = data.filter((n: any) => !n.isRead);
+
+      this.lessonNotifCount.set(
+        unread.filter((n: any) => n.type === 'lesson').length
+      );
+      this.quizNotifCount.set(
+        unread.filter((n: any) => n.type === 'quiz').length
+      );
+      this.certNotifCount.set(
+        unread.filter((n: any) => n.type === 'certificate').length
+      );
+    },
+    error: () => {
+      // Error হলে 0 set করো — page crash করবে না
+      this.lessonNotifCount.set(0);
+      this.quizNotifCount.set(0);
+      this.certNotifCount.set(0);
+    }
+  });
+}
 
   private async loadQuizProgress(): Promise<void> {
     try {
@@ -136,12 +174,16 @@ export class Profile {
   }
 
 getImageUrl(path: string | null): string {
-  return this.learningApi.buildDownloadUrl(path);
+  return this.learningApi.buildDownloadUrl(path ?? '');
 }
 
 formatPrice(price: number): string {
   return price === 0 ? 'Free' : `৳${price.toLocaleString()}`;
 }
+
+  trackByCourseId(index: number, item: WishlistItem): string | number {
+    return item.courseId;
+  }
 
   protected goToHome(): void { this.router.navigateByUrl('/homepage'); }
   protected logout(): void { this.authService.logout(); this.router.navigateByUrl('/login'); }

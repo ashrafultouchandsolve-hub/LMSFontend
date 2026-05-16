@@ -2,6 +2,7 @@ import {
   Title
 } from "./chunk-AZHTHYPO.js";
 import "./chunk-LUJVR3QK.js";
+import "./chunk-7RJDFMHS.js";
 import {
   HashLocationStrategy,
   Location,
@@ -12,7 +13,6 @@ import {
   PlatformNavigation,
   ViewportScroller
 } from "./chunk-NVKUJCPK.js";
-import "./chunk-7RJDFMHS.js";
 import {
   LOCATION_INITIALIZED,
   PlatformLocation
@@ -96,11 +96,11 @@ import {
   ɵɵdefineInjector,
   ɵɵinject
 } from "./chunk-2F6MNHOG.js";
-import "./chunk-JRFR6BLO.js";
 import {
   defer,
   isObservable
 } from "./chunk-HWYXSU2G.js";
+import "./chunk-JRFR6BLO.js";
 import {
   BehaviorSubject,
   EMPTY,

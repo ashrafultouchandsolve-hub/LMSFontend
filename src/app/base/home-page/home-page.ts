@@ -15,6 +15,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { NotificationBell } from "../../shared/notification-bell/notification-bell";
 
 type LearningHighlight = { title: string; description: string; };
 
@@ -29,7 +30,7 @@ type HomeCourse = {
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink],
+  imports: [RouterLink, NotificationBell],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

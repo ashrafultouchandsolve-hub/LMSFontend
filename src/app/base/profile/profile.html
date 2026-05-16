@@ -97,15 +97,40 @@
 		</aside>
 
 		<section class="future-card" aria-label="Future learning features">
-			<h3>{{ lang.t().profileActivity }}</h3>
-			<p>{{ lang.t().profileActivityDesc }}</p>
-			<div class="action-grid">
-				<button type="button" routerLink="/myClasses" class="future-btn">{{ lang.t().profileMyClasses }}</button>
-				<button type="button" routerLink="/my-courses" class="future-btn">{{ lang.t().profileMyCourses }}</button>
-				<button type="button" routerLink="/assignments" class="future-btn">{{ lang.t().profileAssignments }}</button>
-				<button type="button" routerLink="/certificates" class="future-btn">{{ lang.t().profileCertificates }}</button>
-			</div>
-		</section>
+  <h3>{{ lang.t().profileActivity }}</h3>
+  <p>{{ lang.t().profileActivityDesc }}</p>
+  <div class="action-grid">
+
+    <button type="button" routerLink="/myClasses" class="future-btn">
+      {{ lang.t().profileMyClasses }}
+    </button>
+
+    <!-- ✅ My Courses — lesson notification দেখাবে -->
+    <button type="button" routerLink="/my-courses" class="future-btn future-btn--notif">
+      {{ lang.t().profileMyCourses }}
+      @if (lessonNotifCount() > 0) {
+        <span class="future-btn-badge">{{ lessonNotifCount() }}</span>
+      }
+    </button>
+
+    <!-- ✅ Assignments — quiz notification দেখাবে -->
+    <button type="button" routerLink="/assignments" class="future-btn future-btn--notif">
+      {{ lang.t().profileAssignments }}
+      @if (quizNotifCount() > 0) {
+        <span class="future-btn-badge">{{ quizNotifCount() }}</span>
+      }
+    </button>
+
+    <!-- ✅ Certificates — certificate notification দেখাবে -->
+    <button type="button" routerLink="/certificates" class="future-btn future-btn--notif">
+      {{ lang.t().profileCertificates }}
+      @if (certNotifCount() > 0) {
+        <span class="future-btn-badge">{{ certNotifCount() }}</span>
+      }
+    </button>
+
+  </div>
+</section>
 
 		<!-- Tab buttons -->
 <div class="profile-tabs">

@@ -12,6 +12,7 @@ import {
   SaveCoursePayload,
   SaveLessonPayload,
 } from '../../Service/learning-api.service';
+import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { CommonModule } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 
@@ -62,15 +63,18 @@ export class Teacher implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly learningApi = inject(LearningApiService);
+  private readonly liveClassService = inject(LiveClassService);
 
   protected readonly searchTerm = signal('');
   protected readonly selectedCourseId = signal<string | null>(null);
   protected readonly showCourseModal = signal(false);
   protected readonly showLessonModal = signal(false);
+  protected readonly showLiveModal = signal(false);
   protected readonly editingCourseId = signal<string | null>(null);
   protected readonly editingLessonId = signal<string | null>(null);
   protected readonly isLoadingCourses = signal(false);
   protected readonly isLoadingLessons = signal(false);
+  protected readonly isLoadingLiveClasses = signal(false);
   protected readonly isSavingCourse = signal(false);
   protected readonly isSavingLesson = signal(false);
   protected readonly notice = signal('');
@@ -83,6 +87,10 @@ export class Teacher implements OnInit {
   protected readonly selectedLessonVideoFile = signal<File | null>(null);
 
   protected readonly courses = signal<Course[]>([]);
+  protected readonly liveClasses = signal<LiveClass[]>([]);
+  protected liveTitle = '';
+  protected liveDesc = '';
+  protected liveScheduledAt = '';
 
   protected readonly currentUser = toSignal(this.authService.currentUser$, {
     initialValue: this.authService.getCurrentUser(),
@@ -319,10 +327,13 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected async openLessons(courseId: string): Promise<void> {
     this.selectedCourseId.set(courseId);
     await this.loadLessons(courseId);
+    await this.loadLiveClasses(courseId);
   }
 
   protected closeLessonsView(): void {
     this.selectedCourseId.set(null);
+    this.liveClasses.set([]);
+    this.closeLiveModal();
   }
 
   protected openNewLessonModal(): void {
@@ -370,6 +381,87 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.showLessonModal.set(false);
     this.lessonForm.markAsPristine();
     this.clearLessonUploadState();
+  }
+
+  protected openLiveModal(): void {
+    if (!this.selectedCourse()) {
+      return;
+    }
+
+    this.liveTitle = '';
+    this.liveDesc = '';
+    this.liveScheduledAt = '';
+    this.showLiveModal.set(true);
+  }
+
+  protected closeLiveModal(): void {
+    this.showLiveModal.set(false);
+    this.liveTitle = '';
+    this.liveDesc = '';
+    this.liveScheduledAt = '';
+  }
+
+  protected async createLiveClass(): Promise<void> {
+    const selected = this.selectedCourse();
+    if (!selected) {
+      return;
+    }
+
+    if (!this.liveTitle.trim() || !this.liveScheduledAt.trim()) {
+      this.setNotice('Live class title and schedule required.', 'error');
+      return;
+    }
+
+    const scheduledDate = new Date(this.liveScheduledAt);
+    if (Number.isNaN(scheduledDate.getTime())) {
+      this.setNotice('Valid schedule date/time select করুন।', 'error');
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.liveClassService.create({
+        courseId: selected.id,
+        title: this.liveTitle.trim(),
+        description: this.liveDesc.trim(),
+        scheduledAt: scheduledDate.toISOString(),
+      }));
+
+      await this.loadLiveClasses(selected.id);
+      this.setNotice('Live class scheduled successfully.', 'success');
+      this.closeLiveModal();
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Live class schedule করা যায়নি।'), 'error');
+    }
+  }
+
+  protected async startLiveClass(id: string): Promise<void> {
+    const selected = this.selectedCourse();
+    if (!selected) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.liveClassService.start(id));
+      await this.loadLiveClasses(selected.id);
+      this.setNotice('Live class started.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Live class start করা যায়নি।'), 'error');
+    }
+  }
+
+  protected async endLiveClass(id: string): Promise<void> {
+    const selected = this.selectedCourse();
+    if (!selected) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.liveClassService.end(id));
+      await this.loadLiveClasses(selected.id);
+      this.setNotice('Live class ended.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Live class end করা যায়নি।'), 'error');
+    }
   }
 
   protected async saveLesson(): Promise<void> {
@@ -593,6 +685,34 @@ private async loadTeacherCourses(): Promise<void> {
     this.isLoadingCourses.set(false);
   }
 }
+
+  private async loadLiveClasses(courseId: string): Promise<void> {
+    this.isLoadingLiveClasses.set(true);
+
+    try {
+      const response = await firstValueFrom(this.liveClassService.getByCourse(courseId));
+      const anyRes = response as any;
+      const liveClassArray = Array.isArray(anyRes?.data)
+        ? anyRes.data
+        : Array.isArray(anyRes?.Data)
+          ? anyRes.Data
+          : [];
+
+      this.liveClasses.set(liveClassArray.map((item: any) => ({
+        id: item.id ?? item.Id ?? '',
+        title: item.title ?? item.Title ?? '',
+        description: item.description ?? item.Description ?? '',
+        scheduledAt: item.scheduledAt ?? item.ScheduledAt ?? '',
+        isActive: Boolean(item.isActive ?? item.IsActive),
+        isEnded: Boolean(item.isEnded ?? item.IsEnded),
+        roomUrl: item.roomUrl ?? item.RoomUrl ?? '',
+      })));
+    } catch {
+      this.liveClasses.set([]);
+    } finally {
+      this.isLoadingLiveClasses.set(false);
+    }
+  }
 
   private async loadLessons(courseId: string): Promise<void> {
     this.isLoadingLessons.set(true);

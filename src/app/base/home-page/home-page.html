@@ -140,6 +140,7 @@
         <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'BN' }}</span>
       </button>
       @if (isLoggedIn()) {
+      <app-notification-bell></app-notification-bell>
       <details class="user-menu">
         <summary class="user-chip" aria-label="User menu">
           <span class="user-avatar">{{ userInitial() }}</span>
@@ -335,7 +336,7 @@
       <button type="button" class="cats-arrow cats-arrow--prev" (click)="scrollCourses('previous')" aria-label="Scroll left">‹</button>
       <div #courseTrackViewport class="cats-viewport">
         @for (course of courses(); track course.id; let i = $index) {
-        <article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
+        <article class="cat-card" [style]="'--card-color:' + getCardColor(i)" [attr.data-index]="(i + 1).toString().padStart(2, '0')">
           <div class="cat-img-wrap">
             <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title" loading="eager" (error)="onImageError($event)" />
             <div class="cat-icon-fallback" aria-hidden="true">

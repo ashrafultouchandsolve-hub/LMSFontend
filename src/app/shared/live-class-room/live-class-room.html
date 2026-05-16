@@ -1,0 +1,45 @@
+<div class="lc-room">
+
+  <!-- Header -->
+  <div class="lc-header">
+    <a routerLink="/homepage" class="lc-back">← Back</a>
+    <div class="lc-title-wrap">
+      @if (!isLoading() && !error()) {
+        <span class="lc-live-dot"></span>
+        <h1>{{ title() }}</h1>
+      }
+    </div>
+    @if (isTeacher() && !isLoading() && !error()) {
+      <button class="lc-end-btn" (click)="endClass()">🔴 End Class</button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="lc-loading">
+      <div class="lc-spinner"></div>
+      <p>Live class এ যোগ দিচ্ছি...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="lc-error">
+      <span>😕</span>
+      <h3>{{ error() }}</h3>
+      <a routerLink="/homepage" class="lc-back-btn">Homepage এ যাও</a>
+    </div>
+  }
+
+  <!-- Daily.co iframe -->
+  @if (!isLoading() && !error() && roomUrl()) {
+    <iframe
+      #dailyFrame
+      class="lc-frame"
+      [src]="roomUrl()"
+      allow="camera; microphone; fullscreen; display-capture; autoplay"
+      allowfullscreen>
+    </iframe>
+  }
+
+</div>

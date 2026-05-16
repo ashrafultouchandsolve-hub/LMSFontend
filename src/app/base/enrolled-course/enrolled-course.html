@@ -39,7 +39,8 @@
 
     <!-- ✅ Quiz button — lesson details এর ঠিক নিচে -->
 @if (selectedLesson()?.hasQuiz) {
-  @if (selectedLesson()?.QuizAttempted) {
+  @if (selectedLesson()?.quizAttempted) {
+    
     <button type="button" class="start-quiz-btn disabled" disabled>
       🔒 Quiz Completed
     </button>

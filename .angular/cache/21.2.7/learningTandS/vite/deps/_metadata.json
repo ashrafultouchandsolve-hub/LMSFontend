@@ -1,85 +1,79 @@
 {
-  "hash": "8d6c66a2",
-  "configHash": "50b48718",
+  "hash": "5b8bb4cf",
+  "configHash": "44981596",
   "lockfileHash": "1315f74f",
-  "browserHash": "95e1ef8d",
+  "browserHash": "c6e1cbb5",
   "optimized": {
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "c9377b5f",
+      "fileHash": "c3d08d90",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "91bf5acc",
+      "fileHash": "4473f26b",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "743d4c52",
+      "fileHash": "f63be9d7",
       "needsInterop": false
     },
     "@angular/core/rxjs-interop": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/rxjs-interop.mjs",
       "file": "@angular_core_rxjs-interop.js",
-      "fileHash": "75e65132",
+      "fileHash": "b6866920",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "30af828c",
+      "fileHash": "46832ceb",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "8e83bb2a",
+      "fileHash": "1a317026",
       "needsInterop": false
     },
     "@angular/platform-browser/animations": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/animations.mjs",
       "file": "@angular_platform-browser_animations.js",
-      "fileHash": "e287684b",
+      "fileHash": "c2121ac2",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "fe6a4b72",
+      "fileHash": "963fe622",
       "needsInterop": false
     },
     "jspdf": {
       "src": "../../../../../../node_modules/jspdf/dist/jspdf.es.min.js",
       "file": "jspdf.js",
-      "fileHash": "652fe3fa",
+      "fileHash": "268ff57d",
       "needsInterop": false
     },
     "ngx-toastr": {
       "src": "../../../../../../node_modules/ngx-toastr/fesm2022/ngx-toastr.mjs",
       "file": "ngx-toastr.js",
-      "fileHash": "3d0638eb",
-      "needsInterop": false
-    },
-    "plyr": {
-      "src": "../../../../../../node_modules/plyr/dist/plyr.mjs",
-      "file": "plyr.js",
-      "fileHash": "1d17bda2",
+      "fileHash": "aab2e69a",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "d6885cd9",
+      "fileHash": "436cb7b2",
       "needsInterop": false
     },
     "rxjs/operators": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/operators/index.js",
       "file": "rxjs_operators.js",
-      "fileHash": "aab7de39",
+      "fileHash": "97472bee",
       "needsInterop": false
     }
   },
@@ -102,11 +96,11 @@
     "chunk-LUJVR3QK": {
       "file": "chunk-LUJVR3QK.js"
     },
-    "chunk-NVKUJCPK": {
-      "file": "chunk-NVKUJCPK.js"
-    },
     "chunk-7RJDFMHS": {
       "file": "chunk-7RJDFMHS.js"
+    },
+    "chunk-NVKUJCPK": {
+      "file": "chunk-NVKUJCPK.js"
     },
     "chunk-7ZLUZ3S7": {
       "file": "chunk-7ZLUZ3S7.js"
@@ -117,11 +111,11 @@
     "chunk-2F6MNHOG": {
       "file": "chunk-2F6MNHOG.js"
     },
-    "chunk-JRFR6BLO": {
-      "file": "chunk-JRFR6BLO.js"
-    },
     "chunk-HWYXSU2G": {
       "file": "chunk-HWYXSU2G.js"
+    },
+    "chunk-JRFR6BLO": {
+      "file": "chunk-JRFR6BLO.js"
     },
     "chunk-MARUHEWW": {
       "file": "chunk-MARUHEWW.js"
