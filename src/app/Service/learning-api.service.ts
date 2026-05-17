@@ -541,4 +541,10 @@ export class LearningApiService {
   downloadStoreItemPdf(itemId: string): string {
     const base = this.activeBaseUrl;
     return `${base}/store/download-pdf/${itemId}`;
-  }}
+  }
+getMyEnrollments(): Observable<any> {
+  return this.withFallback((base) =>
+    this.http.get<any>(`${base}/enrollment/my-enrollments`)
+  );
+}
+}

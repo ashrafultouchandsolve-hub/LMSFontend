@@ -31,15 +31,9 @@
     </div>
   }
 
-  <!-- Daily.co iframe -->
-  @if (!isLoading() && !error() && roomUrl()) {
-    <iframe
-      #dailyFrame
-      class="lc-frame"
-      [src]="roomUrl()"
-      allow="camera; microphone; fullscreen; display-capture; autoplay"
-      allowfullscreen>
-    </iframe>
+  <!-- ✅ Jitsi Meet container — iframe এর বদলে এই div এ Jitsi inject হবে -->
+  @if (!isLoading() && !error()) {
+    <div id="jitsi-container" class="lc-frame"></div>
   }
 
 </div>

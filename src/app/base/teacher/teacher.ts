@@ -13,7 +13,7 @@ import {
   SaveLessonPayload,
 } from '../../Service/learning-api.service';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
-import { CommonModule } from '@angular/common';
+import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -53,7 +53,7 @@ type Course = {
 
 @Component({
   selector: 'app-teacher',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, TeacherProfileComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, TeacherProfileComponent,DatePipe],
   templateUrl: './teacher.html',
   styleUrl: './teacher.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -87,11 +87,11 @@ export class Teacher implements OnInit {
   protected readonly selectedLessonVideoFile = signal<File | null>(null);
 
   protected readonly courses = signal<Course[]>([]);
-  protected readonly liveClasses = signal<LiveClass[]>([]);
-  protected liveTitle = '';
-  protected liveDesc = '';
-  protected liveScheduledAt = '';
-
+protected readonly liveClasses    = signal<LiveClass[]>([]);
+protected readonly isCreatingLive = signal(false);
+protected liveTitle       = '';
+protected liveDesc        = '';
+protected liveScheduledAt = '';
   protected readonly currentUser = toSignal(this.authService.currentUser$, {
     initialValue: this.authService.getCurrentUser(),
   });

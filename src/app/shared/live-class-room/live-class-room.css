@@ -67,12 +67,19 @@
 }
 .lc-end-btn:hover { background: rgba(239,68,68,0.25); }
 
-/* iframe */
+/* ✅ Jitsi container — flex: 1 দিয়ে পুরো বাকি height নেবে */
 .lc-frame {
   flex: 1;
-  border: none;
   width: 100%;
   display: block;
+  overflow: hidden;
+}
+
+/* Jitsi নিজে iframe তৈরি করে, সেটাও full size হওয়া দরকার */
+.lc-frame iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
 }
 
 /* Loading */

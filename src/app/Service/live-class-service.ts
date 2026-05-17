@@ -34,7 +34,7 @@ export class LiveClassService {
     return this.http.put(`${this.baseUrl}/end/${id}`, {});
   }
 
-  join(id: string): Observable<{ roomUrl: string; token: string; title: string }> {
+  join(id: string): Observable<{ roomUrl: string; userName: string; title: string }> {
     return this.http.get<any>(`${this.baseUrl}/join/${id}`);
   }
 }

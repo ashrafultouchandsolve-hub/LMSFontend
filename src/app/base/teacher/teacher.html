@@ -210,7 +210,7 @@
                     <button type="button" class="btn btn-danger" (click)="startLiveClass(lc.id)">🔴 Start</button>
                   }
                   @if (lc.isActive) {
-                    <a [routerLink]="['/liveClass', lc.id]" class="btn btn-outline">Join →</a>
+                    <a [routerLink]="['/live-class', lc.id]" class="btn btn-outline">Join →</a>
                     <button type="button" class="btn btn-danger" (click)="endLiveClass(lc.id)">End</button>
                   }
                   @if (lc.isEnded) {

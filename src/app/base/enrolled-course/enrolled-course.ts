@@ -5,8 +5,7 @@ import { AuthService } from '../../Service/auth.service';
 import { LearningApiService, LessonDto } from '../../Service/learning-api.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LanguageService } from '../../Service/language.service';
-import { QuizAttemptComponent } from '../quiz-attempt/quiz-attempt';
-
+import { LiveClass, LiveClassService } from '../../Service/live-class-service'; // ✅ নতুন
 
 type LessonView = {
   id: string;
@@ -48,6 +47,7 @@ export class EnrolledCourse implements OnDestroy {
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
+  private readonly liveClassService = inject(LiveClassService); // ✅ নতুন
   readonly lang = inject(LanguageService);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
@@ -64,6 +64,11 @@ export class EnrolledCourse implements OnDestroy {
   protected readonly isSubmittingComment = signal(false);
   protected readonly commentMessage = signal('');
   protected readonly commentError = signal('');
+
+  // ✅ Live class signals
+  protected readonly liveClasses = signal<LiveClass[]>([]);
+  protected readonly isLoadingLive = signal(false);
+
   private saveProgressInterval: any;
 
   protected readonly selectedLesson = computed(() => {
@@ -77,48 +82,50 @@ export class EnrolledCourse implements OnDestroy {
     return name.trim().charAt(0).toUpperCase() || 'I';
   });
 
+  // ✅ Active live class আছে কিনা
+  protected readonly activeLiveClass = computed(() =>
+    this.liveClasses().find(lc => lc.isActive) ?? null
+  );
+
   constructor(private readonly sanitizer: DomSanitizer) {
     void this.loadLessons();
     effect(() => {
       const lesson = this.selectedLesson();
       if (lesson) {
-        // DOM update এর পরে reinit
         setTimeout(() => this.initPlyr(), 100);
       }
     });
   }
 
-
   ngAfterViewInit() {
     this.initPlyr();
   }
+
   ngOnDestroy() {
     this.plyrInstance?.destroy();
     clearInterval(this.saveProgressInterval);
   }
 
-protected selectLesson(lessonId: string): void {
-  clearInterval(this.saveProgressInterval);
-  this.selectedLessonId.set(lessonId);
+  protected selectLesson(lessonId: string): void {
+    clearInterval(this.saveProgressInterval);
+    this.selectedLessonId.set(lessonId);
 
-  // ✅ নতুন lesson select হলে quiz status reload করো
-  const lesson = this.lessons().find(l => l.id === lessonId);
-  if (lesson && !lesson.hasQuiz) return;
+    const lesson = this.lessons().find(l => l.id === lessonId);
+    if (lesson && !lesson.hasQuiz) return;
 
-  const userId = this.authService.getCurrentUser()?.id ?? '';
-  if (!userId || !lesson) return;
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    if (!userId || !lesson) return;
 
-  firstValueFrom(this.learningApi.hasAttemptedQuiz(lessonId, String(userId)))
-    .then(res => {
-      const data = (res as any)?.Data ?? (res as any)?.data ?? res;
-      const attempted = data === true || data === 'true';
-      this.lessons.update(list =>
-        list.map(l => l.id === lessonId ? { ...l, QuizAttempted: attempted } : l)
-      );
-    })
-    .catch(() => {});
-}
-
+    firstValueFrom(this.learningApi.hasAttemptedQuiz(lessonId, String(userId)))
+      .then(res => {
+        const data = (res as any)?.Data ?? (res as any)?.data ?? res;
+        const attempted = data === true || data === 'true';
+        this.lessons.update(list =>
+          list.map(l => l.id === lessonId ? { ...l, QuizAttempted: attempted } : l)
+        );
+      })
+      .catch(() => {});
+  }
 
   private initPlyr() {
     const videoEl = this.videoPlayer?.nativeElement;
@@ -145,22 +152,13 @@ protected selectLesson(lessonId: string): void {
       disableContextMenu: true,
     });
   }
-  protected formatDuration(totalMinutes: number): string {
-    if (totalMinutes <= 0) {
-      return 'N/A';
-    }
 
+  protected formatDuration(totalMinutes: number): string {
+    if (totalMinutes <= 0) return 'N/A';
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-
-    if (hours === 0) {
-      return `${minutes} min`;
-    }
-
-    if (minutes === 0) {
-      return `${hours} hr`;
-    }
-
+    if (hours === 0) return `${minutes} min`;
+    if (minutes === 0) return `${hours} hr`;
     return `${hours} hr ${minutes} min`;
   }
 
@@ -194,6 +192,7 @@ protected selectLesson(lessonId: string): void {
 
       this.courseMeta.set(await this.loadCourseMeta(id));
       await this.loadComments(id);
+      await this.loadLiveClasses(id); // ✅ live class লোড করো
 
       const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));
       const anyRes = response as any;
@@ -205,18 +204,13 @@ protected selectLesson(lessonId: string): void {
 
       const userId = this.authService.getCurrentUser()?.id ?? '';
 
-      // প্রতিটি lesson এর quiz আছে কিনা এবং attempt হয়েছে কিনা check করো
       const lessonsWithQuizInfo = await Promise.all(
         mappedLessons.map(async (lesson) => {
           try {
-            // quiz count check
-            const quizRes = await firstValueFrom(
-              this.learningApi.getQuizzesByLesson(lesson.id)
-            );
+            const quizRes = await firstValueFrom(this.learningApi.getQuizzesByLesson(lesson.id));
             const quizData = (quizRes as any)?.Data ?? (quizRes as any)?.data ?? [];
             const hasQuiz = Array.isArray(quizData) && quizData.length > 0;
 
-            // attempt check — quiz থাকলেই check করো
             let quizAttempted = false;
             if (hasQuiz && userId) {
               const attemptRes = await firstValueFrom(
@@ -226,7 +220,7 @@ protected selectLesson(lessonId: string): void {
               quizAttempted = attemptData === true || attemptData === 'true';
             }
 
-            return { ...lesson, hasQuiz, quizAttempted: quizAttempted };
+            return { ...lesson, hasQuiz, quizAttempted };
           } catch {
             return { ...lesson, hasQuiz: false, quizAttempted: false };
           }
@@ -235,7 +229,6 @@ protected selectLesson(lessonId: string): void {
 
       this.lessons.set(lessonsWithQuizInfo);
 
-      // Check if lessonId is in query params (coming from video history resume)
       const resumeLessonId = this.route?.snapshot.queryParamMap.get('lessonId') ?? '';
       if (resumeLessonId && lessonsWithQuizInfo.some(l => l.id === resumeLessonId)) {
         this.selectedLessonId.set(resumeLessonId);
@@ -251,8 +244,30 @@ protected selectLesson(lessonId: string): void {
     }
   }
 
+  // ✅ Live class load করো
+  private async loadLiveClasses(courseId: string): Promise<void> {
+    this.isLoadingLive.set(true);
+    try {
+      const response = await firstValueFrom(this.liveClassService.getByCourse(courseId));
+      const anyRes = response as any;
+      const arr = Array.isArray(anyRes?.data) ? anyRes.data
+        : Array.isArray(anyRes?.Data) ? anyRes.Data : [];
 
-
+      this.liveClasses.set(arr.map((item: any) => ({
+        id: item.id ?? item.Id ?? '',
+        title: item.title ?? item.Title ?? '',
+        description: item.description ?? item.Description ?? '',
+        scheduledAt: item.scheduledAt ?? item.ScheduledAt ?? '',
+        isActive: Boolean(item.isActive ?? item.IsActive),
+        isEnded: Boolean(item.isEnded ?? item.IsEnded),
+        roomUrl: item.roomUrl ?? item.RoomUrl ?? '',
+      })));
+    } catch {
+      this.liveClasses.set([]);
+    } finally {
+      this.isLoadingLive.set(false);
+    }
+  }
 
   private async loadCourseMeta(id: string): Promise<CourseMetaView | null> {
     try {
@@ -263,14 +278,9 @@ protected selectLesson(lessonId: string): void {
         : (Array.isArray(responseWithAlternativeShape.Data) ? responseWithAlternativeShape.Data : []);
 
       const matchedCourse = rawCourses.find((course) => course.id === id);
-      if (!matchedCourse) {
-        return null;
-      }
+      if (!matchedCourse) return null;
 
-      return {
-        title: matchedCourse.title,
-        instructorName: matchedCourse.instructorName,
-      };
+      return { title: matchedCourse.title, instructorName: matchedCourse.instructorName };
     } catch {
       return null;
     }
@@ -298,9 +308,8 @@ protected selectLesson(lessonId: string): void {
 
       let rawComments: any[] = [];
 
-      // Handle different response structures
       if (Array.isArray(payload?.data?.comments)) {
-        rawComments = payload.data.comments;       // ✅ এটা এখন match করবে
+        rawComments = payload.data.comments;
       } else if (Array.isArray(payload?.data?.data)) {
         rawComments = payload.data.data;
       } else if (Array.isArray(payload?.data)) {
@@ -312,8 +321,7 @@ protected selectLesson(lessonId: string): void {
       }
 
       this.comments.set(rawComments.map((comment: any) => this.normalizeComment(comment)));
-    } catch (error) {
-      console.error('Error loading comments:', error);
+    } catch {
       this.comments.set([]);
       this.commentError.set('Comments লোড করা যায়নি।');
     } finally {
@@ -338,20 +346,9 @@ protected selectLesson(lessonId: string): void {
     const currentCourseId = this.courseId();
     const content = this.commentText().trim();
 
-    if (!userId) {
-      this.commentError.set('Comment করতে login করুন।');
-      return;
-    }
-
-    if (!content) {
-      this.commentError.set('Comment text দিন।');
-      return;
-    }
-
-    if (!currentCourseId) {
-      this.commentError.set('Course পাওয়া যায়নি।');
-      return;
-    }
+    if (!userId) { this.commentError.set('Comment করতে login করুন।'); return; }
+    if (!content) { this.commentError.set('Comment text দিন।'); return; }
+    if (!currentCourseId) { this.commentError.set('Course পাওয়া যায়নি।'); return; }
 
     this.isSubmittingComment.set(true);
     this.commentError.set('');
@@ -362,12 +359,10 @@ protected selectLesson(lessonId: string): void {
         userId: String(userId),
         content,
       }));
-
       this.commentText.set('');
       this.commentMessage.set('Comment added successfully.');
       await this.loadComments(currentCourseId);
-    } catch (error) {
-      console.error('Error adding comment:', error);
+    } catch {
       this.commentError.set('Comment add করা যায়নি।');
     } finally {
       this.isSubmittingComment.set(false);
@@ -378,10 +373,7 @@ protected selectLesson(lessonId: string): void {
     const userId = this.authService.getCurrentUser()?.id ?? '';
     const content = this.editingCommentText().trim();
 
-    if (!userId || !content) {
-      this.commentError.set('Comment text দিন।');
-      return;
-    }
+    if (!userId || !content) { this.commentError.set('Comment text দিন।'); return; }
 
     this.isSubmittingComment.set(true);
     this.commentError.set('');
@@ -392,8 +384,7 @@ protected selectLesson(lessonId: string): void {
       this.editingCommentText.set('');
       this.commentMessage.set('Comment updated successfully.');
       await this.loadComments(this.courseId());
-    } catch (error) {
-      console.error('Error updating comment:', error);
+    } catch {
       this.commentError.set('Comment update করা যায়নি।');
     } finally {
       this.isSubmittingComment.set(false);
@@ -401,15 +392,12 @@ protected selectLesson(lessonId: string): void {
   }
 
   protected async deleteComment(commentId: string): Promise<void> {
-    if (!globalThis.confirm('Delete this comment?')) {
-      return;
-    }
+    if (!globalThis.confirm('Delete this comment?')) return;
 
     try {
       await firstValueFrom(this.learningApi.deleteCourseComment(commentId));
       await this.loadComments(this.courseId());
-    } catch (error) {
-      console.error('Error deleting comment:', error);
+    } catch {
       this.commentError.set('Comment delete করা যায়নি।');
     }
   }
@@ -420,16 +408,17 @@ protected selectLesson(lessonId: string): void {
   }
 
   protected formatCommentDate(value: string | null): string {
-    if (!value) {
-      return 'Just now';
-    }
-
+    if (!value) return 'Just now';
     const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return 'Just now';
-    }
-
+    if (Number.isNaN(parsed.getTime())) return 'Just now';
     return parsed.toLocaleString();
+  }
+
+  // ✅ Live class scheduled time format
+  protected formatScheduled(value: string): string {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toLocaleString('bn-BD', { dateStyle: 'medium', timeStyle: 'short' });
   }
 
   private mapLessonForView(lesson: any): LessonView {
@@ -453,9 +442,8 @@ protected selectLesson(lessonId: string): void {
         : (hasExternalVideo ? videoUrl : ''),
       thumbnailUrl: this.learningApi.buildDownloadUrl(thumbnailPath),
       hasQuiz: false,
-      quizAttempted: false
+      quizAttempted: false,
     };
-
   }
 
   isYoutube(url: string): boolean {
@@ -475,40 +463,32 @@ protected selectLesson(lessonId: string): void {
     return match ? match[1] : '';
   }
 
-
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
 
-  // Video load হলে saved position থেকে শুরু
   async onVideoLoaded(event: Event, lessonId: string): Promise<void> {
     const video = event.target as HTMLVideoElement;
     const userId = this.authService.getCurrentUser()?.id ?? '';
     if (!userId) return;
 
-    // আগের interval clear করো
     clearInterval(this.saveProgressInterval);
 
     try {
-      // Check if resumeAt query param exists (coming from video history)
       const resumeAtParam = this.route?.snapshot.queryParamMap.get('resumeAt');
       let resumeSeconds = resumeAtParam ? parseFloat(resumeAtParam) : null;
 
-      // If no query param, get from saved progress
       if (resumeSeconds === null || isNaN(resumeSeconds)) {
-        const res = await firstValueFrom(
-          this.learningApi.getVideoProgress(lessonId, userId)
-        );
+        const res = await firstValueFrom(this.learningApi.getVideoProgress(lessonId, userId));
         const progress = (res as any)?.Data;
         resumeSeconds = progress?.watchedSeconds ?? null;
       }
 
       if (resumeSeconds !== null && resumeSeconds > 5) {
-        // seeked event দিয়ে নিশ্চিত করো
         const trySetTime = () => {
           if (video.readyState >= 2) {
-            video.currentTime = resumeSeconds;
+            video.currentTime = resumeSeconds!;
           } else {
             video.addEventListener('canplay', () => {
-              video.currentTime = resumeSeconds;
+              video.currentTime = resumeSeconds!;
             }, { once: true });
           }
         };
@@ -516,7 +496,6 @@ protected selectLesson(lessonId: string): void {
       }
     } catch { }
 
-    // প্রতি ৫ সেকেন্ডে save
     this.saveProgressInterval = setInterval(async () => {
       if (video.paused || video.ended) return;
       const uid = this.authService.getCurrentUser()?.id ?? '';
@@ -525,13 +504,12 @@ protected selectLesson(lessonId: string): void {
         this.learningApi.saveVideoProgress(lessonId, {
           userId: uid,
           watchedSeconds: video.currentTime,
-          totalSeconds: video.duration || 0
+          totalSeconds: video.duration || 0,
         })
       ).catch(() => { });
     }, 5000);
   }
 
-  // Video শেষ হলে complete mark করো
   async onVideoEnded(event: Event, lessonId: string): Promise<void> {
     const video = event.target as HTMLVideoElement;
     const userId = this.authService.getCurrentUser()?.id ?? '';
@@ -541,7 +519,7 @@ protected selectLesson(lessonId: string): void {
       this.learningApi.saveVideoProgress(lessonId, {
         userId,
         watchedSeconds: video.duration,
-        totalSeconds: video.duration
+        totalSeconds: video.duration,
       })
     ).catch(() => { });
 

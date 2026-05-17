@@ -53,7 +53,11 @@ export const routes: Routes = [
     { path: 'quiz/:lessonId', component: QuizAttemptComponent, canActivate: [authGuard] },
     { path: 'history', component: VideoHistoryComponent, canActivate: [authGuard] },
     { path: 'enrolled-students/:courseId', component: EnrolledStudents, canActivate: [authGuard, teacherGuard] },
-    { path: 'liveClass/:id', component: LiveClassRoom, canActivate: [authGuard] },
+    {
+  path: 'live-class/:id',
+  loadComponent: () => import('./shared/live-class-room/live-class-room').then(m => m.LiveClassRoom),
+  canActivate: [authGuard]
+},
     {
   path: 'instructors',
   loadComponent: () => import('./base/instructors/instructors').then(m => m.Instructors),
