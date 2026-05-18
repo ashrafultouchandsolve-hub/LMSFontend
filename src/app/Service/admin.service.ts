@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environments';
 
 export interface DashboardStats {
   totalStudents: number;
@@ -48,7 +49,7 @@ export class AdminService {
   private readonly http = inject(HttpClient);
   // private readonly baseUrl = 'http://160.191.150.185:8071/api/Admin';
 
-     private readonly baseUrl = 'https://localhost:7002/api/Admin';
+     private readonly baseUrl = environment.baseUrl + '/Admin';
 
   getDashboard(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(`${this.baseUrl}/dashboard`);

@@ -102,7 +102,7 @@ export class LearningApiService {
 
 
    private readonly primaryBaseUrl = environment.baseUrl;
-  private readonly fallbackBaseUrl = 'https://localhost:7236/api';
+  private readonly fallbackBaseUrl = environment.baseUrl;
 
 
 

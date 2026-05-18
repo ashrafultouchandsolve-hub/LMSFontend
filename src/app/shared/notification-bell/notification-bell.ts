@@ -23,7 +23,7 @@ export class NotificationBell implements OnInit {
   ngOnInit() {
     if (!this.authSvc.isLoggedIn()) return;
     this.load();
-    // প্রতি ৩০ সেকেন্ডে refresh
+    // Refresh every 30 seconds
     this.refreshTimer = setInterval(() => this.loadCount(), 30000);
   }
 
@@ -118,7 +118,7 @@ export class NotificationBell implements OnInit {
     }
   }
 
-  // Outside click এ close করো
+  // Close on outside click
   @HostListener('document:click', ['$event'])
   onDocClick(e: MouseEvent) {
     const target = e.target as HTMLElement;
@@ -140,10 +140,10 @@ export class NotificationBell implements OnInit {
   timeAgo(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
-    if (m < 1)  return 'এইমাত্র';
-    if (m < 60) return `${m} মিনিট আগে`;
+    if (m < 1)  return 'Just now';
+    if (m < 60) return `${m} minutes ago`;
     const h = Math.floor(m / 60);
-    if (h < 24) return `${h} ঘণ্টা আগে`;
-    return `${Math.floor(h / 24)} দিন আগে`;
+    if (h < 24) return `${h} hours ago`;
+    return `${Math.floor(h / 24)} days ago`;
   }
 }

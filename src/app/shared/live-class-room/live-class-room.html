@@ -18,7 +18,7 @@
   @if (isLoading()) {
     <div class="lc-loading">
       <div class="lc-spinner"></div>
-      <p>Live class এ যোগ দিচ্ছি...</p>
+      <p>Joining live class...</p>
     </div>
   }
 
@@ -27,11 +27,11 @@
     <div class="lc-error">
       <span>😕</span>
       <h3>{{ error() }}</h3>
-      <a routerLink="/homepage" class="lc-back-btn">Homepage এ যাও</a>
+      <a routerLink="/homepage" class="lc-back-btn">Go to Homepage</a>
     </div>
   }
 
-  <!-- ✅ Jitsi Meet container — iframe এর বদলে এই div এ Jitsi inject হবে -->
+  <!-- Jitsi Meet container — Jitsi will be injected into this div instead of an iframe -->
   @if (!isLoading() && !error()) {
     <div id="jitsi-container" class="lc-frame"></div>
   }

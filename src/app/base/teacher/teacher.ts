@@ -15,6 +15,7 @@ import {
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
+import { environment } from '../../../environments/environments';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
@@ -601,7 +602,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
     }
 
-    return `https://localhost:7002${path}`;
+      return `${environment.baseUrl.replace('/api', '')}${path}`;
   }
 
   protected onThumbnailError(event: Event, context: 'course' | 'lesson'): void {

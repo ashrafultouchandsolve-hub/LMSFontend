@@ -20,7 +20,7 @@
         <div class="notif-header">
           <span class="notif-header-title">Notifications</span>
           @if (unreadCount() > 0) {
-            <button class="notif-read-all" (click)="markAllRead()">সব পড়া হয়েছে</button>
+            <button class="notif-read-all" (click)="markAllRead()">Mark all as read</button>
           }
         </div>
 
@@ -45,7 +45,7 @@
           @empty {
             <div class="notif-empty">
               <span>🔔</span>
-              <p>কোনো notification নেই</p>
+              <p>No notifications</p>
             </div>
           }
         </div>

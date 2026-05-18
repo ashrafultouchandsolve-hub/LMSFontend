@@ -42,16 +42,16 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
         const userName = res.userName ?? res.UserName ?? 'Student';
         this.title.set(res.title ?? res.Title ?? 'Live Class');
 
-        // "https://meet.jit.si/tands-abc123" থেকে room name বের করো
+        // Extract room name from "https://meet.jit.si/tands-abc123"
         const roomName = roomUrl.replace('https://meet.jit.si/', '');
 
         this.isLoading.set(false);
 
-        // DOM update হওয়ার পরে Jitsi load করো
+        // Load Jitsi after DOM update
         setTimeout(() => this.loadJitsi(roomName, userName), 0);
       },
       error: (err: any) => {
-        const msg = err?.error?.message ?? err?.error?.Message ?? 'Live class এ যোগ দেওয়া যায়নি।';
+        const msg = err?.error?.message ?? err?.error?.Message ?? 'Could not join live class.';
         this.error.set(msg);
         this.isLoading.set(false);
       }
@@ -87,7 +87,7 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
   }
 
   endClass() {
-    if (!confirm('Live class শেষ করবে?')) return;
+    if (!confirm('End the live class?')) return;
     this.svc.end(this.classId()).subscribe({
       next: () => this.router.navigateByUrl('/teacher'),
       error: () => {}
