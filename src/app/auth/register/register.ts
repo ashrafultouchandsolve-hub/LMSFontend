@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
 
@@ -14,22 +14,33 @@ import { LanguageService } from '../../Service/language.service';
 export class Register {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isSubmitting = signal(false);
   protected readonly apiMessage = signal('');
   protected readonly isTeacherPending = signal(false); // ✅ Teacher pending state
   protected readonly showPassword = signal(false);
   protected readonly showConfirmPassword = signal(false);
+  protected readonly preselectedRole = signal<string>('');
   readonly lang = inject(LanguageService);
 
+  ngOnInit(): void {
+    const url = this.router.url;
+    if (url.includes('register/teacher')) {
+      this.registerForm.controls.role.setValue('1');
+      this.preselectedRole.set('teacher');
+    } else if (url.includes('register/student')) {
+      this.registerForm.controls.role.setValue('0');
+      this.preselectedRole.set('student');
+    }
+  }
   protected readonly registerForm = new FormGroup({
     fullname: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(2)],
     }),
-    role: new FormControl('', {
+    role: new FormControl('0', {
       nonNullable: true,
-      validators: [Validators.required],
     }),
     email: new FormControl('', {
       nonNullable: true,

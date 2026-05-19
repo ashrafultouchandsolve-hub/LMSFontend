@@ -536,3 +536,99 @@
 		font-size: 14px;
 	}
 }
+.role-badge {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    border: 2px solid;
+}
+
+.role-badge--teacher {
+    background: #FFF8E1;
+    border-color: #F39C12;
+    color: #854F0B;
+}
+
+.role-badge--student {
+    background: #EAF2FB;
+    border-color: #2D6DB4;
+    color: #1A3C6B;
+}
+/* ── Teacher Theme ── */
+.auth-shell--teacher {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 65%, #1a1a2e 100%);
+    color: #e8f0fe;
+}
+
+.auth-shell--teacher .auth-decor-1 {
+    background: radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0) 70%);
+}
+
+.auth-shell--teacher .auth-decor-2 {
+    background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0) 75%);
+}
+
+.auth-shell--teacher .auth-decor-3 {
+    background: radial-gradient(circle, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 70%);
+}
+
+.auth-shell--teacher .hero-title {
+    color: #fbbf24;
+}
+
+.auth-shell--teacher .hero-subtitle {
+    color: #93c5fd;
+}
+
+.auth-shell--teacher .auth-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    backdrop-filter: blur(20px);
+}
+
+.auth-shell--teacher .form-label {
+    color: #fbbf24;
+}
+
+.auth-shell--teacher label {
+    color: #cbd5e1;
+}
+
+.auth-shell--teacher input,
+.auth-shell--teacher select {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(251, 191, 36, 0.3);
+    color: #131313;
+}
+
+.auth-shell--teacher input::placeholder {
+    color: #64748b;
+}
+
+.auth-shell--teacher input:focus,
+.auth-shell--teacher select:focus {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+}
+
+.auth-shell--teacher .submit-button {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+.auth-shell--teacher .submit-button:hover {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.auth-shell--teacher .lang-toggle-btn {
+    background: rgba(255,255,255,0.08);
+    color: #fbbf24;
+    border-color: rgba(251,191,36,0.3);
+}
+
+.auth-shell--teacher .auth-links a {
+    color: #93c5fd;
+}

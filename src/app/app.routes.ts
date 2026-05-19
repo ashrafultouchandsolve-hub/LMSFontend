@@ -27,6 +27,8 @@ export const routes: Routes = [
     { path: '', redirectTo: 'homepage', pathMatch: 'full' },
     { path: 'login', component: Login },
     { path: 'register', component: Register },
+    { path: 'register/student', component: Register },
+    { path: 'register/teacher', component: Register },
     { path: 'onboarding-preferences', component: OnboardingPreferences, canActivate: [authGuard] },
     { path: 'homepage', component: HomePage },
     { path: 'profile', component: Profile, canActivate: [authGuard] },

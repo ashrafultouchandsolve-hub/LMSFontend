@@ -83,30 +83,44 @@
 		</section>
 	} @else {
 		<section class="course-grid" aria-label="Enrolled courses list">
-			@for (course of filteredCourses(); track course.id) {
-				
-				<article class="course-card">
-					<div class="course-top-row">
-						<span class="badge">{{ course.level }}</span>
-						<span class="tag">{{ course.category }}</span>
+			@for (course of filteredCourses(); track course.id; let i = $index) {
+				<article class="course-card" [style]="'--card-color:' + getCardColor(i)">
+					<div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
+						<img class="track-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
 					</div>
+					<div class="course-card-inner">
+						<span [class]="'course-badge ' + getLevelClass(course.level)">
+							{{ course.level === 'Beginner' ? 'Beginner' : course.level === 'Intermediate' ? 'Intermediate' : 'Advanced' }}
+						</span>
+						<h3>{{ course.title }}</h3>
+						<p class="course-description">{{ course.description }}</p>
+						<a [routerLink]="['/course-details', course.id]" class="see-more-button">See More</a>
+						<ul class="course-points">
+							<li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
+							<li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
+							<li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
+							<li><strong>{{ lang.t().courseDuration }}</strong> {{ formatDuration(course.durationMinutes) }}</li>
+							<li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
+						</ul>
 
-					<h3>{{ course.title }}</h3>
-					<p class="desc">{{ course.description }}</p>
+						@if (course.totalRatings && course.totalRatings > 0) {
+							<div class="course-rating">
+								<span class="rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+								<span class="rating-count">({{ course.totalRatings }} ratings)</span>
+							</div>
+						}
 
-					<ul class="meta" aria-label="Course details">
-						<li><strong>Instructor:</strong> {{ course.instructorName }}</li>
-						<li><strong>Lessons:</strong> {{ course.lessonCount }}</li>
-						<li><strong>Duration:</strong> {{ formatDuration(course.durationMinutes) }}</li>
-						<li><strong>Price:</strong> {{ formatPrice(course.price) }}</li>
-					</ul>
-
-					<div class="card-actions">
-						<a class="btn solid" [routerLink]="['/enrolled-course', course.id]">Continue Learning</a>
-						<a class="btn ghost" [routerLink]="['/course-details', course.id]">Course Details</a>
+						<div class="course-footer">
+							<div class="course-footer-actions">
+								<a [routerLink]="['/enrolled-course', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
+								<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-primary">View Details</a>
+							</div>
+							<a [routerLink]="['/enrolled-course', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
+						</div>
 					</div>
 				</article>
 			}
 		</section>
 	}
 </main>
+ 

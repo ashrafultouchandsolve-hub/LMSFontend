@@ -15,6 +15,9 @@ type EnrolledCourseView = {
   lessonCount: number;
   durationMinutes: number;
   price: number;
+  thumbnailUrl: string;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 @Component({
@@ -137,7 +140,8 @@ export class MyCourses {
         .filter((item) => item.isEnrolled)
         .map((item) => this.mapToView(item.course));
 
-      this.myCourses.set(enrolledOnly);
+      let enriched = await this.attachRatings(enrolledOnly);
+      this.myCourses.set(enriched);
     } catch {
       this.errorMessage.set('Enrolled courses লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।');
       this.myCourses.set([]);
@@ -157,6 +161,7 @@ export class MyCourses {
       lessonCount: dto.lessonCount ?? 0,
       durationMinutes: dto.durationMinutes,
       price: dto.price,
+      thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
     };
   }
 
@@ -166,5 +171,42 @@ export class MyCourses {
     }
 
     return 'Beginner';
+  }
+
+  protected getImageUrl(thumbnailPath: string | null): string {
+    if (!thumbnailPath) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+    return this.learningApi.buildDownloadUrl(thumbnailPath);
+  }
+
+  protected onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.getImageUrl(null);
+  }
+
+  protected getLevelClass(level: EnrolledCourseView['level']): string {
+    if (level === 'Advanced')    return 'course-badge-adv';
+    if (level === 'Intermediate') return 'course-badge-int';
+    return 'course-badge-beg';
+  }
+
+  protected getCardColor(index: number): string {
+    const colors = ['#ec4899','#7c3aed','#06b6d4','#f97316','#10b981','#3b82f6','#f59e0b','#8b5cf6'];
+    return colors[index % colors.length];
+  }
+
+  protected getImageClass(level: EnrolledCourseView['level']): string {
+    if (level === 'Advanced')    return 'track-img-adv';
+    if (level === 'Intermediate') return 'track-img-int';
+    return 'track-img-beg';
+  }
+
+  private async attachRatings(courses: EnrolledCourseView[]): Promise<EnrolledCourseView[]> {
+    return Promise.all(courses.map(async (c) => {
+      try {
+        const res = await firstValueFrom(this.learningApi.getRatingSummary(c.id));
+        const d = (res as any)?.data ?? (res as any)?.Data;
+        if (d) return { ...c, averageRating: parseFloat(d.averageRating) || 0, totalRatings: d.totalRatings || 0 };
+      } catch {}
+      return c;
+    }));
   }
 }

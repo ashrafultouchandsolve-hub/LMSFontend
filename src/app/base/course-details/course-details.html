@@ -140,6 +140,7 @@
 					<button type="button" class="coupon-button">{{ lang.t().cdCoupon }}</button>
 				}
 				@if (isLoggedIn()) {
+					@if (!isTeacher()){
 					@if (isCheckingEnrollment()) {
 						<button type="button" class="enroll-button enroll-button-muted" disabled>{{ lang.t().cdCheckingEnrollment }}</button>
 					} @else if (isEnrolled()) {
@@ -147,6 +148,7 @@
 					} @else {
 						<a [routerLink]="['/payment']" [queryParams]="{ courseId: selectedCourse.id, courseTitle: selectedCourse.title, amount: selectedCourse.price }" class="enroll-button enroll-link">{{ lang.t().cdEnrollNow }}</a>
 					}
+				}
 				} @else {
 					<a routerLink="/login" class="enroll-button enroll-link">{{ lang.t().cdLoginToEnroll }}</a>
 				}

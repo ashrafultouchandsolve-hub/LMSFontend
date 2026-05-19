@@ -78,6 +78,12 @@ export class Courses {
 
   protected readonly hasFilteredCourses = computed(() => this.filteredCourses().length > 0);
 
+  // ✅ Check if current user is a teacher
+  protected readonly isTeacher = computed(() => {
+    const currentUser = this.authService.getCurrentUser();
+    return currentUser?.role === 1;
+  });
+
   // ✅ Sidebar এ শুধু course আছে এমন category দেখাবে
   protected readonly availableCategories = computed(() => {
     const existing = new Set(this.courses().map(c => c.category));

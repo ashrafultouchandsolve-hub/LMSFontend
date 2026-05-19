@@ -118,10 +118,12 @@
 
                 <div class="course-footer">
                   <div class="course-footer-actions">
-                    @if (course.isEnrolled) {
-                      <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
-                    } @else {
-                      <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
+                    @if (!isTeacher()) {
+                      @if (course.isEnrolled) {
+                        <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
+                      } @else {
+                        <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
+                      }
                     }
                     <button
                       type="button"
