@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent } from '@angular/common/http';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -86,6 +86,8 @@ export class Teacher implements OnInit {
   protected readonly selectedLessonThumbnailFile = signal<File | null>(null);
   protected readonly selectedLessonThumbnailPreview = signal('');
   protected readonly selectedLessonVideoFile = signal<File | null>(null);
+  protected readonly videoUploadProgress = signal(0);
+  protected readonly isUploadingVideo = signal(false);
 
   protected readonly courses = signal<Course[]>([]);
 protected readonly liveClasses    = signal<LiveClass[]>([]);
@@ -511,7 +513,35 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
       const lessonVideoFile = this.selectedLessonVideoFile();
       if (targetLessonId && lessonVideoFile) {
-        await firstValueFrom(this.learningApi.uploadLessonVideo(targetLessonId, lessonVideoFile));
+        this.isUploadingVideo.set(true);
+        this.videoUploadProgress.set(0);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            this.learningApi.uploadLessonVideoWithProgress(targetLessonId, lessonVideoFile).subscribe({
+              next: (event: HttpEvent<any>) => {
+                if (event.type === 1) {
+                  // HttpProgressEvent has type 1
+                  const progressEvent = event as any;
+                  if (progressEvent.total) {
+                    const progress = Math.round((100 * progressEvent.loaded) / progressEvent.total);
+                    this.videoUploadProgress.set(progress);
+                  }
+                }
+              },
+              error: (err) => {
+                this.isUploadingVideo.set(false);
+                reject(err);
+              },
+              complete: () => {
+                this.isUploadingVideo.set(false);
+                this.videoUploadProgress.set(100);
+                resolve();
+              },
+            });
+          });
+        } catch (uploadError) {
+          throw uploadError;
+        }
       } else if (targetLessonId && formValue.videoUrl.trim()) {
         await firstValueFrom(this.learningApi.setLessonVideoUrl(targetLessonId, formValue.videoUrl.trim()));
       }

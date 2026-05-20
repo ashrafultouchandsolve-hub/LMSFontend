@@ -401,8 +401,20 @@
 
           <label class="full upload-field">
             <span>Or Upload Video File</span>
-            <input type="file" accept="video/*" (change)="onLessonVideoFileSelected($event)" />
+            <input type="file" accept="video/*" (change)="onLessonVideoFileSelected($event)" [disabled]="isUploadingVideo()" />
           </label>
+
+          @if (isUploadingVideo()) {
+            <div class="full video-upload-progress">
+              <div class="progress-info">
+                <span class="progress-label">Uploading video...</span>
+                <span class="progress-percentage">{{ videoUploadProgress() }}%</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" [style.width.%]="videoUploadProgress()"></div>
+              </div>
+            </div>
+          }
 
           <label class="full upload-field">
             <span>Lesson Thumbnail (optional)</span>

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams, HttpEvent, HttpProgressEvent } from '@angular/common/http';
 import { Observable, catchError, debounce, map, of, tap, throwError } from 'rxjs';
 import { JwtService } from './jwt.service';
 import { environment } from '../../environments/environments';
@@ -243,6 +243,37 @@ export class LearningApiService {
     return this.withFallback((baseUrl) =>
       this.http.post<ApiResponse<unknown>>(`${baseUrl}/lesson/uploadvideo/${lessonId}`, formData),
     );
+  }
+
+  uploadLessonVideoWithProgress(lessonId: string, file: File): Observable<HttpEvent<ApiResponse<unknown>>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.primaryBaseUrl}/lesson/uploadvideo/${lessonId}`, formData, {
+        reportProgress: true,
+        observe: 'events',
+      })
+      .pipe(
+        tap(() => {
+          this.activeBaseUrl = this.primaryBaseUrl;
+        }),
+        catchError((error) => {
+          if (!this.isNetworkError(error)) {
+            return throwError(() => error);
+          }
+
+          return this.http
+            .post<ApiResponse<unknown>>(`${this.fallbackBaseUrl}/lesson/uploadvideo/${lessonId}`, formData, {
+              reportProgress: true,
+              observe: 'events',
+            })
+            .pipe(
+              tap(() => {
+                this.activeBaseUrl = this.fallbackBaseUrl;
+              }),
+            );
+        }),
+      );
   }
 
   setLessonVideoUrl(lessonId: string, videoUrl: string): Observable<ApiResponse<unknown>> {

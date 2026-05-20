@@ -100,7 +100,7 @@
 							<li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
 							<li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
 							<li><strong>{{ lang.t().courseDuration }}</strong> {{ formatDuration(course.durationMinutes) }}</li>
-							<li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
+							
 						</ul>
 
 						@if (course.totalRatings && course.totalRatings > 0) {

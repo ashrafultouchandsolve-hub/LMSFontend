@@ -680,6 +680,54 @@ label.full,
   padding-top: 8px;
 }
 
+/* Video Upload Progress Styles */
+.video-upload-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border: 1px solid #d8deef;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2563eb;
+}
+
+.progress-label {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.progress-percentage {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #2563eb;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+}
+
 @media (max-width: 980px) {
   .teacher-page {
     grid-template-columns: 1fr;
