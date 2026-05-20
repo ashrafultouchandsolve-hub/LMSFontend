@@ -1,0 +1,96 @@
+<div class="quiz-page">
+
+  <header class="quiz-header">
+    <button type="button" class="back-btn" (click)="goBack()">← Back</button>
+    <div>
+      <h1>Quiz Editor</h1>
+      <p class="quiz-subtitle">Lesson: <strong>{{ lessonTitle() }}</strong></p>
+    </div>
+  </header>
+
+  @if (notice()) {
+    <div class="notice" [class.notice-error]="noticeType() === 'error'">{{ notice() }}</div>
+  }
+
+  <!-- কতটা quiz যোগ করবে -->
+  <section class="quiz-count-section">
+    <label class="count-label">How many quizzes do you want to add?</label>
+    <div class="count-pills">
+      @for (n of quizCountOptions; track n) {
+        <button type="button"
+          class="count-pill"
+          [class.active]="quizCount() === n"
+          (click)="setQuizCount(n)">{{ n }}</button>
+      }
+    </div>
+  </section>
+
+  <!-- Quiz forms -->
+  <form class="quiz-forms" (ngSubmit)="saveAll()">
+    @for (form of forms(); track $index; let i = $index) {
+      <div class="quiz-form-card">
+        <div class="quiz-form-number">Q{{ i + 1 }}</div>
+
+        <div class="form-field">
+          <label>Question</label>
+          <textarea
+            rows="2"
+            [value]="form.question"
+            (input)="updateForm(i, 'question', $any($event.target).value)"
+            placeholder="Enter question..."
+          ></textarea>
+        </div>
+
+        <div class="options-grid">
+          @for (opt of ['A','B','C','D']; track opt) {
+            <div class="form-field option-field"
+              [class.correct]="form.correctAnswer === opt">
+              <label>
+                <span class="opt-label">{{ opt }}</span>
+                <input type="radio"
+                  [name]="'correct_' + i"
+                  [value]="opt"
+                  [checked]="form.correctAnswer === opt"
+                  (change)="updateForm(i, 'correctAnswer', opt)"
+                />
+                <span class="correct-tag">✓ Correct</span>
+              </label>
+              <input type="text"
+                [value]="opt === 'A' ? form.optionA : opt === 'B' ? form.optionB : opt === 'C' ? form.optionC : form.optionD"
+                (input)="updateForm(i, opt === 'A' ? 'optionA' : opt === 'B' ? 'optionB' : opt === 'C' ? 'optionC' : 'optionD', $any($event.target).value)"
+                [placeholder]="'Option ' + opt"
+              />
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <button type="submit" class="save-btn" [disabled]="isSaving()">
+      {{ isSaving() ? 'Saving...' : '💾 Save All Quiz' }}
+    </button>
+  </form>
+
+  <!-- Existing quizzes -->
+  @if (quizzes().length > 0) {
+    <section class="existing-quizzes">
+      <h2>Saved Quizzes ({{ quizzes().length }})</h2>
+      @for (q of quizzes(); track q.id; let i = $index) {
+        <div class="existing-card">
+          <div class="existing-header">
+            <span class="existing-num">Q{{ i + 1 }}</span>
+            <strong>{{ q.question }}</strong>
+            <button type="button" class="delete-btn" (click)="deleteQuiz(q.id)">🗑</button>
+          </div>
+          <div class="existing-options">
+            <span [class.correct-opt]="q.correctAnswer === 'A'">A: {{ q.optionA }}</span>
+            <span [class.correct-opt]="q.correctAnswer === 'B'">B: {{ q.optionB }}</span>
+            <span [class.correct-opt]="q.correctAnswer === 'C'">C: {{ q.optionC }}</span>
+            <span [class.correct-opt]="q.correctAnswer === 'D'">D: {{ q.optionD }}</span>
+          </div>
+        </div>
+      }
+    </section>
+  }
+
+</div>

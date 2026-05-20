@@ -1,0 +1,73 @@
+<div class="vh-page">
+
+  <header class="vh-header">
+    <button type="button" class="vh-back-btn" (click)="goBack()">← Back</button>
+    <div>
+      <h1>📺 Watch History</h1>
+      <p>তুমি যেসব lesson দেখেছ</p>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <div class="vh-loading">
+      <div class="vh-spinner"></div>
+      <p>Loading...</p>
+    </div>
+  }
+
+  @else if (history().length === 0) {
+    <div class="vh-empty">
+      <div class="vh-empty-icon">📭</div>
+      <h2>কোনো history নেই</h2>
+      <p>তুমি এখনো কোনো video দেখনি।</p>
+      <a routerLink="/courses" class="vh-browse-btn">Browse Courses</a>
+    </div>
+  }
+
+  @else {
+    <div class="vh-list">
+      @for (item of history(); track item.lessonId) {
+        <div class="vh-card">
+
+          <!-- Progress bar -->
+          <div class="vh-progress-wrap">
+            <div class="vh-progress-bar"
+              [style.width.%]="item.progressPercent"
+              [class.completed]="item.isCompleted">
+            </div>
+          </div>
+
+          <div class="vh-card-body">
+            <!-- Left: info -->
+            <div class="vh-info">
+              <div class="vh-status-badge" [class.completed]="item.isCompleted">
+                {{ item.isCompleted ? '✅ সম্পন্ন' : '▶ চলছে' }}
+              </div>
+              <h3>{{ item.lessonTitle }}</h3>
+              <div class="vh-meta">
+                <span>⏱ {{ formatTime(item.watchedSeconds) }} / {{ formatTime(item.totalSeconds) }}</span>
+                <span>📅 {{ formatDate(item.lastWatchedAt) }}</span>
+              </div>
+            </div>
+
+            <!-- Right: percent + button -->
+            <div class="vh-right">
+              <div class="vh-percent-circle" [class.done]="item.isCompleted">
+                <strong>{{ item.progressPercent }}%</strong>
+              </div>
+              <a
+                [routerLink]="['/enrolled-course', item.courseId]"
+                [queryParams]="{ lessonId: item.lessonId, resumeAt: item.watchedSeconds }"
+                class="vh-resume-btn"
+                [class.completed]="item.isCompleted">
+                {{ item.isCompleted ? '🔄 Rewatch' : '▶ Resume' }}
+              </a>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

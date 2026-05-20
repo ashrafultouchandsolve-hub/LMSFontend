@@ -1,0 +1,132 @@
+<div class="qa-page">
+
+  @if (isLoading()) {
+    <div class="qa-loading">Loading...</div>
+  }
+
+  @else if (alreadyAttempted()) {
+    <!-- Already attempted screen -->
+    <div class="qa-done">
+      <div class="qa-done-icon">🔒</div>
+      <h2>Quiz ইতিমধ্যে সম্পন্ন হয়েছে</h2>
+      <p>এই lesson এর quiz আপনি আগেই দিয়েছেন। আবার attempt করা যাবে না।</p>
+      <button type="button" class="qa-back-btn" (click)="goBack()">← Back to Lesson</button>
+    </div>
+  }
+
+  @else if (isSubmitted()) {
+    <div class="qa-result">
+      @if (result()) {
+        @if (result().alreadyAttempted) {
+          <div class="qa-previous-attempt-banner">
+            <p>📋 আপনার স্কোর</p>
+          </div>
+        }
+        <div class="qa-score-circle">
+          <strong>{{ result().score }}</strong>
+          <span>/ {{ result().totalQuestions }}</span>
+        </div>
+        <h2>Quiz শেষ!</h2>
+        <p class="qa-score-label">
+          {{ result().score }} টি সঠিক, {{ result().totalQuestions - result().score }} টি ভুল
+        </p>
+        <div class="qa-results-list">
+          @for (r of result().results; track r.quizId; let i = $index) {
+            <div class="qa-result-card" [class.correct]="r.isCorrect" [class.wrong]="!r.isCorrect">
+              <div class="qa-result-header">
+                <span class="qa-result-num">Q{{ i + 1 }}</span>
+                <span class="qa-result-icon">{{ r.isCorrect ? '✓' : '✗' }}</span>
+              </div>
+              <p class="qa-result-q">{{ r.question }}</p>
+              <div class="qa-result-ans">
+                <span>তোমার উত্তর: <strong>{{ r.selectedAnswer || 'দেওয়া হয়নি' }}</strong></span>
+                @if (!r.isCorrect) {
+                  <span class="correct-ans">সঠিক উত্তর: <strong>{{ r.correctAnswer }}</strong></span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <h2>Quiz জমা হয়েছে!</h2>
+      }
+      <!-- Back button -->
+      <button type="button" (click)="goBack()" class="qa-back-btn">← Back to Lesson</button>
+    </div>
+  }
+
+  @else if (quizzes().length === 0) {
+    <div class="qa-done">
+      <h2>এই lesson এ কোনো quiz নেই</h2>
+      <button type="button" class="qa-back-btn" (click)="goBack()">← Back</button>
+    </div>
+  }
+
+  @else {
+    <!-- Quiz screen -->
+    <div class="qa-header">
+      <div>
+        <h1>{{ lessonTitle() }}</h1>
+        <p>{{ answeredCount }} / {{ quizzes().length }} answered</p>
+      </div>
+
+      <!-- Timer -->
+      <div class="qa-timer" [class.danger]="timeLeft() < 30">
+        <svg class="timer-ring" viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="26" fill="none" stroke="#e5e7eb" stroke-width="4"/>
+          <circle cx="30" cy="30" r="26" fill="none"
+            [attr.stroke]="timerColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="163.4"
+            [attr.stroke-dashoffset]="163.4 * (1 - timerPercent / 100)"
+            transform="rotate(-90 30 30)"
+            style="transition: stroke-dashoffset 1s linear, stroke 0.5s"/>
+        </svg>
+        <span class="timer-text" [style.color]="timerColor">{{ formatTime(timeLeft()) }}</span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="qa-progress-wrap">
+      <div class="qa-progress-bar"
+        [style.width.%]="timerPercent"
+        [style.background]="timerColor">
+      </div>
+    </div>
+
+    <!-- Questions -->
+    <div class="qa-questions">
+      @for (quiz of quizzes(); track quiz.id; let i = $index) {
+        <div class="qa-card" [class.answered]="userAnswers()[quiz.id]">
+          <div class="qa-q-num">Q{{ i + 1 }}</div>
+          <p class="qa-q-text">{{ quiz.question }}</p>
+
+          <div class="qa-options">
+            @for (opt of ['A','B','C','D']; track opt) {
+              <button
+                type="button"
+                class="qa-option"
+                [class.selected]="userAnswers()[quiz.id] === opt"
+                [disabled]="isSubmitted()"
+                (click)="selectAnswer(quiz.id, opt)">
+                <span class="qa-opt-label">{{ opt }}</span>
+                <span>{{ opt === 'A' ? quiz.optionA : opt === 'B' ? quiz.optionB : opt === 'C' ? quiz.optionC : quiz.optionD }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="button"
+      class="qa-submit-btn"
+      [disabled]="isSubmitted() || timeLeft() === 0 || alreadyAttempted()"
+      (click)="submitQuiz()">
+      {{ isSubmitted() ? '✓ Submitted' : alreadyAttempted() ? '🔒 Already Completed' : '📤 Submit Quiz' }}
+    </button>
+  }
+
+</div>

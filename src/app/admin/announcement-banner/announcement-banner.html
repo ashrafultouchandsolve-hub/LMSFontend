@@ -1,0 +1,51 @@
+@if (items().length > 0 && current) {
+  <div class="ann-bar" [attr.data-type]="current.type">
+
+    <div class="ann-bar-inner">
+
+      <!-- Type icon -->
+      <span class="ann-icon">
+        @switch (current.type) {
+          @case ('urgent')  { 🚨 }
+          @case ('warning') { ⚠️ }
+          @case ('success') { ✅ }
+          @default          { 📢 }
+        }
+      </span>
+
+      <!-- Content -->
+      <div class="ann-content">
+        @if (current.title) {
+          <strong class="ann-title">{{ current.title }}</strong>
+        }
+        <span class="ann-message">{{ current.message }}</span>
+        @if (current.expiresAt) {
+          <span class="ann-expiry">
+            · {{ current.expiresAt | date:'dd MMM, hh:mm a' }}
+          </span>
+        }
+      </div>
+
+      <!-- Multiple indicator -->
+      @if (items().length > 1) {
+        <span class="ann-count">{{ activeIndex() + 1 }}/{{ items().length }}</span>
+      }
+
+      <!-- Dismiss -->
+      <button class="ann-close" (click)="dismiss()" aria-label="Dismiss">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Progress bar — 5s auto-rotate -->
+    @if (items().length > 1) {
+      <div class="ann-progress">
+        <div class="ann-progress-bar"></div>
+      </div>
+    }
+
+  </div>
+}

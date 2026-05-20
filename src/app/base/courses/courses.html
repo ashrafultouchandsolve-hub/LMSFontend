@@ -1,0 +1,151 @@
+<main class="courses-page">
+  <nav class="top-navbar">
+    <a class="brand" routerLink="/homepage">
+      <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+    </a>
+    <div class="topbar-nav">
+      <a routerLink="/homepage">Home</a>
+      <a routerLink="/courses">Courses</a>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+        <span>🌐</span>
+        <span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+      </button>
+      <a href="/homepage" class="nav-button nav-button-ghost">{{ lang.t().coursesBackHome }}</a>
+    </div>
+  </nav>
+
+  <div class="courses-layout">
+
+    <!-- ✅ Category Sidebar -->
+    <aside class="category-sidebar">
+      <h3 class="sidebar-title">📂 Browse by Category</h3>
+      <ul class="category-list">
+        @for (cat of availableCategories(); track cat.value) {
+          <li>
+            <button
+              class="category-btn"
+              [class.active]="activeCategory() === cat.value"
+              (click)="setCategory(cat.value)">
+              <span class="cat-icon">{{ cat.icon }}</span>
+              <span class="cat-label">{{ cat.label }}</span>
+              @if (cat.value === 'All') {
+                <span class="cat-count">{{ courses().length }}</span>
+              } @else {
+                <span class="cat-count">
+                  {{ (courses().filter((c) => c.category === cat.value)).length }}
+                </span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    </aside>
+
+    <!-- Right side: search + grid -->
+    <div class="courses-main">
+
+      <!-- Active category header -->
+      <div class="courses-filter-bar">
+        <div class="filter-left">
+          <h2 class="filter-title">
+            @if (activeCategory() === 'All') {
+              🗂 All Courses
+            } @else {
+              {{ activeCategory() }}
+            }
+          </h2>
+          <span class="filter-count">{{ filteredCourses().length }} courses</span>
+        </div>
+
+        <section class="courses-search" aria-label="Search courses">
+          <label class="search-field">
+            <input
+              type="search"
+              class="search-input"
+              [placeholder]="lang.t().coursesSearchPlaceholder"
+              [value]="searchTerm()"
+              (input)="updateSearchTerm($any($event.target).value)"
+            />
+          </label>
+        </section>
+      </div>
+
+      @if (isLoadingCourses()) {
+        <article class="courses-empty-state">
+          <h3>{{ lang.t().coursesLoading }}</h3>
+          <p>{{ lang.t().coursesLoadingDesc }}</p>
+        </article>
+      } @else if (!hasCourses()) {
+        <article class="courses-empty-state">
+          <h3>{{ lang.t().coursesNone }}</h3>
+          <p>{{ lang.t().coursesNoneDesc }}</p>
+        </article>
+      } @else if (!hasFilteredCourses()) {
+        <article class="courses-empty-state">
+          <h3>{{ lang.t().coursesNoMatch }}</h3>
+          <p>{{ lang.t().coursesNoMatchDesc }}</p>
+        </article>
+      } @else {
+        <section class="courses-grid" aria-label="All courses list">
+          @for (course of filteredCourses(); track course.id; let i = $index) {
+            <article class="course-card" [style]="'--card-color:' + getCardColor(i)">
+              <div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
+                <img class="track-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+              </div>
+              <div class="course-card-inner">
+                <span [class]="'course-badge ' + getLevelClass(course.level)">
+                  {{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
+                </span>
+                <h3>{{ course.title }}</h3>
+                <p class="course-description">{{ course.description }}</p>
+                <a [routerLink]="['/course-details', course.id]" class="see-more-button">{{ lang.t().courseSeeMore }}</a>
+                <ul class="course-points">
+                  <li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
+                  <li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
+                  <li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
+                  <li><strong>{{ lang.t().courseDuration }}</strong> {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
+                  <li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
+                </ul>
+
+                @if (course.totalRatings && course.totalRatings > 0) {
+                  <div class="course-rating">
+                    <span class="rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+                    <span class="rating-count">({{ course.totalRatings }} ratings)</span>
+                  </div>
+                }
+
+                <div class="course-footer">
+                  <div class="course-footer-actions">
+                    @if (!isTeacher()) {
+                      @if (course.isEnrolled) {
+                        <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
+                      } @else {
+                        <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
+                      }
+                    }
+                    <button
+                      type="button"
+                      class="enrolled-button wishlist-button"
+                      [class.wishlisted]="course.isWishlisted"
+                      [class.is-toggling]="wishlistToggleId() === course.id"
+                      [disabled]="wishlistToggleId() === course.id"
+                      (click)="toggleWishlist(course)">
+                      @if (course.isWishlisted) {
+                        {{ wishlistToggleId() === course.id ? 'Updating...' : '✓ In Wishlist' }}
+                      } @else {
+                        {{ wishlistToggleId() === course.id ? 'Adding...' : '♡ Wishlist' }}
+                      }
+                    </button>
+                  </div>
+                  <a [routerLink]="['/course-details', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
+                </div>
+              </div>
+            </article>
+          }
+        </section>
+      }
+    </div>
+  </div>
+</main>

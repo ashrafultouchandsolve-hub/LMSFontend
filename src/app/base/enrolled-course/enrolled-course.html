@@ -1,0 +1,239 @@
+<section class="enrolled-shell">
+  <main class="enrolled-page">
+    <a [routerLink]="courseId() ? ['/course-details', courseId()] : ['/courses']" class="back-link">{{ lang.t().ecBack }}</a>
+
+    @if (courseMeta(); as meta) {
+      <header class="page-head">
+        <h1>{{ meta.title }}</h1>
+        <p>{{ lang.t().ecLessons }} {{ lang.t().profileDashboard }}</p>
+      </header>
+    }
+
+    <div class="lesson-layout">
+      <section class="video-panel">
+        @if (selectedLesson(); as currentLesson) {
+
+          @if (isYoutube(selectedVideoUrl())) {
+            <iframe class="lesson-player" [src]="getSafeYoutubeUrl(selectedVideoUrl())"
+              frameborder="0" allowfullscreen></iframe>
+          } @else {
+            <div class="plyr-wrap">
+              <video
+                #videoPlayer
+                class="lesson-player"
+                [src]="selectedVideoUrl()"
+                [attr.data-lesson-id]="selectedLesson()!.id"
+                playsinline
+                (loadedmetadata)="onVideoLoaded($event, selectedLesson()!.id)"
+                (ended)="onVideoEnded($event, selectedLesson()!.id)">
+              </video>
+            </div>
+          }
+
+          <div class="lesson-details">
+            <h3>{{ currentLesson.title }}</h3>
+          </div>
+
+          @if (selectedLesson()?.hasQuiz) {
+            @if (selectedLesson()?.quizAttempted) {
+              <button type="button" class="start-quiz-btn disabled" disabled>
+                🔒 Quiz Completed
+              </button>
+            } @else {
+              <a [routerLink]="['/quiz', selectedLesson()?.id]"
+                 [queryParams]="{ title: selectedLesson()?.title, courseId: courseId() }"
+                 class="start-quiz-btn">
+                📝 Start Quiz
+              </a>
+            }
+          }
+
+        } @else {
+          <div class="video-fallback">
+            <h2>{{ lang.t().ecNoLesson }}</h2>
+          </div>
+        }
+
+        <div class="lesson-slider">
+          @for (lesson of lessons(); track lesson.id) {
+            <button class="slide-card"
+              [class.active]="lesson.id === selectedLessonId()"
+              (click)="selectLesson(lesson.id)"
+              type="button">
+              <div class="slide-thumb">
+                @if (lesson.thumbnailUrl) {
+                  <img [src]="lesson.thumbnailUrl" [alt]="lesson.title" class="slide-thumb-img" />
+                } @else {
+                  ▶
+                }
+              </div>
+              <p class="slide-title">{{ lesson.title }}</p>
+            </button>
+          }
+        </div>
+
+      </section>
+
+      <aside class="lesson-sidebar">
+        <h3 class="lesson-sidebar-Header">{{ lang.t().ecLessons }} ({{ lessons().length }})</h3>
+        @for (lesson of lessons(); track lesson.id) {
+          <button class="lesson-item" [class.lesson-item-active]="lesson.id === selectedLessonId()"
+            (click)="selectLesson(lesson.id)" [attr.title]="lesson.title" type="button">
+            <span class="lesson-order">{{ lesson.orderIndex }}</span>
+            <span class="lesson-content">
+              <span class="lesson-head-row">
+                <strong class="lesson-title">{{ lesson.title }}</strong>
+                <small class="lesson-duration">{{ formatDuration(lesson.durationMinutes) }}</small>
+              </span>
+              <span class="lesson-desc">{{ lesson.description || 'No description available' }}</span>
+            </span>
+          </button>
+        }
+      </aside>
+    </div>
+
+    <!-- ✅ Live Class Section -->
+    <section class="live-section">
+      <div class="live-section-head">
+        <h2>📺 Live Classes</h2>
+        <span class="live-count">{{ liveClasses().length }} scheduled</span>
+      </div>
+
+      @if (isLoadingLive()) {
+        <p class="live-loading">Live class লোড হচ্ছে...</p>
+      } @else if (activeLiveClass(); as active) {
+        <!-- Active class — সবার আগে দেখাও -->
+        <div class="live-active-banner">
+          <div class="live-pulse-dot"></div>
+          <div class="live-active-info">
+            <strong>🔴 এখন চলছে: {{ active.title }}</strong>
+            @if (active.description) {
+              <p>{{ active.description }}</p>
+            }
+          </div>
+          <a [routerLink]="['/live-class', active.id]" class="live-join-btn">
+            Join Now →
+          </a>
+        </div>
+      }
+
+      @if (liveClasses().length === 0) {
+        <p class="live-empty">এই course এ এখনো কোনো live class schedule করা হয়নি।</p>
+      } @else {
+        <div class="live-list">
+          @for (lc of liveClasses(); track lc.id) {
+            @if (!lc.isActive) {
+              <div class="live-card" [class.live-card-ended]="lc.isEnded">
+                <div class="live-card-info">
+                  <p class="live-card-title">{{ lc.title }}</p>
+                  <p class="live-card-time">🕐 {{ formatScheduled(lc.scheduledAt) }}</p>
+                  @if (lc.description) {
+                    <p class="live-card-desc">{{ lc.description }}</p>
+                  }
+                </div>
+                <div class="live-card-status">
+                  @if (lc.isEnded) {
+                    <span class="live-badge live-badge-ended">Ended</span>
+                  } @else {
+                    <span class="live-badge live-badge-upcoming">Upcoming</span>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </section>
+
+    <section class="teacher-card">
+      <div class="teacher-avatar">{{ instructorInitial() }}</div>
+      <div>
+        <p class="teacher-name">{{ courseMeta()?.instructorName }}</p>
+        <p class="teacher-role">{{ lang.t().ecInstructor }}</p>
+      </div>
+    </section>
+
+    <section class="comments-card">
+      <div class="comments-header">
+        <div>
+          <p class="comments-label">Comment System</p>
+          <h2>Course Comments</h2>
+        </div>
+        <span class="comments-count">{{ comments().length }} comments</span>
+      </div>
+
+      @if (commentError()) {
+        <div class="comment-alert comment-alert-error">{{ commentError() }}</div>
+      }
+
+      @if (commentMessage()) {
+        <div class="comment-alert comment-alert-success">{{ commentMessage() }}</div>
+      }
+
+      <div class="comment-form">
+        @if (canComment()) {
+          <textarea
+            class="comment-input"
+            rows="3"
+            placeholder="Write a comment..."
+            [value]="commentText()"
+            (input)="commentText.set($any($event.target).value)"></textarea>
+          <button
+            type="button"
+            class="comment-submit-btn"
+            [disabled]="isSubmittingComment()"
+            (click)="submitComment()">
+            {{ isSubmittingComment() ? 'Posting...' : 'Post Comment' }}
+          </button>
+        } @else {
+          <div class="comment-login-note">
+            Please login to comment.
+          </div>
+        }
+      </div>
+
+      <div class="comments-list">
+        @if (isLoadingComments()) {
+          <div class="comments-empty">Loading comments...</div>
+        } @else if (comments().length === 0) {
+          <div class="comments-empty">No comments yet. Be the first to share your thoughts.</div>
+        } @else {
+          @for (comment of comments(); track comment.id) {
+            <article class="comment-item" [class.my-comment]="isMyComment(comment)">
+              <div class="comment-avatar">{{ comment.userName.charAt(0).toUpperCase() }}</div>
+              <div class="comment-bubble">
+                <div class="comment-meta">
+                  <strong>{{ comment.userName }}</strong>
+                  <span class="comment-time">{{ formatCommentDate(comment.createdAt) }}</span>
+                </div>
+
+                @if (editingCommentId() === comment.id) {
+                  <textarea
+                    class="comment-input comment-edit-input"
+                    rows="3"
+                    [value]="editingCommentText()"
+                    (input)="editingCommentText.set($any($event.target).value)"></textarea>
+                  <div class="comment-edit-actions">
+                    <button type="button" class="comment-submit-btn" (click)="saveComment(comment)" [disabled]="isSubmittingComment()">
+                      {{ isSubmittingComment() ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button type="button" class="comment-cancel-btn" (click)="cancelEditComment()">Cancel</button>
+                  </div>
+                } @else {
+                  <p class="comment-content">{{ comment.content }}</p>
+                }
+
+                @if (isMyComment(comment)) {
+                  <div class="comment-actions">
+                    <button type="button" class="comment-link-btn" (click)="beginEditComment(comment)">Edit</button>
+                    <button type="button" class="comment-link-btn comment-link-danger" (click)="deleteComment(comment.id)">Delete</button>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        }
+      </div>
+    </section>
+  </main>
+</section>

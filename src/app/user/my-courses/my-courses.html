@@ -1,0 +1,126 @@
+<main class="my-courses-page">
+	<!-- ─── TOP NAVBAR ─────────────────────────────────── -->
+	<nav class="top-navbar">
+		<a class="brand" routerLink="/homepage">
+			<img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+		</a>
+		<div class="topbar-nav">
+			<a routerLink="/homepage">Home</a>
+			<a routerLink="/courses">Courses</a>
+		</div>
+		<div class="topbar-actions">
+			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+				<span>🌐</span>
+				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+			</button>
+			<a routerLink="/profile" class="nav-button nav-button-ghost">← Back</a>
+		</div>
+	</nav>
+
+	<header class="hero">
+		<div>
+			<p class="eyebrow">Student Space</p>
+			<h1>My Enrolled Courses</h1>
+			<p class="subtitle">তুমি যেসব কোর্সে enrolled আছো, সবগুলো এখানে থাকবে।</p>
+		</div>
+
+		<div class="hero-actions">
+			<a class="btn ghost" [routerLink]="['/courses']">Browse Courses</a>
+			<a class="btn solid" [routerLink]="['/profile']">Back</a>
+		</div>
+	</header>
+
+	@if (!errorMessage() && hasCourses()) {
+		<section class="stats" aria-label="Course overview">
+			<article class="stat-card">
+				<p>Total Courses</p>
+				<h3>{{ myCourses().length }}</h3>
+			</article>
+			<article class="stat-card">
+				<p>Total Lessons</p>
+				<h3>{{ totalLessons() }}</h3>
+			</article>
+			<article class="stat-card">
+				<p>Total Duration</p>
+				<h3>{{ formatDuration(totalMinutes()) }}</h3>
+			</article>
+		</section>
+	}
+
+	<section class="search-wrap" aria-label="Search enrolled courses">
+		<label class="search-field">
+			<span class="search-label">Search inside my courses</span>
+			<input
+				type="search"
+				placeholder="Type title, category, instructor..."
+				[value]="searchTerm()"
+				(input)="updateSearchTerm($any($event.target).value)"
+			/>
+		</label>
+	</section>
+
+	@if (isLoading()) {
+		<section class="state-block" aria-live="polite">
+			<h2>Loading your courses...</h2>
+			<p>একটু অপেক্ষা করো, enrolled course list আনা হচ্ছে।</p>
+		</section>
+	} @else if (errorMessage()) {
+		<section class="state-block error" aria-live="assertive">
+			<h2>Something went wrong</h2>
+			<p>{{ errorMessage() }}</p>
+			<a class="btn solid" [routerLink]="['/login']">Go to Login</a>
+		</section>
+	} @else if (!hasCourses()) {
+		<section class="state-block" aria-live="polite">
+			<h2>No enrolled course yet</h2>
+			<p>এখনও কোনো কোর্সে enrollment করা হয়নি। নতুন কোর্স শুরু করো।</p>
+			<a class="btn solid" [routerLink]="['/courses']">Explore Courses</a>
+		</section>
+	} @else if (!hasFilteredCourses()) {
+		<section class="state-block" aria-live="polite">
+			<h2>No match found</h2>
+			<p>Search term অনুযায়ী কোনো enrolled course পাওয়া যায়নি।</p>
+		</section>
+	} @else {
+		<section class="course-grid" aria-label="Enrolled courses list">
+			@for (course of filteredCourses(); track course.id; let i = $index) {
+				<article class="course-card" [style]="'--card-color:' + getCardColor(i)">
+					<div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
+						<img class="track-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+					</div>
+					<div class="course-card-inner">
+						<span [class]="'course-badge ' + getLevelClass(course.level)">
+							{{ course.level === 'Beginner' ? 'Beginner' : course.level === 'Intermediate' ? 'Intermediate' : 'Advanced' }}
+						</span>
+						<h3>{{ course.title }}</h3>
+						<p class="course-description">{{ course.description }}</p>
+						<a [routerLink]="['/course-details', course.id]" class="see-more-button">See More</a>
+						<ul class="course-points">
+							<li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
+							<li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
+							<li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
+							<li><strong>{{ lang.t().courseDuration }}</strong> {{ formatDuration(course.durationMinutes) }}</li>
+							<li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
+						</ul>
+
+						@if (course.totalRatings && course.totalRatings > 0) {
+							<div class="course-rating">
+								<span class="rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+								<span class="rating-count">({{ course.totalRatings }} ratings)</span>
+							</div>
+						}
+
+						<div class="course-footer">
+							<div class="course-footer-actions">
+								<a [routerLink]="['/enrolled-course', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
+								<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-primary">View Details</a>
+							</div>
+							<a [routerLink]="['/enrolled-course', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
+						</div>
+					</div>
+				</article>
+			}
+		</section>
+	}
+</main>
+ 

@@ -1,0 +1,733 @@
+<main class="home-page">
+
+  <!-- ─── TOPBAR ──────────────────────────────────── -->
+  <header class="topbar">
+    <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
+      <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+    </a>
+    <nav class="topbar-nav" aria-label="Primary navigation">
+      <!-- ✅ home-page.html এ navbar এ এই অংশ খুঁজো: -->
+      <!--   <a routerLink="/courses">{{ lang.t().navCourses }}</a>  -->
+      <!-- এটা DELETE করো এবং নিচেরটা দিয়ে replace করো -->
+
+      <div class="nav-dropdown-wrap">
+        <a routerLink="/courses" class="nav-dropdown-trigger">
+          {{ lang.t().navCourses }}
+          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
+          </svg>
+        </a>
+
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-inner">
+
+            <div class="nav-dropdown-group">
+              <span class="nav-dropdown-group-label">📘 SSC</span>
+              <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--purple"></span>
+                <div>
+                  <strong>SSC 2027</strong>
+                  <span>Final Preparation</span>
+                </div>
+              </a>
+            </div>
+
+            <div class="nav-dropdown-divider"></div>
+
+            <div class="nav-dropdown-group">
+              <span class="nav-dropdown-group-label">📗 HSC</span>
+              <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--green"></span>
+                <div>
+                  <strong>HSC 2027</strong>
+                  <span>Final Preparation</span>
+                </div>
+              </a>
+
+            </div>
+
+            <div class="nav-dropdown-divider"></div>
+
+            <div class="nav-dropdown-group">
+              <span class="nav-dropdown-group-label">🎯 Admission</span>
+              <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
+                <div>
+                  <strong>Admission English</strong>
+                  <span>University Prep</span>
+                </div>
+              </a>
+              <a routerLink="/courses" [queryParams]="{category:'Admission Science'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
+                <div>
+                  <strong>Admission Science</strong>
+                  <span>University Prep</span>
+                </div>
+              </a>
+            </div>
+
+            <div class="nav-dropdown-divider"></div>
+
+            <div class="nav-dropdown-group">
+              <span class="nav-dropdown-group-label">⚡ Skills & Other</span>
+              <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
+                <div>
+                  <strong>Skills Development</strong>
+                  <span>Career Growth</span>
+                </div>
+              </a>
+              <a routerLink="/courses" [queryParams]="{category:'Communication'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
+                <div>
+                  <strong>Communication</strong>
+                  <span>Soft Skills</span>
+                </div>
+              </a>
+              <a routerLink="/courses" [queryParams]="{category:'General'}" class="nav-dropdown-item">
+                <span class="nav-dropdown-dot nav-dropdown-dot--gray"></span>
+                <div>
+                  <strong>General</strong>
+                  <span>Other Courses</span>
+                </div>
+              </a>
+            </div>
+
+            <div class="nav-dropdown-footer">
+              <a routerLink="/courses" [queryParams]="{category:'All'}" class="nav-dropdown-all">
+                Browse All Courses
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <a routerLink="/instructors">Instructor</a>
+      <a routerLink="/store">Store</a>
+      <a href="#platform-identity">{{ lang.t().navVision }}</a>
+
+      <div class="nav-dropdown-wrap">
+        <button class="nav-dropdown-trigger" style="background: none; border: none; cursor: pointer;">
+          More
+          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
+          </svg>
+        </button>
+
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-inner">
+
+            <div class="nav-dropdown-group">
+              <a routerLink="/leaderboard" class="nav-dropdown-group-label">🏆 Leaderboard</a>
+            </div>
+
+            @if(isLoggedIn()) {
+            <div class="nav-dropdown-divider"></div>
+
+            <div class="nav-dropdown-group">
+              <a routerLink="/history" class="nav-dropdown-group-label">📹 Video History</a>
+            </div>
+            }
+
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="topbar-actions">
+      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()"
+        [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'Change to Bengali'">
+        <span class="lang-icon">🌐</span>
+        <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'BN' }}</span>
+      </button>
+      @if (isLoggedIn()) {
+      <app-notification-bell></app-notification-bell>
+      <details class="user-menu">
+        <summary class="user-chip" aria-label="User menu">
+          <span class="user-avatar">{{ userInitial() }}</span>
+          <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
+          <span class="menu-caret" aria-hidden="true">
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+              <path d="M1 1L5 5L9 1" />
+            </svg>
+          </span>
+        </summary>
+        <div class="user-menu-list" role="menu">
+          <a routerLink="/profile" class="user-menu-link" role="menuitem">
+            <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
+          </a>
+          @if (isTeacher()) {
+          <a routerLink="/teacher" class="user-menu-link" role="menuitem">
+            <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
+          </a>
+          }
+        </div>
+      </details>
+      <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
+      } @else {
+      <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
+      <a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
+      }
+    </div>
+  </header>
+
+  <!-- ─── HERO SLIDER ───────────────────────────────── -->
+  <section class="hero-slider">
+    <div class="slides-track" [style.transform]="'translateX(-' + activeSlide() * 100 + '%)'">
+
+      <!-- Slide 1 — SSC 2027 -->
+      <div class="slide slide-1">
+        <div class="slide-copy">
+          <span class="slide-badge">🎯 Final Preparation</span>
+          <h1>SSC 2027 <span class="slide-accent">Complete Course</span></h1>
+          <p>Get complete preparation — all subjects in one place. Bengali, English, Math and everything.</p>
+          <div class="slide-actions">
+            <a routerLink="/courses" [queryParams]="{category: 'SSC 2027'}" class="slide-btn-primary">Explore Courses
+              →</a>
+            <a href="#tracks" class="slide-btn-ghost">All Categories</a>
+          </div>
+        </div>
+        <div class="slide-visual">
+          <div class="slide-badge-float slide-badge-float--1">
+            <span>📚</span>
+            <div><strong>SSC 2027</strong><span>Full Syllabus</span></div>
+          </div>
+          <div class="slide-badge-float slide-badge-float--2">
+            <span>✅</span>
+            <div><strong>Live MCQ</strong><span>Practice Daily</span></div>
+          </div>
+          <div class="slide-blob slide-blob--1"></div>
+          <div class="slide-blob slide-blob--2"></div>
+        </div>
+      </div>
+
+      <!-- Slide 2 — HSC 2027 -->
+      <div class="slide slide-2">
+        <div class="slide-copy">
+          <span class="slide-badge">🏆 Top Rated</span>
+          <h1>HSC 2027 <span class="slide-accent">Master Class</span></h1>
+          <p>Complete HSC preparation with Admission English, Skills Development. With Expert Teachers.</p>
+          <div class="slide-actions">
+            <a routerLink="/courses" [queryParams]="{category: 'HSC 2027'}" class="slide-btn-primary">Enroll Now →</a>
+            <a href="#tracks" class="slide-btn-ghost">All Courses</a>
+          </div>
+        </div>
+        <div class="slide-visual">
+          <div class="slide-badge-float slide-badge-float--1">
+            <span>🎓</span>
+            <div><strong>HSC 2027</strong><span>Expert Teachers</span></div>
+          </div>
+          <div class="slide-badge-float slide-badge-float--2">
+            <span>🔥</span>
+            <div><strong>Admission</strong><span>English Special</span></div>
+          </div>
+          <div class="slide-blob slide-blob--1"></div>
+          <div class="slide-blob slide-blob--2"></div>
+        </div>
+      </div>
+
+      <!-- Slide 3 — Skills Development -->
+      <div class="slide slide-3">
+        <div class="slide-copy">
+          <span class="slide-badge">⚡ New Course</span>
+          <h1>Skills <span class="slide-accent">Development</span></h1>
+          <p>Prepare yourself for the future. Communication, Critical Thinking and more.</p>
+          <div class="slide-actions">
+            <a routerLink="/courses" [queryParams]="{category: 'Skills Development'}" class="slide-btn-primary">Get
+              Started →</a>
+            <a href="#tracks" class="slide-btn-ghost">View Details</a>
+          </div>
+        </div>
+        <div class="slide-visual">
+          <div class="slide-badge-float slide-badge-float--1">
+            <span>💡</span>
+            <div><strong>Skills</strong><span>Development</span></div>
+          </div>
+          <div class="slide-badge-float slide-badge-float--2">
+            <span>🚀</span>
+            <div><strong>Career</strong><span>Ready</span></div>
+          </div>
+          <div class="slide-blob slide-blob--1"></div>
+          <div class="slide-blob slide-blob--2"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dots -->
+    <div class="slider-dots">
+      @for (dot of [0,1,2]; track dot) {
+      <button class="slider-dot" [class.active]="activeSlide() === dot" (click)="goToSlide(dot)"
+        [attr.aria-label]="'Go to slide ' + (dot + 1)">
+      </button>
+      }
+    </div>
+
+    <!-- Prev / Next arrows -->
+    <button class="slider-arrow slider-arrow--prev" (click)="prevSlide()" aria-label="Previous slide">‹</button>
+    <button class="slider-arrow slider-arrow--next" (click)="nextSlide()" aria-label="Next slide">›</button>
+
+    <a routerLink="/free-class" class="free-bubble">
+      <span class="free-bubble-icon">🎁</span>
+      <span class="free-bubble-text">Free<br>Classes</span>
+    </a>
+  </section>
+  <br>
+  <br>
+
+
+  <!-- ─── CATEGORY SECTION ───────────────────────────── -->
+  <section class="category-section" id="tracks">
+    <div class="category-header">
+      <h2>Learn by Category</h2>
+      <p>Choose the right course based on your goals</p>
+    </div>
+    <div class="category-grid">
+      <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="cat-pill cat-pill--ssc">
+        <span class="cat-pill-icon">📘</span>
+        <div>
+          <strong>SSC 2027</strong>
+          <span>Final Preparation</span>
+        </div>
+      </a>
+      <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="cat-pill cat-pill--hsc">
+        <span class="cat-pill-icon">📗</span>
+        <div>
+          <strong>HSC 2027</strong>
+          <span>Final Preparation</span>
+        </div>
+      </a>
+      <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="cat-pill cat-pill--admission">
+        <span class="cat-pill-icon">🎯</span>
+        <div>
+          <strong>Admission English</strong>
+          <span>University Prep</span>
+        </div>
+      </a>
+      <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="cat-pill cat-pill--skills">
+        <span class="cat-pill-icon">⚡</span>
+        <div>
+          <strong>Skills Development</strong>
+          <span>Career Growth</span>
+        </div>
+      </a>
+    </div>
+  </section>
+  <br>
+
+  <!-- ─── COURSES ───────────────────────────────────── -->
+  <section class="cats-section">
+    <h2 class="cats-title">
+      {{ lang.t().sectionH2Line1 }}<br>
+      {{ lang.t().sectionH2Line2 }}
+    </h2>
+
+    @if (isLoadingCourses()) {
+    <article class="track-empty-state">
+      <h3>{{ lang.t().coursesLoading }}</h3>
+      <p>{{ lang.t().coursesLoadingDesc }}</p>
+    </article>
+    } @else if (courses().length === 0) {
+    <article class="track-empty-state">
+      <h3>{{ lang.t().coursesNone }}</h3>
+      <p>{{ lang.t().coursesNoneDesc }}</p>
+    </article>
+    } @else {
+    <div class="cats-carousel-shell">
+      <button type="button" class="cats-arrow cats-arrow--prev" (click)="scrollCourses('previous')"
+        aria-label="Scroll left">‹</button>
+      <div #courseTrackViewport class="cats-viewport">
+        @for (course of courses(); track course.id; let i = $index) {
+        <article class="cat-card" [style]="'--card-color:' + getCardColor(i)"
+          [attr.data-index]="(i + 1).toString().padStart(2, '0')">
+          <div class="cat-img-wrap">
+            <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title" loading="eager"
+              (error)="onImageError($event)" />
+            <div class="cat-icon-fallback" aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none" width="36" height="36">
+                <rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.2)" />
+                <path d="M12 28V14l8-4 8 4v14l-8 4-8-4z" stroke="white" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+          <div class="cat-body">
+            <span class="cat-badge">
+              {{ course.level === 'Beginner' ? lang.t().levelBeginner
+              : course.level === 'Intermediate' ? lang.t().levelIntermediate
+              : lang.t().levelAdvanced }}
+            </span>
+            <h3>{{ course.title }}</h3>
+            <p class="cat-desc">{{ course.description }}</p>
+            <ul class="cat-meta">
+              <li>📚 {{ course.lessonCount }} {{ lang.t().courseLessons }}</li>
+              <li>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
+              <li>💰 {{ formatPrice(course.price) }}</li>
+            </ul>
+            @if (course.totalRatings && course.totalRatings > 0) {
+            <div class="cat-rating">
+              <span class="cat-rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+              <span class="cat-rating-count">({{ course.totalRatings }} ratings)</span>
+            </div>
+            }
+            <div class="cat-footer">
+              @if (!isTeacher()) {
+              @if (course.isEnrolled) {
+              <a [routerLink]="['/course-details', course.id]" class="cat-btn cat-btn--enrolled">{{
+                lang.t().courseEnrolled }}</a>
+              } @else {
+              <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)"
+                class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
+              }
+              }
+              <a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().courseStartLearning }} →</a>
+            </div>
+          </div>
+        </article>
+        }
+        <article class="cat-card cat-card--browse">
+          <a routerLink="/courses" class="browse-all-link">
+            <div class="browse-all-circle">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path d="M6 14H22M22 14L16 8M22 14L16 20" stroke="#6d28d9" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+            <span>Browse All</span>
+          </a>
+        </article>
+      </div>
+      <button type="button" class="cats-arrow cats-arrow--next" (click)="scrollCourses('next')"
+        aria-label="Scroll right">›</button>
+    </div>
+    }
+  </section>
+
+
+
+  <section class="about-section" id="platform-identity">
+
+    <!-- Header -->
+    <div class="about-header">
+      <span class="about-tag" id="aboutUs">💡 About Us</span>
+      <h2>About <span class="about-accent">"Nirvor Nije Sikhi"</span></h2>
+      <p>Not the biggest. The bravest. Built for SSC & HSC
+        students who want to conquer English.</p>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="about-cards">
+
+      <!-- Card 1 — Mission -->
+      <div class="about-card about-card--purple">
+        <div class="about-card-glow"></div>
+        <div class="about-card-top">
+          <div class="about-card-icon">🎯</div>
+          <span class="about-card-label">Our Mission</span>
+        </div>
+        <h3>Mission</h3>
+        <p>Deliver quality education to every student — from anywhere, anytime.</p>
+        <div class="about-card-line"></div>
+        <span class="about-card-stat">10,000+ Students</span>
+      </div>
+
+      <!-- Card 2 — Vision -->
+      <div class="about-card about-card--blue">
+        <div class="about-card-glow"></div>
+        <div class="about-card-top">
+          <div class="about-card-icon">📽️</div>
+          <span class="about-card-label">Live Class</span>
+        </div>
+        <h3>Live Classes</h3>
+        <p>Join live sessions, watch recordings anytime, and never miss a lesson.</p>
+        <div class="about-card-line"></div>
+        <span class="about-card-stat">Recorded Forever</span>
+      </div>
+
+      <!-- Card 3 — Outcome Based -->
+      <div class="about-card about-card--teal">
+        <div class="about-card-glow"></div>
+        <div class="about-card-top">
+          <div class="about-card-icon">✉️</div>
+          <span class="about-card-label">Community</span>
+        </div>
+        <h3>Ask, Answer, Grow</h3>
+        <p>Be part of a learning community where you can ask questions, get answers, and improve together.</p>
+        <div class="about-card-line"></div>
+        <span class="about-card-stat">Community Support</span>
+      </div>
+
+      <!-- Card 4 — Analytics -->
+      <div class="about-card about-card--orange">
+        <div class="about-card-glow"></div>
+        <div class="about-card-top">
+          <div class="about-card-icon">📊</div>
+          <span class="about-card-label">Performance</span>
+        </div>
+        <h3>{{ lang.t().feature2Title }}</h3>
+        <p>{{ lang.t().feature2Desc }}</p>
+        <div class="about-card-line"></div>
+        <span class="about-card-stat">Real-time Analytics</span>
+      </div>
+
+      <!-- Card 5 — Mentor -->
+      <div class="about-card about-card--green">
+        <div class="about-card-glow"></div>
+        <div class="about-card-top">
+          <div class="about-card-icon">🧑‍🏫</div>
+          <span class="about-card-label">Mentorship</span>
+        </div>
+        <h3>{{ lang.t().feature3Title }}</h3>
+        <p>{{ lang.t().feature3Desc }}</p>
+        <div class="about-card-line"></div>
+        <span class="about-card-stat">{{ lang.t().quoteFooter2 }}</span>
+      </div>
+
+      <!-- Card 6 — Quote / Big Commitment -->
+      <div class="about-card about-card--quote">
+        <div class="about-card-glow"></div>
+        <div class="quote-mark">"</div>
+        <p class="about-quote-text">{{ lang.t().quoteText }}</p>
+        <div class="about-card-line"></div>
+        <span class="about-card-label">{{ lang.t().quoteLabel }}</span>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="successStory" class="review-section">
+
+    <div class="review-header">
+      <span class="review-tag">⭐ Success Stories</span>
+      <h2>What Our <span class="review-accent">Students Say</span></h2>
+      <p>Trusted by thousands of students, we move forward with their love and support.</p>
+    </div>
+
+    <!-- Slider -->
+    <div class="review-slider-wrap">
+
+      <!-- Prev Arrow -->
+      <button class="review-arrow review-arrow--prev" (click)="prevReview()" aria-label="Previous review">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+
+      <!-- Slider Track -->
+      <div class="review-track-outer">
+        <div class="review-track" [style.transform]="'translateX(-' + activeReview() * 100 + '%)'">
+
+          @for (review of reviews; track review.name) {
+          <div class="review-card">
+
+            <!-- Left: Quote -->
+            <div class="review-card-left">
+              <div class="review-quote-icon">
+                <svg width="32" height="28" viewBox="0 0 32 28" fill="none">
+                  <path
+                    d="M0 28V17.6C0 12.267 1.6 8.267 4.8 5.6 8 2.933 12.267 1.333 17.6.8L18.4 3.2C15.467 3.733 13.067 4.8 11.2 6.4 9.333 8 8.267 10.133 8 12.8H14.4V28H0ZM17.6 28V17.6C17.6 12.267 19.2 8.267 22.4 5.6 25.6 2.933 29.867 1.333 35.2.8L36 3.2C33.067 3.733 30.667 4.8 28.8 6.4 26.933 8 25.867 10.133 25.6 12.8H32V28H17.6Z"
+                    fill="#6366f1" />
+                </svg>
+              </div>
+              <blockquote class="review-quote">{{ review.quote }}</blockquote>
+              <div class="review-author">
+                <div class="review-author-avatar">{{ review.name.charAt(0) }}</div>
+                <div>
+                  <strong>{{ review.name }}</strong>
+                  <span>{{ review.role }}</span>
+                </div>
+              </div>
+              <div class="review-stars">
+                @for (s of [1,2,3,4,5]; track s) {
+                <span class="review-star" [class.filled]="s <= review.rating">★</span>
+                }
+              </div>
+            </div>
+
+            <!-- Right: Image/Video thumbnail -->
+            <div class="review-card-right">
+              <div class="review-thumb-wrap">
+                @if (review.image) {
+                <img [src]="review.image" [alt]="review.name" class="review-thumb-img" />
+                } @else {
+                <div class="review-thumb-placeholder">
+                  <span class="review-thumb-initial">{{ review.name.charAt(0) }}</span>
+                </div>
+                }
+                @if (review.videoUrl) {
+                <a [href]="review.videoUrl" target="_blank" class="review-play-btn" aria-label="Watch video">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </a>
+                }
+                @if (review.videoCaption) {
+                <div class="review-thumb-caption">{{ review.videoCaption }}</div>
+                }
+              </div>
+            </div>
+
+          </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- Next Arrow -->
+      <button class="review-arrow review-arrow--next" (click)="nextReview()" aria-label="Next review">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Dots -->
+    <div class="review-dots">
+      @for (r of reviews; track r.name; let i = $index) {
+      <button class="review-dot" [class.active]="activeReview() === i" (click)="goToReview(i)"
+        [attr.aria-label]="'Go to review ' + (i + 1)">
+      </button>
+      }
+    </div>
+
+  </section>
+  <!-- ─── FEATURES ──────────────────────────────────── -->
+  <section class="community-section">
+    <div class="community-header">
+      <span class="community-tag">🌐 Our Family</span>
+      <h2>Join Our <span class="community-accent">Community</span></h2>
+      <p>Connect with thousands of students — Learn together, Grow together.</p>
+    </div>
+
+    <div class="community-cards">
+
+      <!-- Facebook Group Card -->
+      <a href="https://www.facebook.com/Nirvoor/" target="_blank" class="comm-card comm-card--fb">
+        <div class="comm-card-glow"></div>
+        <div class="comm-card-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+            <path d="M14 8.5V7c0-.8.5-1 1-1h2V3h-3c-2.2 0-4 1.8-4 4v1.5H8V12h2v9h4v-9h2.7l.3-3.5H14z" />
+          </svg>
+        </div>
+        <div class="comm-card-body">
+          <h3>Facebook Group</h3>
+          <p>Join our Facebook group. Ask questions, Get answers.</p>
+          <div class="comm-card-stats">
+            <span>👥 10,000+ Members</span>
+            <span>🔥 Daily Posts</span>
+          </div>
+        </div>
+        <div class="comm-card-arrow">→</div>
+      </a>
+
+      <!-- YouTube Channel Card -->
+      <a href="https://www.nirvoor.com/" target="_blank" class="comm-card comm-card--yt">
+        <div class="comm-card-glow"></div>
+        <div class="comm-card-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+            <path
+              d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.3 2.8 12 2.8 12 2.8s-4.3 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.3 21.8 12 21.8 12 21.8s4.3 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.3l6.6 3.6-6.6 3.6z" />
+          </svg>
+        </div>
+
+        <div class="comm-card-body">
+          <h3>YouTube Channel</h3>
+          <p>Get free video lessons, tips and tricks on our YouTube channel.</p>
+          <div class="comm-card-stats">
+            <span>▶ Free Videos</span>
+            <span>📺 Weekly Upload</span>
+          </div>
+        </div>
+        <div class="comm-card-arrow">→</div>
+      </a>
+
+      <!-- Free Classes Card -->
+      <a routerLink="/free-class" class="comm-card comm-card--free">
+        <div class="comm-card-glow"></div>
+        <div class="comm-card-icon">🎁</div>
+        <div class="comm-card-body">
+          <h3>Free Classes</h3>
+          <p>Learn for free — Access our curated free classes here.</p>
+          <div class="comm-card-stats">
+            <span>✅ Completely Free</span>
+            <span>🚀 Start Now</span>
+          </div>
+        </div>
+        <div class="comm-card-arrow">→</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ──────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-middle">
+      <div class="footer-shell">
+        <section class="footer-brand-panel">
+          <a class="footer-logo-link" routerLink="/homepage" aria-label="Nirvoor Nije Sikhi home">
+            <img src="/TandSBlack.png" alt="Touch & Solve" class="footer-logo" />
+          </a>
+          <div class="footer-brand-copy">
+            <p class="footer-kicker footer-kicker--soft">Touch & Solve</p>
+            <h3 class="footer-title">Trusted Self-Learning Platform.</h3>
+            <p class="footer-lead">We solve just in touch. A learning platform built with a clean structure, stronger
+              outcomes, and a smooth student journey.</p>
+          </div>
+          <div class="footer-social" aria-label="Social links">
+            <a href="https://www.facebook.com/touchandsolve" class="social" aria-label="Facebook">
+              <svg viewBox="0 0 24 24">
+                <path d="M14 8.5V7c0-.8.5-1 1-1h2V3h-3c-2.2 0-4 1.8-4 4v1.5H8V12h2v9h4v-9h2.7l.3-3.5H14z" />
+              </svg>
+            </a>
+            <a href="https://www.youtube.com/@touchandsolve" class="social" aria-label="YouTube">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.3 2.8 12 2.8 12 2.8s-4.3 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.3 21.8 12 21.8 12 21.8s4.3 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.3l6.6 3.6-6.6 3.6z" />
+              </svg>
+            </a>
+          </div>
+        </section>
+        <section class="footer-links-panel">
+          <div class="footer-links">
+            <div class="footer-column">
+              <h5>Explore</h5>
+              <ul>
+                <li><a routerLink="/courses">Courses</a></li>
+                <li><a routerLink="/instructors">Instructors</a></li>
+                <li><a routerLink="/store">Store</a></li>
+              </ul>
+            </div>
+            <div class="footer-column">
+              <h5>Company</h5>
+              <ul>
+                <li><a href="#aboutUs">About Us</a></li>
+                <li><a href="#successStory">Success Story</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+              </ul>
+            </div>
+            <div class="footer-column">
+              <h5>Learning</h5>
+              <ul>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">Help Center</a></li>
+                <li><a href="#">FAQ</a></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="footer-bottom-dark">
+      <div class="footer-bottom footer-bottom--split">
+        <div class="footer-copyright">&copy; 2026 Touch & Solve. All rights reserved.</div>
+        <div class="footer-nav-small">
+          <a routerLink="/">Home</a>
+          <a href="#aboutUs">About</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>

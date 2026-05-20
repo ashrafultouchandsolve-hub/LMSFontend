@@ -1,0 +1,139 @@
+<main class="my-classes-page">
+
+  <header class="mc-header">
+    <h1>📺 My Live Classes</h1>
+    <p>তোমার enrolled course গুলোর সব live class এখানে দেখতে পাবে।</p>
+  </header>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="mc-loading">
+      <div class="mc-spinner"></div>
+      <p>Live classes লোড হচ্ছে...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage()) {
+    <div class="mc-error">
+      <span>😕</span>
+      <p>{{ errorMessage() }}</p>
+      <a routerLink="/login" class="mc-login-btn">Login করো</a>
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+
+    <!-- 🔴 Active now banner -->
+    @if (activeLiveClasses().length > 0) {
+      <section class="mc-active-section">
+        <h2 class="mc-section-title">🔴 এখন Live</h2>
+        <div class="mc-active-list">
+          @for (lc of activeLiveClasses(); track lc.id) {
+            <div class="mc-active-card">
+              <div class="mc-pulse-dot"></div>
+              <div class="mc-active-info">
+                <p class="mc-active-course">{{ lc.courseTitle }}</p>
+                <strong class="mc-active-title">{{ lc.title }}</strong>
+                @if (lc.description) {
+                  <p class="mc-active-desc">{{ lc.description }}</p>
+                }
+              </div>
+              <a [routerLink]="['/live-class', lc.id]" class="mc-join-btn">
+                Join Now →
+              </a>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- 📅 Upcoming classes -->
+    @if (upcomingLiveClasses().length > 0) {
+      <section class="mc-upcoming-section">
+        <h2 class="mc-section-title">📅 Upcoming Classes</h2>
+        <div class="mc-upcoming-list">
+          @for (lc of upcomingLiveClasses(); track lc.id) {
+            <div class="mc-upcoming-card">
+              <div class="mc-upcoming-icon">📺</div>
+              <div class="mc-upcoming-info">
+                <p class="mc-upcoming-course">{{ lc.courseTitle }}</p>
+                <strong class="mc-upcoming-title">{{ lc.title }}</strong>
+                <p class="mc-upcoming-time">🕐 {{ formatScheduled(lc.scheduledAt) }}</p>
+                @if (lc.description) {
+                  <p class="mc-upcoming-desc">{{ lc.description }}</p>
+                }
+              </div>
+              <span class="mc-badge mc-badge-upcoming">Upcoming</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- 📚 Course by course breakdown -->
+    <section class="mc-courses-section">
+      <h2 class="mc-section-title">📚 Course অনুযায়ী</h2>
+
+      @if (courses().length === 0) {
+        <div class="mc-empty">
+          <span>📭</span>
+          <h3>কোনো enrolled course নেই</h3>
+          <p>Course এ enroll করলে এখানে live class দেখতে পাবে।</p>
+          <a routerLink="/courses" class="mc-browse-btn">Courses দেখো →</a>
+        </div>
+      }
+
+      <div class="mc-course-list">
+        @for (course of courses(); track course.id) {
+          <div class="mc-course-card">
+
+            <!-- Course header -->
+            <div class="mc-course-head">
+              <div class="mc-course-icon">📖</div>
+              <div class="mc-course-meta">
+                <strong>{{ course.title }}</strong>
+                <span>{{ course.instructorName }} · {{ course.category }}</span>
+              </div>
+              <span class="mc-live-count">
+                {{ totalLive(course) }} live
+              </span>
+            </div>
+
+            <!-- Live classes of this course -->
+            @if (course.isLoadingLive) {
+              <p class="mc-live-loading">লোড হচ্ছে...</p>
+            } @else if (course.liveClasses.length === 0) {
+              <p class="mc-live-none">এই course এ এখনো কোনো live class schedule হয়নি।</p>
+            } @else {
+              <div class="mc-live-list">
+                @for (lc of course.liveClasses; track lc.id) {
+                  <div class="mc-live-row" [class.mc-live-row-active]="lc.isActive" [class.mc-live-row-ended]="lc.isEnded">
+                    <div class="mc-live-row-info">
+                      <p class="mc-live-row-title">{{ lc.title }}</p>
+                      <p class="mc-live-row-time">{{ formatScheduled(lc.scheduledAt) }}</p>
+                    </div>
+                    <div class="mc-live-row-action">
+                      @if (lc.isActive) {
+                        <a [routerLink]="['/live-class', lc.id]" class="mc-join-btn mc-join-btn-sm">
+                          🔴 Join
+                        </a>
+                      } @else if (lc.isEnded) {
+                        <span class="mc-badge mc-badge-ended">Ended</span>
+                      } @else {
+                        <span class="mc-badge mc-badge-upcoming">Upcoming</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    </section>
+
+  }
+
+</main>

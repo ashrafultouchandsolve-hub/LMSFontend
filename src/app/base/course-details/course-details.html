@@ -1,0 +1,178 @@
+<main class="course-details-page">
+
+	<nav class="top-navbar top-navbar--teacher">
+	  <a class="brand" routerLink="/homepage">
+		<img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
+	  </a>
+	  <div class="topbar-nav">
+		<a routerLink="/homepage">Home</a>
+		<a routerLink="/courses">Courses</a>
+	  </div>
+	  <div class="topbar-actions">
+		<button type="button" class="nav-button nav-button-ghost" routerLink="/home-page">← Back to Site</button>
+	  </div>
+	</nav>
+
+	<a routerLink="/courses" class="back-link">{{ lang.t().cdBack }}</a>
+
+	@if (isLoading()) {
+		<section class="info-card loading-state" aria-live="polite">
+			<h2>{{ lang.t().cdLoading }}</h2>
+			<p>{{ lang.t().cdLoadingDesc }}</p>
+		</section>
+	} @else if (errorMessage()) {
+		<section class="info-card error-state" aria-live="assertive">
+			<h2>{{ lang.t().cdUnavailable }}</h2>
+			<p>{{ errorMessage() }}</p>
+			<a routerLink="/homepage" class="action-link">{{ lang.t().cdGoBack }}</a>
+			
+		</section>
+	
+	} @else if (course(); as selectedCourse) {
+		<div class="course-layout">
+			<section class="course-main-card">
+				<header class="card-head">
+					<button type="button" class="tab-button tab-button-active" aria-current="page">{{ lang.t().cdOverview }}</button>
+						
+				</header>
+				<article class="card-body">
+					<h1>{{ selectedCourse.title }}</h1>
+					<section class="details-section">
+						<h2>{{ lang.t().cdInstructor }}</h2>
+						<div class="instructor-list">
+							<article class="instructor-item">
+								<div class="instructor-avatar" aria-hidden="true">{{ getInstructorInitial(selectedCourse.instructorName) }}</div>
+								<p>{{ selectedCourse.instructorName }}</p>
+							</article>
+						</div>
+					</section>
+					<section class="details-section">
+						<h2>{{ lang.t().cdDescription }}</h2>
+						<p class="description-text">
+							{{ displayDescription() }}@if (canToggleDescription() && !isDescriptionExpanded()) { ... }
+						</p>
+						@if (canToggleDescription()) {
+							<button type="button" class="see-more-button" (click)="toggleDescription()">
+								@if (isDescriptionExpanded()) { {{ lang.t().cdSeeLess }} } @else { {{ lang.t().cdSeeMore }} }
+							</button>
+						}
+					</section>
+					<section class="info-note">
+						<h3>{{ lang.t().cdNote }}</h3>
+						<p>{{ lang.t().cdNoteText }}</p>
+					</section>
+				</article>
+			</section>
+
+			<aside class="course-side-card">
+				@if (imageAvailable()) {
+					<img class="course-image" [src]="selectedCourse.thumbnailUrl" [alt]="selectedCourse.title + ' thumbnail'" (error)="onImageError()" />
+				} @else {
+					<div class="course-image-placeholder" role="img" aria-label="No image available"><span>No Image</span></div>
+				}
+				
+				<!-- Rating Section -->
+				<div class="rating-section">
+					<div class="rating-summary">
+						<div class="rating-stars">
+							{{ averageRating().toFixed(1) }} ⭐
+						</div>
+							<p class="rating-count">({{ totalRatings() }} ratings)</p>
+					</div>
+				</div>
+
+				<div class="price-wrap">
+					<p class="current-price">{{ formatPrice(selectedCourse.price) }}</p>
+				</div>
+				
+				<!-- Rating Form Button -->
+				@if (isLoggedIn() && isEnrolled()) {
+					<button type="button" class="coupon-button" (click)="showRatingForm.set(!showRatingForm())">
+						{{ showRatingForm() ? '✕ Close' : '⭐ Rate Course' }}
+					</button>
+					
+					<!-- Rating Form -->
+					@if (showRatingForm()) {
+						<div class="rating-form">
+							<h4>What do you think about this course?</h4>
+							
+							<div class="stars-input">
+								@for (star of getStarArray(); track star) {
+									<button 
+										type="button" 
+										class="star-btn" 
+										[class.active]="star <= userRating()"
+										(click)="setRating(star)"
+										[attr.aria-label]="'Rate ' + star + ' stars'">
+										★
+									</button>
+								}
+							</div>
+
+							<textarea 
+								class="feedback-input"
+								placeholder="Share your feedback (optional)"
+								[value]="userFeedback()"
+								(input)="userFeedback.set($any($event.target).value)"
+								rows="3">
+							</textarea>
+
+							@if (ratingMessage()) {
+								<p class="rating-message">{{ ratingMessage() }}</p>
+							}
+
+							<button 
+								type="button" 
+								class="submit-btn"
+								(click)="submitRating(selectedCourse.id)"
+								[disabled]="isSubmittingRating()">
+								{{ isSubmittingRating() ? 'Saving...' : 'Submit Rating' }}
+							</button>
+						</div>
+					}
+				} @else {
+					<button type="button" class="coupon-button" disabled>
+						{{ !isLoggedIn() ? 'Login to Rate' : 'Enroll to Rate' }}
+					</button>
+				}
+				
+				@if (!isLoggedIn() && !isEnrolled()) {
+					<button type="button" class="coupon-button">{{ lang.t().cdCoupon }}</button>
+				}
+				@if (isLoggedIn()) {
+					@if (!isTeacher()){
+					@if (isCheckingEnrollment()) {
+						<button type="button" class="enroll-button enroll-button-muted" disabled>{{ lang.t().cdCheckingEnrollment }}</button>
+					} @else if (isEnrolled()) {
+						<a [routerLink]="['/enrolled-course', selectedCourse.id]" class="enroll-button enroll-button-success enroll-link">{{ lang.t().cdEnrolled }}</a>
+					} @else {
+						<a [routerLink]="['/payment']" [queryParams]="{ courseId: selectedCourse.id, courseTitle: selectedCourse.title, amount: selectedCourse.price }" class="enroll-button enroll-link">{{ lang.t().cdEnrollNow }}</a>
+					}
+				}
+				} @else {
+					<a routerLink="/login" class="enroll-button enroll-link">{{ lang.t().cdLoginToEnroll }}</a>
+				}
+				<button
+					type="button"
+					class="wishlist-button"
+					[class.wishlisted]="isWishlisted()"
+					[class.is-toggling]="isTogglingWishlist()"
+					[disabled]="isTogglingWishlist()"
+					(click)="toggleWishlist()">
+					@if (isWishlisted()) {
+						{{ isTogglingWishlist() ? 'Updating...' : '✓ In Wishlist' }}
+					} @else {
+						{{ isTogglingWishlist() ? 'Adding...' : '♡ Add to Wishlist' }}
+					}
+				</button>
+				<ul class="course-meta" aria-label="Course meta information">
+					<li><span>{{ lang.t().cdCategory }}</span><strong>{{ selectedCourse.category }}</strong></li>
+					<li><span>{{ lang.t().cdLevel }}</span><strong>{{ selectedCourse.level }}</strong></li>
+					<li><span>{{ lang.t().cdLessonsCount }}</span><strong>{{ selectedCourse.lessonCount }}</strong></li>
+					<li><span>{{ lang.t().cdDuration }}</span><strong>{{ formatDuration(selectedCourse.durationMinutes) }}</strong></li>
+					<li><span>{{ lang.t().cdStatus }}</span><strong>{{ selectedCourse.isPublished ? lang.t().cdPublished : lang.t().cdDraft }}</strong></li>
+				</ul>
+			</aside>
+		</div>
+	}
+</main>

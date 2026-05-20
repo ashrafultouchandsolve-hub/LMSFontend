@@ -1,0 +1,39 @@
+<div class="lc-room">
+
+  <!-- Header -->
+  <div class="lc-header">
+    <a routerLink="/homepage" class="lc-back">← Back</a>
+    <div class="lc-title-wrap">
+      @if (!isLoading() && !error()) {
+        <span class="lc-live-dot"></span>
+        <h1>{{ title() }}</h1>
+      }
+    </div>
+    @if (isTeacher() && !isLoading() && !error()) {
+      <button class="lc-end-btn" (click)="endClass()">🔴 End Class</button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="lc-loading">
+      <div class="lc-spinner"></div>
+      <p>Joining live class...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="lc-error">
+      <span>😕</span>
+      <h3>{{ error() }}</h3>
+      <a routerLink="/homepage" class="lc-back-btn">Go to Homepage</a>
+    </div>
+  }
+
+  <!-- Jitsi Meet container — Jitsi will be injected into this div instead of an iframe -->
+  @if (!isLoading() && !error()) {
+    <div id="jitsi-container" class="lc-frame"></div>
+  }
+
+</div>

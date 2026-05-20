@@ -1,0 +1,105 @@
+<main class="payment-page">
+	<a routerLink="/homepage" class="back-link">&larr; Back to Home</a>
+
+	<section class="payment-shell">
+		<article class="summary-card">
+			<p class="eyebrow">Demo Payment</p>
+			<h1>{{ courseTitle() }}</h1>
+			<p class="summary-note">এই page শুধু demo এর জন্য। এখানে payment flow দেখানো হয়েছে।</p>
+
+			<div class="amount-box">
+				<span>Payable Amount</span>
+				<strong>{{ totalPayableText() }}</strong>
+			</div>
+
+			<h2>Select Method</h2>
+			<div class="method-list" role="group" aria-label="Payment method">
+				@for (method of methodOptions; track method) {
+					<button
+						type="button"
+						[class]="selectedMethod() === method ? 'method-btn method-btn-active' : 'method-btn'"
+						(click)="chooseMethod(method)"
+					>
+						{{ method }}
+					</button>
+				}
+			</div>
+		</article>
+
+		<article class="form-card">
+			<h2>Payment Information</h2>
+
+			@if (successMessage()) {
+				<p class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+			}
+
+			<form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" novalidate>
+				<div class="field-grid">
+					<label>
+						<span>Full Name</span>
+						<input type="text" formControlName="payerName" placeholder="Your name" />
+						@if (paymentForm.controls.payerName.touched && paymentForm.controls.payerName.invalid) {
+							<small>Valid name required</small>
+						}
+					</label>
+
+					<label>
+						<span>Email</span>
+						<input type="email" formControlName="email" placeholder="name@mail.com" />
+						@if (paymentForm.controls.email.touched && paymentForm.controls.email.invalid) {
+							<small>Valid email required</small>
+						}
+					</label>
+
+					<label>
+						<span>Phone</span>
+						<input type="tel" formControlName="phone" placeholder="01XXXXXXXXX" />
+						@if (paymentForm.controls.phone.touched && paymentForm.controls.phone.invalid) {
+							<small>Valid Bangladeshi phone number required</small>
+						}
+					</label>
+
+					<label>
+						<span>Card Number</span>
+						<input type="text" formControlName="cardNumber" placeholder="16 digit card number" />
+						@if (paymentForm.controls.cardNumber.touched && paymentForm.controls.cardNumber.invalid) {
+							<small>Card number must be 16 digits</small>
+						}
+					</label>
+
+					<label>
+						<span>Expiry (MM/YY)</span>
+						<input type="text" formControlName="expiry" placeholder="08/28" />
+						@if (paymentForm.controls.expiry.touched && paymentForm.controls.expiry.invalid) {
+							<small>Format should be MM/YY</small>
+						}
+					</label>
+
+					<label>
+						<span>CVV</span>
+						<input type="password" formControlName="cvv" placeholder="3 or 4 digits" />
+						@if (paymentForm.controls.cvv.touched && paymentForm.controls.cvv.invalid) {
+							<small>CVV should be 3 or 4 digits</small>
+						}
+					</label>
+				</div>
+
+				<label class="terms">
+					<input type="checkbox" formControlName="agree" />
+					<span>I understand this is a demo payment and no real transaction will be processed.</span>
+				</label>
+				@if (paymentForm.controls.agree.touched && paymentForm.controls.agree.invalid) {
+					<small class="agree-error">Please accept demo payment terms.</small>
+				}
+
+				<button class="pay-button" type="submit" [disabled]="isProcessing()">
+					@if (isProcessing()) {
+						Processing...
+					} @else {
+						Pay {{ totalPayableText() }}
+					}
+				</button>
+			</form>
+		</article>
+	</section>
+</main>

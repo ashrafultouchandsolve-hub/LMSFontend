@@ -1,0 +1,205 @@
+<main class="profile-page">
+	<header class="topbar card-surface reveal-up">
+		<a class="brand" routerLink="/homepage" aria-label="Learning platform home">
+			<img src="/Logo2.png" alt="Touch & Solve Learning Platform" class="brand-logo" />
+		</a>
+		<nav class="topbar-nav" aria-label="Primary navigation">
+			<a href="#tracks">{{ lang.t().navTracks }}</a>
+			<a href="#platform-identity">{{ lang.t().navVision }}</a>
+		</nav>
+		<div class="topbar-actions">
+			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
+				<span>🌐</span>
+				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
+			</button>
+			@if (isLoggedIn()) {
+				<details class="user-menu">
+					<summary class="user-chip">
+						<span class="user-avatar">{{ userInitial() }}</span>
+						<span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
+						<span class="menu-caret" aria-hidden="true">▾</span>
+					</summary>
+					<div class="user-menu-list" role="menu">
+						<a routerLink="/profile" class="user-menu-link" role="menuitem">{{ lang.t().navProfile }}</a>
+						@if (isTeacher()) {
+							<a routerLink="/teacher" class="user-menu-link" role="menuitem">{{ lang.t().navTeacher }}</a>
+						}
+					</div>
+				</details>
+				<button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
+			} @else {
+				<a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
+				<a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
+			}
+		</div>
+	</header>
+
+	<section class="profile-shell">
+		<section class="info-card" aria-label="User profile details">
+			<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
+			<div class="user-info">
+				<h2>{{ userName() }}</h2>
+				<p>{{ userEmail() }}</p>
+				<span class="role-badge">{{ lang.t().profileRole }}: {{ userRole() }}</span>
+			</div>
+		</section>
+
+		<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
+			<div class="panel-header">
+				<div>
+					<p class="panel-label">{{ lang.t().profileDashboard }}</p>
+					<h2>Performance</h2>
+				</div>
+				<span class="live-badge">
+					<span class="live-dot" aria-hidden="true"></span>
+					{{ lang.t().profileLive }}
+				</span>
+			</div>
+			<div class="ring-wrap">
+				<div class="progress-ring" [attr.role]="'img'" [attr.aria-label]="percentageScore() + '% quiz completion'">
+					<svg class="ring-svg" viewBox="0 0 120 120">
+						<circle cx="60" cy="60" r="50" class="ring-track" />
+						<circle cx="60" cy="60" r="50" class="ring-fill" [style.--percentage]="percentageScore() + '%'" />
+					</svg>
+					<div class="ring-core">
+						<strong>{{ percentageScore() | number: '1.0-0' }}%</strong>
+						<span>{{ lang.t().profileCompletion }}</span>
+					</div>
+				</div>
+				<div class="ring-legend">
+					<div class="legend-item">
+						<span class="legend-dot legend-done" aria-hidden="true"></span>
+						<span>Correct ({{ correctAnswers() }})</span>
+					</div>
+					<div class="legend-item">
+						<span class="legend-dot legend-remain" aria-hidden="true"></span>
+						<span>Wrong ({{ wrongAnswers() }})</span>
+					</div>
+				</div>
+			</div>
+			<div class="dashboard-list">
+				<div class="dashboard-row">
+					<span class="row-icon" aria-hidden="true">✅</span>
+					<span>Correct Answers</span>
+					<strong class="row-value row-ok">{{ correctAnswers() }}</strong>
+				</div>
+				<div class="dashboard-row">
+					<span class="row-icon" aria-hidden="true">❌</span>
+					<span>Wrong Answers</span>
+					<strong class="row-value row-err">{{ wrongAnswers() }}</strong>
+				</div>
+				<div class="dashboard-row">
+					<span class="row-icon" aria-hidden="true">📊</span>
+					<span>Score</span>
+					<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
+				</div>
+			</div>
+		</aside>
+
+		<section class="future-card" aria-label="Future learning features">
+  <h3>{{ lang.t().profileActivity }}</h3>
+  <p>{{ lang.t().profileActivityDesc }}</p>
+  <div class="action-grid">
+
+    <button type="button" routerLink="/myClasses" class="future-btn">
+      {{ lang.t().profileMyClasses }}
+    </button>
+
+    <!-- ✅ My Courses — lesson notification দেখাবে -->
+    <button type="button" routerLink="/my-courses" class="future-btn future-btn--notif">
+      {{ lang.t().profileMyCourses }}
+      @if (lessonNotifCount() > 0) {
+        <span class="future-btn-badge">{{ lessonNotifCount() }}</span>
+      }
+    </button>
+
+    <!-- ✅ Assignments — quiz notification দেখাবে -->
+    <button type="button" routerLink="/assignments" class="future-btn future-btn--notif">
+      {{ lang.t().profileAssignments }}
+      @if (quizNotifCount() > 0) {
+        <span class="future-btn-badge">{{ quizNotifCount() }}</span>
+      }
+    </button>
+
+    <!-- ✅ Certificates — certificate notification দেখাবে -->
+    <button type="button" routerLink="/certificates" class="future-btn future-btn--notif">
+      {{ lang.t().profileCertificates }}
+      @if (certNotifCount() > 0) {
+        <span class="future-btn-badge">{{ certNotifCount() }}</span>
+      }
+    </button>
+
+  </div>
+</section>
+
+		<!-- Tab buttons -->
+<div class="profile-tabs">
+  <button type="button"
+    class="profile-tab"
+    [class.active]="activeTab() === 'profile'"
+    (click)="switchTab('profile')">
+    👤 Profile
+  </button>
+  <button type="button"
+    class="profile-tab"
+    [class.active]="activeTab() === 'wishlist'"
+    (click)="switchTab('wishlist')">
+    ♥ Wishlist
+    @if (wishlist().length > 0) {
+      <span class="tab-badge">{{ wishlist().length }}</span>
+    }
+  </button>
+</div>
+
+<!-- Profile content -->
+@if (activeTab() === 'profile') {
+  <!-- আগের profile content এখানে -->
+}
+
+<!-- Wishlist content -->
+@if (activeTab() === 'wishlist') {
+  <section class="wishlist-section">
+
+    @if (isLoadingWishlist()) {
+      <div class="wishlist-loading">Loading...</div>
+    } @else if (wishlist().length === 0) {
+      <div class="wishlist-empty">
+        <div class="wishlist-empty-icon">💔</div>
+        <h3>Wishlist খালি</h3>
+        <p>কোনো course wishlist এ নেই।</p>
+        <a routerLink="/courses" class="browse-btn">Browse Courses</a>
+      </div>
+    } @else {
+      <div class="wishlist-grid">
+        @for (item of wishlist(); track item.courseId) {
+          <div class="wishlist-card">
+            <div class="wishlist-thumb">
+              <img [src]="getImageUrl(item.thumbnailPath)"
+                [alt]="item.title"
+                (error)="$any($event.target).style.display='none'" />
+            </div>
+            <div class="wishlist-card-body">
+              <span class="wishlist-level">{{ item.level }}</span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.instructorName }}</p>
+              <div class="wishlist-card-footer">
+                <strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
+							<div class="wishlist-actions">
+								<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View Course</a>
+								@if (item.isEnrolled) {
+									<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled</a>
+								} @else {
+									<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enrolled-btn wishlist-enroll-btn">Enroll Now</a>
+								}
+							</div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </section>
+}
+	</section>
+</main>
