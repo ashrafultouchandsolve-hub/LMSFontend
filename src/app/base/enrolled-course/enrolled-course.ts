@@ -6,6 +6,7 @@ import { LearningApiService, LessonDto } from '../../Service/learning-api.servic
 import { DomSanitizer } from '@angular/platform-browser';
 import { LanguageService } from '../../Service/language.service';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service'; // ✅ নতুন
+import { Navbar } from '../../shared/navbar/navbar';
 
 type LessonView = {
   id: string;
@@ -36,7 +37,7 @@ type CourseCommentView = {
 
 @Component({
   selector: 'app-enrolled-course',
-  imports: [RouterLink],
+  imports: [RouterLink,Navbar],
   templateUrl: './enrolled-course.html',
   styleUrl: './enrolled-course.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

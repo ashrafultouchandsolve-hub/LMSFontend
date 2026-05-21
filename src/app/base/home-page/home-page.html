@@ -1,174 +1,6 @@
 <main class="home-page">
 
-  <!-- ─── TOPBAR ──────────────────────────────────── -->
-  <header class="topbar">
-    <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-      <img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
-    </a>
-    <nav class="topbar-nav" aria-label="Primary navigation">
-      <!-- ✅ home-page.html এ navbar এ এই অংশ খুঁজো: -->
-      <!--   <a routerLink="/courses">{{ lang.t().navCourses }}</a>  -->
-      <!-- এটা DELETE করো এবং নিচেরটা দিয়ে replace করো -->
-
-      <div class="nav-dropdown-wrap">
-        <a routerLink="/courses" class="nav-dropdown-trigger">
-          {{ lang.t().navCourses }}
-          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
-            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
-          </svg>
-        </a>
-
-        <div class="nav-dropdown">
-          <div class="nav-dropdown-inner">
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">📘 SSC</span>
-              <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--purple"></span>
-                <div>
-                  <strong>SSC 2027</strong>
-                  <span>Final Preparation</span>
-                </div>
-              </a>
-            </div>
-
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">📗 HSC</span>
-              <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--green"></span>
-                <div>
-                  <strong>HSC 2027</strong>
-                  <span>Final Preparation</span>
-                </div>
-              </a>
-
-            </div>
-
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">🎯 Admission</span>
-              <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
-                <div>
-                  <strong>Admission English</strong>
-                  <span>University Prep</span>
-                </div>
-              </a>
-              <a routerLink="/courses" [queryParams]="{category:'Admission Science'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
-                <div>
-                  <strong>Admission Science</strong>
-                  <span>University Prep</span>
-                </div>
-              </a>
-            </div>
-
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">⚡ Skills & Other</span>
-              <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
-                <div>
-                  <strong>Skills Development</strong>
-                  <span>Career Growth</span>
-                </div>
-              </a>
-              <a routerLink="/courses" [queryParams]="{category:'Communication'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
-                <div>
-                  <strong>Communication</strong>
-                  <span>Soft Skills</span>
-                </div>
-              </a>
-              <a routerLink="/courses" [queryParams]="{category:'General'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--gray"></span>
-                <div>
-                  <strong>General</strong>
-                  <span>Other Courses</span>
-                </div>
-              </a>
-            </div>
-
-            <div class="nav-dropdown-footer">
-              <a routerLink="/courses" [queryParams]="{category:'All'}" class="nav-dropdown-all">
-                Browse All Courses
-              </a>
-            </div>
-
-          </div>
-        </div>
-      </div>
-      <a routerLink="/instructors">Instructor</a>
-      <a routerLink="/store">Store</a>
-      <a href="#platform-identity">{{ lang.t().navVision }}</a>
-
-      <div class="nav-dropdown-wrap">
-        <button class="nav-dropdown-trigger" style="background: none; border: none; cursor: pointer;">
-          More
-          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
-            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
-          </svg>
-        </button>
-
-        <div class="nav-dropdown">
-          <div class="nav-dropdown-inner">
-
-            <div class="nav-dropdown-group">
-              <a routerLink="/leaderboard" class="nav-dropdown-group-label">🏆 Leaderboard</a>
-            </div>
-
-            @if(isLoggedIn()) {
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <a routerLink="/history" class="nav-dropdown-group-label">📹 Video History</a>
-            </div>
-            }
-
-          </div>
-        </div>
-      </div>
-    </nav>
-    <div class="topbar-actions">
-      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()"
-        [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'Change to Bengali'">
-        <span class="lang-icon">🌐</span>
-        <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'BN' }}</span>
-      </button>
-      @if (isLoggedIn()) {
-      <app-notification-bell></app-notification-bell>
-      <details class="user-menu">
-        <summary class="user-chip" aria-label="User menu">
-          <span class="user-avatar">{{ userInitial() }}</span>
-          <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
-          <span class="menu-caret" aria-hidden="true">
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
-              <path d="M1 1L5 5L9 1" />
-            </svg>
-          </span>
-        </summary>
-        <div class="user-menu-list" role="menu">
-          <a routerLink="/profile" class="user-menu-link" role="menuitem">
-            <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
-          </a>
-          @if (isTeacher()) {
-          <a routerLink="/teacher" class="user-menu-link" role="menuitem">
-            <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
-          </a>
-          }
-        </div>
-      </details>
-      <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
-      } @else {
-      <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
-      <a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
-      }
-    </div>
-  </header>
+  <app-navbar></app-navbar>
 
   <!-- ─── HERO SLIDER ───────────────────────────────── -->
   <section class="hero-slider">
@@ -401,110 +233,105 @@
     }
   </section>
 
-
-
-  <section class="about-section" id="platform-identity">
+  <!-- ─── ABOUT SECTION ─────────────────────────────── -->
+  <section class="about-section" id="aboutUs">
 
     <!-- Header -->
     <div class="about-header">
-      <span class="about-tag" id="aboutUs">💡 About Us</span>
+      <span class="about-tag">💡 About Us</span>
       <h2>About <span class="about-accent">"Nirvor Nije Sikhi"</span></h2>
-      <p>Not the biggest. The bravest. Built for SSC & HSC
-        students who want to conquer English.</p>
+      <p>Not the biggest. The bravest. Built for SSC &amp; HSC students who want to conquer English.</p>
     </div>
 
     <!-- Cards Grid -->
     <div class="about-cards">
 
       <!-- Card 1 — Mission -->
-      <div class="about-card about-card--purple">
+      <article class="about-card about-card--purple">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🎯</div>
-          <span class="about-card-label">Our Mission</span>
+          <span class="about-card-label">Mission</span>
         </div>
-        <h3>Mission</h3>
-        <p>Deliver quality education to every student — from anywhere, anytime.</p>
+        <h3>Focused Learning</h3>
+        <p>Clear guidance, structured content, and consistent practice — so every student can progress fast.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">10,000+ Students</span>
-      </div>
+        <div class="about-card-stat">Daily Smart Tasks</div>
+      </article>
 
       <!-- Card 2 — Vision -->
-      <div class="about-card about-card--blue">
+      <article class="about-card about-card--blue">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
-          <div class="about-card-icon">📽️</div>
-          <span class="about-card-label">Live Class</span>
+          <div class="about-card-icon">🌍</div>
+          <span class="about-card-label">Vision</span>
         </div>
-        <h3>Live Classes</h3>
-        <p>Join live sessions, watch recordings anytime, and never miss a lesson.</p>
+        <h3>Future Ready</h3>
+        <p>We build confidence, skills, and mindset for exams and real-life communication.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">Recorded Forever</span>
-      </div>
+        <div class="about-card-stat">Exam + Career Ready</div>
+      </article>
 
-      <!-- Card 3 — Outcome Based -->
-      <div class="about-card about-card--teal">
+      <!-- Card 3 — Community -->
+      <article class="about-card about-card--teal">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
-          <div class="about-card-icon">✉️</div>
+          <div class="about-card-icon">🤝</div>
           <span class="about-card-label">Community</span>
         </div>
-        <h3>Ask, Answer, Grow</h3>
-        <p>Be part of a learning community where you can ask questions, get answers, and improve together.</p>
+        <h3>Learn Together</h3>
+        <p>Thousands of learners, mentors, and teachers — all helping each other grow.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">Community Support</span>
-      </div>
+        <div class="about-card-stat">Supportive Network</div>
+      </article>
 
-      <!-- Card 4 — Analytics -->
-      <div class="about-card about-card--orange">
-        <div class="about-card-glow"></div>
-        <div class="about-card-top">
-          <div class="about-card-icon">📊</div>
-          <span class="about-card-label">Performance</span>
-        </div>
-        <h3>{{ lang.t().feature2Title }}</h3>
-        <p>{{ lang.t().feature2Desc }}</p>
-        <div class="about-card-line"></div>
-        <span class="about-card-stat">Real-time Analytics</span>
-      </div>
-
-      <!-- Card 5 — Mentor -->
-      <div class="about-card about-card--green">
+      <!-- Card 4 — Mentors -->
+      <article class="about-card about-card--orange">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🧑‍🏫</div>
-          <span class="about-card-label">Mentorship</span>
+          <span class="about-card-label">Mentors</span>
         </div>
-        <h3>{{ lang.t().feature3Title }}</h3>
-        <p>{{ lang.t().feature3Desc }}</p>
+        <h3>Top Teachers</h3>
+        <p>Learn from experienced teachers with proven methods and exam-friendly guidance.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">{{ lang.t().quoteFooter2 }}</span>
-      </div>
+        <div class="about-card-stat">Verified Experts</div>
+      </article>
 
-      <!-- Card 6 — Quote / Big Commitment -->
-      <div class="about-card about-card--quote">
+      <!-- Card 5 — Growth -->
+      <article class="about-card about-card--green">
         <div class="about-card-glow"></div>
-        <div class="quote-mark">"</div>
-        <p class="about-quote-text">{{ lang.t().quoteText }}</p>
+        <div class="about-card-top">
+          <div class="about-card-icon">📈</div>
+          <span class="about-card-label">Growth</span>
+        </div>
+        <h3>Track Progress</h3>
+        <p>Clear milestones and feedback help you measure improvement every week.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-label">{{ lang.t().quoteLabel }}</span>
-      </div>
+        <div class="about-card-stat">Progress Dashboard</div>
+      </article>
+
+      <!-- Card 6 — Quote -->
+      <article class="about-card about-card--quote">
+        <div class="about-card-glow"></div>
+        <div class="quote-mark">“</div>
+        <p class="about-quote-text">We believe every student can master English with the right system and consistent guidance.</p>
+        <div class="about-card-line"></div>
+        <div class="about-card-stat">Touch &amp; Solve</div>
+      </article>
 
     </div>
   </section>
 
-  <section id="successStory" class="review-section">
-
+  <!-- ─── REVIEWS SECTION ────────────────────────────── -->
+  <section class="review-section">
     <div class="review-header">
-      <span class="review-tag">⭐ Success Stories</span>
-      <h2>What Our <span class="review-accent">Students Say</span></h2>
-      <p>Trusted by thousands of students, we move forward with their love and support.</p>
+      <span class="review-tag">💬 Reviews</span>
+      <h2>Student <span class="review-accent">Feedback</span></h2>
+      <p>Real stories from learners who study with us.</p>
     </div>
 
-    <!-- Slider -->
     <div class="review-slider-wrap">
-
-      <!-- Prev Arrow -->
       <button class="review-arrow review-arrow--prev" (click)="prevReview()" aria-label="Previous review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round">
@@ -512,7 +339,6 @@
         </svg>
       </button>
 
-      <!-- Slider Track -->
       <div class="review-track-outer">
         <div class="review-track" [style.transform]="'translateX(-' + activeReview() * 100 + '%)'">
 

@@ -5,6 +5,7 @@ import { LearningApiService } from '../../Service/learning-api.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type QuizItem = {
   id: string;

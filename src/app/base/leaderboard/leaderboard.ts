@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type LeaderboardEntry = {
   userId: string;
@@ -18,7 +19,7 @@ type ProfileUser = { id?: string | number; fullName?: string; email?: string; ro
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [RouterLink, CommonModule],
+  imports: [CommonModule, Navbar],
   templateUrl: './leaderboard.html',
   styleUrl: './leaderboard.css',
 })

@@ -1,21 +1,5 @@
 <main class="my-courses-page">
-	<!-- ─── TOP NAVBAR ─────────────────────────────────── -->
-	<nav class="top-navbar">
-		<a class="brand" routerLink="/homepage">
-			<img src="/Logo2.png" alt="Touch & Solve" class="brand-logo" />
-		</a>
-		<div class="topbar-nav">
-			<a routerLink="/homepage">Home</a>
-			<a routerLink="/courses">Courses</a>
-		</div>
-		<div class="topbar-actions">
-			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
-				<span>🌐</span>
-				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
-			</button>
-			<a routerLink="/profile" class="nav-button nav-button-ghost">← Back</a>
-		</div>
-	</nav>
+	<app-navbar></app-navbar>
 
 	<header class="hero">
 		<div>

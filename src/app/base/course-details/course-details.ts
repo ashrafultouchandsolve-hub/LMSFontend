@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type CourseDetailsView = {
   id: string;
@@ -28,7 +29,7 @@ type CourseDetailsView = {
 
 @Component({
   selector: 'app-course-details',
-  imports: [RouterLink],
+  imports: [RouterLink, Navbar],
   templateUrl: './course-details.html',
   styleUrl: './course-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

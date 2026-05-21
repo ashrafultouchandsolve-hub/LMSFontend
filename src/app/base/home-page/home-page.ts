@@ -10,12 +10,12 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
-import { NotificationBell } from "../../shared/notification-bell/notification-bell";
+import { Navbar } from '../../shared/navbar/navbar';
 
 type LearningHighlight = { title: string; description: string; };
 
@@ -30,27 +30,23 @@ type HomeCourse = {
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, NotificationBell],
+  imports: [RouterLink, Navbar],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private readonly authService  = inject(AuthService);
-  private readonly router       = inject(Router);
   private readonly learningApi  = inject(LearningApiService);
   readonly lang                 = inject(LanguageService);
 
   @ViewChild('courseTrackViewport')
   private courseTrackViewport?: ElementRef<HTMLDivElement>;
 
-  protected readonly isLoggedIn       = signal(false);
-  protected readonly userName         = signal('');
   protected readonly userRole         = signal<number | null>(null);
   protected readonly isLoadingCourses = signal(false);
   protected readonly courses          = signal<HomeCourse[]>([]);
   protected readonly isTeacher        = computed(() => this.userRole() === 1);
-  protected readonly userInitial      = computed(() => this.userName().charAt(0).toUpperCase());
   protected readonly activeReview = signal(0);
 private reviewInterval: any;
 
@@ -61,15 +57,12 @@ private reviewInterval: any;
 
   ngOnInit(): void {
     this.startReviewTimer();
-    this.authService.isLoggedIn$.subscribe((v) => this.isLoggedIn.set(v));
     this.authService.currentUser$.subscribe((user) => {
-      if (user?.fullName) this.userName.set(user.fullName);
       this.userRole.set(typeof user?.role === 'number' ? user.role : null);
     });
 
     const user = this.authService.getCurrentUser();
     if (user) {
-      this.userName.set(user.fullName || user.email);
       this.userRole.set(typeof user.role === 'number' ? user.role : null);
     }
 
@@ -108,11 +101,6 @@ private reviewInterval: any;
   }
 
   // ── Existing methods ─────────────────────────────
-
-  protected logout(): void {
-    this.authService.logout();
-    this.router.navigateByUrl('/login');
-  }
 
   protected getCardColor(index: number): string {
     const colors = ['#ec4899','#7c3aed','#06b6d4','#f97316','#10b981','#3b82f6','#f59e0b','#8b5cf6'];
