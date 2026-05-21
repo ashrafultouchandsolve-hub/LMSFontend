@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type EnrolledCourseView = {
   id: string;
@@ -22,7 +23,7 @@ type EnrolledCourseView = {
 
 @Component({
   selector: 'app-my-courses',
-  imports: [RouterLink],
+  imports: [RouterLink, Navbar],
   templateUrl: './my-courses.html',
   styleUrl: './my-courses.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

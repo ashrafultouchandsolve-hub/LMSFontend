@@ -1,38 +1,5 @@
 <main class="profile-page">
-	<header class="topbar card-surface reveal-up">
-		<a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-			<img src="./Logo2.png" alt="Touch & Solve Learning Platform" class="brand-logo" />
-		</a>
-		<nav class="topbar-nav" aria-label="Primary navigation">
-			<a href="#tracks">{{ lang.t().navTracks }}</a>
-			<a href="#platform-identity">{{ lang.t().navVision }}</a>
-		</nav>
-		<div class="topbar-actions">
-			<button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
-				<span>🌐</span>
-				<span>{{ lang.isBangla() ? 'EN' : 'বাং' }}</span>
-			</button>
-			@if (isLoggedIn()) {
-				<details class="user-menu">
-					<summary class="user-chip">
-						<span class="user-avatar">{{ userInitial() }}</span>
-						<span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
-						<span class="menu-caret" aria-hidden="true">▾</span>
-					</summary>
-					<div class="user-menu-list" role="menu">
-						<a routerLink="/profile" class="user-menu-link" role="menuitem">{{ lang.t().navProfile }}</a>
-						@if (isTeacher()) {
-							<a routerLink="/teacher" class="user-menu-link" role="menuitem">{{ lang.t().navTeacher }}</a>
-						}
-					</div>
-				</details>
-				<button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
-			} @else {
-				<a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
-				<a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
-			}
-		</div>
-	</header>
+	<app-navbar></app-navbar>
 
 	<section class="profile-shell">
 		<section class="info-card" aria-label="User profile details">

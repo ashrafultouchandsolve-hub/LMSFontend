@@ -5,6 +5,7 @@ import { LearningApiService } from '../../Service/learning-api.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type QuizItem = {
   id: string;
@@ -19,7 +20,7 @@ type QuizItem = {
 @Component({
   selector: 'app-quiz-attempt',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule,Navbar],
   templateUrl: './quiz-attempt.html',
   styleUrl: './quiz-attempt.css'
 })

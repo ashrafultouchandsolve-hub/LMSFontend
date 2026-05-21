@@ -7,6 +7,7 @@ import { LanguageService } from '../../Service/language.service';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { NotificationService } from '../../Service/notification-service';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type ProfileUser = { id?: number; fullName?: string; email?: string; role?: number; };
 
@@ -32,7 +33,7 @@ type WishlistItem = {
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, Navbar],
   templateUrl: './profile.html',
   styleUrls: ['./profile.css'],
 })

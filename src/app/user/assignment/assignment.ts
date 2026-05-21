@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { Navbar } from '../../shared/navbar/navbar';
 
 @Component({
   selector: 'app-assignment',
-  imports: [],
+  imports: [Navbar],
   templateUrl: './assignment.html',
   styleUrl: './assignment.css',
 })

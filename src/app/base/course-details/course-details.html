@@ -1,17 +1,6 @@
 <main class="course-details-page">
 
-	<nav class="top-navbar top-navbar--teacher">
-	  <a class="brand" routerLink="/homepage">
-		<img src="./Logo2.png" alt="Touch & Solve" class="brand-logo" />
-	  </a>
-	  <div class="topbar-nav">
-		<a routerLink="/homepage">Home</a>
-		<a routerLink="/courses">Courses</a>
-	  </div>
-	  <div class="topbar-actions">
-		<button type="button" class="nav-button nav-button-ghost" routerLink="/home-page">← Back to Site</button>
-	  </div>
-	</nav>
+	<app-navbar></app-navbar>
 
 	<a routerLink="/courses" class="back-link">{{ lang.t().cdBack }}</a>
 

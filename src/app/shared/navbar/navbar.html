@@ -1,0 +1,195 @@
+<header class="topbar">
+  <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
+    <img src="./logo-3.png" alt="Touch & Solve" class="brand-logo" />
+  </a>
+
+  <button
+    class="hamburger"
+    (click)="toggleMobileMenu()"
+    [class.hamburger--open]="mobileMenuOpen()"
+    aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <nav class="topbar-nav" [class.topbar-nav--open]="mobileMenuOpen()" aria-label="Primary navigation">
+    <div class="nav-dropdown-wrap">
+      <a routerLink="/courses" class="nav-dropdown-trigger">
+        {{ lang.t().navCourses }}
+        <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+          <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
+        </svg>
+      </a>
+
+      <div class="nav-dropdown">
+        <div class="nav-dropdown-inner">
+          <div class="nav-dropdown-group">
+            <span class="nav-dropdown-group-label">📘 SSC</span>
+            <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--purple"></span>
+              <div>
+                <strong>SSC 2027</strong>
+                <span>Final Preparation</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="nav-dropdown-divider"></div>
+
+          <div class="nav-dropdown-group">
+            <span class="nav-dropdown-group-label">📗 HSC</span>
+            <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--green"></span>
+              <div>
+                <strong>HSC 2027</strong>
+                <span>Final Preparation</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="nav-dropdown-divider"></div>
+
+          <div class="nav-dropdown-group">
+            <span class="nav-dropdown-group-label">🎯 Admission</span>
+            <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
+              <div>
+                <strong>Admission English</strong>
+                <span>University Prep</span>
+              </div>
+            </a>
+            <a routerLink="/courses" [queryParams]="{category:'Admission Science'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
+              <div>
+                <strong>Admission Science</strong>
+                <span>University Prep</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="nav-dropdown-divider"></div>
+
+          <div class="nav-dropdown-group">
+            <span class="nav-dropdown-group-label">⚡ Skills & Other</span>
+            <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
+              <div>
+                <strong>Skills Development</strong>
+                <span>Career Growth</span>
+              </div>
+            </a>
+            <a routerLink="/courses" [queryParams]="{category:'Communication'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
+              <div>
+                <strong>Communication</strong>
+                <span>Soft Skills</span>
+              </div>
+            </a>
+            <a routerLink="/courses" [queryParams]="{category:'General'}" class="nav-dropdown-item">
+              <span class="nav-dropdown-dot nav-dropdown-dot--gray"></span>
+              <div>
+                <strong>General</strong>
+                <span>Other Courses</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="nav-dropdown-footer">
+            <a routerLink="/courses" [queryParams]="{category:'All'}" class="nav-dropdown-all">
+              Browse All Courses
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a routerLink="/instructors">Instructor</a>
+    <a routerLink="/store">Store</a>
+    <a href="#platform-identity">{{ lang.t().navVision }}</a>
+
+    <div class="nav-dropdown-wrap">
+      <button class="nav-dropdown-trigger" type="button">
+        More
+        <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+          <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
+        </svg>
+      </button>
+
+      <div class="nav-dropdown">
+        <div class="nav-dropdown-inner">
+          <div class="nav-dropdown-group">
+            <a routerLink="/leaderboard" class="nav-dropdown-group-label">🏆 Leaderboard</a>
+          </div>
+
+          @if(isLoggedIn()) {
+            <div class="nav-dropdown-divider"></div>
+            <div class="nav-dropdown-group">
+              <a routerLink="/history" class="nav-dropdown-group-label">📹 Video History</a>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-nav-section" [class.mobile-nav-section--visible]="mobileMenuOpen()">
+    <p class="mobile-nav-label">Courses</p>
+    <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="mobile-nav-item" (click)="toggleMobileMenu()">📘 SSC 2027</a>
+    <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="mobile-nav-item" (click)="toggleMobileMenu()">📗 HSC 2027</a>
+    <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="mobile-nav-item" (click)="toggleMobileMenu()">🎯 Admission English</a>
+    <a routerLink="/courses" [queryParams]="{category:'Admission Science'}" class="mobile-nav-item" (click)="toggleMobileMenu()">🎯 Admission Science</a>
+    <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="mobile-nav-item" (click)="toggleMobileMenu()">⚡ Skills Development</a>
+    <a routerLink="/courses" [queryParams]="{category:'Communication'}" class="mobile-nav-item" (click)="toggleMobileMenu()">⚡ Communication</a>
+    <a routerLink="/courses" [queryParams]="{category:'General'}" class="mobile-nav-item" (click)="toggleMobileMenu()">📁 General</a>
+  </div>
+
+  <div class="mobile-nav-divider" [class.mobile-nav-divider--visible]="mobileMenuOpen()"></div>
+
+  <div class="mobile-nav-section" [class.mobile-nav-section--visible]="mobileMenuOpen()">
+    <a routerLink="/instructors" class="mobile-nav-item" (click)="toggleMobileMenu()">👨‍🏫 Instructors</a>
+    <a routerLink="/store" class="mobile-nav-item" (click)="toggleMobileMenu()">🛒 Store</a>
+    <a routerLink="/leaderboard" class="mobile-nav-item" (click)="toggleMobileMenu()">🏆 Leaderboard</a>
+    @if(isLoggedIn()) {
+      <a routerLink="/history" class="mobile-nav-item" (click)="toggleMobileMenu()">📹 Video History</a>
+    }
+  </div>
+
+  <div class="topbar-actions">
+    <button
+      type="button"
+      class="lang-toggle-btn"
+      (click)="lang.toggle()"
+      [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'Change to Bengali'">
+      <span class="lang-icon">🌐</span>
+      <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'BN' }}</span>
+    </button>
+
+    @if (isLoggedIn()) {
+      <app-notification-bell></app-notification-bell>
+      <details class="user-menu">
+        <summary class="user-chip" aria-label="User menu">
+          <span class="user-avatar">{{ userInitial() }}</span>
+          <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
+          <span class="menu-caret" aria-hidden="true">
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+              <path d="M1 1L5 5L9 1" />
+            </svg>
+          </span>
+        </summary>
+        <div class="user-menu-list" role="menu">
+          <a routerLink="/profile" class="user-menu-link" role="menuitem">
+            <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
+          </a>
+          @if (isTeacher()) {
+            <a routerLink="/teacher" class="user-menu-link" role="menuitem">
+              <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
+            </a>
+          }
+        </div>
+      </details>
+      <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
+    } @else {
+      <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
+      <a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
+    }
+  </div>
+</header>

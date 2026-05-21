@@ -1,19 +1,5 @@
 <main class="lb-page">
-  <header class="topbar">
-    <a class="brand" routerLink="/homepage">
-      <img src="./Logo2.png" alt="Touch & Solve" class="brand-logo" />
-    </a>
-    <nav class="topbar-nav">
-      <a routerLink="/homepage">Home</a>
-      <a routerLink="/courses">Courses</a>
-    </nav>
-    <div class="topbar-actions">
-      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()">
-        🌐 {{ lang.isBangla() ? 'EN' : 'বাং' }}
-      </button>
-      <a routerLink="/profile" class="nav-btn">← Profile</a>
-    </div>
-  </header>
+  <app-navbar></app-navbar>
 
   <!-- DARK HERO PODIUM ZONE -->
   <section class="hero-zone">

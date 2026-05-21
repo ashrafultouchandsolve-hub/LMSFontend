@@ -1,12 +1,11 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { LearningApiService } from '../../Service/learning-api.service';
-import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
 import { environment } from '../../../environments/environments';
+import { Navbar } from '../../shared/navbar/navbar';
 
 interface StoreItem {
   id: string;
@@ -22,15 +21,13 @@ type Category = 'All' | 'Books' | 'Materials' | 'Resources';
 
 @Component({
   selector: 'app-store',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, Navbar],
   templateUrl: './store.html',
   styleUrl: './store.css',
 })
 export class Store implements OnInit {
   private readonly http        = inject(HttpClient);
   protected readonly learningApi = inject(LearningApiService);
-  private readonly authService = inject(AuthService);
-  private readonly router      = inject(Router);
   readonly lang                = inject(LanguageService);
 
   readonly allItems    = signal<StoreItem[]>([]);
@@ -38,29 +35,11 @@ export class Store implements OnInit {
   readonly isLoading   = signal(true);
   readonly activeTab   = signal<Category>('All');
 
-  protected readonly isLoggedIn       = signal(false);
-  protected readonly userName         = signal('');
-  protected readonly userRole         = signal<number | null>(null);
-  protected readonly isTeacher        = computed(() => this.userRole() === 1);
-  protected readonly userInitial      = computed(() => this.userName().charAt(0).toUpperCase());
-
   readonly  baseUrl = environment.baseUrl;
 
   readonly categories: Category[] = ['All', 'Books', 'Materials', 'Resources'];
 
   ngOnInit() {
-    this.authService.isLoggedIn$.subscribe((v) => this.isLoggedIn.set(v));
-    this.authService.currentUser$.subscribe((user) => {
-      if (user?.fullName) this.userName.set(user.fullName);
-      this.userRole.set(typeof user?.role === 'number' ? user.role : null);
-    });
-
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.userName.set(user.fullName || user.email);
-      this.userRole.set(typeof user?.role === 'number' ? user.role : null);
-    }
-
     this.http.get<any>(`${this.baseUrl}/Store/items`).subscribe({
       next: (res) => {
         const data = res.data ?? [];
@@ -70,11 +49,6 @@ export class Store implements OnInit {
       },
       error: () => this.isLoading.set(false)
     });
-  }
-
-  protected logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/homepage']);
   }
 
   setCategory(cat: Category) {

@@ -147,8 +147,8 @@
   flex-direction: column;
   justify-content: center;
 
-  min-height: 80px;   /* 🔥 increase this */
-  padding: 1rem 1rem;  /* 🔥 একটু বাড়াও */
+  min-height: 52px;
+  padding: 0.5rem 0.6rem;
 
   border-radius: 16px;
   background: linear-gradient(135deg, #1d4ed8, #0ea5e9);

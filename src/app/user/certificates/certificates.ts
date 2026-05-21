@@ -1,11 +1,12 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { firstValueFrom } from 'rxjs';
 import jsPDF from 'jspdf';
+import { Navbar } from '../../shared/navbar/navbar';
 
 interface CertificateItem {
   id: string;
@@ -18,7 +19,7 @@ interface CertificateItem {
 
 @Component({
   selector: 'app-certificates',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, Navbar],
   templateUrl: './certificates.html',
   styleUrl: './certificates.css',
 })
@@ -30,23 +31,10 @@ export class Certificates implements OnInit {
 
   protected certs = signal<CertificateItem[]>([]);
   protected isLoading = signal(true);
-  protected isLoggedIn = signal(false);
-  protected userName = signal('');
-  protected userRole = signal<number | null>(null);
-  protected isTeacher = computed(() => this.userRole() === 1);
-  protected userInitial = computed(() => this.userName().charAt(0).toUpperCase());
-
   ngOnInit() {
-    // Subscribe to auth state changes
-    this.auth.isLoggedIn$.subscribe((isLoggedIn) => {
-      this.isLoggedIn.set(isLoggedIn);
-    });
-
     this.auth.currentUser$.subscribe((user) => {
-      if (user && user.fullName) {
-        this.userName.set(user.fullName);
-      }
-      this.userRole.set(typeof user?.role === 'number' ? user.role : null);
+      const userId = user?.id;
+      if (userId) void this.load(String(userId));
     });
 
     const userId = this.auth.getCurrentUser()?.id;
@@ -94,7 +82,7 @@ export class Certificates implements OnInit {
             id: issuedCert?.id || `${course.id}-locked`,
             courseId: course.id,
             courseName: course.title,
-            studentName: this.auth.getCurrentUser()?.fullName || this.userName() || 'Student',
+            studentName: this.auth.getCurrentUser()?.fullName || 'Student',
             issuedAt: issuedCert?.issuedAt,
             isIssued: !!issuedCert
           };

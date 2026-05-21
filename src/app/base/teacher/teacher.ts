@@ -16,6 +16,7 @@ import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 import { environment } from '../../../environments/environments';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
@@ -54,7 +55,7 @@ type Course = {
 
 @Component({
   selector: 'app-teacher',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, TeacherProfileComponent,DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, TeacherProfileComponent, DatePipe, Navbar],
   templateUrl: './teacher.html',
   styleUrl: './teacher.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

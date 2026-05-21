@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type CoursesViewItem = {
   id: string;
@@ -38,7 +39,7 @@ const CATEGORIES = [
 
 @Component({
   selector: 'app-courses',
-  imports: [RouterLink],
+  imports: [RouterLink, Navbar],
   templateUrl: './courses.html',
   styleUrl: './courses.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

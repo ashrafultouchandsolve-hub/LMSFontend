@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
+import { Navbar } from '../../shared/navbar/navbar';
 
 type CourseWithLive = {
   id: string;
@@ -16,7 +17,7 @@ type CourseWithLive = {
 
 @Component({
   selector: 'app-my-classes',
-  imports: [RouterLink], 
+  imports: [RouterLink,Navbar], 
   templateUrl: './my-classes.html',
   styleUrl: './my-classes.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

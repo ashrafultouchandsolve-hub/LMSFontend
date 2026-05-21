@@ -1,174 +1,6 @@
 <main class="home-page">
 
-  <!-- ─── TOPBAR ──────────────────────────────────── -->
-  <header class="topbar">
-    <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-      <img src="./Logo2.png" alt="Touch & Solve" class="brand-logo" />
-    </a>
-    <nav class="topbar-nav" aria-label="Primary navigation">
-      <!-- ✅ home-page.html এ navbar এ এই অংশ খুঁজো: -->
-      <!--   <a routerLink="/courses">{{ lang.t().navCourses }}</a>  -->
-      <!-- এটা DELETE করো এবং নিচেরটা দিয়ে replace করো -->
-
-      <div class="nav-dropdown-wrap">
-        <a routerLink="/courses" class="nav-dropdown-trigger">
-          {{ lang.t().navCourses }}
-          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
-            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
-          </svg>
-        </a>
-
-        <div class="nav-dropdown">
-          <div class="nav-dropdown-inner">
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">📘 SSC</span>
-              <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--purple"></span>
-                <div>
-                  <strong>SSC 2027</strong>
-                  <span>Final Preparation</span>
-                </div>
-              </a>
-            </div>
-
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">📗 HSC</span>
-              <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--green"></span>
-                <div>
-                  <strong>HSC 2027</strong>
-                  <span>Final Preparation</span>
-                </div>
-              </a>
-
-            </div>
-
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">🎯 Admission</span>
-              <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
-                <div>
-                  <strong>Admission English</strong>
-                  <span>University Prep</span>
-                </div>
-              </a>
-              <a routerLink="/courses" [queryParams]="{category:'Admission Science'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--orange"></span>
-                <div>
-                  <strong>Admission Science</strong>
-                  <span>University Prep</span>
-                </div>
-              </a>
-            </div>
-
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <span class="nav-dropdown-group-label">⚡ Skills & Other</span>
-              <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
-                <div>
-                  <strong>Skills Development</strong>
-                  <span>Career Growth</span>
-                </div>
-              </a>
-              <a routerLink="/courses" [queryParams]="{category:'Communication'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--blue"></span>
-                <div>
-                  <strong>Communication</strong>
-                  <span>Soft Skills</span>
-                </div>
-              </a>
-              <a routerLink="/courses" [queryParams]="{category:'General'}" class="nav-dropdown-item">
-                <span class="nav-dropdown-dot nav-dropdown-dot--gray"></span>
-                <div>
-                  <strong>General</strong>
-                  <span>Other Courses</span>
-                </div>
-              </a>
-            </div>
-
-            <div class="nav-dropdown-footer">
-              <a routerLink="/courses" [queryParams]="{category:'All'}" class="nav-dropdown-all">
-                Browse All Courses
-              </a>
-            </div>
-
-          </div>
-        </div>
-      </div>
-      <a routerLink="/instructors">Instructor</a>
-      <a routerLink="/store">Store</a>
-      <a href="#platform-identity">{{ lang.t().navVision }}</a>
-
-      <div class="nav-dropdown-wrap">
-        <button class="nav-dropdown-trigger" style="background: none; border: none; cursor: pointer;">
-          More
-          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
-            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
-          </svg>
-        </button>
-
-        <div class="nav-dropdown">
-          <div class="nav-dropdown-inner">
-
-            <div class="nav-dropdown-group">
-              <a routerLink="/leaderboard" class="nav-dropdown-group-label">🏆 Leaderboard</a>
-            </div>
-
-            @if(isLoggedIn()) {
-            <div class="nav-dropdown-divider"></div>
-
-            <div class="nav-dropdown-group">
-              <a routerLink="/history" class="nav-dropdown-group-label">📹 Video History</a>
-            </div>
-            }
-
-          </div>
-        </div>
-      </div>
-    </nav>
-    <div class="topbar-actions">
-      <button type="button" class="lang-toggle-btn" (click)="lang.toggle()"
-        [attr.aria-label]="lang.isBangla() ? 'Switch to English' : 'Change to Bengali'">
-        <span class="lang-icon">🌐</span>
-        <span class="lang-label">{{ lang.isBangla() ? 'EN' : 'BN' }}</span>
-      </button>
-      @if (isLoggedIn()) {
-      <app-notification-bell></app-notification-bell>
-      <details class="user-menu">
-        <summary class="user-chip" aria-label="User menu">
-          <span class="user-avatar">{{ userInitial() }}</span>
-          <span class="user-name">{{ lang.t().navHi }} {{ userName() }}</span>
-          <span class="menu-caret" aria-hidden="true">
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
-              <path d="M1 1L5 5L9 1" />
-            </svg>
-          </span>
-        </summary>
-        <div class="user-menu-list" role="menu">
-          <a routerLink="/profile" class="user-menu-link" role="menuitem">
-            <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
-          </a>
-          @if (isTeacher()) {
-          <a routerLink="/teacher" class="user-menu-link" role="menuitem">
-            <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
-          </a>
-          }
-        </div>
-      </details>
-      <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
-      } @else {
-      <a routerLink="/login" class="nav-button nav-button-ghost">{{ lang.t().navLogin }}</a>
-      <a routerLink="/register" class="nav-button nav-button-primary">{{ lang.t().navGetStarted }}</a>
-      }
-    </div>
-  </header>
+  <app-navbar></app-navbar>
 
   <!-- ─── HERO SLIDER ───────────────────────────────── -->
   <section class="hero-slider">
@@ -401,110 +233,105 @@
     }
   </section>
 
-
-
-  <section class="about-section" id="platform-identity">
+  <!-- ─── ABOUT SECTION ─────────────────────────────── -->
+  <section class="about-section" id="aboutUs">
 
     <!-- Header -->
     <div class="about-header">
-      <span class="about-tag" id="aboutUs">💡 About Us</span>
+      <span class="about-tag">💡 About Us</span>
       <h2>About <span class="about-accent">"Nirvor Nije Sikhi"</span></h2>
-      <p>Not the biggest. The bravest. Built for SSC & HSC
-        students who want to conquer English.</p>
+      <p>Not the biggest. The bravest. Built for SSC &amp; HSC students who want to conquer English.</p>
     </div>
 
     <!-- Cards Grid -->
     <div class="about-cards">
 
       <!-- Card 1 — Mission -->
-      <div class="about-card about-card--purple">
+      <article class="about-card about-card--purple">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🎯</div>
-          <span class="about-card-label">Our Mission</span>
+          <span class="about-card-label">Mission</span>
         </div>
-        <h3>Mission</h3>
-        <p>Deliver quality education to every student — from anywhere, anytime.</p>
+        <h3>Focused Learning</h3>
+        <p>Clear guidance, structured content, and consistent practice — so every student can progress fast.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">10,000+ Students</span>
-      </div>
+        <div class="about-card-stat">Daily Smart Tasks</div>
+      </article>
 
       <!-- Card 2 — Vision -->
-      <div class="about-card about-card--blue">
+      <article class="about-card about-card--blue">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
-          <div class="about-card-icon">📽️</div>
-          <span class="about-card-label">Live Class</span>
+          <div class="about-card-icon">🌍</div>
+          <span class="about-card-label">Vision</span>
         </div>
-        <h3>Live Classes</h3>
-        <p>Join live sessions, watch recordings anytime, and never miss a lesson.</p>
+        <h3>Future Ready</h3>
+        <p>We build confidence, skills, and mindset for exams and real-life communication.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">Recorded Forever</span>
-      </div>
+        <div class="about-card-stat">Exam + Career Ready</div>
+      </article>
 
-      <!-- Card 3 — Outcome Based -->
-      <div class="about-card about-card--teal">
+      <!-- Card 3 — Community -->
+      <article class="about-card about-card--teal">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
-          <div class="about-card-icon">✉️</div>
+          <div class="about-card-icon">🤝</div>
           <span class="about-card-label">Community</span>
         </div>
-        <h3>Ask, Answer, Grow</h3>
-        <p>Be part of a learning community where you can ask questions, get answers, and improve together.</p>
+        <h3>Learn Together</h3>
+        <p>Thousands of learners, mentors, and teachers — all helping each other grow.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">Community Support</span>
-      </div>
+        <div class="about-card-stat">Supportive Network</div>
+      </article>
 
-      <!-- Card 4 — Analytics -->
-      <div class="about-card about-card--orange">
-        <div class="about-card-glow"></div>
-        <div class="about-card-top">
-          <div class="about-card-icon">📊</div>
-          <span class="about-card-label">Performance</span>
-        </div>
-        <h3>{{ lang.t().feature2Title }}</h3>
-        <p>{{ lang.t().feature2Desc }}</p>
-        <div class="about-card-line"></div>
-        <span class="about-card-stat">Real-time Analytics</span>
-      </div>
-
-      <!-- Card 5 — Mentor -->
-      <div class="about-card about-card--green">
+      <!-- Card 4 — Mentors -->
+      <article class="about-card about-card--orange">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🧑‍🏫</div>
-          <span class="about-card-label">Mentorship</span>
+          <span class="about-card-label">Mentors</span>
         </div>
-        <h3>{{ lang.t().feature3Title }}</h3>
-        <p>{{ lang.t().feature3Desc }}</p>
+        <h3>Top Teachers</h3>
+        <p>Learn from experienced teachers with proven methods and exam-friendly guidance.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-stat">{{ lang.t().quoteFooter2 }}</span>
-      </div>
+        <div class="about-card-stat">Verified Experts</div>
+      </article>
 
-      <!-- Card 6 — Quote / Big Commitment -->
-      <div class="about-card about-card--quote">
+      <!-- Card 5 — Growth -->
+      <article class="about-card about-card--green">
         <div class="about-card-glow"></div>
-        <div class="quote-mark">"</div>
-        <p class="about-quote-text">{{ lang.t().quoteText }}</p>
+        <div class="about-card-top">
+          <div class="about-card-icon">📈</div>
+          <span class="about-card-label">Growth</span>
+        </div>
+        <h3>Track Progress</h3>
+        <p>Clear milestones and feedback help you measure improvement every week.</p>
         <div class="about-card-line"></div>
-        <span class="about-card-label">{{ lang.t().quoteLabel }}</span>
-      </div>
+        <div class="about-card-stat">Progress Dashboard</div>
+      </article>
+
+      <!-- Card 6 — Quote -->
+      <article class="about-card about-card--quote">
+        <div class="about-card-glow"></div>
+        <div class="quote-mark">“</div>
+        <p class="about-quote-text">We believe every student can master English with the right system and consistent guidance.</p>
+        <div class="about-card-line"></div>
+        <div class="about-card-stat">Touch &amp; Solve</div>
+      </article>
 
     </div>
   </section>
 
-  <section id="successStory" class="review-section">
-
+  <!-- ─── REVIEWS SECTION ────────────────────────────── -->
+  <section class="review-section">
     <div class="review-header">
-      <span class="review-tag">⭐ Success Stories</span>
-      <h2>What Our <span class="review-accent">Students Say</span></h2>
-      <p>Trusted by thousands of students, we move forward with their love and support.</p>
+      <span class="review-tag">💬 Reviews</span>
+      <h2>Student <span class="review-accent">Feedback</span></h2>
+      <p>Real stories from learners who study with us.</p>
     </div>
 
-    <!-- Slider -->
     <div class="review-slider-wrap">
-
-      <!-- Prev Arrow -->
       <button class="review-arrow review-arrow--prev" (click)="prevReview()" aria-label="Previous review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round">
@@ -512,7 +339,6 @@
         </svg>
       </button>
 
-      <!-- Slider Track -->
       <div class="review-track-outer">
         <div class="review-track" [style.transform]="'translateX(-' + activeReview() * 100 + '%)'">
 
@@ -661,73 +487,94 @@
   </section>
 
   <!-- ─── FOOTER ──────────────────────────────────── -->
-  <footer class="footer">
-    <div class="footer-middle">
-      <div class="footer-shell">
-        <section class="footer-brand-panel">
-          <a class="footer-logo-link" routerLink="/homepage" aria-label="Nirvoor Nije Sikhi home">
-            <img src="./TandSBlack.png" alt="Touch & Solve" class="footer-logo" />
+<footer class="footer">
+
+
+
+  <!-- Main Footer Body -->
+  <div class="footer-body">
+    <div class="footer-grid">
+
+      <!-- Col 1 — Brand -->
+      <div class="footer-col footer-col--brand">
+        <a routerLink="/homepage" class="footer-logo-link">
+          <img src="/tns.png" alt="Touch & Solve" class="footer-logo" />
+        </a>
+        <p class="footer-brand-desc">We solve just in touch. A learning platform built with a clean structure, stronger outcomes, and a smooth student journey.</p>
+        <div class="footer-social">
+          <a href="https://www.facebook.com/touchandsolve" class="footer-social-link" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8.5V7c0-.8.5-1 1-1h2V3h-3c-2.2 0-4 1.8-4 4v1.5H8V12h2v9h4v-9h2.7l.3-3.5H14z"/></svg>
           </a>
-          <div class="footer-brand-copy">
-            <p class="footer-kicker footer-kicker--soft">Touch & Solve</p>
-            <h3 class="footer-title">Trusted Self-Learning Platform.</h3>
-            <p class="footer-lead">We solve just in touch. A learning platform built with a clean structure, stronger
-              outcomes, and a smooth student journey.</p>
-          </div>
-          <div class="footer-social" aria-label="Social links">
-            <a href="https://www.facebook.com/touchandsolve" class="social" aria-label="Facebook">
-              <svg viewBox="0 0 24 24">
-                <path d="M14 8.5V7c0-.8.5-1 1-1h2V3h-3c-2.2 0-4 1.8-4 4v1.5H8V12h2v9h4v-9h2.7l.3-3.5H14z" />
-              </svg>
-            </a>
-            <a href="https://www.youtube.com/@touchandsolve" class="social" aria-label="YouTube">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.3 2.8 12 2.8 12 2.8s-4.3 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.3 21.8 12 21.8 12 21.8s4.3 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.3l6.6 3.6-6.6 3.6z" />
-              </svg>
-            </a>
-          </div>
-        </section>
-        <section class="footer-links-panel">
-          <div class="footer-links">
-            <div class="footer-column">
-              <h5>Explore</h5>
-              <ul>
-                <li><a routerLink="/courses">Courses</a></li>
-                <li><a routerLink="/instructors">Instructors</a></li>
-                <li><a routerLink="/store">Store</a></li>
-              </ul>
-            </div>
-            <div class="footer-column">
-              <h5>Company</h5>
-              <ul>
-                <li><a href="#aboutUs">About Us</a></li>
-                <li><a href="#successStory">Success Story</a></li>
-                <li><a href="#">Privacy Policy</a></li>
-              </ul>
-            </div>
-            <div class="footer-column">
-              <h5>Learning</h5>
-              <ul>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Help Center</a></li>
-                <li><a href="#">FAQ</a></li>
-              </ul>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-    <div class="footer-bottom-dark">
-      <div class="footer-bottom footer-bottom--split">
-        <div class="footer-copyright">&copy; 2026 Touch & Solve. All rights reserved.</div>
-        <div class="footer-nav-small">
-          <a routerLink="/">Home</a>
-          <a href="#aboutUs">About</a>
-          <a href="#">Contact</a>
+          <a href="https://www.youtube.com/@touchandsolve" class="footer-social-link" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.3 2.8 12 2.8 12 2.8s-4.3 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.3 21.8 12 21.8 12 21.8s4.3 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.3l6.6 3.6-6.6 3.6z"/></svg>
+          </a>
         </div>
       </div>
+
+      <!-- Col 2 — Explore -->
+      <div class="footer-col">
+        <h5 class="footer-col-title">Explore</h5>
+        <ul class="footer-col-links">
+          <li><a routerLink="/courses">Courses</a></li>
+          <li><a routerLink="/instructors">Instructors</a></li>
+          <li><a routerLink="/store">Store</a></li>
+          <li><a routerLink="/free-class">Free Classes</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3 — Company -->
+      <div class="footer-col">
+        <h5 class="footer-col-title">Company</h5>
+        <ul class="footer-col-links">
+          <li><a href="#aboutUs">About Us</a></li>
+          <li><a href="#successStory">Success Story</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4 — Mobile App -->
+      <div class="footer-col footer-col--app">
+        <h5 class="footer-col-title">Mobile App</h5>
+        <p class="footer-app-desc">Learn anywhere, anytime with our mobile app.</p>
+        <div class="footer-app-btns">
+          <a href="#" class="footer-app-btn footer-app-btn--android">
+            <svg class="footer-app-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.85c.609.351.609 1.232 0 1.583l-1.8 1.04L13.793 12l2.105-2.104 1.8 1.061zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z"/>
+            </svg>
+            <div class="footer-app-btn-text">
+              <span class="footer-app-btn-sub">Get it on</span>
+              <span class="footer-app-btn-name">Google Play</span>
+            </div>
+          </a>
+          <a href="#" class="footer-app-btn footer-app-btn--ios">
+            <svg class="footer-app-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+            <div class="footer-app-btn-text">
+              <span class="footer-app-btn-sub">Download on the</span>
+              <span class="footer-app-btn-name">App Store</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
     </div>
-  </footer>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="footer-bottom-bar">
+    <div class="footer-bottom-inner">
+      <p class="footer-copyright">© 2026 Touch &amp; Solve. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a routerLink="/">Home</a>
+        <a href="#aboutUs">About</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+  </div>
+
+</footer>
 
 </main>

@@ -1,6 +1,6 @@
 <section class="enrolled-shell">
   <main class="enrolled-page">
-    <a [routerLink]="courseId() ? ['/course-details', courseId()] : ['/courses']" class="back-link">{{ lang.t().ecBack }}</a>
+    <app-navbar></app-navbar>
 
     @if (courseMeta(); as meta) {
       <header class="page-head">
