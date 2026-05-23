@@ -28,6 +28,10 @@
   padding-top: 84px;
 }
 
+:host-context(.has-announcement) {
+  padding-top: 128px;
+}
+
 /* ─── TOPBAR ─────────────────────────────────────────────────── */
 .topbar {
   display: flex;
@@ -47,6 +51,10 @@
   right: 12px;
   width: auto;
   z-index: 1000;
+}
+
+:host-context(.has-announcement) .topbar {
+  top: 56px;
 }
 
 .brand {

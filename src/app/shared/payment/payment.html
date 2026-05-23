@@ -2,104 +2,84 @@
 	<a routerLink="/homepage" class="back-link">&larr; Back to Home</a>
 
 	<section class="payment-shell">
+
+		<!-- LEFT: Summary Card -->
 		<article class="summary-card">
-			<p class="eyebrow">Demo Payment</p>
+			<p class="eyebrow">Secure Payment</p>
 			<h1>{{ courseTitle() }}</h1>
-			<p class="summary-note">এই page শুধু demo এর জন্য। এখানে payment flow দেখানো হয়েছে।</p>
+			<p class="summary-note">
+				আপনাকে SSLCommerz-এর নিরাপদ payment gateway তে redirect করা হবে।
+				সেখানে Card, bKash, Nagad সহ সব method দিয়ে payment করতে পারবেন।
+			</p>
 
 			<div class="amount-box">
 				<span>Payable Amount</span>
 				<strong>{{ totalPayableText() }}</strong>
 			</div>
 
-			<h2>Select Method</h2>
-			<div class="method-list" role="group" aria-label="Payment method">
-				@for (method of methodOptions; track method) {
-					<button
-						type="button"
-						[class]="selectedMethod() === method ? 'method-btn method-btn-active' : 'method-btn'"
-						(click)="chooseMethod(method)"
-					>
-						{{ method }}
-					</button>
-				}
+			<h2>Accepted Payment Methods</h2>
+			<div class="method-list">
+				<div class="method-btn">💳 Credit / Debit Card</div>
+				<div class="method-btn">📱 bKash</div>
+				<div class="method-btn">📱 Nagad</div>
+				<div class="method-btn">🏦 Internet Banking</div>
 			</div>
 		</article>
 
+		<!-- RIGHT: Confirm Card -->
 		<article class="form-card">
-			<h2>Payment Information</h2>
+			<h2>Order Summary</h2>
 
-			@if (successMessage()) {
-				<p class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+			@if (message()) {
+				<p
+					[class]="isError() ? 'error-message' : 'success-message'"
+					role="status"
+					aria-live="polite"
+				>
+					{{ message() }}
+				</p>
 			}
 
-			<form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" novalidate>
-				<div class="field-grid">
-					<label>
-						<span>Full Name</span>
-						<input type="text" formControlName="payerName" placeholder="Your name" />
-						@if (paymentForm.controls.payerName.touched && paymentForm.controls.payerName.invalid) {
-							<small>Valid name required</small>
-						}
-					</label>
-
-					<label>
-						<span>Email</span>
-						<input type="email" formControlName="email" placeholder="name@mail.com" />
-						@if (paymentForm.controls.email.touched && paymentForm.controls.email.invalid) {
-							<small>Valid email required</small>
-						}
-					</label>
-
-					<label>
-						<span>Phone</span>
-						<input type="tel" formControlName="phone" placeholder="01XXXXXXXXX" />
-						@if (paymentForm.controls.phone.touched && paymentForm.controls.phone.invalid) {
-							<small>Valid Bangladeshi phone number required</small>
-						}
-					</label>
-
-					<label>
-						<span>Card Number</span>
-						<input type="text" formControlName="cardNumber" placeholder="16 digit card number" />
-						@if (paymentForm.controls.cardNumber.touched && paymentForm.controls.cardNumber.invalid) {
-							<small>Card number must be 16 digits</small>
-						}
-					</label>
-
-					<label>
-						<span>Expiry (MM/YY)</span>
-						<input type="text" formControlName="expiry" placeholder="08/28" />
-						@if (paymentForm.controls.expiry.touched && paymentForm.controls.expiry.invalid) {
-							<small>Format should be MM/YY</small>
-						}
-					</label>
-
-					<label>
-						<span>CVV</span>
-						<input type="password" formControlName="cvv" placeholder="3 or 4 digits" />
-						@if (paymentForm.controls.cvv.touched && paymentForm.controls.cvv.invalid) {
-							<small>CVV should be 3 or 4 digits</small>
-						}
-					</label>
+			<div class="order-info">
+				<div class="order-row">
+					<span>Course</span>
+					<strong>{{ courseTitle() }}</strong>
 				</div>
+				<div class="order-row">
+					<span>Amount</span>
+					<strong class="amount-highlight">{{ totalPayableText() }}</strong>
+				</div>
+				<div class="order-row">
+					<span>Gateway</span>
+					<strong>🔒 SSLCommerz</strong>
+				</div>
+			</div>
 
-				<label class="terms">
-					<input type="checkbox" formControlName="agree" />
-					<span>I understand this is a demo payment and no real transaction will be processed.</span>
-				</label>
-				@if (paymentForm.controls.agree.touched && paymentForm.controls.agree.invalid) {
-					<small class="agree-error">Please accept demo payment terms.</small>
+			<div class="ssl-notice">
+				<span class="lock-icon">🔐</span>
+				<p>
+					আপনার payment তথ্য সম্পূর্ণ নিরাপদ। SSLCommerz Bangladesh-এর সবচেয়ে বিশ্বস্ত payment gateway।
+				</p>
+			</div>
+
+			<button
+				class="pay-button"
+				type="button"
+				[disabled]="isProcessing()"
+				(click)="initiatePayment()"
+			>
+				@if (isProcessing()) {
+					<span class="btn-spinner"></span> Redirecting to Gateway...
+				} @else {
+					🔒 Pay {{ totalPayableText() }} Securely
 				}
+			</button>
 
-				<button class="pay-button" type="submit" [disabled]="isProcessing()">
-					@if (isProcessing()) {
-						Processing...
-					} @else {
-						Pay {{ totalPayableText() }}
-					}
-				</button>
-			</form>
+			<p class="secure-note">
+				By clicking Pay, you agree to our Terms &amp; Conditions.
+				No card info is stored on our servers.
+			</p>
 		</article>
+
 	</section>
 </main>

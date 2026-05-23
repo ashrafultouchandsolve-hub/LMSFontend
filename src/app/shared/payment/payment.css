@@ -201,3 +201,92 @@ small {
 		grid-template-columns: 1fr;
 	}
 }
+/* ── payment.css এর একদম শেষে এই CSS টা যোগ করো ── */
+
+.error-message {
+	margin: 0 0 0.9rem;
+	padding: 0.7rem 0.8rem;
+	border-radius: 10px;
+	border: 1px solid #fca5a5;
+	background: #fef2f2;
+	color: #991b1b;
+	font-weight: 600;
+}
+
+.order-info {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	padding: 1rem 1.2rem;
+	margin-bottom: 1.2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.order-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.95rem;
+}
+
+.order-row span {
+	color: #64748b;
+}
+
+.order-row strong {
+	color: #0f172a;
+}
+
+.amount-highlight {
+	color: #0f766e !important;
+	font-size: 1.1rem;
+}
+
+.ssl-notice {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	background: #ecfeff;
+	border: 1px solid #99f6e4;
+	border-radius: 10px;
+	padding: 0.85rem 1rem;
+	margin-bottom: 1.2rem;
+}
+
+.lock-icon {
+	font-size: 1.3rem;
+	flex-shrink: 0;
+}
+
+.ssl-notice p {
+	margin: 0;
+	font-size: 0.85rem;
+	color: #0f766e;
+	line-height: 1.5;
+}
+
+.secure-note {
+	text-align: center;
+	font-size: 0.8rem;
+	color: #94a3b8;
+	margin-top: 0.8rem;
+	line-height: 1.5;
+}
+
+.btn-spinner {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	border: 2px solid rgba(255,255,255,0.4);
+	border-top-color: white;
+	border-radius: 50%;
+	animation: spin 0.7s linear infinite;
+	margin-right: 6px;
+	vertical-align: middle;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}

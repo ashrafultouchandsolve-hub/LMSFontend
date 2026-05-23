@@ -5,9 +5,13 @@
 /* ── Announcement Banner ── */
 .ann-bar {
   width: 100%;
-  position: relative;
-  z-index: 200;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1300;
   animation: annSlideDown 0.35s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 @keyframes annSlideDown {
   from { transform: translateY(-100%); opacity: 0; }

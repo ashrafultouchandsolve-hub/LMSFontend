@@ -578,4 +578,17 @@ getMyEnrollments(): Observable<any> {
     this.http.get<any>(`${base}/enrollment/my-enrollments`)
   );
 }
+
+initiatePayment(body: { courseId: string }): Observable<any> {
+  return this.withFallback((base) =>
+    this.http.post<any>(`${base}/payment/initiate`, body)
+  );
+}
+
+getPaymentStatus(transactionId: string): Observable<any> {
+  return this.withFallback((base) =>
+    this.http.get<any>(`${base}/payment/status/${transactionId}`)
+  );
+}
+ 
 }
