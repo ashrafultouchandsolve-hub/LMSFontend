@@ -1,0 +1,23 @@
+# GitLab CI/CD — Angular app build করে GitLab Pages এ publish করে।
+# Live URL: https://touchandsolve.gitlab.io/project_lms/
+image: node:22
+
+stages:
+  - deploy
+
+pages:
+  stage: deploy
+  script:
+    - npm ci
+    # base-href = Pages এর sub-path; production config এ live backend URL baked in হয়
+    - npx ng build --configuration production --base-href=/project_lms/
+    # GitLab Pages 'public/' ফোল্ডার serve করে — build output সেখানে নাও
+    - rm -rf public
+    - mv dist/learningTandS/browser public
+    # SPA deep-link/refresh fix: না-পাওয়া path এ index.html ফেরত দাও → Angular router handle করবে
+    - cp public/index.html public/404.html
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

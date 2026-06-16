@@ -366,3 +366,5 @@ FodyWeavers.xsd
 /dist
 */dist
 *dist
+# Angular build cache
+.angular/
