@@ -14,6 +14,9 @@ type CoursesViewItem = {
   category: string;
   instructorName: string;
   lessonCount: number;
+  enrollmentCount: number;
+  videoCount: number;
+  practiceCount: number;
   durationMinutes: number;
   price: number;
   isEnrolled: boolean;
@@ -184,6 +187,9 @@ export class Courses {
       id: dto.id, title: dto.title, description: dto.description,
       level: this.normalizeLevel(dto.level), category: dto.category,
       instructorName: dto.instructorName, lessonCount: dto.lessonCount ?? 0,
+      enrollmentCount: dto.enrollmentCount ?? 0,
+      videoCount: dto.videoCount ?? 0,
+      practiceCount: dto.practiceCount ?? 0,
       durationMinutes: dto.durationMinutes, price: dto.price,
       isEnrolled: false, isWishlisted: false,
       thumbnailUrl: this.getImageUrl(dto.thumbnailPath),

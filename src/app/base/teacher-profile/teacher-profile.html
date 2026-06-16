@@ -8,14 +8,14 @@
     <!-- Header -->
     <header class="profile-header">
       <div>
-        <h1>My Profile</h1>
-        <p>Manage your teacher profile information.</p>
+        <h1>{{ lang.t().tpTitle }}</h1>
+        <p>{{ lang.t().tpSub }}</p>
       </div>
       <button type="button" class="btn btn-primary" (click)="toggleEditMode()" [disabled]="isSaving()">
         @if (!isEditMode()) {
-        ✏️ Edit Profile
+        ✏️ {{ lang.t().tpEdit }}
         } @else {
-        ✕ Cancel Edit
+        ✕ {{ lang.t().tpCancelEdit }}
         }
       </button>
     </header>
@@ -35,7 +35,7 @@
         @if (isEditMode()) {
         <div class="image-upload-area">
           <label for="profileImageInput" class="upload-label">
-            📷 Upload Photo
+            📷 {{ lang.t().tpUploadPhoto }}
           </label>
           <input #profileImageInput type="file" id="profileImageInput" accept=".jpg,.jpeg,.png,.webp" class="file-input"
             (change)="onImageSelected($event)" />
@@ -43,9 +43,9 @@
           @if (selectedProfileImageFile()) {
           <button type="button" class="btn btn-success" (click)="uploadProfileImage()" [disabled]="isUploadingImage()">
             @if (!isUploadingImage()) {
-            Upload
+            {{ lang.t().tpUpload }}
             } @else {
-            Uploading...
+            {{ lang.t().tpUploading }}
             }
           </button>
           }
@@ -58,29 +58,29 @@
         <form [formGroup]="profileForm">
           <!-- Full Name -->
           <div class="form-group">
-            <label for="fullName">Full Name *</label>
+            <label for="fullName">{{ lang.t().tpFullName }} *</label>
             <input type="text" id="fullName" class="form-input" formControlName="fullName" [readonly]="!isEditMode()"
-              placeholder="Your full name" />
+              [placeholder]="lang.t().tpNamePlaceholder" />
           </div>
 
           <!-- Email -->
           <div class="form-group">
-            <label for="email">Email *</label>
+            <label for="email">{{ lang.t().commonEmail }} *</label>
             <input type="email" id="email" class="form-input" formControlName="email" readonly
               placeholder="Your email" />
           </div>
 
           <!-- Bio -->
           <div class="form-group">
-            <label for="bio">About Me</label>
+            <label for="bio">{{ lang.t().tpAboutMe }}</label>
             <textarea id="bio" class="form-textarea" formControlName="bio" [readonly]="!isEditMode()"
               [value]="profileForm.get('bio')?.value || ''"
-              placeholder="Tell us about yourself..." rows="4"></textarea>
+              [placeholder]="lang.t().tpAboutPlaceholder" rows="4"></textarea>
           </div>
 
           <!-- Facebook Link -->
           <div class="form-group">
-            <label for="facebookLink">Facebook Link</label>
+            <label for="facebookLink">{{ lang.t().tpFacebook }}</label>
             <input type="url" id="facebookLink" class="form-input" formControlName="facebookLink"
             [value]="profileForm.get('facebookLink')?.value || ''"
               [readonly]="!isEditMode()" placeholder="https://facebook.com/..." />
@@ -88,7 +88,7 @@
 
           <!-- YouTube Link -->
           <div class="form-group">
-            <label for="youtubeLink">YouTube Link</label>
+            <label for="youtubeLink">{{ lang.t().tpYoutube }}</label>
             <input type="url" id="youtubeLink" class="form-input" formControlName="youtubeLink"
             [value]="profileForm.get('youtubeLink')?.value || ''"
               [readonly]="!isEditMode()" placeholder="https://youtube.com/..." />
@@ -100,13 +100,13 @@
             <button type="button" class="btn btn-primary" (click)="saveProfile()"
               [disabled]="isSaving() || profileForm.invalid">
               @if (!isSaving()) {
-              💾 Save
+              💾 {{ lang.t().tpSave }}
               } @else {
-              Saving...
+              {{ lang.t().tpSaving }}
               }
             </button>
             <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving()">
-              Cancel
+              {{ lang.t().commonCancel }}
             </button>
           </div>
           }

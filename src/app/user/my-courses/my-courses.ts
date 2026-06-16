@@ -14,6 +14,9 @@ type EnrolledCourseView = {
   category: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   lessonCount: number;
+  enrollmentCount: number;
+  videoCount: number;
+  practiceCount: number;
   durationMinutes: number;
   price: number;
   thumbnailUrl: string;
@@ -160,6 +163,9 @@ export class MyCourses {
       category: dto.category,
       level: this.normalizeLevel(dto.level),
       lessonCount: dto.lessonCount ?? 0,
+      enrollmentCount: dto.enrollmentCount ?? 0,
+      videoCount: dto.videoCount ?? 0,
+      practiceCount: dto.practiceCount ?? 0,
       durationMinutes: dto.durationMinutes,
       price: dto.price,
       thumbnailUrl: this.getImageUrl(dto.thumbnailPath),

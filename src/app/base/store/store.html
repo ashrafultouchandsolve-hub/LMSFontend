@@ -5,9 +5,9 @@
   <!-- Hero -->
   <div class="store-hero">
     <div class="store-hero-content">
-      <span class="store-hero-tag">📦 Our Store</span>
-      <h1>Study <span class="store-accent">Materials</span></h1>
-      <p>Books, study materials এবং resources — সব এক জায়গায়।</p>
+      <span class="store-hero-tag">📦 {{ lang.t().stTag }}</span>
+      <h1>{{ lang.t().stTitle1 }} <span class="store-accent">Materials</span></h1>
+      <p>{{ lang.t().stSub }}</p>
     </div>
     <div class="store-hero-blur store-hero-blur--1"></div>
     <div class="store-hero-blur store-hero-blur--2"></div>
@@ -21,7 +21,7 @@
           class="store-tab"
           [class.active]="activeTab() === cat"
           (click)="setCategory(cat)">
-          {{ cat === 'All' ? '🗂 All' : getCategoryIcon(cat) + ' ' + cat }}
+          {{ cat === 'All' ? ('🗂 ' + lang.t().stAll) : getCategoryIcon(cat) + ' ' + cat }}
         </button>
       }
     </div>
@@ -46,8 +46,8 @@
     @if (items().length === 0) {
       <div class="store-empty">
         <div class="empty-icon">🛒</div>
-        <h3>No items available</h3>
-        <p>Store items will appear here soon.</p>
+        <h3>{{ lang.t().stNoItems }}</h3>
+        <p>{{ lang.t().stNoItemsDesc }}</p>
       </div>
     } @else {
       <div class="store-grid">
@@ -75,11 +75,11 @@
                 <span class="store-card-price">{{ formatPrice(item.price) }}</span>
                 @if (item.fileUrl) {
                   <a [href]="learningApi.downloadStoreItemPdf(item.id)" target="_blank" class="store-card-btn store-card-btn--download">
-                    ⬇ Download
+                    ⬇ {{ lang.t().stDownload }}
                   </a>
                 } @else {
                   <button class="store-card-btn store-card-btn--buy">
-                    🛒 Buy Now
+                    🛒 {{ lang.t().stBuyNow }}
                   </button>
                 }
               </div>

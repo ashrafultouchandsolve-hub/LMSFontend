@@ -7,8 +7,11 @@ import { AuthService } from '../../Service/auth.service';
 import { AdminItem } from '../admin-item/admin-item';
 import { AnnouncementBanner } from '../announcement-banner/announcement-banner';
 import { Announcement, AnnouncementService } from '../../Service/announcement-service';
+import { LanguageService } from '../../Service/language.service';
+import { Category, CategoryService } from '../../Service/category.service';
+import { LearningApiService } from '../../Service/learning-api.service';
 
-type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'comments' | 'store-items'|'announcements';
+type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -23,6 +26,9 @@ export class AdminDashboard implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly annSvc = inject(AnnouncementService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly learningApi = inject(LearningApiService);
+  protected readonly lang = inject(LanguageService);
 
   readonly annTypes = [
     { value: 'info', label: 'Info', icon: '📢' },
@@ -58,6 +64,12 @@ annSubmitting  = signal(false);
   students = signal<AdminStudent[]>([]);
   courses  = signal<AdminCourse[]>([]);
   comments = signal<AdminComment[]>([]);   // ✅
+
+  // ── Categories ──────────────────────────────────────
+  categories     = signal<Category[]>([]);
+  newCategoryName = signal('');
+  editingCategoryId = signal<string | null>(null);
+  editingCategoryName = signal('');
 
   // Search filters for all sections
   searchQuery = signal('');
@@ -144,6 +156,7 @@ annSubmitting  = signal(false);
       case 'teachers': this.loadTeachers(); break;
       case 'students': this.loadStudents(); break;
       case 'courses': this.loadCourses(); break;
+      case 'categories': this.loadCategories(); break;
       case 'comments': this.loadComments(); break;
       case 'store-items': break;
       case 'announcements': this.loadAnnouncements(); break;
@@ -164,6 +177,7 @@ annSubmitting  = signal(false);
       || value === 'teachers'
       || value === 'students'
       || value === 'courses'
+      || value === 'categories'
       || value === 'comments'
       || value === 'store-items'
       || value === 'announcements';
@@ -207,6 +221,71 @@ annSubmitting  = signal(false);
       next: (data) => { this.comments.set(data); this.isLoading.set(false); },
       error: () => this.isLoading.set(false)
     });
+  }
+
+  // ── Categories ──────────────────────────────────────
+  loadCategories() {
+    this.isLoading.set(true);
+    this.categoryService.getAll().subscribe({
+      next: (res: any) => { this.categories.set(res?.data ?? res?.Data ?? []); this.isLoading.set(false); },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
+  createCategory() {
+    const name = this.newCategoryName().trim();
+    if (!name) return;
+    this.categoryService.create(name).subscribe({
+      next: () => { this.showMessage('Category created.', 'success'); this.newCategoryName.set(''); this.loadCategories(); },
+      error: (e) => this.showMessage(e?.error?.message ?? 'Failed to create category.', 'error')
+    });
+  }
+
+  startEditCategory(cat: Category) {
+    this.editingCategoryId.set(cat.id);
+    this.editingCategoryName.set(cat.name);
+  }
+
+  cancelEditCategory() {
+    this.editingCategoryId.set(null);
+    this.editingCategoryName.set('');
+  }
+
+  saveCategory(id: string) {
+    const name = this.editingCategoryName().trim();
+    if (!name) return;
+    this.categoryService.update(id, name).subscribe({
+      next: () => { this.showMessage('Category updated.', 'success'); this.cancelEditCategory(); this.loadCategories(); },
+      error: () => this.showMessage('Failed to update category.', 'error')
+    });
+  }
+
+  deleteCategory(id: string) {
+    if (!confirm('Delete this category? Courses in it keep their category name.')) return;
+    this.categoryService.delete(id).subscribe({
+      next: () => { this.showMessage('Category deleted.', 'success'); this.loadCategories(); },
+      error: () => this.showMessage('Failed to delete category.', 'error')
+    });
+  }
+
+  onCategoryImageSelected(event: Event, id: string) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.categoryService.uploadImage(id, file).subscribe({
+      next: () => { this.showMessage('Image updated.', 'success'); this.loadCategories(); },
+      error: () => this.showMessage('Failed to upload image.', 'error')
+    });
+    input.value = '';
+  }
+
+  categoryImageUrl(path?: string | null): string {
+    return path ? this.learningApi.buildDownloadUrl(path) : '';
+  }
+
+  /** Open the course manager (reused teacher authoring) for a category, or for all courses. */
+  manageCourses(categoryName?: string) {
+    this.router.navigate(['/course-manager'], categoryName ? { queryParams: { category: categoryName } } : {});
   }
 
   approveTeacher(id: string) {

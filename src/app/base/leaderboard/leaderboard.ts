@@ -15,11 +15,30 @@ type LeaderboardEntry = {
   percentageScore: number;
 };
 
+// rank যুক্ত entry — rank সবসময় score-অনুযায়ী canonical order থেকে আসে
+type RankedEntry = LeaderboardEntry & { rank: number };
+
+type EnrolledCourse = { id: string; title: string };
+
+type RecommendedCourse = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  price: number;
+  instructorName: string;
+  thumbnailUrl: string;
+};
+
 type ProfileUser = { id?: string | number; fullName?: string; email?: string; role?: number };
+
+type Mode = 'loading' | 'ranking' | 'recommend' | 'error';
+type SortKey = 'score' | 'correct';
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [CommonModule, Navbar],
+  imports: [CommonModule, Navbar, RouterLink],
   templateUrl: './leaderboard.html',
   styleUrl: './leaderboard.css',
 })
@@ -28,44 +47,197 @@ export class Leaderboard implements OnInit {
   private readonly authService = inject(AuthService);
   readonly lang = inject(LanguageService);
 
-  protected readonly entries = signal<LeaderboardEntry[]>([]);
-  protected readonly isLoading = signal(true);
+  // ── high-level view state ──
+  protected readonly mode = signal<Mode>('loading');
   protected readonly error = signal('');
   protected readonly currentUserId = signal('');
 
-  protected readonly topThree = computed(() => this.entries().slice(0, 3));
+  // ── enrolled-course ranking state ──
+  protected readonly enrolledCourses = signal<EnrolledCourse[]>([]);
+  protected readonly selectedCourseId = signal('');
+  protected readonly entries = signal<LeaderboardEntry[]>([]);
+  protected readonly isBoardLoading = signal(false);
+
+  // ── interactivity ──
+  protected readonly searchTerm = signal('');
+  protected readonly sortKey = signal<SortKey>('score');
+
+  // ── recommend mode ──
+  protected readonly recommended = signal<RecommendedCourse[]>([]);
+  protected readonly usedPreferences = signal(false); // true হলে preference-ভিত্তিক, নাহলে fallback
+
+  // canonical rank = score-অনুযায়ী (server already sorted, তবু নিশ্চিত করি)
+  protected readonly rankedEntries = computed<RankedEntry[]>(() =>
+    [...this.entries()]
+      .sort((a, b) => b.percentageScore - a.percentageScore || b.correctAnswers - a.correctAnswers)
+      .map((e, i) => ({ ...e, rank: i + 1 }))
+  );
+
+  // podium সবসময় canonical top-3 (search/sort ছোঁয় না)
+  protected readonly topThree = computed(() => this.rankedEntries().slice(0, 3));
+
+  // table view — search filter + sort toggle প্রয়োগ করা, কিন্তু rank canonical
+  protected readonly viewEntries = computed<RankedEntry[]>(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    let list = this.rankedEntries();
+    if (term) list = list.filter(e => (e.fullName ?? '').toLowerCase().includes(term));
+    if (this.sortKey() === 'correct') {
+      list = [...list].sort((a, b) => b.correctAnswers - a.correctAnswers);
+    }
+    return list;
+  });
+
+  protected readonly selectedCourseTitle = computed(() =>
+    this.enrolledCourses().find(c => c.id === this.selectedCourseId())?.title ?? ''
+  );
 
   protected readonly myRank = computed(() => {
-    const idx = this.entries().findIndex(e => e.userId === this.currentUserId());
+    const idx = this.rankedEntries().findIndex(e => e.userId === this.currentUserId());
     return idx >= 0 ? idx + 1 : null;
   });
 
   protected readonly myScore = computed(() => {
-    const entry = this.entries().find(e => e.userId === this.currentUserId());
+    const entry = this.rankedEntries().find(e => e.userId === this.currentUserId());
     return entry?.percentageScore ?? 0;
   });
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser() as ProfileUser | null;
     if (user?.id) this.currentUserId.set(String(user.id));
-    void this.loadLeaderboard();
+    void this.bootstrap();
   }
 
-  private async loadLeaderboard(): Promise<void> {
-    this.isLoading.set(true);
+  // enrollment দেখে ঠিক করি: ranking mode না recommend mode
+  private async bootstrap(): Promise<void> {
+    this.mode.set('loading');
     this.error.set('');
     try {
-      const response = await firstValueFrom(this.learningApi.getLeaderboard());
-      const payload = response as any;
-      const data: LeaderboardEntry[] =
-        payload?.data ?? payload?.Data ?? payload ?? [];
+      const res = await firstValueFrom(this.learningApi.getMyEnrollments());
+      const raw = (res as any)?.Data ?? (res as any)?.data ?? [];
+      const courses: EnrolledCourse[] = (Array.isArray(raw) ? raw : [])
+        .map((c: any) => ({ id: String(c.id ?? c.Id ?? ''), title: c.title ?? c.Title ?? 'Untitled course' }))
+        .filter((c: EnrolledCourse) => c.id);
+
+      if (courses.length > 0) {
+        this.enrolledCourses.set(courses);
+        this.selectedCourseId.set(courses[0].id);
+        this.mode.set('ranking');
+        await this.loadBoard(courses[0].id);
+      } else {
+        this.mode.set('recommend');
+        await this.loadRecommendations();
+      }
+    } catch (err) {
+      console.error('Leaderboard bootstrap error:', err);
+      this.error.set('Leaderboard লোড করা যায়নি।');
+      this.mode.set('error');
+    }
+  }
+
+  // dropdown থেকে course পরিবর্তন
+  protected async onCourseChange(courseId: string): Promise<void> {
+    if (!courseId) return;
+    this.selectedCourseId.set(courseId);
+    this.searchTerm.set('');
+    this.sortKey.set('score');
+    await this.loadBoard(courseId);
+  }
+
+  private async loadBoard(courseId: string): Promise<void> {
+    this.isBoardLoading.set(true);
+    try {
+      const res = await firstValueFrom(this.learningApi.getCourseLeaderboard(courseId));
+      const data = (res as any)?.Data ?? (res as any)?.data ?? res ?? [];
       this.entries.set(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Leaderboard load error:', err);
-      this.error.set('Leaderboard লোড করা যায়নি।');
+      console.error('Course leaderboard load error:', err);
+      this.entries.set([]);
     } finally {
-      this.isLoading.set(false);
+      this.isBoardLoading.set(false);
     }
+  }
+
+  // ── recommendations: signup preference (interests + skill level) ম্যাচ করে ──
+  private async loadRecommendations(): Promise<void> {
+    let prefs: { skillLevel?: string; interests?: string[] } | null = null;
+    try {
+      prefs = await firstValueFrom(this.learningApi.getUserPreferences());
+    } catch {
+      prefs = null; // 404 = কোনো preference সেভ নেই
+    }
+
+    let courses: any[] = [];
+    try {
+      const res = await firstValueFrom(this.learningApi.getAllCourses());
+      courses = (res as any)?.data ?? (res as any)?.Data ?? [];
+    } catch {
+      courses = [];
+    }
+
+    const enrolledIds = new Set(this.enrolledCourses().map(c => c.id));
+    const candidates = (Array.isArray(courses) ? courses : [])
+      .filter((c: any) => !enrolledIds.has(String(c.id)));
+
+    const interests = (prefs?.interests ?? []).map(s => (s ?? '').toLowerCase()).filter(Boolean);
+    const skill = (prefs?.skillLevel ?? '').toLowerCase();
+    const hasPrefs = interests.length > 0 || !!skill;
+
+    const scored = candidates.map((c: any) => {
+      const cat = (c.category ?? '').toLowerCase();
+      const lvl = (c.level ?? '').toLowerCase();
+      let score = 0;
+      // category ↔ interest: label drift সামলাতে দুদিকেই contains দেখি
+      if (cat && interests.some(it => it === cat || it.includes(cat) || cat.includes(it))) score += 2;
+      if (skill && lvl === skill) score += 1;
+      return { c, score };
+    });
+
+    // preference থাকলে শুধু ম্যাচ করা course; ম্যাচ না থাকলে / preference না থাকলে fallback = সব
+    let chosen = hasPrefs ? scored.filter(s => s.score > 0) : [];
+    this.usedPreferences.set(chosen.length > 0);
+    if (chosen.length === 0) chosen = scored; // fallback — section যেন খালি না থাকে
+
+    const top = chosen
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(s => this.mapRecommended(s.c));
+
+    this.recommended.set(top);
+  }
+
+  private mapRecommended(c: any): RecommendedCourse {
+    return {
+      id: String(c.id),
+      title: c.title ?? 'Untitled',
+      description: c.description ?? '',
+      category: c.category ?? '',
+      level: c.level ?? 'Beginner',
+      price: c.price ?? 0,
+      instructorName: c.instructorName ?? '',
+      thumbnailUrl: this.learningApi.buildDownloadUrl(c.thumbnailPath ?? null),
+    };
+  }
+
+  // ── interactivity helpers ──
+  protected setSort(key: SortKey): void {
+    this.sortKey.set(key);
+  }
+
+  protected jumpToMyRank(): void {
+    const id = this.currentUserId();
+    if (!id) return;
+    // search খোলা থাকলে clear করে দিই যাতে নিজের row নিশ্চিত দেখা যায়
+    if (this.searchTerm()) this.searchTerm.set('');
+    setTimeout(() => {
+      const el = document.getElementById('lb-row-' + id);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.classList.add('row-flash');
+      setTimeout(() => el?.classList.remove('row-flash'), 1600);
+    }, 60);
+  }
+
+  protected formatPrice(price: number): string {
+    return price <= 0 ? 'Free' : `৳${price}`;
   }
 
   protected isCurrentUser(userId: string): boolean {

@@ -1,16 +1,16 @@
 <div class="qa-page">
 
   @if (isLoading()) {
-    <div class="qa-loading">Loading...</div>
+    <div class="qa-loading">{{ lang.t().commonLoading }}</div>
   }
 
   @else if (alreadyAttempted()) {
     <!-- Already attempted screen -->
     <div class="qa-done">
       <div class="qa-done-icon">🔒</div>
-      <h2>Quiz ইতিমধ্যে সম্পন্ন হয়েছে</h2>
-      <p>এই lesson এর quiz আপনি আগেই দিয়েছেন। আবার attempt করা যাবে না।</p>
-      <button type="button" class="qa-back-btn" (click)="goBack()">← Back to Lesson</button>
+      <h2>{{ lang.t().qzAlreadyTitle }}</h2>
+      <p>{{ lang.t().qzAlreadyDesc }}</p>
+      <button type="button" class="qa-back-btn" (click)="goBack()">← {{ lang.t().qzBackToLesson }}</button>
     </div>
   }
 
@@ -19,16 +19,16 @@
       @if (result()) {
         @if (result().alreadyAttempted) {
           <div class="qa-previous-attempt-banner">
-            <p>📋 আপনার স্কোর</p>
+            <p>📋 {{ lang.t().qzYourScore }}</p>
           </div>
         }
         <div class="qa-score-circle">
           <strong>{{ result().score }}</strong>
           <span>/ {{ result().totalQuestions }}</span>
         </div>
-        <h2>Quiz শেষ!</h2>
+        <h2>{{ lang.t().qzFinished }}</h2>
         <p class="qa-score-label">
-          {{ result().score }} টি সঠিক, {{ result().totalQuestions - result().score }} টি ভুল
+          {{ result().score }} {{ lang.t().qzCorrect }}, {{ result().totalQuestions - result().score }} {{ lang.t().qzWrong }}
         </p>
         <div class="qa-results-list">
           @for (r of result().results; track r.quizId; let i = $index) {
@@ -39,26 +39,26 @@
               </div>
               <p class="qa-result-q">{{ r.question }}</p>
               <div class="qa-result-ans">
-                <span>তোমার উত্তর: <strong>{{ r.selectedAnswer || 'দেওয়া হয়নি' }}</strong></span>
+                <span>{{ lang.t().qzYourAnswer }} <strong>{{ r.selectedAnswer || lang.t().qzNotGiven }}</strong></span>
                 @if (!r.isCorrect) {
-                  <span class="correct-ans">সঠিক উত্তর: <strong>{{ r.correctAnswer }}</strong></span>
+                  <span class="correct-ans">{{ lang.t().qzCorrectAnswer }} <strong>{{ r.correctAnswer }}</strong></span>
                 }
               </div>
             </div>
           }
         </div>
       } @else {
-        <h2>Quiz জমা হয়েছে!</h2>
+        <h2>{{ lang.t().qzSubmittedMsg }}</h2>
       }
       <!-- Back button -->
-      <button type="button" (click)="goBack()" class="qa-back-btn">← Back to Lesson</button>
+      <button type="button" (click)="goBack()" class="qa-back-btn">← {{ lang.t().qzBackToLesson }}</button>
     </div>
   }
 
   @else if (quizzes().length === 0) {
     <div class="qa-done">
-      <h2>এই lesson এ কোনো quiz নেই</h2>
-      <button type="button" class="qa-back-btn" (click)="goBack()">← Back</button>
+      <h2>{{ lang.t().qzNoQuiz }}</h2>
+      <button type="button" class="qa-back-btn" (click)="goBack()">← {{ lang.t().commonBack }}</button>
     </div>
   }
 
@@ -67,7 +67,7 @@
     <div class="qa-header">
       <div>
         <h1>{{ lessonTitle() }}</h1>
-        <p>{{ answeredCount }} / {{ quizzes().length }} answered</p>
+        <p>{{ answeredCount }} / {{ quizzes().length }} {{ lang.t().qzAnswered }}</p>
       </div>
 
       <!-- Timer -->
@@ -125,7 +125,7 @@
       class="qa-submit-btn"
       [disabled]="isSubmitted() || timeLeft() === 0 || alreadyAttempted()"
       (click)="submitQuiz()">
-      {{ isSubmitted() ? '✓ Submitted' : alreadyAttempted() ? '🔒 Already Completed' : '📤 Submit Quiz' }}
+      {{ isSubmitted() ? ('✓ ' + lang.t().qzSubmitted) : alreadyAttempted() ? ('🔒 ' + lang.t().qzAlreadyCompleted) : ('📤 ' + lang.t().qzSubmitQuiz) }}
     </button>
   }
 

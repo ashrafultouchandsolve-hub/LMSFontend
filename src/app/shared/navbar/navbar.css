@@ -548,46 +548,78 @@
     display: flex;
   }
 
+  /* Mobile navbar: sticky fixed card that expands into a scrollable menu panel */
   .topbar {
-    position: relative;
+    position: fixed;
+    flex-wrap: wrap;
+    row-gap: 12px;
+    padding: 12px 16px;
+    align-items: center;
   }
 
-  .topbar-nav {
-    display: none;
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    right: 0;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    border: 1px solid rgba(0,0,0,0.07);
-    padding: 12px;
-    flex-direction: column;
-    gap: 4px;
-    z-index: 999;
-  }
-
-  .topbar-nav--open {
-    display: flex;
-  }
-
+  /* desktop inline nav + its dropdowns are unused on mobile */
+  .topbar-nav,
+  .topbar-nav > a,
   .nav-dropdown-wrap {
+    display: none !important;
+  }
+
+  /* CLOSED state → show only brand + hamburger, hide everything else */
+  .mobile-nav-section,
+  .mobile-nav-divider,
+  .topbar-actions {
     display: none;
   }
 
-  .mobile-nav-section--visible {
+  /* OPEN state (hamburger toggled) → the card becomes a scrollable menu */
+  .topbar:has(.topbar-nav--open) {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start;
+  }
+
+  /* Course / link sections: full-width vertical lists */
+  .topbar:has(.topbar-nav--open) .mobile-nav-section {
     display: flex;
     flex-direction: column;
+    width: 100%;
     gap: 2px;
+  }
+
+  .topbar:has(.topbar-nav--open) .mobile-nav-divider {
+    display: block;
+    width: 100%;
+    margin: 6px 0;
+  }
+
+  /* Actions (lang, notifications, user, logout): full-width stacked controls */
+  .topbar:has(.topbar-nav--open) .topbar-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid var(--c-border);
+  }
+
+  .topbar-actions .lang-toggle-btn,
+  .topbar-actions .nav-button {
+    width: 100%;
+    justify-content: center;
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+
+  .topbar-actions .user-menu {
     width: 100%;
   }
 
-  .mobile-nav-divider--visible {
-    display: block;
-  }
-
-  .topbar-nav > a {
-    display: none;
+  .topbar-actions .user-chip {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

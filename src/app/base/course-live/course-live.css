@@ -1,0 +1,53 @@
+:host { display: block; }
+
+.cl-section {
+  margin: 22px 0;
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  box-shadow: 0 12px 30px -16px rgba(20, 26, 56, 0.18);
+}
+.cl-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cl-head h2 { margin: 0; font-size: 20px; font-weight: 800; color: #111827; }
+.cl-count { font-size: 12px; color: #6b7280; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; }
+.cl-loading, .cl-empty { margin: 0; font-size: 13.5px; color: #6b7280; }
+
+.cl-active {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; margin-bottom: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  border: 1px solid #fecaca;
+}
+.cl-pulse {
+  width: 12px; height: 12px; border-radius: 50%; background: #ef4444; flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); animation: clPulse 1.4s ease-out infinite;
+}
+@keyframes clPulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); } 70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+.cl-active-info { flex: 1; min-width: 0; }
+.cl-active-info strong { color: #b91c1c; font-size: 14.5px; }
+.cl-active-info p { margin: 4px 0 0; font-size: 12.5px; color: #7f1d1d; }
+.cl-join {
+  flex-shrink: 0; text-decoration: none;
+  font-size: 13px; font-weight: 700; color: #fff;
+  padding: 9px 16px; border-radius: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 8px 18px -8px rgba(239, 68, 68, 0.8);
+}
+.cl-join:hover { filter: brightness(1.08); }
+
+.cl-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.cl-card {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  padding: 14px; border-radius: 14px; background: #f8fafc; border: 1px solid rgba(15, 23, 42, 0.08);
+}
+.cl-card--ended { opacity: 0.65; }
+.cl-card-title { margin: 0; font-size: 14.5px; font-weight: 700; color: #1c2142; }
+.cl-card-time { margin: 3px 0 0; font-size: 12px; color: #6b7280; }
+.cl-card-desc { margin: 4px 0 0; font-size: 12.5px; color: #6b7280; }
+.cl-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+.cl-badge--ended { background: #e5e7eb; color: #4b5563; }
+.cl-badge--up { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+@media (max-width: 600px) { .cl-list { grid-template-columns: 1fr; } }

@@ -348,6 +348,27 @@
 
 .course-points strong { color: var(--c-text-3); font-weight: 600; margin-right: 2px; }
 
+/* ─── COURSE STATS STRIP ─────────────────────────────────────── */
+.course-stats {
+  margin: 10px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.cstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  text-align: center;
+}
+.cstat-num { font-size: 0.86rem; font-weight: 800; color: #1d4ed8; white-space: nowrap; }
+.cstat small { font-size: 0.62rem; font-weight: 600; color: var(--c-text-2); line-height: 1.1; letter-spacing: 0.01em; }
+
 /* ─── RATING DISPLAY ─────────────────────────────────────────── */
 .course-rating {
 	margin: 8px 0 0;

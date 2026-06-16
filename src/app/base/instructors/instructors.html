@@ -5,9 +5,9 @@
   <!-- Header -->
   <div class="page-hero">
     <div class="page-hero-content">
-      <span class="page-hero-tag">Our Team</span>
-      <h1>Meet Our <span class="hero-accent">Instructors</span></h1>
-      <p>বাংলাদেশের সেরা শিক্ষকদের সাথে পড়ো। প্রতিটি instructor তাদের বিষয়ে expert।</p>
+      <span class="page-hero-tag">{{ lang.t().insTag }}</span>
+      <h1>{{ lang.t().insTitle1 }} <span class="hero-accent">Instructors</span></h1>
+      <p>{{ lang.t().insSub }}</p>
     </div>
     <div class="page-hero-blur page-hero-blur--1"></div>
     <div class="page-hero-blur page-hero-blur--2"></div>
@@ -32,8 +32,8 @@
     @if (instructors().length === 0) {
       <div class="empty-state">
         <div class="empty-icon">🎓</div>
-        <h3>No instructors yet</h3>
-        <p>Instructors will appear here once approved.</p>
+        <h3>{{ lang.t().insNoYet }}</h3>
+        <p>{{ lang.t().insNoYetDesc }}</p>
       </div>
     } @else {
       <div class="instructors-grid">
@@ -58,12 +58,12 @@
                 <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
                   <path d="M12 3L2 8l10 5 8-4v6h2V8L12 3zm-8 9v4l8 4 8-4v-4l-8 4-8-4z" />
                 </svg>
-                {{ inst.courseCount > 0 ? (inst.courseCount + ' Courses') : 'Instructor' }}
+                {{ inst.courseCount > 0 ? (inst.courseCount + ' ' + lang.t().insCourses) : lang.t().insInstructor }}
               </span>
               @if (inst.bio) {
                 <p class="card-bio">{{ inst.bio }}</p>
               } @else {
-                <p class="card-bio card-bio--empty">Expert instructor</p>
+                <p class="card-bio card-bio--empty">{{ lang.t().insExpert }}</p>
               }
             </div>
 

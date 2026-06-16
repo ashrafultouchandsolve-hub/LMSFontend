@@ -21,6 +21,9 @@ export type CourseDto = {
   thumbnailPath: string | null;
   isPublished: boolean;
   lessonCount?: number;
+  enrollmentCount?: number;
+  videoCount?: number;
+  practiceCount?: number;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -51,6 +54,20 @@ export type SaveCoursePayload = {
   price: number;
   durationMinutes: number;
   isPublished: boolean;
+  /** UserId of the teacher the admin appoints to this course (primary). */
+  teacherUserId?: string;
+  /** UserIds of all teachers assigned to this course (first = primary). */
+  teacherUserIds?: string[];
+};
+
+export type CourseTeacher = {
+  id: string;
+  userId?: string;
+  fullName: string;
+  bio?: string | null;
+  profileImagePath?: string | null;
+  facebookLink?: string | null;
+  youtubeLink?: string | null;
 };
 
 export type SaveLessonPayload = {
@@ -63,6 +80,39 @@ export type SaveLessonPayload = {
   durationMinutes: number;
   resourceUrl: string;
   isFreePreview: boolean;
+};
+
+export type StudentProfileDto = {
+  id: string;
+  fullName: string;
+  email: string;
+  profileImagePath: string | null;
+  phone: string | null;
+  bio: string | null;
+  dateOfBirth: string | null;
+  gender: string | null;
+  address: string | null;
+  institution: string | null;
+  classOrGrade: string | null;
+  guardianName: string | null;
+  guardianPhone: string | null;
+  facebookLink: string | null;
+  linkedInLink: string | null;
+};
+
+export type StudentProfilePayload = {
+  fullName: string;
+  phone?: string | null;
+  bio?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  address?: string | null;
+  institution?: string | null;
+  classOrGrade?: string | null;
+  guardianName?: string | null;
+  guardianPhone?: string | null;
+  facebookLink?: string | null;
+  linkedInLink?: string | null;
 };
 
 export type EnrollmentDto = {
@@ -161,6 +211,21 @@ export class LearningApiService {
     return this.withFallback((base) => this.http.get<any>(`${base}/quiz/overall-progress/${userId}`));
   }
 
+  // ── Student profile ──────────────────────────────────────
+  getMyStudentProfile(): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/student/me`));
+  }
+
+  updateStudentProfile(dto: StudentProfilePayload): Observable<any> {
+    return this.withFallback((base) => this.http.put<any>(`${base}/student/update-profile`, dto));
+  }
+
+  uploadStudentProfileImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.withFallback((base) => this.http.post<any>(`${base}/student/upload-profile-image`, formData));
+  }
+
 
 
   getTeacherCourses(): Observable<ApiResponse<CourseDto[]>> {
@@ -187,6 +252,13 @@ export class LearningApiService {
     );
   }
 
+  /** Teachers assigned to a course (primary + co-teachers) with their details. */
+  getCourseTeachers(courseId: string): Observable<{ data: CourseTeacher[] }> {
+    return this.withFallback((baseUrl) =>
+      this.http.get<any>(`${baseUrl}/course/${courseId}/teachers`),
+    );
+  }
+
   deleteCourse(courseId: string): Observable<ApiResponse<unknown>> {
     return this.withFallback((baseUrl) =>
       this.http.delete<ApiResponse<unknown>>(`${baseUrl}/course/delete/${courseId}`),
@@ -209,6 +281,11 @@ export class LearningApiService {
     return this.withFallback((baseUrl) =>
       this.http.get<{ courseId: string; totalEnrollment: number }>(`${baseUrl}/enrollment/count/${courseId}`),
     );
+  }
+
+  /** Public course-details stats: enrolled students, total videos, total practice materials. */
+  getCourseStats(courseId: string): Observable<any> {
+    return this.withFallback((baseUrl) => this.http.get<any>(`${baseUrl}/course/${courseId}/stats`));
   }
 
   createLesson(payload: SaveLessonPayload): Observable<ApiResponse<string>> {
@@ -390,6 +467,10 @@ export class LearningApiService {
     return `${baseWithoutApi}/uploads/${path}`;
   }
 
+  getBaseUrl(): string {
+    return this.activeBaseUrl;
+  }
+
   buildStreamUrl(path: string | null): string {
     if (!path) {
       return '';
@@ -477,6 +558,16 @@ export class LearningApiService {
 
   getLeaderboard(): Observable<any> {
     return this.withFallback((base) => this.http.get<any>(`${base}/quiz/leaderboard`));
+  }
+
+  // নির্দিষ্ট course-এর leaderboard (student enrolled course গুলোর জন্য)
+  getCourseLeaderboard(courseId: string): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/quiz/leaderboard/course/${courseId}`));
+  }
+
+  // signup onboarding-এ সংরক্ষিত preference (SkillLevel, Goal, Language, Interests[])
+  getUserPreferences(): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/UserPreference`));
   }
 
   // Enrolled students list (teacher এর জন্য)

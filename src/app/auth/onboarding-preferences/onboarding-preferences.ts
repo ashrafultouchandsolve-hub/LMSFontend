@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Service } from '../../Service/service';
+import { LanguageService } from '../../Service/language.service';
 
 @Component({
   selector: 'app-onboarding-preferences',
@@ -11,6 +12,7 @@ import { Service } from '../../Service/service';
 export class OnboardingPreferences {
   private readonly router = inject(Router);
   private readonly service = inject(Service);
+  protected readonly lang = inject(LanguageService);
 
   protected readonly step = signal(1);
 

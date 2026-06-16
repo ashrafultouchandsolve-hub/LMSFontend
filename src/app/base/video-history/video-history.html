@@ -1,26 +1,26 @@
 <div class="vh-page">
 
   <header class="vh-header">
-    <button type="button" class="vh-back-btn" (click)="goBack()">← Back</button>
+    <button type="button" class="vh-back-btn" (click)="goBack()">← {{ lang.t().commonBack }}</button>
     <div>
-      <h1>📺 Watch History</h1>
-      <p>তুমি যেসব lesson দেখেছ</p>
+      <h1>📺 {{ lang.t().vhTitle }}</h1>
+      <p>{{ lang.t().vhSub }}</p>
     </div>
   </header>
 
   @if (isLoading()) {
     <div class="vh-loading">
       <div class="vh-spinner"></div>
-      <p>Loading...</p>
+      <p>{{ lang.t().commonLoading }}</p>
     </div>
   }
 
   @else if (history().length === 0) {
     <div class="vh-empty">
       <div class="vh-empty-icon">📭</div>
-      <h2>কোনো history নেই</h2>
-      <p>তুমি এখনো কোনো video দেখনি।</p>
-      <a routerLink="/courses" class="vh-browse-btn">Browse Courses</a>
+      <h2>{{ lang.t().vhEmpty }}</h2>
+      <p>{{ lang.t().vhEmptyDesc }}</p>
+      <a routerLink="/courses" class="vh-browse-btn">{{ lang.t().vhBrowse }}</a>
     </div>
   }
 
@@ -41,7 +41,7 @@
             <!-- Left: info -->
             <div class="vh-info">
               <div class="vh-status-badge" [class.completed]="item.isCompleted">
-                {{ item.isCompleted ? '✅ সম্পন্ন' : '▶ চলছে' }}
+                {{ item.isCompleted ? '✅' : '▶' }} {{ item.isCompleted ? lang.t().vhCompleted : lang.t().vhPlaying }}
               </div>
               <h3>{{ item.lessonTitle }}</h3>
               <div class="vh-meta">
@@ -60,7 +60,7 @@
                 [queryParams]="{ lessonId: item.lessonId, resumeAt: item.watchedSeconds }"
                 class="vh-resume-btn"
                 [class.completed]="item.isCompleted">
-                {{ item.isCompleted ? '🔄 Rewatch' : '▶ Resume' }}
+                {{ item.isCompleted ? '🔄' : '▶' }} {{ item.isCompleted ? lang.t().vhRewatch : lang.t().vhResume }}
               </a>
             </div>
           </div>

@@ -1,0 +1,49 @@
+import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { LiveClass, LiveClassService } from '../../Service/live-class-service';
+import { LanguageService } from '../../Service/language.service';
+
+@Component({
+  selector: 'app-course-live',
+  standalone: true,
+  imports: [DatePipe, RouterLink],
+  templateUrl: './course-live.html',
+  styleUrl: './course-live.css',
+})
+export class CourseLive implements OnInit {
+  @Input({ required: true }) courseId!: string;
+
+  private readonly liveClassService = inject(LiveClassService);
+  protected readonly lang = inject(LanguageService);
+
+  protected readonly liveClasses = signal<LiveClass[]>([]);
+  protected readonly isLoading = signal(false);
+  protected readonly activeLiveClass = computed(() => this.liveClasses().find((lc) => lc.isActive) ?? null);
+
+  ngOnInit(): void {
+    void this.load();
+  }
+
+  private async load(): Promise<void> {
+    this.isLoading.set(true);
+    try {
+      const res: any = await firstValueFrom(this.liveClassService.getByCourse(this.courseId));
+      const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+      this.liveClasses.set(arr.map((item: any) => ({
+        id: item.id ?? item.Id ?? '',
+        title: item.title ?? item.Title ?? '',
+        description: item.description ?? item.Description ?? '',
+        scheduledAt: item.scheduledAt ?? item.ScheduledAt ?? '',
+        isActive: Boolean(item.isActive ?? item.IsActive),
+        isEnded: Boolean(item.isEnded ?? item.IsEnded),
+        roomUrl: item.roomUrl ?? item.RoomUrl ?? '',
+      })));
+    } catch {
+      this.liveClasses.set([]);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+}

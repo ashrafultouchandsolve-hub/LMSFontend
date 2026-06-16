@@ -20,6 +20,9 @@ export class Navbar implements OnInit, OnDestroy {
   protected readonly userName = signal('');
   protected readonly userRole = signal<number | null>(null);
   protected readonly isTeacher = computed(() => this.userRole() === 1);
+  protected readonly isAdmin = computed(() => this.userRole() === 2);
+  // Leaderboard শুধু logged-in student (Role = 0) দেখবে
+  protected readonly isStudent = computed(() => this.isLoggedIn() && this.userRole() === 0);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
   protected readonly mobileMenuOpen = signal(false);
 
@@ -47,6 +50,25 @@ export class Navbar implements OnInit, OnDestroy {
 
   protected toggleMobileMenu(): void {
     this.mobileMenuOpen.update((v) => !v);
+  }
+
+  /** "Vision" nav link → smooth-scroll to the "Nirvor Nije Sikhi" About section on the home page. */
+  protected goToVision(event: Event): void {
+    event.preventDefault();
+    this.mobileMenuOpen.set(false);
+
+    const scrollToAbout = () => {
+      const el = document.getElementById('aboutUs');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const path = this.router.url.split('?')[0].split('#')[0];
+    if (path === '/homepage' || path === '/' || path === '') {
+      scrollToAbout();
+    } else {
+      // Different page → land on home first, then scroll once the section renders.
+      this.router.navigateByUrl('/homepage').then(() => setTimeout(scrollToAbout, 120));
+    }
   }
 
   protected logout(): void {

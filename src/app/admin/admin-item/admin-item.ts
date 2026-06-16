@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 
 type StoreItem = {
   id: string;
@@ -26,6 +27,7 @@ type StoreItem = {
 export class AdminItem implements OnInit {
   protected readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
+  protected readonly lang = inject(LanguageService);
   private readonly fb = inject(NonNullableFormBuilder);
 
   protected readonly items = signal<StoreItem[]>([]);

@@ -1000,3 +1000,109 @@
   background: var(--border);
   border-radius: 3px;
 }
+
+/* ── Categories ─────────────────────────────────────── */
+.cat-create-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.cat-create-row .search-input { flex: 1; }
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 22px;
+}
+.cat-card {
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 12px 32px -14px rgba(20, 26, 56, 0.22);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+.cat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 50px -18px rgba(99, 102, 241, 0.42);
+}
+
+/* Banner: gradient (or cover image) with the category name overlaid */
+.cat-card-banner {
+  position: relative;
+  height: 138px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+  overflow: hidden;
+}
+/* readability gradient over any cover image */
+.cat-card-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.05) 0%, rgba(15, 23, 42, 0.55) 100%);
+}
+.cat-card-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.cat-card-watermark {
+  position: absolute;
+  top: -12px;
+  right: -6px;
+  font-size: 92px;
+  opacity: 0.16;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.cat-card-name {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.cat-card-body { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.cat-manage-btn { width: 100%; justify-content: center; }
+.cat-sec-actions {
+  display: flex;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.07);
+}
+.cat-sec-actions .btn {
+  flex: 1;
+  justify-content: center;
+  font-size: 12px;
+  padding: 7px 6px;
+}
+.cat-img-btn { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }

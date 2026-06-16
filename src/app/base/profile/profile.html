@@ -2,13 +2,29 @@
 	<app-navbar></app-navbar>
 
 	<section class="profile-shell">
+		@if (saveSuccess()) {
+			<div class="save-toast" role="status">✅ {{ lang.t().profileUpdated }}</div>
+		}
+
 		<section class="info-card" aria-label="User profile details">
-			<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
+			<div class="avatar-wrap">
+				@if (avatarUrl()) {
+					<img class="avatar-img" [src]="avatarUrl()" [alt]="userName()"
+						(error)="$any($event.target).style.display='none'" />
+				} @else {
+					<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
+				}
+			</div>
 			<div class="user-info">
 				<h2>{{ userName() }}</h2>
 				<p>{{ userEmail() }}</p>
 				<span class="role-badge">{{ lang.t().profileRole }}: {{ userRole() }}</span>
 			</div>
+			@if (!isTeacher()) {
+				<button type="button" class="edit-profile-btn" (click)="openEdit()">
+					✎ {{ lang.t().profileEdit }}
+				</button>
+			}
 		</section>
 
 		<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
@@ -57,9 +73,16 @@
 				</div>
 				<div class="dashboard-row">
 					<span class="row-icon" aria-hidden="true">📊</span>
-					<span>Score</span>
+					<span>MCQ Score</span>
 					<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
 				</div>
+				@if (hasExamPerf()) {
+					<div class="dashboard-row">
+						<span class="row-icon" aria-hidden="true">📝</span>
+						<span>Exam Score ({{ examPerf()?.obtained }}/{{ examPerf()?.max }})</span>
+						<strong class="row-value row-ok">{{ examPercentage() | number: '1.0-0' }}%</strong>
+					</div>
+				}
 			</div>
 		</aside>
 
@@ -120,7 +143,83 @@
 
 <!-- Profile content -->
 @if (activeTab() === 'profile') {
-  <!-- আগের profile content এখানে -->
+  @if (!isTeacher()) {
+    <section class="details-card" aria-label="Profile details">
+      <div class="details-head">
+        <h3>{{ lang.t().profileDetails }}</h3>
+        <button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+      </div>
+
+      @if (profile()?.bio) {
+        <div class="about-block">
+          <span class="about-label">{{ lang.t().profileAboutSection }}</span>
+          <p class="about-text">{{ profile()?.bio }}</p>
+        </div>
+      }
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileFullName }}</span>
+          <span class="detail-value">{{ profile()?.fullName || userName() }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
+          <span class="detail-value">{{ profile()?.email || userEmail() }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profilePhone }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileDob }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileGender }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileClass }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileInstitution }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item detail-item--wide">
+          <span class="detail-label">{{ lang.t().profileAddress }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileGuardianName }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
+          <span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
+        </div>
+        @if (profile()?.facebookLink) {
+          <div class="detail-item">
+            <span class="detail-label">{{ lang.t().profileFacebook }}</span>
+            <a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
+          </div>
+        }
+        @if (profile()?.linkedInLink) {
+          <div class="detail-item">
+            <span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
+            <a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
+          </div>
+        }
+      </div>
+
+      @if (!hasDetails()) {
+        <div class="details-empty">
+          <p>{{ lang.t().profileAddInfo }}</p>
+          <button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
+        </div>
+      }
+    </section>
+  }
 }
 
 <!-- Wishlist content -->
@@ -169,4 +268,119 @@
   </section>
 }
 	</section>
+
+	<!-- ── Edit Profile Modal ───────────────────────────── -->
+	@if (isEditing()) {
+		<div class="edit-overlay" (click)="closeEdit()">
+			<div class="edit-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="edit-modal-head">
+					<h3>{{ lang.t().profileEdit }}</h3>
+					<button type="button" class="edit-close" (click)="closeEdit()" aria-label="Close">✕</button>
+				</div>
+
+				<div class="edit-modal-body">
+					@if (saveError()) {
+						<div class="edit-error" role="alert">{{ saveError() }}</div>
+					}
+
+					<!-- Photo -->
+					<div class="edit-photo-row">
+						<div class="edit-photo-preview">
+							@if (imagePreview()) {
+								<img [src]="imagePreview()" alt="Preview" />
+							} @else if (avatarUrl()) {
+								<img [src]="avatarUrl()" alt="Current" (error)="$any($event.target).style.display='none'" />
+							} @else {
+								<span class="edit-photo-initial">{{ editForm.fullName.charAt(0).toUpperCase() || 'S' }}</span>
+							}
+						</div>
+						<div class="edit-photo-actions">
+							<label class="edit-photo-btn">
+								{{ lang.t().profileChangePhoto }}
+								<input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+							</label>
+							<span class="edit-photo-hint">{{ lang.t().profilePhotoHint }}</span>
+						</div>
+					</div>
+
+					<!-- Basic info -->
+					<p class="edit-section-title">{{ lang.t().profileBasicInfo }}</p>
+					<div class="edit-grid">
+						<label class="edit-field">
+							<span>{{ lang.t().profileFullName }} *</span>
+							<input type="text" [(ngModel)]="editForm.fullName" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileEmailLabel }}</span>
+							<input type="email" [value]="userEmail()" disabled />
+							<small class="edit-note">{{ lang.t().profileEmailNote }}</small>
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profilePhone }}</span>
+							<input type="tel" [(ngModel)]="editForm.phone" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileDob }}</span>
+							<input type="date" [(ngModel)]="editForm.dateOfBirth" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileGender }}</span>
+							<select [(ngModel)]="editForm.gender">
+								<option value="">{{ lang.t().profileGenderSelect }}</option>
+								<option value="Male">{{ lang.t().profileGenderMale }}</option>
+								<option value="Female">{{ lang.t().profileGenderFemale }}</option>
+								<option value="Other">{{ lang.t().profileGenderOther }}</option>
+							</select>
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileClass }}</span>
+							<input type="text" [(ngModel)]="editForm.classOrGrade" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileInstitution }}</span>
+							<input type="text" [(ngModel)]="editForm.institution" />
+						</label>
+						<label class="edit-field edit-field--wide">
+							<span>{{ lang.t().profileAddress }}</span>
+							<input type="text" [(ngModel)]="editForm.address" />
+						</label>
+					</div>
+
+					<!-- Optional info -->
+					<p class="edit-section-title">{{ lang.t().profileOptionalInfo }}
+						<span class="edit-section-hint">{{ lang.t().profileOptionalHint }}</span>
+					</p>
+					<div class="edit-grid">
+						<label class="edit-field">
+							<span>{{ lang.t().profileGuardianName }}</span>
+							<input type="text" [(ngModel)]="editForm.guardianName" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileGuardianPhone }}</span>
+							<input type="tel" [(ngModel)]="editForm.guardianPhone" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileFacebook }}</span>
+							<input type="url" placeholder="https://facebook.com/…" [(ngModel)]="editForm.facebookLink" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileLinkedIn }}</span>
+							<input type="url" placeholder="https://linkedin.com/in/…" [(ngModel)]="editForm.linkedInLink" />
+						</label>
+						<label class="edit-field edit-field--wide">
+							<span>{{ lang.t().profileBio }}</span>
+							<textarea rows="3" [placeholder]="lang.t().profileBioPlaceholder" [(ngModel)]="editForm.bio"></textarea>
+						</label>
+					</div>
+				</div>
+
+				<div class="edit-modal-foot">
+					<button type="button" class="edit-cancel" (click)="closeEdit()" [disabled]="isSaving()">{{ lang.t().profileCancel }}</button>
+					<button type="button" class="edit-save" (click)="saveProfile()" [disabled]="isSaving()">
+						{{ isSaving() ? lang.t().profileSaving : lang.t().profileSave }}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
 </main>

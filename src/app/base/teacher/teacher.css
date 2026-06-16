@@ -118,7 +118,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 18px 14px;
+  /* top clearance for the fixed floating navbar — dark bg fills the top so no empty gap */
+  padding: 84px 14px 18px;
   background: linear-gradient(180deg, #0f1230 0%, #151a3e 100%);
   color: #e5e9ff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -183,7 +184,7 @@
 }
 
 .dashboard-area {
-  padding: 24px;
+  padding: 84px 24px 24px;
   display: grid;
   gap: 18px;
   align-content: start;
@@ -581,11 +582,15 @@ tr:last-child td {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(18, 20, 34, 0.48);
+  background: rgba(18, 20, 34, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   display: grid;
   place-items: center;
-  z-index: 100;
+  /* Above the fixed navbar (z-index 1000) so the modal fully overlays it */
+  z-index: 2000;
   padding: 16px;
+  overflow-y: auto;
 }
 
 .modal-card {
@@ -740,6 +745,11 @@ label.full,
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
+  /* sidebar (with its own top clearance) sits on top now, so the content area starts normally */
+  .dashboard-area {
+    padding-top: 24px;
+  }
+
   .sidebar-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -776,4 +786,242 @@ label.full,
   .sidebar-nav {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Free live class panel ──────────────────────────────── */
+.flp-start {
+  border: 1px solid rgba(95, 110, 204, 0.22);
+  background: linear-gradient(160deg, rgba(95, 110, 204, 0.08), rgba(139, 92, 246, 0.05));
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+.flp-start h3 { margin: 0 0 12px; font-size: 1.02rem; color: #2a2f50; }
+.flp-form {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr auto;
+  gap: 10px;
+  align-items: stretch;
+}
+.flp-form input {
+  padding: 10px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(84, 98, 154, 0.28);
+  background: #fff;
+  color: #1a1f3a;
+  font-size: 0.92rem;
+  outline: none;
+}
+.flp-form input:focus { border-color: #5f6ecc; box-shadow: 0 0 0 3px rgba(95, 110, 204, 0.15); }
+.flp-golive { white-space: nowrap; }
+.flp-note { margin: 12px 0 0; font-size: 0.84rem; color: rgba(23, 27, 47, 0.6); }
+
+.flp-list-title { margin: 6px 0 14px; font-size: 1rem; color: #2a2f50; }
+
+.flp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.flp-card {
+  border: 1px solid rgba(84, 98, 154, 0.18);
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 22px rgba(20, 26, 56, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.flp-card--ended { opacity: 0.62; }
+.flp-card h4 { margin: 0; font-size: 1.05rem; color: #1c2142; }
+.flp-desc { margin: 0; font-size: 0.86rem; color: rgba(23, 27, 47, 0.62); line-height: 1.45; }
+.flp-card-head { display: flex; }
+.flp-live {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+  color: #d22f2f;
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.28);
+  padding: 3px 10px; border-radius: 20px;
+}
+.flp-dot { width: 7px; height: 7px; border-radius: 50%; background: #f43f5e; animation: flpPulse 1.5s ease-out infinite; }
+.flp-ended {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+  color: rgba(23, 27, 47, 0.5);
+  background: rgba(23, 27, 47, 0.06);
+  padding: 3px 10px; border-radius: 20px;
+}
+.flp-link-row { display: flex; gap: 8px; }
+.flp-link-row input {
+  flex: 1; min-width: 0;
+  padding: 8px 11px;
+  border-radius: 9px;
+  border: 1px solid rgba(84, 98, 154, 0.24);
+  background: #f6f7fc;
+  color: #3a4063;
+  font-size: 0.8rem;
+}
+.flp-actions { display: flex; gap: 8px; }
+.flp-actions .btn { flex: 1; }
+
+@keyframes flpPulse {
+  0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(244, 63, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+@media (max-width: 640px) {
+  .flp-form { grid-template-columns: 1fr; }
+}
+
+/* ── Exam authoring / grading panel ─────────────────────────────── */
+.exam-author-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+.exam-author-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(84, 98, 154, 0.18);
+  box-shadow: 0 6px 18px rgba(20, 26, 56, 0.05);
+}
+.exam-author-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.exam-author-head h3 { margin: 0; font-size: 0.98rem; color: #1c2142; }
+.exam-author-line { margin: 0; font-size: 0.82rem; color: #3a4063; }
+.exam-author-line.muted { color: #9aa3bd; }
+.exam-author-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.exam-author-actions .btn { font-size: 0.78rem; padding: 6px 10px; }
+.exam-q-upload { cursor: pointer; display: inline-flex; align-items: center; }
+
+.exam-badge {
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+}
+.exam-badge--ok { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.exam-badge--locked { background: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; }
+
+.modal-wide { max-width: 760px; width: 100%; }
+.exam-subs-list { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
+.exam-sub-row {
+  display: grid;
+  grid-template-columns: 1.4fr auto 90px 1.4fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: #f6f7fc;
+  border: 1px solid rgba(84, 98, 154, 0.14);
+}
+.exam-sub-info { display: flex; flex-direction: column; min-width: 0; }
+.exam-sub-info strong { font-size: 0.88rem; color: #1c2142; }
+.exam-sub-info span { font-size: 0.72rem; color: #6b7280; }
+.exam-mark-input, .exam-fb-input {
+  padding: 7px 9px; border-radius: 8px; border: 1px solid rgba(84, 98, 154, 0.28);
+  background: #fff; font-size: 0.8rem; width: 100%;
+}
+@media (max-width: 720px) {
+  .exam-sub-row { grid-template-columns: 1fr; }
+}
+
+/* ── Multi-teacher appoint checklist ────────────────────────────── */
+.appoint-hint { font-weight: 400; color: rgba(23, 27, 47, 0.5); font-size: 0.78rem; }
+/* multi-select dropdown */
+.ms-dropdown { position: relative; }
+.ms-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid #d5d9ea;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ms-trigger:hover { border-color: #aeb6dd; }
+.ms-trigger--open { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+.ms-placeholder { flex: 1; color: #9aa3bd; font-size: 0.9rem; }
+.ms-chips { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.ms-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 6px 3px 10px; border-radius: 20px;
+  background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3;
+  font-size: 0.8rem; font-weight: 600;
+}
+.ms-chip-x {
+  display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%;
+  background: rgba(99, 102, 241, 0.18); color: #4338ca; font-size: 0.6rem; cursor: pointer;
+}
+.ms-chip-x:hover { background: #6366f1; color: #fff; }
+.ms-caret { color: #6b7280; font-size: 0.8rem; flex-shrink: 0; transition: transform 0.2s ease; }
+.ms-trigger--open .ms-caret { transform: rotate(180deg); }
+
+.ms-backdrop { position: fixed; inset: 0; z-index: 10; }
+.ms-panel {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 11;
+  max-height: 240px; overflow-y: auto;
+  background: #fff; border: 1px solid rgba(84, 98, 154, 0.24); border-radius: 12px;
+  box-shadow: 0 18px 40px -16px rgba(20, 26, 56, 0.4);
+  padding: 6px;
+}
+.ms-option {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 9px; background: transparent;
+  text-align: left; cursor: pointer; transition: background 0.12s ease;
+}
+.ms-option:hover { background: #f4f6fc; }
+.ms-option--on { background: #eef2ff; }
+.ms-check {
+  display: grid; place-items: center; width: 20px; height: 20px; flex-shrink: 0;
+  border-radius: 6px; border: 1.5px solid #cbd2ec; color: #fff; font-size: 0.72rem; font-weight: 800;
+}
+.ms-option--on .ms-check { background: #6366f1; border-color: #6366f1; }
+.ms-opt-text { display: flex; flex-direction: column; min-width: 0; }
+.ms-opt-name { font-size: 0.88rem; font-weight: 700; color: #1c2142; }
+.ms-opt-email { font-size: 0.72rem; color: #6b7280; }
+.appoint-count { display: block; margin-top: 6px; font-size: 0.78rem; color: #4f46e5; font-weight: 600; }
+
+/* ── Practice materials panel (admin) ───────────────────────────── */
+.pm-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.pm-input {
+  flex: 1; min-width: 160px;
+  padding: 9px 12px; border-radius: 9px;
+  border: 1px solid rgba(84, 98, 154, 0.28); background: #fff; color: #1a1f3a; font-size: 0.9rem;
+}
+.pm-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.pm-file { cursor: pointer; display: inline-flex; align-items: center; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+
+.pm-list { display: flex; flex-direction: column; gap: 8px; }
+.pm-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: #f6f7fc; border: 1px solid rgba(84, 98, 154, 0.14);
+}
+.pm-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pm-row-info strong { font-size: 0.9rem; color: #1c2142; }
+.pm-row-info span { font-size: 0.76rem; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pm-badge {
+  flex-shrink: 0; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.4px;
+  color: #fff; padding: 3px 9px; border-radius: 20px;
+}
+.pm-badge--pdf { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.pm-badge--doc { background: linear-gradient(135deg, #2563eb, #1e40af); }
+
+@media (max-width: 640px) {
+  .pm-form { flex-direction: column; align-items: stretch; }
+  .pm-file { max-width: none; }
 }

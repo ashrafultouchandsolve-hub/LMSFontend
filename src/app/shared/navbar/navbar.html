@@ -104,7 +104,8 @@
 
     <a routerLink="/instructors">Instructor</a>
     <a routerLink="/store">Store</a>
-    <a href="#platform-identity">{{ lang.t().navVision }}</a>
+    <a routerLink="/free-live" class="nav-live-link">🔴 {{ lang.t().navLive }}</a>
+    <a href="#aboutUs" (click)="goToVision($event)">{{ lang.t().navVision }}</a>
 
     <div class="nav-dropdown-wrap">
       <button class="nav-dropdown-trigger" type="button">
@@ -116,9 +117,11 @@
 
       <div class="nav-dropdown">
         <div class="nav-dropdown-inner">
-          <div class="nav-dropdown-group">
-            <a routerLink="/leaderboard" class="nav-dropdown-group-label">🏆 Leaderboard</a>
-          </div>
+          @if(isStudent()) {
+            <div class="nav-dropdown-group">
+              <a routerLink="/leaderboard" class="nav-dropdown-group-label">🏆 Leaderboard</a>
+            </div>
+          }
 
           @if(isLoggedIn()) {
             <div class="nav-dropdown-divider"></div>
@@ -147,7 +150,10 @@
   <div class="mobile-nav-section" [class.mobile-nav-section--visible]="mobileMenuOpen()">
     <a routerLink="/instructors" class="mobile-nav-item" (click)="toggleMobileMenu()">👨‍🏫 Instructors</a>
     <a routerLink="/store" class="mobile-nav-item" (click)="toggleMobileMenu()">🛒 Store</a>
-    <a routerLink="/leaderboard" class="mobile-nav-item" (click)="toggleMobileMenu()">🏆 Leaderboard</a>
+    <a routerLink="/free-live" class="mobile-nav-item" (click)="toggleMobileMenu()">🔴 {{ lang.t().navLive }}</a>
+    @if(isStudent()) {
+      <a routerLink="/leaderboard" class="mobile-nav-item" (click)="toggleMobileMenu()">🏆 Leaderboard</a>
+    }
     @if(isLoggedIn()) {
       <a routerLink="/history" class="mobile-nav-item" (click)="toggleMobileMenu()">📹 Video History</a>
     }
@@ -182,6 +188,11 @@
           @if (isTeacher()) {
             <a routerLink="/teacher" class="user-menu-link" role="menuitem">
               <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
+            </a>
+          }
+          @if (isAdmin()) {
+            <a routerLink="/admin" class="user-menu-link" role="menuitem">
+              <span class="menu-icon">⚙️</span> {{ lang.t().navAdmin }}
             </a>
           }
         </div>

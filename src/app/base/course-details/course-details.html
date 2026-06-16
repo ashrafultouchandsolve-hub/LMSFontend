@@ -27,13 +27,37 @@
 				<article class="card-body">
 					<h1>{{ selectedCourse.title }}</h1>
 					<section class="details-section">
-						<h2>{{ lang.t().cdInstructor }}</h2>
-						<div class="instructor-list">
-							<article class="instructor-item">
-								<div class="instructor-avatar" aria-hidden="true">{{ getInstructorInitial(selectedCourse.instructorName) }}</div>
-								<p>{{ selectedCourse.instructorName }}</p>
-							</article>
-						</div>
+						<h2>{{ lang.t().cdCourseTeachers }}</h2>
+@if (teachers().length > 0) {
+							<div class="cd-teacher-grid">
+								@for (t of teachers(); track t.id) {
+									<article class="cd-teacher-card">
+										<div class="cd-teacher-avatar-wrap">
+											@if (t.profileImagePath) {
+												<img class="cd-teacher-avatar" [src]="teacherImageUrl(t.profileImagePath)" [alt]="t.fullName" />
+											} @else {
+												<div class="cd-teacher-initial">{{ getInstructorInitial(t.fullName) }}</div>
+											}
+										</div>
+										<div class="cd-teacher-info">
+											<h3 class="cd-teacher-name">{{ t.fullName }}</h3>
+											@if (t.bio) { <p class="cd-teacher-bio">{{ t.bio }}</p> } @else { <p class="cd-teacher-bio cd-teacher-bio--empty">{{ lang.t().insExpert }}</p> }
+											<div class="cd-teacher-social">
+												@if (t.youtubeLink) { <a [href]="t.youtubeLink" target="_blank" rel="noopener noreferrer" class="cd-social cd-social--yt" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.3 2.8 12 2.8 12 2.8s-4.3 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.3 21.8 12 21.8 12 21.8s4.3 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.3l6.6 3.6-6.6 3.6z"/></svg></a> }
+												@if (t.facebookLink) { <a [href]="t.facebookLink" target="_blank" rel="noopener noreferrer" class="cd-social cd-social--fb" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M14 8.5V7c0-.8.5-1 1-1h2V3h-3c-2.2 0-4 1.8-4 4v1.5H8V12h2v9h4v-9h2.7l.3-3.5H14z"/></svg></a> }
+											</div>
+										</div>
+									</article>
+								}
+							</div>
+						} @else {
+							<div class="instructor-list">
+								<article class="instructor-item">
+									<div class="instructor-avatar" aria-hidden="true">{{ getInstructorInitial(selectedCourse.instructorName) }}</div>
+									<p>{{ selectedCourse.instructorName }}</p>
+								</article>
+							</div>
+						}
 					</section>
 					<section class="details-section">
 						<h2>{{ lang.t().cdDescription }}</h2>
@@ -141,6 +165,7 @@
 				} @else {
 					<a routerLink="/login" class="enroll-button enroll-link">{{ lang.t().cdLoginToEnroll }}</a>
 				}
+				<p class="free-live-note">{{ lang.t().cdFreeLiveNote }}</p>
 				<button
 					type="button"
 					class="wishlist-button"
@@ -154,12 +179,10 @@
 						{{ isTogglingWishlist() ? 'Adding...' : '♡ Add to Wishlist' }}
 					}
 				</button>
-				<ul class="course-meta" aria-label="Course meta information">
-					<li><span>{{ lang.t().cdCategory }}</span><strong>{{ selectedCourse.category }}</strong></li>
-					<li><span>{{ lang.t().cdLevel }}</span><strong>{{ selectedCourse.level }}</strong></li>
-					<li><span>{{ lang.t().cdLessonsCount }}</span><strong>{{ selectedCourse.lessonCount }}</strong></li>
-					<li><span>{{ lang.t().cdDuration }}</span><strong>{{ formatDuration(selectedCourse.durationMinutes) }}</strong></li>
-					<li><span>{{ lang.t().cdStatus }}</span><strong>{{ selectedCourse.isPublished ? lang.t().cdPublished : lang.t().cdDraft }}</strong></li>
+				<ul class="course-meta" aria-label="Course statistics">
+					<li><span>{{ lang.t().cdStudents }}</span><strong>{{ enrollmentCount() }}</strong></li>
+					<li><span>{{ lang.t().cdTotalVideos }}</span><strong>{{ videoCount() }}</strong></li>
+					<li><span>{{ lang.t().cdTotalPractice }}</span><strong>{{ practiceCount() }}</strong></li>
 				</ul>
 			</aside>
 		</div>

@@ -1,0 +1,32 @@
+@if (recordings().length > 0) {
+  <section class="cr-section">
+    <div class="cr-head">
+      <h2>🎬 {{ lang.t().recSectionTitle }}</h2>
+    </div>
+    <div class="cr-grid">
+      @for (rec of recordings(); track rec.id) {
+        <article class="cr-card">
+          <div class="cr-thumb">🎬</div>
+          <div class="cr-info">
+            <p class="cr-title">{{ rec.title }}</p>
+            <p class="cr-time">🕐 {{ rec.scheduledAt | date:'dd MMM, hh:mm a' }}</p>
+          </div>
+          <button type="button" class="cr-watch" (click)="play(rec)">▶ {{ lang.t().recWatch }}</button>
+        </article>
+      }
+    </div>
+  </section>
+}
+
+@if (watching(); as rec) {
+  <div class="cr-modal-backdrop" (click)="close()">
+    <div class="cr-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="cr-modal-head">
+        <h3>🎬 {{ rec.title }}</h3>
+        <button type="button" class="cr-modal-x" (click)="close()" aria-label="Close">✕</button>
+      </div>
+      <video #recPlayer class="cr-video" controls controlsList="nodownload" disablePictureInPicture
+        oncontextmenu="return false" playsinline></video>
+    </div>
+  </div>
+}

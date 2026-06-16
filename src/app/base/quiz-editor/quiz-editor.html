@@ -1,10 +1,10 @@
 <div class="quiz-page">
 
   <header class="quiz-header">
-    <button type="button" class="back-btn" (click)="goBack()">← Back</button>
+    <button type="button" class="back-btn" (click)="goBack()">← {{ lang.t().commonBack }}</button>
     <div>
-      <h1>Quiz Editor</h1>
-      <p class="quiz-subtitle">Lesson: <strong>{{ lessonTitle() }}</strong></p>
+      <h1>{{ lang.t().qeTitle }}</h1>
+      <p class="quiz-subtitle">{{ lang.t().qeLesson }} <strong>{{ lessonTitle() }}</strong></p>
     </div>
   </header>
 
@@ -14,7 +14,7 @@
 
   <!-- কতটা quiz যোগ করবে -->
   <section class="quiz-count-section">
-    <label class="count-label">How many quizzes do you want to add?</label>
+    <label class="count-label">{{ lang.t().qeHowMany }}</label>
     <div class="count-pills">
       @for (n of quizCountOptions; track n) {
         <button type="button"
@@ -32,12 +32,12 @@
         <div class="quiz-form-number">Q{{ i + 1 }}</div>
 
         <div class="form-field">
-          <label>Question</label>
+          <label>{{ lang.t().qeQuestion }}</label>
           <textarea
             rows="2"
             [value]="form.question"
             (input)="updateForm(i, 'question', $any($event.target).value)"
-            placeholder="Enter question..."
+            [placeholder]="lang.t().qeQuestionPlaceholder"
           ></textarea>
         </div>
 
@@ -53,12 +53,12 @@
                   [checked]="form.correctAnswer === opt"
                   (change)="updateForm(i, 'correctAnswer', opt)"
                 />
-                <span class="correct-tag">✓ Correct</span>
+                <span class="correct-tag">✓ {{ lang.t().qeCorrect }}</span>
               </label>
               <input type="text"
                 [value]="opt === 'A' ? form.optionA : opt === 'B' ? form.optionB : opt === 'C' ? form.optionC : form.optionD"
                 (input)="updateForm(i, opt === 'A' ? 'optionA' : opt === 'B' ? 'optionB' : opt === 'C' ? 'optionC' : 'optionD', $any($event.target).value)"
-                [placeholder]="'Option ' + opt"
+                [placeholder]="lang.t().qeOption + ' ' + opt"
               />
             </div>
           }
@@ -67,14 +67,14 @@
     }
 
     <button type="submit" class="save-btn" [disabled]="isSaving()">
-      {{ isSaving() ? 'Saving...' : '💾 Save All Quiz' }}
+      {{ isSaving() ? lang.t().qeSaving : ('💾 ' + lang.t().qeSaveAll) }}
     </button>
   </form>
 
   <!-- Existing quizzes -->
   @if (quizzes().length > 0) {
     <section class="existing-quizzes">
-      <h2>Saved Quizzes ({{ quizzes().length }})</h2>
+      <h2>{{ lang.t().qeSavedQuizzes }} ({{ quizzes().length }})</h2>
       @for (q of quizzes(); track q.id; let i = $index) {
         <div class="existing-card">
           <div class="existing-header">

@@ -1,12 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LearningApiService, LessonDto } from '../../Service/learning-api.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LanguageService } from '../../Service/language.service';
-import { LiveClass, LiveClassService } from '../../Service/live-class-service'; // ✅ নতুন
+import { LiveClass, LiveClassService } from '../../Service/live-class-service';
+import { ExamService, ExamView } from '../../Service/exam.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { CourseLive } from '../course-live/course-live';
+import { CourseRecordings } from '../course-recordings/course-recordings';
+import { CourseExams } from '../course-exams/course-exams';
+import { CoursePractice } from '../course-practice/course-practice';
+import { SafeUrl } from '@angular/platform-browser';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { JwtService } from '../../Service/jwt.service';
+import Hls from 'hls.js';
+
 
 type LessonView = {
   id: string;
@@ -37,7 +47,7 @@ type CourseCommentView = {
 
 @Component({
   selector: 'app-enrolled-course',
-  imports: [RouterLink,Navbar],
+  imports: [RouterLink, Navbar, CourseLive, CourseRecordings, CourseExams, CoursePractice],
   templateUrl: './enrolled-course.html',
   styleUrl: './enrolled-course.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,10 +55,13 @@ type CourseCommentView = {
 export class EnrolledCourse implements OnDestroy {
 
   private plyrInstance: any = null;
+  private hlsInstance: any = null;  // HLS.js instance
+  private playerEl: HTMLVideoElement | null = null;  // Plyr/HLS যে element এ bound
+  private initToken = 0;            // প্রতিটা lesson switch এ বাড়ে — stale async init abort করতে
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
-  private readonly liveClassService = inject(LiveClassService); // ✅ নতুন
+  private readonly liveClassService = inject(LiveClassService);
   readonly lang = inject(LanguageService);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
@@ -66,9 +79,49 @@ export class EnrolledCourse implements OnDestroy {
   protected readonly commentMessage = signal('');
   protected readonly commentError = signal('');
 
+  private readonly http = inject(HttpClient);
+  private readonly jwtService = inject(JwtService);
+
+  // ✅ Signed video URL — token সহ, inspect করে copy করলেও কাজ করবে না (5 মিনিট পরে expire)
+  protected readonly signedVideoUrl = signal<string>('');
+
   // ✅ Live class signals
   protected readonly liveClasses = signal<LiveClass[]>([]);
   protected readonly isLoadingLive = signal(false);
+
+  // ✅ Live class recordings (separate "Live Class" section, plays via the same tokenized HLS)
+  protected readonly recordings = signal<LiveClass[]>([]);
+  protected readonly isLoadingRecordings = signal(false);
+  protected readonly watchingRecording = signal<LiveClass | null>(null);
+  private recHls: any = null;
+
+  // ✅ Hub view: landing shows 4 cards; each opens a focused section with a Back button
+  protected readonly view = signal<'hub' | 'practice' | 'live' | 'record' | 'exam'>('hub');
+
+  protected setView(v: 'hub' | 'practice' | 'live' | 'record' | 'exam'): void {
+    // Leaving Record Video → tear down the player (its <video> is removed from the DOM)
+    if (this.view() === 'record' && v !== 'record') {
+      this.initToken++;
+      this.destroyPlyr();
+    }
+    this.view.set(v);
+  }
+  protected backToHub(): void { this.setView('hub'); }
+
+  // ✅ Exam section (legacy inline state — superseded by <app-course-exams>)
+  private readonly examService = inject(ExamService);
+  protected readonly exams = signal<ExamView[]>([]);
+  protected readonly examAnswerNames = signal<Record<string, string>>({});
+  protected readonly submittingExamId = signal<string | null>(null);
+  protected readonly nowTick = signal<number>(Date.now());
+  private examFiles: Record<string, File> = {};
+  private examInterval: any;
+
+  /** Always 3 slots (1st/2nd/Final); null = not created yet (locked). */
+  protected readonly examSlots = computed<(ExamView | null)[]>(() => {
+    const list = this.exams();
+    return [1, 2, 3].map((slot) => list.find((e) => e.slot === slot) ?? null);
+  });
 
   private saveProgressInterval: any;
 
@@ -83,36 +136,95 @@ export class EnrolledCourse implements OnDestroy {
     return name.trim().charAt(0).toUpperCase() || 'I';
   });
 
-  // ✅ Active live class আছে কিনা
   protected readonly activeLiveClass = computed(() =>
     this.liveClasses().find(lc => lc.isActive) ?? null
   );
 
-  constructor(private readonly sanitizer: DomSanitizer) {
-    void this.loadLessons();
-    effect(() => {
-      const lesson = this.selectedLesson();
-      if (lesson) {
-        setTimeout(() => this.initPlyr(), 100);
-      }
-    });
-  }
+constructor(private readonly sanitizer: DomSanitizer) {
+  void this.loadLessons();
+  effect(() => {
+    const v = this.view();
+    const lesson = this.selectedLesson();
+    // Player only exists in the Record Video view — set up there (and re-init on entry)
+    if (v !== 'record' || !lesson) return;
+    // প্রতিটা lesson switch এ: token বাড়াও (stale async abort), আগের player সম্পূর্ণ teardown করো
+    const myToken = ++this.initToken;
+    this.signedVideoUrl.set('');
 
-  ngAfterViewInit() {
-    this.initPlyr();
-  }
+    if (this.isYoutube(lesson.videoUrl) || !lesson.videoUrl) {
+      // YouTube/খালি — video player তুলে দাও (iframe/placeholder দেখাবে)
+      this.destroyPlyr();
+      return;
+    }
+    // uploaded video: persistent player রাখি — switch এ শুধু source swap হবে (setupPlayer এ)
+
+    // signed token নাও, তারপর সরাসরি player setup করো (polling এর উপর নির্ভর করি না)
+    const authToken = this.jwtService.getToken();
+    const headers = new HttpHeaders(authToken ? { Authorization: `Bearer ${authToken}` } : {});
+    const params = new HttpParams().set('path', lesson.videoUrl);
+    this.http.get<any>(`${this.learningApi.getBaseUrl()}/files/video-token?${params.toString()}`, { headers })
+      .subscribe({
+        next: (res) => {
+          if (myToken !== this.initToken) return;   // এর মধ্যে অন্য lesson এ switch হয়েছে — বাদ
+          const streamParams = new HttpParams()
+            .set('path', lesson.videoUrl)
+            .set('token', res.token)
+            .set('exp', String(res.exp));
+          // ✅ HLS (chunk ভাঙা) video হলে playlist endpoint, নাহলে raw stream (fallback)
+          const isHlsVideo = (lesson.videoUrl ?? '').toLowerCase().endsWith('.m3u8');
+          const endpoint = isHlsVideo ? 'files/hls/playlist' : 'files/stream';
+          const url = `${this.learningApi.getBaseUrl()}/${endpoint}?${streamParams.toString()}`;
+          this.signedVideoUrl.set(url);
+          this.setupPlayer(url, myToken);
+        },
+        error: () => {
+          if (myToken !== this.initToken) return;
+          const raw = lesson.videoUrl ?? '';
+          this.signedVideoUrl.set(raw);
+          this.setupPlayer(raw, myToken);
+        }
+      });
+  });
+}
 
   ngOnDestroy() {
-    this.plyrInstance?.destroy();
+    this.initToken++;   // চলমান কোনো async setup abort করো
+    this.destroyPlyr();
+    if (this.recHls) { try { this.recHls.destroy(); } catch { } this.recHls = null; }
     clearInterval(this.saveProgressInterval);
+    clearInterval(this.examInterval);
+  }
+
+  private destroyPlyr(): void {
+    const v = this.playerEl ?? this.videoPlayer?.nativeElement ?? null;
+    // ⚠️ order গুরুত্বপূর্ণ: Plyr আগে destroy করো। নাহলে HLS destroy blob revoke করার পর
+    // Plyr সেই dead blob restore করে net::ERR_FILE_NOT_FOUND দেয়।
+    if (this.plyrInstance) {
+      try { this.plyrInstance.destroy(); } catch { }
+      this.plyrInstance = null;
+    }
+    if (this.hlsInstance) {
+      try { this.hlsInstance.destroy(); } catch { }
+      this.hlsInstance = null;
+    }
+    if (v) {
+      try { v.pause(); } catch { }
+      v.removeAttribute('src');
+      (v as any).srcObject = null;
+      try { v.load(); } catch { }
+    }
+    this.playerEl = null;
   }
 
   protected selectLesson(lessonId: string): void {
+    if (lessonId === this.selectedLessonId()) return; // same lesson click করলে কিছু করার দরকার নেই
+
     clearInterval(this.saveProgressInterval);
+    // destroyPlyr এখানে করি না — effect + setupPlayer persistent player এ source swap করবে
     this.selectedLessonId.set(lessonId);
 
     const lesson = this.lessons().find(l => l.id === lessonId);
-    if (lesson && !lesson.hasQuiz) return;
+    if (!lesson?.hasQuiz) return;
 
     const userId = this.authService.getCurrentUser()?.id ?? '';
     if (!userId || !lesson) return;
@@ -122,25 +234,72 @@ export class EnrolledCourse implements OnDestroy {
         const data = (res as any)?.Data ?? (res as any)?.data ?? res;
         const attempted = data === true || data === 'true';
         this.lessons.update(list =>
-          list.map(l => l.id === lessonId ? { ...l, QuizAttempted: attempted } : l)
+          list.map(l => l.id === lessonId ? { ...l, quizAttempted: attempted } : l)
         );
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
-  private initPlyr() {
-    const videoEl = this.videoPlayer?.nativeElement;
-    if (!videoEl) return;
+  // signed URL পাওয়ার পর player সেটআপ করে। মূল কৌশল: একটাই persistent Plyr+HLS instance —
+  // lesson switch এ destroy/recreate করি না (তাতে Plyr DOM-restructuring conflict + blob error হতো),
+  // শুধু hls.loadSource() দিয়ে নতুন source swap করি। token দিয়ে stale switch abort, RAF দিয়ে
+  // <video> element render এর জন্য অপেক্ষা করি।
+  private setupPlayer(url: string, token: number, attempt = 0): void {
+    if (token !== this.initToken || !url) return;   // stale switch / খালি url
 
-    if (this.plyrInstance) {
-      this.plyrInstance.destroy();
-      this.plyrInstance = null;
+    const videoEl = this.videoPlayer?.nativeElement;
+    if (!videoEl) {
+      // element এখনো DOM এ আসেনি — পরের frame এ আবার চেষ্টা করো (max ~20 frame)
+      if (attempt < 20) requestAnimationFrame(() => this.setupPlayer(url, token, attempt + 1));
+      return;
     }
 
     const PlyrLib = (window as any).Plyr;
     if (!PlyrLib) return;
 
-    this.plyrInstance = new PlyrLib(videoEl, {
+    // video element বদলে গেলে (YouTube ↔ uploaded toggle এর পর Angular নতুন element বানায়) পুরো reset
+    if (this.playerEl && this.playerEl !== videoEl) this.destroyPlyr();
+
+    const isHls = url.includes('/hls/playlist');
+
+    if (isHls && Hls.isSupported()) {
+      // প্রথমবার: Plyr ও HLS একবারই তৈরি করো এবং persistent রাখো
+      if (!this.hlsInstance || this.playerEl !== videoEl) {
+        // Plyr official pattern: আগে Plyr, তারপর hls.attachMedia()
+        if (!this.plyrInstance) this.plyrInstance = new PlyrLib(videoEl, this.getPlyrConfig());
+        const hls = new Hls({
+          xhrSetup: (xhr: XMLHttpRequest) => { xhr.withCredentials = false; },
+        });
+        this.hlsInstance = hls;
+        hls.attachMedia(videoEl);
+        hls.on(Hls.Events.ERROR, (_evt: any, data: any) => {
+          console.error('[HLS]', data.type, data.details, 'fatal:', data.fatal,
+            'httpStatus:', data.response?.code);
+          if (!data.fatal) return;
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+            case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+            default:
+              try { hls.destroy(); } catch { }
+              if (this.hlsInstance === hls) this.hlsInstance = null;
+          }
+        });
+        this.playerEl = videoEl;
+      }
+      // switch: শুধু source swap — destroy/reattach নেই বলে blob churn/ERR_FILE_NOT_FOUND নেই
+      this.hlsInstance.loadSource(url);
+    } else {
+      // Safari native HLS অথবা raw mp4/non-HLS fallback — HLS.js লাগবে না
+      if (this.hlsInstance) { try { this.hlsInstance.destroy(); } catch { } this.hlsInstance = null; }
+      if (!this.plyrInstance) this.plyrInstance = new PlyrLib(videoEl, this.getPlyrConfig());
+      this.playerEl = videoEl;
+      videoEl.src = url;
+      try { videoEl.load(); } catch { }
+    }
+  }
+
+  private getPlyrConfig() {
+    return {
       controls: [
         'play-large', 'play', 'progress',
         'current-time', 'duration',
@@ -151,7 +310,7 @@ export class EnrolledCourse implements OnDestroy {
       keyboard: { focused: true, global: false },
       tooltips: { controls: true, seek: true },
       disableContextMenu: true,
-    });
+    };
   }
 
   protected formatDuration(totalMinutes: number): string {
@@ -193,7 +352,7 @@ export class EnrolledCourse implements OnDestroy {
 
       this.courseMeta.set(await this.loadCourseMeta(id));
       await this.loadComments(id);
-      await this.loadLiveClasses(id); // ✅ live class লোড করো
+      // live / recordings / exams are now self-contained child components
 
       const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));
       const anyRes = response as any;
@@ -245,7 +404,6 @@ export class EnrolledCourse implements OnDestroy {
     }
   }
 
-  // ✅ Live class load করো
   private async loadLiveClasses(courseId: string): Promise<void> {
     this.isLoadingLive.set(true);
     try {
@@ -268,6 +426,172 @@ export class EnrolledCourse implements OnDestroy {
     } finally {
       this.isLoadingLive.set(false);
     }
+  }
+
+  private async loadRecordings(courseId: string): Promise<void> {
+    this.isLoadingRecordings.set(true);
+    try {
+      const response: any = await firstValueFrom(this.liveClassService.getCourseRecordings(courseId));
+      const arr = Array.isArray(response?.data) ? response.data
+        : Array.isArray(response?.Data) ? response.Data : [];
+
+      this.recordings.set(arr.map((item: any) => ({
+        id: item.id ?? item.Id ?? '',
+        title: item.title ?? item.Title ?? '',
+        description: item.description ?? item.Description ?? '',
+        scheduledAt: item.scheduledAt ?? item.ScheduledAt ?? '',
+        isActive: false,
+        isEnded: true,
+        roomUrl: '',
+        recordingPath: item.recordingPath ?? item.RecordingPath ?? '',
+        recordingStatus: item.recordingStatus ?? item.RecordingStatus ?? '',
+      })));
+    } catch {
+      this.recordings.set([]);
+    } finally {
+      this.isLoadingRecordings.set(false);
+    }
+  }
+
+  // ── Exams ───────────────────────────────────────────────────────
+  private async loadExams(courseId: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.examService.getCourseExams(courseId));
+      const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+      this.exams.set(arr.map((e: any) => ({
+        id: e.id ?? e.Id,
+        slot: e.slot ?? e.Slot,
+        title: e.title ?? e.Title ?? '',
+        instruction: e.instruction ?? e.Instruction ?? '',
+        deadline: e.deadline ?? e.Deadline,
+        durationMinutes: e.durationMinutes ?? e.DurationMinutes ?? 0,
+        totalMarks: e.totalMarks ?? e.TotalMarks ?? 0,
+        isPublished: e.isPublished ?? e.IsPublished ?? false,
+        hasQuestion: e.hasQuestion ?? e.HasQuestion ?? false,
+        isClosed: e.isClosed ?? e.IsClosed ?? false,
+        submitted: e.submitted ?? e.Submitted ?? false,
+        submittedAt: e.submittedAt ?? e.SubmittedAt ?? null,
+        marks: e.marks ?? e.Marks ?? null,
+        feedback: e.feedback ?? e.Feedback ?? null,
+        graded: e.graded ?? e.Graded ?? false,
+      })));
+      if (!this.examInterval) {
+        // Day-level countdown — a 60s tick is plenty; refreshes "N days left" and flips closed.
+        this.examInterval = setInterval(() => this.nowTick.set(Date.now()), 60000);
+      }
+    } catch {
+      this.exams.set([]);
+    }
+  }
+
+  /** Whole days left until the deadline (0 once passed). */
+  protected daysLeft(deadline: string): number {
+    const ms = new Date(deadline).getTime() - this.nowTick();
+    return ms <= 0 ? 0 : Math.ceil(ms / 86400000);
+  }
+
+  protected isExamPast(exam: ExamView): boolean {
+    return new Date(exam.deadline).getTime() <= this.nowTick();
+  }
+
+  /** locked | open | submitted | closed */
+  protected examState(exam: ExamView | null): 'locked' | 'open' | 'submitted' | 'closed' {
+    if (!exam || !exam.isPublished) return 'locked';
+    if (this.isExamPast(exam)) return 'closed';
+    return exam.submitted ? 'submitted' : 'open';
+  }
+
+  protected onExamFileSelected(examId: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.examFiles[examId] = file;
+    this.examAnswerNames.update((m) => ({ ...m, [examId]: file.name }));
+  }
+
+  protected async submitExam(exam: ExamView): Promise<void> {
+    const file = this.examFiles[exam.id];
+    if (!file) return;
+    this.submittingExamId.set(exam.id);
+    try {
+      await firstValueFrom(this.examService.submit(exam.id, file));
+      delete this.examFiles[exam.id];
+      this.examAnswerNames.update((m) => { const c = { ...m }; delete c[exam.id]; return c; });
+      await this.loadExams(this.courseId());
+    } catch {
+      // server enforces deadline/enrollment; reload to reflect the true state
+      await this.loadExams(this.courseId());
+    } finally {
+      this.submittingExamId.set(null);
+    }
+  }
+
+  protected viewExamQuestion(exam: ExamView): void {
+    this.examService.viewQuestion(exam.id).subscribe({
+      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
+      error: () => {},
+    });
+  }
+
+  protected viewMyAnswer(exam: ExamView): void {
+    this.examService.myAnswer(exam.id).subscribe({
+      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
+      error: () => {},
+    });
+  }
+
+  /** Open a recording in the modal player and stream it via the tokenized HLS endpoint. */
+  protected playRecording(rec: LiveClass): void {
+    if (!rec.recordingPath) return;
+    this.watchingRecording.set(rec);
+
+    const authToken = this.jwtService.getToken();
+    const headers = new HttpHeaders(authToken ? { Authorization: `Bearer ${authToken}` } : {});
+    const params = new HttpParams().set('path', rec.recordingPath);
+    this.http.get<any>(`${this.learningApi.getBaseUrl()}/files/video-token?${params.toString()}`, { headers })
+      .subscribe({
+        next: (res) => {
+          const streamParams = new HttpParams()
+            .set('path', rec.recordingPath!)
+            .set('token', res.token)
+            .set('exp', String(res.exp));
+          const url = `${this.learningApi.getBaseUrl()}/files/hls/playlist?${streamParams.toString()}`;
+          this.attachRecordingHls(url);
+        },
+        error: () => { /* modal stays; user can close */ },
+      });
+  }
+
+  private attachRecordingHls(url: string, attempt = 0): void {
+    const videoEl = this.recordingPlayer?.nativeElement;
+    if (!videoEl) {
+      if (attempt > 20) return;
+      requestAnimationFrame(() => this.attachRecordingHls(url, attempt + 1));
+      return;
+    }
+    if (this.recHls) { try { this.recHls.destroy(); } catch { } this.recHls = null; }
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      this.recHls = hls;
+      hls.loadSource(url);
+      hls.attachMedia(videoEl);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => { videoEl.play().catch(() => { }); });
+    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      videoEl.src = url;
+      videoEl.play().catch(() => { });
+    }
+  }
+
+  protected closeRecording(): void {
+    if (this.recHls) { try { this.recHls.destroy(); } catch { } this.recHls = null; }
+    const v = this.recordingPlayer?.nativeElement;
+    if (v) {
+      try { v.pause(); } catch { }
+      v.removeAttribute('src');
+      try { v.load(); } catch { }
+    }
+    this.watchingRecording.set(null);
   }
 
   private async loadCourseMeta(id: string): Promise<CourseMetaView | null> {
@@ -415,7 +739,6 @@ export class EnrolledCourse implements OnDestroy {
     return parsed.toLocaleString();
   }
 
-  // ✅ Live class scheduled time format
   protected formatScheduled(value: string): string {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
@@ -438,10 +761,12 @@ export class EnrolledCourse implements OnDestroy {
       description: lesson.description ?? lesson.Description ?? '',
       orderIndex: lesson.orderIndex ?? lesson.OrderIndex ?? 0,
       durationMinutes: lesson.durationMinutes ?? lesson.DurationMinutes ?? 0,
+      // ✅ Uploaded video: raw path রাখো — effect() এ signed URL fetch হবে
+      // YouTube: external URL যেমন আছে তেমন রাখো
       videoUrl: hasUploadedVideo
-        ? this.learningApi.buildDownloadUrl(videoPath)
+        ? videoPath
         : (hasExternalVideo ? videoUrl : ''),
-      thumbnailUrl: this.learningApi.buildDownloadUrl(thumbnailPath),
+      thumbnailUrl: this.learningApi.buildStreamUrl(thumbnailPath),
       hasQuiz: false,
       quizAttempted: false,
     };
@@ -465,6 +790,7 @@ export class EnrolledCourse implements OnDestroy {
   }
 
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
+  @ViewChild('recordingPlayer') recordingPlayer?: ElementRef<HTMLVideoElement>;
 
   async onVideoLoaded(event: Event, lessonId: string): Promise<void> {
     const video = event.target as HTMLVideoElement;

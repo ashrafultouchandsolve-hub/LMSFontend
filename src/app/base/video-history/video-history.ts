@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 
 @Component({
   selector: 'app-video-history',
@@ -16,6 +17,7 @@ export class VideoHistoryComponent implements OnInit {
   private api = inject(LearningApiService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  protected readonly lang = inject(LanguageService);
 
   history = signal<any[]>([]);
   isLoading = signal(true);

@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { LearningApiService } from '../../Service/learning-api.service';
+import { LanguageService } from '../../Service/language.service';
 
 @Component({
   selector: 'app-payment',
@@ -15,6 +16,7 @@ export class Payment {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly learningApi = inject(LearningApiService);
+  protected readonly lang = inject(LanguageService);
 
   protected readonly isProcessing = signal(false);
   protected readonly message = signal('');

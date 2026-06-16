@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse, HttpEvent } from '@angular/common/http';
-import { Router, RouterLink, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../Service/auth.service';
@@ -12,11 +12,16 @@ import {
   SaveCoursePayload,
   SaveLessonPayload,
 } from '../../Service/learning-api.service';
-import { LiveClass, LiveClassService } from '../../Service/live-class-service';
+import { FreeLiveClass, LiveClass, LiveClassService } from '../../Service/live-class-service';
+import { ExamService, ExamView, ExamSubmissionView } from '../../Service/exam.service';
+import { PracticeService, PracticeMaterial } from '../../Service/practice.service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 import { environment } from '../../../environments/environments';
 import { Navbar } from '../../shared/navbar/navbar';
+import { LanguageService } from '../../Service/language.service';
+import { Category, CategoryService } from '../../Service/category.service';
+import { AdminService, AdminTeacher } from '../../Service/admin.service';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
@@ -66,6 +71,10 @@ export class Teacher implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly learningApi = inject(LearningApiService);
   private readonly liveClassService = inject(LiveClassService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly adminService = inject(AdminService);
+  private readonly route = inject(ActivatedRoute);
+  protected readonly lang = inject(LanguageService);
 
   protected readonly searchTerm = signal('');
   protected readonly selectedCourseId = signal<string | null>(null);
@@ -105,6 +114,33 @@ protected liveScheduledAt = '';
   protected readonly isTeacher = computed(() => this.currentUser()?.role === 1);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
 
+  // ── Role modes: Admin authors courses; Teacher only runs live classes ──
+  protected readonly isAdminMode = computed(() => this.currentUser()?.role === 2);
+  protected readonly isLiveTeacherMode = computed(() => this.currentUser()?.role === 1);
+
+  // Category + teacher-appointment data (admin authoring)
+  protected readonly categories = signal<Category[]>([]);
+  protected readonly approvedTeachers = signal<AdminTeacher[]>([]);
+  // Multiple teachers can be assigned to one course (userIds)
+  protected readonly selectedTeacherIds = signal<string[]>([]);
+  protected readonly teacherDropdownOpen = signal(false);
+
+  /** The approved-teacher objects that are currently selected (for chips). */
+  protected readonly selectedTeacherObjs = computed(() => {
+    const ids = this.selectedTeacherIds();
+    return this.approvedTeachers().filter((t) => ids.includes(t.id));
+  });
+
+  protected toggleTeacher(userId: string): void {
+    this.selectedTeacherIds.update((ids) =>
+      ids.includes(userId) ? ids.filter((x) => x !== userId) : [...ids, userId]
+    );
+  }
+  protected isTeacherSelected(userId: string): boolean {
+    return this.selectedTeacherIds().includes(userId);
+  }
+  protected readonly categoryFilter = signal<string>('');
+
 
 
   protected readonly showStudentsPanel = signal(false);
@@ -114,11 +150,17 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
   protected readonly filteredCourses = computed(() => {
     const keyword = this.searchTerm().trim().toLowerCase();
+    const cat = this.categoryFilter().trim().toLowerCase();
+    let list = this.courses();
+
+    if (cat) {
+      list = list.filter((course) => course.category.toLowerCase() === cat);
+    }
     if (!keyword) {
-      return this.courses();
+      return list;
     }
 
-    return this.courses().filter((course) => {
+    return list.filter((course) => {
       return (
         course.title.toLowerCase().includes(keyword) ||
         course.category.toLowerCase().includes(keyword) ||
@@ -155,6 +197,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     durationMinutes: [0, [Validators.min(0)]],
     thumbnailUrl: [''],
     published: [false],
+    teacherUserId: [''],
   });
 
   protected readonly lessonForm = this.fb.group({
@@ -172,54 +215,159 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected readonly isLessonEditorOpen = computed(() => this.showLessonModal());
 
   protected readonly courseModalTitle = computed(() =>
-    this.editingCourseId() === null ? 'New Course' : 'Edit Course',
+    this.editingCourseId() === null ? this.lang.t().tcNewCourse : this.lang.t().tcEditCourse,
   );
 
   protected readonly lessonModalTitle = computed(() =>
-    this.editingLessonId() === null ? 'Add Lesson' : 'Edit Lesson',
+    this.editingLessonId() === null ? this.lang.t().tcAddLesson : this.lang.t().tcEditLesson,
   );
 
   protected readonly currentCourseName = computed(() => this.selectedCourse()?.title ?? 'Course');
 
-  protected readonly sidebarItems = [
-    { key: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { key: 'courses', label: 'Courses', icon: '📚' },
-    { key: 'users', label: 'Users', icon: '👥' },
-    { key: 'enrollments', label: 'Enrollments', icon: '📝' },
-    { key: 'teacher-profile', label: 'My Profile', icon: '👤' },
-  ] as const;
+  protected readonly sidebarItems = computed<{ key: 'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile' | 'live'; label: string; icon: string }[]>(() => {
+    // Admin (course manager): only the course list. Teacher: live + courses + profile.
+    if (this.isAdminMode()) {
+      return [{ key: 'courses', label: this.lang.t().tcSideCourses, icon: '📚' }];
+    }
+    return [
+      { key: 'live', label: this.lang.t().tcSideLive, icon: '🔴' },
+      { key: 'courses', label: this.lang.t().tcSideCourses, icon: '📚' },
+      { key: 'teacher-profile', label: this.lang.t().tcSideProfile, icon: '👤' },
+    ];
+  });
 
-  protected readonly activeSidebarKey = signal<'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile'>('courses');
+  protected readonly activeSidebarKey = signal<'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile' | 'live'>('courses');
 
   ngOnInit(): void {
-    void this.loadTeacherCourses();
+    if (this.isAdminMode()) {
+      // Admin authoring: load category from the card the admin came from, then all courses.
+      const cat = this.route.snapshot.queryParamMap.get('category') ?? '';
+      this.categoryFilter.set(cat);
+      void this.loadCategoriesAndTeachers();
+      void this.loadAllCoursesAdmin();
+    } else {
+      void this.loadTeacherCourses();
+    }
+  }
+
+  private async loadCategoriesAndTeachers(): Promise<void> {
+    try {
+      const catRes: any = await firstValueFrom(this.categoryService.getAll());
+      this.categories.set(catRes?.data ?? catRes?.Data ?? []);
+    } catch { this.categories.set([]); }
+    try {
+      const teachers = await firstValueFrom(this.adminService.getTeachers());
+      // only approved/active teachers can be appointed
+      this.approvedTeachers.set((teachers ?? []).filter((t) => (t.status ?? '').toLowerCase() !== 'pending' && (t.status ?? '').toLowerCase() !== 'blocked'));
+    } catch { this.approvedTeachers.set([]); }
   }
 
   protected updateSearchTerm(value: string): void {
     this.searchTerm.set(value);
   }
 
-  protected selectSidebar(key: 'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile'): void {
+  protected selectSidebar(key: 'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile' | 'live'): void {
     this.activeSidebarKey.set(key);
 
     if (key === 'courses') {
       this.closeLessonsView();
+    }
+
+    if (key === 'live') {
+      void this.loadMyFreeClasses();
+    }
+  }
+
+  // ── Free public live classes (anyone can join without login) ─────
+  protected freeLiveTitle = '';
+  protected freeLiveDesc = '';
+  protected readonly myFreeClasses = signal<FreeLiveClass[]>([]);
+  protected readonly isStartingFree = signal(false);
+  protected readonly isLoadingFree = signal(false);
+  protected readonly copiedFreeId = signal<string | null>(null);
+
+  private async loadMyFreeClasses(): Promise<void> {
+    this.isLoadingFree.set(true);
+    try {
+      const res: any = await firstValueFrom(this.liveClassService.getMyFree());
+      this.myFreeClasses.set(res?.data ?? res?.Data ?? []);
+    } catch {
+      this.myFreeClasses.set([]);
+    } finally {
+      this.isLoadingFree.set(false);
+    }
+  }
+
+  protected async startFreeLive(): Promise<void> {
+    const title = this.freeLiveTitle.trim();
+    if (!title) {
+      this.setNotice('Live class title required.', 'error');
+      return;
+    }
+
+    this.isStartingFree.set(true);
+    try {
+      const res: any = await firstValueFrom(
+        this.liveClassService.startFree({ title, description: this.freeLiveDesc.trim() }),
+      );
+      const newId = res?.data?.id ?? res?.Data?.Id ?? null;
+      this.freeLiveTitle = '';
+      this.freeLiveDesc = '';
+      await this.loadMyFreeClasses();
+      this.setNotice('Free live class is now LIVE. Share the link or open the room.', 'success');
+      if (newId) this.router.navigateByUrl(`/free-live/${newId}`);
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Free live class start করা যায়নি।'), 'error');
+    } finally {
+      this.isStartingFree.set(false);
+    }
+  }
+
+  protected async endFreeLive(id: string): Promise<void> {
+    if (!window.confirm('End this free live class?')) return;
+    try {
+      await firstValueFrom(this.liveClassService.endFree(id));
+      await this.loadMyFreeClasses();
+      this.setNotice('Free live class ended.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Free live class end করা যায়নি।'), 'error');
+    }
+  }
+
+  protected openFreeRoom(id: string): void {
+    this.router.navigateByUrl(`/free-live/${id}`);
+  }
+
+  protected buildFreeLink(id: string): string {
+    return `${window.location.origin}/free-live/${id}`;
+  }
+
+  protected async copyFreeLink(id: string): Promise<void> {
+    const link = this.buildFreeLink(id);
+    try {
+      await navigator.clipboard.writeText(link);
+      this.copiedFreeId.set(id);
+      setTimeout(() => this.copiedFreeId.set(null), 2000);
+    } catch {
+      this.setNotice(link, 'success');
     }
   }
 
   protected openNewCourseModal(): void {
     this.clearCourseUploadState();
     this.editingCourseId.set(null);
+    this.selectedTeacherIds.set([]);
     this.courseForm.reset({
       title: '',
-      category: '',
+      category: this.categoryFilter() || '',
       description: '',
-      instructorName: this.userName(),
+      instructorName: '',
       level: 'Beginner',
       price: 0,
       durationMinutes: 0,
       thumbnailUrl: '',
       published: false,
+      teacherUserId: '',
     });
     this.showCourseModal.set(true);
   }
@@ -232,6 +380,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
     this.clearCourseUploadState();
     this.editingCourseId.set(course.id);
+    this.selectedTeacherIds.set([]);
     this.courseForm.reset({
       title: course.title,
       category: course.category,
@@ -242,12 +391,22 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       durationMinutes: course.durationMinutes,
       thumbnailUrl: course.thumbnailUrl,
       published: course.published,
+      teacherUserId: '',
     });
     this.showCourseModal.set(true);
+    // Preselect the course's currently-assigned teachers (by their userId)
+    firstValueFrom(this.learningApi.getCourseTeachers(course.id))
+      .then((res: any) => {
+        const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+        const ids = arr.map((t: any) => t.userId ?? t.UserId).filter((x: any) => !!x);
+        this.selectedTeacherIds.set(ids);
+      })
+      .catch(() => {});
   }
 
   protected closeCourseModal(): void {
     this.showCourseModal.set(false);
+    this.teacherDropdownOpen.set(false);
     this.courseForm.markAsPristine();
     this.clearCourseUploadState();
   }
@@ -264,19 +423,32 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       return;
     }
 
+    const editingIdCheck = this.editingCourseId();
+    const teacherIds = this.selectedTeacherIds();
+    // At least one teacher must be appointed.
+    if (teacherIds.length === 0) {
+      this.setNotice('Please appoint at least one teacher for this course.', 'error');
+      return;
+    }
+
     this.isSavingCourse.set(true);
 
     try {
       const formValue = this.courseForm.getRawValue();
+      const appointedNames = this.approvedTeachers()
+        .filter((t) => teacherIds.includes(t.id))
+        .map((t) => t.fullName);
       const payload: SaveCoursePayload = {
         title: formValue.title,
         description: formValue.description,
         category: formValue.category,
-        instructorName: formValue.instructorName || this.userName(),
+        instructorName: appointedNames.join(', ') || formValue.instructorName || '',
         level: formValue.level,
         price: Number(formValue.price || 0),
         durationMinutes: Number(formValue.durationMinutes || 0),
         isPublished: formValue.published,
+        teacherUserId: teacherIds[0],
+        teacherUserIds: teacherIds,
       };
 
       const editingId = this.editingCourseId();
@@ -294,7 +466,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         await firstValueFrom(this.learningApi.uploadCourseThumbnail(targetCourseId, thumbnailFile));
       }
 
-      await this.loadTeacherCourses();
+      await this.reloadCourses();
       this.setNotice('কোর্স সফলভাবে সংরক্ষণ হয়েছে।', 'success');
       this.closeCourseModal();
     } catch (error) {
@@ -318,7 +490,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
     try {
       await firstValueFrom(this.learningApi.deleteCourse(courseId));
-      await this.loadTeacherCourses();
+      await this.reloadCourses();
       if (this.selectedCourseId() === courseId) {
         this.selectedCourseId.set(null);
       }
@@ -332,6 +504,286 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.selectedCourseId.set(courseId);
     await this.loadLessons(courseId);
     await this.loadLiveClasses(courseId);
+    await this.loadExams(courseId);
+    await this.loadPractice(courseId);
+  }
+
+  // ── Exams (admin authors; admin + appointed teacher grade) ───────
+  private readonly examService = inject(ExamService);
+  protected readonly exams = signal<ExamView[]>([]);
+  protected readonly examSlots = computed<(ExamView | null)[]>(() => {
+    const list = this.exams();
+    return [1, 2, 3].map((slot) => list.find((e) => e.slot === slot) ?? null);
+  });
+
+  protected readonly showExamModal = signal(false);
+  protected examSlotEditing = 1;
+  protected examTitle = '';
+  protected examInstruction = '';
+  protected examDurationDays = 1;   // exam window length in days (starts when the question is uploaded)
+  protected examTotalMarks = 0;
+  protected readonly isSavingExam = signal(false);
+  protected readonly uploadingQuestionSlot = signal<number | null>(null);
+
+  protected readonly showExamSubsModal = signal(false);
+  protected readonly examSubs = signal<ExamSubmissionView[]>([]);
+  protected readonly examSubsTotalMarks = signal(0);
+  private examSubsExamId: string | null = null;
+  protected gradeInputs: Record<string, { marks: string; feedback: string }> = {};
+
+  private mapExam = (e: any): ExamView => ({
+    id: e.id ?? e.Id,
+    slot: e.slot ?? e.Slot,
+    title: e.title ?? e.Title ?? '',
+    instruction: e.instruction ?? e.Instruction ?? '',
+    startDate: e.startDate ?? e.StartDate,
+    deadline: e.deadline ?? e.Deadline,
+    durationMinutes: e.durationMinutes ?? e.DurationMinutes ?? 0,
+    totalMarks: e.totalMarks ?? e.TotalMarks ?? 0,
+    isPublished: e.isPublished ?? e.IsPublished ?? false,
+    hasQuestion: e.hasQuestion ?? e.HasQuestion ?? false,
+    isStarted: e.isStarted ?? e.IsStarted ?? false,
+    isClosed: e.isClosed ?? e.IsClosed ?? false,
+    submitted: false, graded: false,
+  });
+
+  private async loadExams(courseId: string): Promise<void> {
+    try {
+      const r: any = await firstValueFrom(this.examService.getCourseExams(courseId));
+      const a = Array.isArray(r?.data) ? r.data : Array.isArray(r?.Data) ? r.Data : [];
+      this.exams.set(a.map(this.mapExam));
+    } catch {
+      this.exams.set([]);
+    }
+  }
+
+  private toLocalInput(iso: string): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  protected openExamModal(slot: number): void {
+    const ex = this.examSlots()[slot - 1];
+    this.examSlotEditing = slot;
+    this.examTitle = ex?.title ?? '';
+    this.examInstruction = ex?.instruction ?? '';
+    this.examDurationDays = ex && ex.durationMinutes > 0 ? Math.max(1, Math.round(ex.durationMinutes / 1440)) : 1;
+    this.examTotalMarks = ex?.totalMarks ?? 0;
+    this.showExamModal.set(true);
+  }
+
+  protected closeExamModal(): void {
+    this.showExamModal.set(false);
+  }
+
+  protected async saveExam(): Promise<void> {
+    const course = this.selectedCourse();
+    if (!course) return;
+    if (!this.examTitle.trim() || !this.examDurationDays || this.examDurationDays < 1) {
+      this.setNotice('Exam title and a duration (days) are required.', 'error');
+      return;
+    }
+    this.isSavingExam.set(true);
+    try {
+      await firstValueFrom(this.examService.createExam({
+        courseId: course.id,
+        slot: this.examSlotEditing,
+        title: this.examTitle.trim(),
+        instruction: this.examInstruction.trim(),
+        durationMinutes: Number(this.examDurationDays) * 1440,
+        totalMarks: Number(this.examTotalMarks || 0),
+      }));
+      await this.loadExams(course.id);
+      this.setNotice('Exam saved.', 'success');
+      this.closeExamModal();
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Exam সেভ করা যায়নি।'), 'error');
+    } finally {
+      this.isSavingExam.set(false);
+    }
+  }
+
+  protected async onExamQuestionSelected(slot: number, event: Event): Promise<void> {
+    const ex = this.examSlots()[slot - 1];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!ex) {
+      this.setNotice('Save the exam first, then upload its question.', 'error');
+      input.value = '';
+      return;
+    }
+    this.uploadingQuestionSlot.set(slot);
+    try {
+      await firstValueFrom(this.examService.uploadQuestion(ex.id, file));
+      const c = this.selectedCourse();
+      if (c) await this.loadExams(c.id);
+      this.setNotice('Question uploaded — exam is now live.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Question আপলোড করা যায়নি।'), 'error');
+    } finally {
+      this.uploadingQuestionSlot.set(null);
+      input.value = '';
+    }
+  }
+
+  protected async openExamSubs(examId: string): Promise<void> {
+    this.examSubsExamId = examId;
+    this.showExamSubsModal.set(true);
+    try {
+      const r: any = await firstValueFrom(this.examService.getSubmissions(examId));
+      const a = Array.isArray(r?.data) ? r.data : Array.isArray(r?.Data) ? r.Data : [];
+      this.examSubsTotalMarks.set(r?.totalMarks ?? r?.TotalMarks ?? 0);
+      const subs: ExamSubmissionView[] = a.map((s: any) => ({
+        submissionId: s.submissionId ?? s.SubmissionId,
+        userId: s.userId ?? s.UserId,
+        studentName: s.studentName ?? s.StudentName ?? 'Student',
+        studentEmail: s.studentEmail ?? s.StudentEmail ?? '',
+        submittedAt: s.submittedAt ?? s.SubmittedAt,
+        marks: s.marks ?? s.Marks ?? null,
+        feedback: s.feedback ?? s.Feedback ?? null,
+        graded: s.graded ?? s.Graded ?? false,
+        gradedByAdmin: s.gradedByAdmin ?? s.GradedByAdmin ?? false,
+      }));
+      this.examSubs.set(subs);
+      this.gradeInputs = {};
+      subs.forEach((s) => this.gradeInputs[s.submissionId] = {
+        marks: s.marks != null ? String(s.marks) : '',
+        feedback: s.feedback ?? '',
+      });
+    } catch {
+      this.examSubs.set([]);
+    }
+  }
+
+  protected closeExamSubs(): void {
+    this.showExamSubsModal.set(false);
+  }
+
+  protected downloadSubmission(sub: ExamSubmissionView): void {
+    this.examService.submissionFile(sub.submissionId).subscribe({
+      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
+      error: () => {},
+    });
+  }
+
+  /** Admin / teacher: preview the uploaded question PDF. */
+  protected viewExamQuestion(examId: string): void {
+    this.examService.viewQuestion(examId).subscribe({
+      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
+      error: () => {},
+    });
+  }
+
+  // ── Practice materials (admin only) ──────────────────────────────
+  private readonly practiceService = inject(PracticeService);
+  protected readonly practiceMaterials = signal<PracticeMaterial[]>([]);
+  protected readonly isSavingPractice = signal(false);
+  protected pmEditingId: string | null = null;
+  protected pmTitle = '';
+  protected pmDesc = '';
+  private pmFile: File | null = null;
+  protected pmFileName = '';
+
+  private async loadPractice(courseId: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.practiceService.getCourseMaterials(courseId));
+      const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+      this.practiceMaterials.set(arr.map((m: any) => ({
+        id: m.id ?? m.Id,
+        title: m.title ?? m.Title ?? '',
+        description: m.description ?? m.Description ?? '',
+        hasFile: m.hasFile ?? m.HasFile ?? false,
+        fileType: (m.fileType ?? m.FileType ?? 'PDF').toUpperCase(),
+        createdAt: m.createdAt ?? m.CreatedAt,
+      })));
+    } catch {
+      this.practiceMaterials.set([]);
+    }
+  }
+
+  protected onPracticeFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.pmFile = file;
+    this.pmFileName = file?.name ?? '';
+  }
+
+  protected resetPracticeForm(): void {
+    this.pmEditingId = null;
+    this.pmTitle = '';
+    this.pmDesc = '';
+    this.pmFile = null;
+    this.pmFileName = '';
+  }
+
+  protected editPractice(m: PracticeMaterial): void {
+    this.pmEditingId = m.id;
+    this.pmTitle = m.title;
+    this.pmDesc = m.description;
+    this.pmFile = null;
+    this.pmFileName = '';
+  }
+
+  protected async savePractice(): Promise<void> {
+    const course = this.selectedCourse();
+    if (!course) return;
+    if (!this.pmTitle.trim()) {
+      this.setNotice('A field name is required.', 'error');
+      return;
+    }
+    if (!this.pmEditingId && !this.pmFile) {
+      this.setNotice('Please choose a PDF or DOC file.', 'error');
+      return;
+    }
+    this.isSavingPractice.set(true);
+    try {
+      if (this.pmEditingId) {
+        await firstValueFrom(this.practiceService.update(this.pmEditingId, this.pmTitle.trim(), this.pmDesc.trim(), this.pmFile));
+      } else {
+        await firstValueFrom(this.practiceService.create(course.id, this.pmTitle.trim(), this.pmDesc.trim(), this.pmFile!));
+      }
+      await this.loadPractice(course.id);
+      this.resetPracticeForm();
+      this.setNotice('Practice material saved.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Practice material সেভ করা যায়নি।'), 'error');
+    } finally {
+      this.isSavingPractice.set(false);
+    }
+  }
+
+  protected async deletePractice(id: string): Promise<void> {
+    if (!window.confirm('Delete this practice material?')) return;
+    try {
+      await firstValueFrom(this.practiceService.delete(id));
+      const c = this.selectedCourse();
+      if (c) await this.loadPractice(c.id);
+      this.setNotice('Practice material deleted.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Delete করা যায়নি।'), 'error');
+    }
+  }
+
+  protected viewPractice(id: string): void {
+    this.practiceService.viewFile(id).subscribe({
+      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
+      error: () => {},
+    });
+  }
+
+  protected async gradeSubmission(sub: ExamSubmissionView): Promise<void> {
+    const g = this.gradeInputs[sub.submissionId];
+    if (!g) return;
+    try {
+      await firstValueFrom(this.examService.grade(sub.submissionId, Number(g.marks || 0), g.feedback || ''));
+      if (this.examSubsExamId) await this.openExamSubs(this.examSubsExamId);
+      this.setNotice('Marks saved.', 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Marks সেভ করা যায়নি।'), 'error');
+    }
   }
 
   protected closeLessonsView(): void {
@@ -548,7 +1000,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       }
 
       await this.loadLessons(selected.id);
-      await this.loadTeacherCourses();
+      await this.reloadCourses();
       this.setNotice('লেসন সফলভাবে সংরক্ষণ হয়েছে।', 'success');
       this.closeLessonModal();
     } catch (error) {
@@ -578,7 +1030,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     try {
       await firstValueFrom(this.learningApi.deleteLesson(lessonId));
       await this.loadLessons(selected.id);
-      await this.loadTeacherCourses();
+      await this.reloadCourses();
       this.setNotice('লেসন মুছে ফেলা হয়েছে।', 'success');
     } catch (error) {
       this.setNotice(this.extractApiErrorMessage(error, 'লেসন ডিলিট করা যায়নি।'), 'error');
@@ -671,6 +1123,10 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.router.navigateByUrl('/homepage');
   }
 
+  protected goToAdmin(): void {
+    this.router.navigateByUrl('/admin');
+  }
+
   protected logout(): void {
     this.authService.logout();
     this.router.navigateByUrl('/login');
@@ -717,6 +1173,48 @@ private async loadTeacherCourses(): Promise<void> {
     this.isLoadingCourses.set(false);
   }
 }
+
+  /** Admin authoring: load ALL courses (any teacher), enriched like the teacher view. */
+  private async loadAllCoursesAdmin(): Promise<void> {
+    this.isLoadingCourses.set(true);
+    try {
+      const existingLessonsByCourseId = new Map(this.courses().map((course) => [course.id, course.lessons]));
+      const response: any = await firstValueFrom(this.learningApi.getAllCourses());
+      const courseDtos: CourseDto[] = Array.isArray(response?.data) ? response.data
+        : Array.isArray(response?.Data) ? response.Data : [];
+
+      const mapped = await Promise.all(
+        courseDtos.map(async (course) => {
+          const [countRes, ratingSummaryRes] = await Promise.all([
+            firstValueFrom(this.learningApi.getEnrollmentCount(course.id)).catch(() => ({ totalEnrollment: 0 })),
+            firstValueFrom(this.learningApi.getRatingSummary(course.id)).catch(() => null),
+          ]);
+          const ratingData = (ratingSummaryRes as any)?.data ?? (ratingSummaryRes as any)?.Data ?? null;
+          const averageRating = ratingData ? Number(ratingData.averageRating || 0) : 0;
+          const totalRatings = ratingData ? Number(ratingData.totalRatings || 0) : 0;
+          return this.mapCourse(
+            course,
+            existingLessonsByCourseId.get(course.id) ?? [],
+            (countRes as any).totalEnrollment ?? 0,
+            averageRating,
+            totalRatings,
+          );
+        })
+      );
+      this.courses.set(mapped);
+    } catch (error) {
+      this.courses.set([]);
+      this.setNotice(this.extractApiErrorMessage(error, 'কোর্স লোড করা যায়নি।'), 'error');
+    } finally {
+      this.isLoadingCourses.set(false);
+    }
+  }
+
+  /** After admin create/edit, reload the right list for the active mode. */
+  private async reloadCourses(): Promise<void> {
+    if (this.isAdminMode()) await this.loadAllCoursesAdmin();
+    else await this.loadTeacherCourses();
+  }
 
   private async loadLiveClasses(courseId: string): Promise<void> {
     this.isLoadingLiveClasses.set(true);

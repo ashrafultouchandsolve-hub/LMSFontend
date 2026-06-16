@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -17,6 +18,7 @@ export class TeacherProfileComponent implements OnInit {
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
   private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly lang = inject(LanguageService);
 
   // Signals for profile state
   protected readonly isLoading = signal(false);

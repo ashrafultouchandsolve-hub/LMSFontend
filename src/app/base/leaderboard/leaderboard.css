@@ -173,16 +173,16 @@
 }
 
 .p-name {
-  font-family: var(--font-display); font-size: 0.9rem;
-  font-weight: 700; color: #d1d5db;
+  font-family: var(--font-display); font-size: 0.92rem;
+  font-weight: 700; color: #eef2f8;
   text-align: center; max-width: 120px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .p-name-gold { color: var(--white); font-size: 1rem; }
 
 .p-pct {
-  font-family: var(--font-display); font-size: 0.95rem;
-  font-weight: 900; color: var(--blue-light);
+  font-family: var(--font-display); font-size: 0.98rem;
+  font-weight: 900; color: #93c5fd;
 }
 .p-pct-gold { color: var(--gold); font-size: 1.1rem; }
 
@@ -252,8 +252,8 @@
 }
 .my-rank-bar strong { color: black; font-weight: 800; }
 .my-score-chip {
-  background: var(--blue); color: black;
-  padding: 4px 14px; border-radius: 999px;
+  background: var(--blue); color: #ffffff;
+  padding: 6px 16px; border-radius: 999px;
   font-size: 0.82rem; font-weight: 700;
   margin-left: auto;
 }
@@ -346,6 +346,180 @@
   font-size: 0.85rem; font-weight: 800;
   color: var(--blue); white-space: nowrap;
   font-family: var(--font-display);
+}
+
+/* ════════════════════════════════════════════════════════
+   COURSE DROPDOWN (dark hero)
+   ════════════════════════════════════════════════════════ */
+.course-picker {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; margin: 0 auto 30px; position: relative; z-index: 2;
+  flex-wrap: wrap;
+}
+.course-picker-label {
+  font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #b9c6e0;
+}
+.course-select-wrap { position: relative; }
+.course-select {
+  appearance: none; -webkit-appearance: none;
+  min-width: 240px; max-width: 80vw;
+  padding: 12px 42px 12px 16px;
+  background: #28344a;
+  border: 1.5px solid #4f7bd6;
+  border-radius: 12px;
+  color: #ffffff; font-family: var(--font-body);
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  outline: none;
+}
+.course-select:hover, .course-select:focus {
+  background: #303e57;
+  border-color: var(--blue-light);
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.25);
+}
+/* dropdown list items — light text on dark so always readable */
+.course-select option { background: #1b2233; color: #ffffff; font-weight: 600; }
+.course-select-caret {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: #93c5fd; pointer-events: none; font-size: 0.9rem;
+}
+
+/* podium cross-fade when switching course */
+.podium-stage { animation: stageFade 0.45s ease both; }
+@keyframes stageFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════════════════════════════════
+   TOOLBAR: search + sort
+   ════════════════════════════════════════════════════════ */
+.lb-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.lb-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: 10px; padding: 8px 12px; flex: 1 1 240px; min-width: 200px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.lb-search:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+.lb-search-icon { font-size: 0.9rem; opacity: 0.6; }
+.lb-search-input {
+  border: none; outline: none; background: transparent;
+  font-family: var(--font-body); font-size: 0.9rem; color: var(--gray-800);
+  width: 100%;
+}
+.lb-search-clear {
+  border: none; background: var(--gray-100); color: var(--gray-600);
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  font-size: 0.7rem; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background 0.15s;
+}
+.lb-search-clear:hover { background: var(--gray-200); }
+.lb-sort { display: flex; align-items: center; gap: 6px; }
+.lb-sort-label { font-size: 0.8rem; color: var(--gray-800); font-weight: 700; }
+.sort-btn {
+  padding: 7px 14px; border: 1.5px solid #cbd5e1;
+  border-radius: 8px; background: #ffffff; color: #1f2937;
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.sort-btn:hover { border-color: var(--blue); color: var(--blue); background: #f0f6ff; }
+.sort-btn.active {
+  background: var(--blue); border-color: var(--blue); color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.35);
+}
+
+.jump-btn {
+  border: none; cursor: pointer; font-family: var(--font-body);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.jump-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59,130,246,0.4); }
+
+.lb-noresult { padding: 28px; text-align: center; color: var(--gray-600); font-weight: 600; }
+
+/* highlight flash when jumping to my row */
+.row-flash { animation: rowFlash 1.5s ease; }
+@keyframes rowFlash {
+  0%, 100% { background: #eff6ff; }
+  30% { background: #fde68a; }
+}
+
+/* ════════════════════════════════════════════════════════
+   RECOMMEND ZONE (no enrollment)
+   ════════════════════════════════════════════════════════ */
+.rec-zone { padding: 44px 20px 64px; max-width: 1100px; margin: 0 auto; }
+.rec-head { text-align: center; margin-bottom: 32px; }
+.rec-head h2 {
+  font-family: var(--font-display); font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 800; color: var(--gray-800); margin: 0 0 8px;
+}
+.rec-head p { color: var(--gray-600); font-size: 0.95rem; margin: 0; }
+.rec-empty { text-align: center; color: var(--gray-600); padding: 40px; }
+
+.rec-grid {
+  display: grid; gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.rec-card {
+  background: var(--white); border: 1px solid var(--gray-200);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column;
+  transition: transform 0.28s cubic-bezier(.22,1,.36,1), box-shadow 0.28s;
+  animation: recIn 0.5s ease both; animation-delay: var(--d, 0ms);
+}
+@keyframes recIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.rec-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px -16px rgba(29,78,216,0.35); }
+
+.rec-thumb-link { display: block; }
+.rec-thumb {
+  position: relative; height: 150px; background: #0f172a;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.rec-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rec-thumb-ph { font-size: 2.4rem; }
+.rec-card:hover .rec-thumb img { transform: scale(1.05); transition: transform 0.4s ease; }
+.rec-level {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(15,23,42,0.82); color: #e0f2fe;
+  font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.rec-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.rec-cat {
+  align-self: flex-start; font-size: 0.68rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--blue); background: #eff6ff; padding: 3px 9px; border-radius: 999px;
+}
+.rec-title {
+  font-family: var(--font-display); font-size: 1.02rem; font-weight: 800;
+  color: var(--gray-800); margin: 0; line-height: 1.3;
+}
+.rec-desc {
+  color: var(--gray-600); font-size: 0.85rem; line-height: 1.5; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rec-foot {
+  margin-top: auto; padding-top: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.rec-price { font-family: var(--font-display); font-weight: 900; color: var(--green); font-size: 1rem; }
+.rec-btn {
+  background: linear-gradient(135deg, var(--blue), #0ea5e9); color: #fff;
+  padding: 8px 14px; border-radius: 9px; text-decoration: none;
+  font-size: 0.82rem; font-weight: 700; white-space: nowrap;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.rec-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(59,130,246,0.35); }
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pcol, .podium-stage, .rec-card, .p-crown, .row-flash, .bar-fill { animation: none !important; transition: none !important; }
 }
 
 /* ── Responsive ────────────────────────────────────────── */

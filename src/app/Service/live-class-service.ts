@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
 
@@ -11,6 +11,18 @@ export interface LiveClass {
   isActive: boolean;
   isEnded: boolean;
   roomUrl: string;
+  recordingPath?: string;
+  recordingStatus?: string;
+}
+
+export interface FreeLiveClass {
+  id: string;
+  title: string;
+  description: string;
+  hostName?: string;
+  roomUrl?: string;
+  isActive?: boolean;
+  createdAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -36,5 +48,48 @@ export class LiveClassService {
 
   join(id: string): Observable<{ roomUrl: string; userName: string; title: string }> {
     return this.http.get<any>(`${this.baseUrl}/join/${id}`);
+  }
+
+  // ── Recordings ─────────────────────────────────────────────────
+  /** Teacher: upload the recorded video of a finished live class (with progress events). */
+  uploadRecording(id: string, file: File): Observable<HttpEvent<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/recording/${id}`, formData, {
+      reportProgress: true,
+      observe: 'events',
+    });
+  }
+
+  /** A course's live-class recordings (for the in-course Live Class section). */
+  getCourseRecordings(courseId: string): Observable<{ data: LiveClass[] }> {
+    return this.http.get<any>(`${this.baseUrl}/course/${courseId}/recordings`);
+  }
+
+  // ── Free / public live classes ─────────────────────────────────
+  /** Teacher: start a free public live class (anyone can join, no login). */
+  startFree(dto: { title: string; description: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/free/start`, dto);
+  }
+
+  /** Public: active free live classes — no auth required. */
+  getActiveFree(): Observable<{ data: FreeLiveClass[] }> {
+    return this.http.get<any>(`${this.baseUrl}/free/active`);
+  }
+
+  /** Public: join a free live class by id with an optional guest name — no auth required. */
+  joinFree(id: string, name?: string): Observable<{ roomUrl: string; userName: string; title: string; hostName: string }> {
+    const query = name && name.trim() ? `?name=${encodeURIComponent(name.trim())}` : '';
+    return this.http.get<any>(`${this.baseUrl}/free/join/${id}${query}`);
+  }
+
+  /** Teacher: my own non-ended free live classes (to manage / end). */
+  getMyFree(): Observable<{ data: FreeLiveClass[] }> {
+    return this.http.get<any>(`${this.baseUrl}/free/mine`);
+  }
+
+  /** Teacher: end a free live class. */
+  endFree(id: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/free/end/${id}`, {});
   }
 }

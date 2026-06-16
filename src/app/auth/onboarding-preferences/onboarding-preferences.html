@@ -1,8 +1,8 @@
 <main class="onboarding-page">
   <section class="onboarding-card">
     <header class="card-head">
-      <p class="step-label">Step {{ step() }} of {{ totalSteps }}</p>
-      <button type="button" class="skip-button" (click)="skipStep()">Skip</button>
+      <p class="step-label">{{ lang.t().obStep }} {{ step() }} {{ lang.t().obOf }} {{ totalSteps }}</p>
+      <button type="button" class="skip-button" (click)="skipStep()">{{ lang.t().obSkip }}</button>
     </header>
 
     <div class="progress-bar" aria-hidden="true">
@@ -11,8 +11,8 @@
 
     @if (step() === 1) {
       <section class="step-block" aria-label="Skill level selection">
-        <h1>🎯 Step 1: Skill Level</h1>
-        <p>আপনার বর্তমান skill level সিলেক্ট করুন।</p>
+        <h1>🎯 {{ lang.t().obStep }} 1: {{ lang.t().obSkillLevel }}</h1>
+        <p>{{ lang.t().obSkillLevelDesc }}</p>
 
         <div class="option-grid">
           @for (option of skillLevelOptions; track option) {
@@ -26,8 +26,8 @@
 
     @if (step() === 2) {
       <section class="step-block" aria-label="Goal selection">
-        <h1>🎯 Step 2: Goal</h1>
-        <p>শিখে আপনি কোন goal অর্জন করতে চান?</p>
+        <h1>🎯 {{ lang.t().obStep }} 2: {{ lang.t().obGoal }}</h1>
+        <p>{{ lang.t().obGoalDesc }}</p>
 
         <div class="option-grid">
           @for (option of goalOptions; track option) {
@@ -41,8 +41,8 @@
 
     @if (step() === 3) {
       <section class="step-block" aria-label="Language selection">
-        <h1>🎯 Step 3: Language</h1>
-        <p>কোন ভাষায় শিখতে কমফোর্টেবল?</p>
+        <h1>🎯 {{ lang.t().obStep }} 3: {{ lang.t().obLanguage }}</h1>
+        <p>{{ lang.t().obLanguageDesc }}</p>
 
         <div class="option-grid">
           @for (option of languageOptions; track option) {
@@ -56,8 +56,8 @@
 
     @if (step() === 4) {
       <section class="step-block" aria-label="Interest selection">
-        <h1>🎯 Step 4: Interests (Multiple Select)</h1>
-        <p>আপনার interest যত খুশি সিলেক্ট করুন, তারপর continue দিন।</p>
+        <h1>🎯 {{ lang.t().obStep }} 4: {{ lang.t().obInterests }}</h1>
+        <p>{{ lang.t().obInterestsDesc }}</p>
 
         <div class="option-grid">
           @for (option of interestOptions; track option) {
@@ -73,8 +73,8 @@
         </div>
 
         <div class="footer-actions">
-          <button type="button" class="skip-button" (click)="skipStep()">Skip</button>
-          <button type="button" class="next-button" (click)="finishOnboarding()">Continue</button>
+          <button type="button" class="skip-button" (click)="skipStep()">{{ lang.t().obSkip }}</button>
+          <button type="button" class="next-button" (click)="finishOnboarding()">{{ lang.t().obContinue }}</button>
         </div>
       </section>
     }

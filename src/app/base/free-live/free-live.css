@@ -1,0 +1,245 @@
+:host { display: block; }
+
+.fl-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 480px at 90% -5%, rgba(129, 140, 248, 0.12), transparent 60%),
+    radial-gradient(700px 420px at 0% 100%, rgba(244, 114, 182, 0.1), transparent 60%),
+    #0a1020;
+  color: #e8edf7;
+}
+
+/* ── Hero ─────────────────────────────────────────────── */
+.fl-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 64px 8% 56px;
+  text-align: center;
+  background: linear-gradient(165deg, #0b1226 0%, #131d3c 60%, #0c1430 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.fl-hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.fl-hero-blob--1 { width: 320px; height: 320px; top: -90px; right: 8%; background: radial-gradient(circle, #6366f1, transparent 70%); }
+.fl-hero-blob--2 { width: 300px; height: 300px; bottom: -120px; left: -30px; background: radial-gradient(circle, #ec4899, transparent 70%); }
+
+.fl-hero-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+.fl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(244, 63, 94, 0.14);
+  border: 1px solid rgba(244, 63, 94, 0.36);
+  color: #fecdd3;
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.fl-badge-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #f43f5e;
+  animation: flPulse 1.5s ease-out infinite;
+}
+.fl-hero h1 {
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 850;
+  letter-spacing: -0.6px;
+  margin: 0 0 14px;
+  background: linear-gradient(90deg, #fff, #c7d2fe);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.fl-hero p { font-size: 16px; line-height: 1.6; color: #9fadc9; margin: 0 auto 22px; max-width: 520px; }
+.fl-refresh {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d7deec;
+  padding: 9px 20px;
+  border-radius: 30px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.fl-refresh:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-1px); }
+
+/* ── Body ─────────────────────────────────────────────── */
+.fl-body { max-width: 1100px; margin: 0 auto; padding: 48px 6% 80px; }
+
+.fl-state { text-align: center; padding: 70px 20px; color: #9fadc9; }
+.fl-spinner {
+  width: 46px; height: 46px;
+  margin: 0 auto 18px;
+  border: 4px solid rgba(255, 255, 255, 0.12);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+  animation: flSpin 0.9s linear infinite;
+}
+.fl-empty-icon { font-size: 52px; margin-bottom: 12px; }
+.fl-empty h3 { color: #e8edf7; font-size: 20px; margin: 0 0 8px; }
+.fl-empty p { margin: 0 auto; max-width: 380px; }
+
+.fl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+.fl-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 20px 44px -28px rgba(0, 0, 0, 0.8);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.fl-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(129, 140, 248, 0.45);
+  box-shadow: 0 28px 54px -26px rgba(99, 102, 241, 0.5);
+}
+.fl-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fecaca;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.32);
+  padding: 4px 11px;
+  border-radius: 20px;
+}
+.fl-live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #f43f5e;
+  animation: flPulse 1.5s ease-out infinite;
+}
+.fl-card-title { font-size: 18.5px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.3px; line-height: 1.25; }
+.fl-card-desc { font-size: 13.5px; line-height: 1.55; color: #aab6d2; margin: 0; flex: 1; }
+.fl-card-host { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #9fadc9; }
+.fl-host-ava {
+  display: grid; place-items: center;
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.fl-host-text strong { color: #e6ebf6; }
+.fl-join-btn {
+  margin-top: 4px;
+  border: 0;
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 10px 22px -10px rgba(99, 102, 241, 0.9);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.fl-join-btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 14px 26px -10px rgba(99, 102, 241, 1); }
+
+.fl-foot-hint {
+  text-align: center;
+  margin: 40px auto 0;
+  font-size: 13px;
+  color: #8493b4;
+}
+
+/* ── Join modal ───────────────────────────────────────── */
+.fl-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(6, 10, 22, 0.72);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  display: grid; place-items: center;
+  padding: 20px;
+  animation: flFade 0.2s ease;
+}
+.fl-modal {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(160deg, #161f3a, #0e1530);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 28px 26px;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.85);
+  animation: flPop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fl-modal h3 { margin: 0 0 6px; font-size: 20px; font-weight: 800; color: #fff; }
+.fl-modal p { margin: 0 0 18px; font-size: 13.5px; color: #9fadc9; line-height: 1.5; }
+.fl-field { display: flex; flex-direction: column; gap: 7px; }
+.fl-field span { font-size: 12.5px; font-weight: 600; color: #c7d0e4; }
+.fl-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 14.5px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.fl-field input:focus { border-color: #818cf8; background: rgba(129, 140, 248, 0.08); }
+.fl-field input::placeholder { color: #6b7794; }
+.fl-modal-actions { display: flex; gap: 12px; margin-top: 22px; }
+.fl-btn-ghost, .fl-btn-primary {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease, background 0.2s ease;
+}
+.fl-btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #c7d0e4;
+}
+.fl-btn-ghost:hover { background: rgba(255, 255, 255, 0.06); }
+.fl-btn-primary {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 10px 22px -10px rgba(99, 102, 241, 0.9);
+}
+.fl-btn-primary:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+/* ── Keyframes ────────────────────────────────────────── */
+@keyframes flSpin { to { transform: rotate(360deg); } }
+@keyframes flPulse {
+  0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+@keyframes flFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes flPop { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 600px) {
+  .fl-hero { padding: 48px 6% 40px; }
+  .fl-body { padding: 32px 5% 60px; }
+  .fl-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-card, .fl-join-btn, .fl-refresh, .fl-btn-primary, .fl-live-dot, .fl-badge-dot, .fl-spinner { animation: none !important; transition: none !important; }
+}

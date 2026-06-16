@@ -1,139 +1,209 @@
 <main class="lb-page">
   <app-navbar></app-navbar>
 
-  <!-- DARK HERO PODIUM ZONE -->
+  <!-- ════ DARK HERO ZONE ════ -->
   <section class="hero-zone">
     <div class="hero-glow hero-glow-l"></div>
     <div class="hero-glow hero-glow-r"></div>
 
     <div class="hero-title-wrap">
-      <span class="hero-eyebrow">🏆 LEADERBOARD</span>
-      <h1 class="hero-title">Top Performers</h1>
-      <p class="hero-sub">Best students based on performance scores</p>
+      <span class="hero-eyebrow">🏆 {{ lang.t().lbEyebrow }}</span>
+      @if (mode() === 'recommend') {
+        <h1 class="hero-title">{{ lang.t().lbRecommendTitle }}</h1>
+        <p class="hero-sub">{{ lang.t().lbRecommendSub }}</p>
+      } @else {
+        <h1 class="hero-title">{{ lang.t().lbRankingTitle }}</h1>
+        <p class="hero-sub">{{ lang.t().lbRankingSub }}</p>
+      }
     </div>
 
-    @if (isLoading()) {
+    @if (mode() === 'loading') {
       <div class="hero-loading">
         <div class="spinner"></div>
-        <span>Loading rankings...</span>
+        <span>{{ lang.t().lbLoading }}</span>
       </div>
-    } @else if (error()) {
+    } @else if (mode() === 'error') {
       <div class="hero-error">⚠️ {{ error() }}</div>
-    } @else if (entries().length === 0) {
-      <div class="hero-empty">📭 এখনো কোনো quiz attempt নেই</div>
-    } @else {
+    } @else if (mode() === 'ranking') {
 
-      <div class="podium-stage">
-
-        <!-- 2nd place -->
-        @if (topThree().length > 1) {
-          <div class="pcol pcol-2" [class.is-me]="isCurrentUser(topThree()[1].userId)">
-            <div class="p-badge">🥈</div>
-            <div class="p-avatar p-av-2">{{ getInitial(topThree()[1].fullName) }}</div>
-            <div class="p-name">{{ topThree()[1].fullName }}</div>
-            <div class="p-pct">{{ topThree()[1].percentageScore | number:'1.0-1' }}%</div>
-            <div class="p-block p-block-2">
-              <div class="p-block-score">
-                <span>✅ {{ topThree()[1].correctAnswers }} / {{ topThree()[1].totalQuestions }}</span>
-              </div>
-              <div class="p-block-num">2</div>
-            </div>
-          </div>
-        }
-
-        <!-- 1st place -->
-        <div class="pcol pcol-1" [class.is-me]="isCurrentUser(topThree()[0].userId)">
-          <div class="p-crown">👑</div>
-          <div class="p-badge">🥇</div>
-          <div class="p-avatar p-av-1">{{ getInitial(topThree()[0].fullName) }}</div>
-          <div class="p-name p-name-gold">{{ topThree()[0].fullName }}</div>
-          <div class="p-pct p-pct-gold">{{ topThree()[0].percentageScore | number:'1.0-1' }}%</div>
-          <div class="p-block p-block-1">
-            <div class="p-block-score">
-              <span>✅ {{ topThree()[0].correctAnswers }} / {{ topThree()[0].totalQuestions }}</span>
-            </div>
-            <div class="p-block-num">1</div>
-          </div>
+      <!-- ── Course dropdown selector ── -->
+      <div class="course-picker">
+        <span class="course-picker-label">📚 {{ lang.t().lbCourseLabel }}</span>
+        <div class="course-select-wrap">
+          <select class="course-select" (change)="onCourseChange($any($event.target).value)">
+            @for (c of enrolledCourses(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === selectedCourseId()">{{ c.title }}</option>
+            }
+          </select>
+          <span class="course-select-caret">▾</span>
         </div>
+      </div>
 
-        <!-- 3rd place -->
-        @if (topThree().length > 2) {
-          <div class="pcol pcol-3" [class.is-me]="isCurrentUser(topThree()[2].userId)">
-            <div class="p-badge">🥉</div>
-            <div class="p-avatar p-av-3">{{ getInitial(topThree()[2].fullName) }}</div>
-            <div class="p-name">{{ topThree()[2].fullName }}</div>
-            <div class="p-pct">{{ topThree()[2].percentageScore | number:'1.0-1' }}%</div>
-            <div class="p-block p-block-3">
-              <div class="p-block-score">
-                <span>✅ {{ topThree()[2].correctAnswers }} / {{ topThree()[2].totalQuestions }}</span>
+      @if (isBoardLoading()) {
+        <div class="hero-loading">
+          <div class="spinner"></div>
+          <span>{{ lang.t().lbLoading }}</span>
+        </div>
+      } @else if (entries().length === 0) {
+        <div class="hero-empty">📭 {{ lang.t().lbNoAttempt }}</div>
+      } @else {
+
+        <div class="podium-stage" [attr.data-key]="selectedCourseId()">
+          <!-- 2nd -->
+          @if (topThree().length > 1) {
+            <div class="pcol pcol-2" [class.is-me]="isCurrentUser(topThree()[1].userId)">
+              <div class="p-badge">🥈</div>
+              <div class="p-avatar p-av-2">{{ getInitial(topThree()[1].fullName) }}</div>
+              <div class="p-name">{{ topThree()[1].fullName }}</div>
+              <div class="p-pct">{{ topThree()[1].percentageScore | number:'1.0-1' }}%</div>
+              <div class="p-block p-block-2">
+                <div class="p-block-score"><span>✅ {{ topThree()[1].correctAnswers }} / {{ topThree()[1].totalQuestions }}</span></div>
+                <div class="p-block-num">2</div>
               </div>
-              <div class="p-block-num">3</div>
+            </div>
+          }
+          <!-- 1st -->
+          <div class="pcol pcol-1" [class.is-me]="isCurrentUser(topThree()[0].userId)">
+            <div class="p-crown">👑</div>
+            <div class="p-badge">🥇</div>
+            <div class="p-avatar p-av-1">{{ getInitial(topThree()[0].fullName) }}</div>
+            <div class="p-name p-name-gold">{{ topThree()[0].fullName }}</div>
+            <div class="p-pct p-pct-gold">{{ topThree()[0].percentageScore | number:'1.0-1' }}%</div>
+            <div class="p-block p-block-1">
+              <div class="p-block-score"><span>✅ {{ topThree()[0].correctAnswers }} / {{ topThree()[0].totalQuestions }}</span></div>
+              <div class="p-block-num">1</div>
             </div>
           </div>
-        }
-
-      </div>
+          <!-- 3rd -->
+          @if (topThree().length > 2) {
+            <div class="pcol pcol-3" [class.is-me]="isCurrentUser(topThree()[2].userId)">
+              <div class="p-badge">🥉</div>
+              <div class="p-avatar p-av-3">{{ getInitial(topThree()[2].fullName) }}</div>
+              <div class="p-name">{{ topThree()[2].fullName }}</div>
+              <div class="p-pct">{{ topThree()[2].percentageScore | number:'1.0-1' }}%</div>
+              <div class="p-block p-block-3">
+                <div class="p-block-score"><span>✅ {{ topThree()[2].correctAnswers }} / {{ topThree()[2].totalQuestions }}</span></div>
+                <div class="p-block-num">3</div>
+              </div>
+            </div>
+          }
+        </div>
+      }
     }
   </section>
 
-  <!-- WHITE LIST ZONE -->
-@if (!isLoading() && entries().length > 0) {
-  <div class="list-wrapper">
-    <section class="list-zone">
+  <!-- ════ WHITE LIST ZONE (ranking + has entries) ════ -->
+  @if (mode() === 'ranking' && !isBoardLoading() && entries().length > 0) {
+    <div class="list-wrapper">
+      <section class="list-zone">
 
-      @if (currentUserId()) {
-        <div class="my-rank-bar">
-          <span>You are ranked <strong>#{{ myRank() }}</strong> out of <strong>{{ entries().length }}</strong> students</span>
-          <span class="my-score-chip">Your score: {{ myScore() | number:'1.0-1' }}%</span>
-        </div>
-      }
+        @if (currentUserId() && myRank()) {
+          <div class="my-rank-bar">
+            <span>{{ lang.t().lbRanked }} <strong>#{{ myRank() }}</strong> {{ lang.t().lbOutOf }} <strong>{{ entries().length }}</strong> {{ lang.t().lbIn }}
+              <strong>{{ selectedCourseTitle() }}</strong></span>
+            <button type="button" class="my-score-chip jump-btn" (click)="jumpToMyRank()">
+              {{ lang.t().lbYourScore }} {{ myScore() | number:'1.0-1' }}% · {{ lang.t().lbJumpToMe }} ↓
+            </button>
+          </div>
+        }
 
-      <div class="table-wrap">
-        <table class="lb-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Student</th>
-              <th>Correct</th>
-              <th>Total Q</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (entry of entries(); track entry.userId; let i = $index) {
-              <tr [class.row-gold]="i===0" [class.row-silver]="i===1" [class.row-bronze]="i===2" [class.row-me]="isCurrentUser(entry.userId)">
-                <td class="col-rank">
-                  @if (i === 0) { <span class="medal">🥇</span> }
-                  @else if (i === 1) { <span class="medal">🥈</span> }
-                  @else if (i === 2) { <span class="medal">🥉</span> }
-                  @else { <span class="rank-n">#{{ i + 1 }}</span> }
-                </td>
-                <td class="col-student">
-                  <div class="lst-avatar" [class.lst-av-me]="isCurrentUser(entry.userId)">
-                    {{ getInitial(entry.fullName) }}
-                  </div>
-                  <span class="lst-name">{{ entry.fullName }}</span>
-                  @if (isCurrentUser(entry.userId)) {
-                    <span class="you-chip">You</span>
-                  }
-                </td>
-                <td class="col-correct">{{ entry.correctAnswers }}</td>
-                <td class="col-total">{{ entry.totalQuestions }}</td>
-                <td class="col-score">
-                  <div class="bar-wrap">
-                    <div class="bar-bg">
-                      <div class="bar-fill" [style.width.%]="entry.percentageScore"></div>
-                    </div>
-                    <strong class="bar-label">{{ entry.percentageScore | number:'1.0-1' }}%</strong>
-                  </div>
-                </td>
-              </tr>
+        <!-- toolbar: search + sort -->
+        <div class="lb-toolbar">
+          <div class="lb-search">
+            <span class="lb-search-icon">🔍</span>
+            <input type="text" class="lb-search-input" [placeholder]="lang.t().lbSearchPlaceholder"
+              [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
+            @if (searchTerm()) {
+              <button type="button" class="lb-search-clear" (click)="searchTerm.set('')">✕</button>
             }
-          </tbody>
-        </table>
-      </div>
+          </div>
+          <div class="lb-sort">
+            <span class="lb-sort-label">{{ lang.t().lbSort }}</span>
+            <button type="button" class="sort-btn" [class.active]="sortKey()==='score'" (click)="setSort('score')">{{ lang.t().lbSortScore }}</button>
+            <button type="button" class="sort-btn" [class.active]="sortKey()==='correct'" (click)="setSort('correct')">{{ lang.t().lbSortCorrect }}</button>
+          </div>
+        </div>
 
-    </section>
+        <div class="table-wrap">
+          @if (viewEntries().length === 0) {
+            <div class="lb-noresult">{{ lang.t().lbNoResult }} “{{ searchTerm() }}”</div>
+          } @else {
+            <table class="lb-table">
+              <thead>
+                <tr>
+                  <th>{{ lang.t().lbTableRank }}</th><th>{{ lang.t().lbTableStudent }}</th><th>{{ lang.t().lbTableCorrect }}</th><th>{{ lang.t().lbTableTotal }}</th><th>{{ lang.t().lbTableScore }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of viewEntries(); track entry.userId) {
+                  <tr [id]="'lb-row-' + entry.userId"
+                      [class.row-gold]="entry.rank===1" [class.row-silver]="entry.rank===2"
+                      [class.row-bronze]="entry.rank===3" [class.row-me]="isCurrentUser(entry.userId)">
+                    <td class="col-rank">
+                      @if (entry.rank === 1) { <span class="medal">🥇</span> }
+                      @else if (entry.rank === 2) { <span class="medal">🥈</span> }
+                      @else if (entry.rank === 3) { <span class="medal">🥉</span> }
+                      @else { <span class="rank-n">#{{ entry.rank }}</span> }
+                    </td>
+                    <td class="col-student">
+                      <div class="lst-avatar" [class.lst-av-me]="isCurrentUser(entry.userId)">{{ getInitial(entry.fullName) }}</div>
+                      <span class="lst-name">{{ entry.fullName }}</span>
+                      @if (isCurrentUser(entry.userId)) { <span class="you-chip">{{ lang.t().lbYou }}</span> }
+                    </td>
+                    <td class="col-correct">{{ entry.correctAnswers }}</td>
+                    <td class="col-total">{{ entry.totalQuestions }}</td>
+                    <td class="col-score">
+                      <div class="bar-wrap">
+                        <div class="bar-bg"><div class="bar-fill" [style.width.%]="entry.percentageScore"></div></div>
+                        <strong class="bar-label">{{ entry.percentageScore | number:'1.0-1' }}%</strong>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </section>
     </div>
-}
+  }
+
+  <!-- ════ RECOMMEND ZONE (no enrollment) ════ -->
+  @if (mode() === 'recommend') {
+    <div class="list-wrapper">
+      <section class="rec-zone">
+        <div class="rec-head">
+          <h2>{{ usedPreferences() ? lang.t().lbRecHeadPref : lang.t().lbRecHeadPopular }}</h2>
+          <p>{{ lang.t().lbRecHeadSub }}</p>
+        </div>
+
+        @if (recommended().length === 0) {
+          <div class="rec-empty">{{ lang.t().lbRecEmpty }}</div>
+        } @else {
+          <div class="rec-grid">
+            @for (c of recommended(); track c.id; let i = $index) {
+              <article class="rec-card" [style.--d]="i * 60 + 'ms'">
+                <a [routerLink]="['/course-details', c.id]" class="rec-thumb-link">
+                  <div class="rec-thumb">
+                    @if (c.thumbnailUrl) { <img [src]="c.thumbnailUrl" [alt]="c.title" /> }
+                    @else { <span class="rec-thumb-ph">📘</span> }
+                    <span class="rec-level">{{ c.level }}</span>
+                  </div>
+                </a>
+                <div class="rec-body">
+                  @if (c.category) { <span class="rec-cat">{{ c.category }}</span> }
+                  <h3 class="rec-title">{{ c.title }}</h3>
+                  <p class="rec-desc">{{ c.description }}</p>
+                  <div class="rec-foot">
+                    <span class="rec-price">{{ formatPrice(c.price) }}</span>
+                    <a [routerLink]="['/course-details', c.id]" class="rec-btn">{{ lang.t().lbViewCourse }}</a>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
 </main>

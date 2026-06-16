@@ -5,9 +5,9 @@
   <!-- Hero -->
   <div class="fc-hero">
     <div class="fc-hero-content">
-      <span class="fc-tag">🎁 সম্পূর্ণ বিনামূল্যে</span>
-      <h1>Free <span class="fc-accent">Classes</span></h1>
-      <p>বাছাই করা free class গুলো এখানে পাবে — কোনো payment ছাড়াই শেখো।</p>
+      <span class="fc-tag">🎁 {{ lang.t().fcTag }}</span>
+      <h1>{{ lang.t().fcTitle }} <span class="fc-accent">Classes</span></h1>
+      <p>{{ lang.t().fcSub }}</p>
     </div>
     <div class="fc-blob fc-blob--1"></div>
     <div class="fc-blob fc-blob--2"></div>
@@ -17,9 +17,9 @@
   <div class="fc-body">
     <div class="fc-coming-soon">
       <div class="fc-icon">🎬</div>
-      <h2>Free Classes Coming Soon</h2>
-      <p>আমরা তোমার জন্য সেরা free class গুলো তৈরি করছি।<br>শীঘ্রই এখানে পাবে।</p>
-      <a routerLink="/courses" class="fc-btn">এখন Courses দেখো →</a>
+      <h2>{{ lang.t().fcComingTitle }}</h2>
+      <p>{{ lang.t().fcComingDesc }}</p>
+      <a routerLink="/courses" class="fc-btn">{{ lang.t().fcBtn }}</a>
     </div>
   </div>
 

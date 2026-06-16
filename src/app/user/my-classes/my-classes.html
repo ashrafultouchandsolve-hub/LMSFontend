@@ -2,15 +2,15 @@
 
   <app-navbar></app-navbar>
   <header class="mc-header">
-    <h1>📺 My Live Classes</h1>
-    <p>তোমার enrolled course গুলোর সব live class এখানে দেখতে পাবে।</p>
+    <h1>📺 {{ lang.t().mcTitle }}</h1>
+    <p>{{ lang.t().mcSub }}</p>
   </header>
 
   <!-- Loading -->
   @if (isLoading()) {
     <div class="mc-loading">
       <div class="mc-spinner"></div>
-      <p>Live classes লোড হচ্ছে...</p>
+      <p>{{ lang.t().commonLoading }}</p>
     </div>
   }
 
@@ -19,7 +19,7 @@
     <div class="mc-error">
       <span>😕</span>
       <p>{{ errorMessage() }}</p>
-      <a routerLink="/login" class="mc-login-btn">Login করো</a>
+      <a routerLink="/login" class="mc-login-btn">{{ lang.t().mcLoginBtn }}</a>
     </div>
   }
 
@@ -28,7 +28,7 @@
     <!-- 🔴 Active now banner -->
     @if (activeLiveClasses().length > 0) {
       <section class="mc-active-section">
-        <h2 class="mc-section-title">🔴 এখন Live</h2>
+        <h2 class="mc-section-title">🔴 {{ lang.t().mcLiveNowSec }}</h2>
         <div class="mc-active-list">
           @for (lc of activeLiveClasses(); track lc.id) {
             <div class="mc-active-card">
@@ -41,7 +41,7 @@
                 }
               </div>
               <a [routerLink]="['/live-class', lc.id]" class="mc-join-btn">
-                Join Now →
+                {{ lang.t().liveJoinNow }}
               </a>
             </div>
           }
@@ -52,7 +52,7 @@
     <!-- 📅 Upcoming classes -->
     @if (upcomingLiveClasses().length > 0) {
       <section class="mc-upcoming-section">
-        <h2 class="mc-section-title">📅 Upcoming Classes</h2>
+        <h2 class="mc-section-title">📅 {{ lang.t().mcUpcomingSec }}</h2>
         <div class="mc-upcoming-list">
           @for (lc of upcomingLiveClasses(); track lc.id) {
             <div class="mc-upcoming-card">
@@ -65,7 +65,7 @@
                   <p class="mc-upcoming-desc">{{ lc.description }}</p>
                 }
               </div>
-              <span class="mc-badge mc-badge-upcoming">Upcoming</span>
+              <span class="mc-badge mc-badge-upcoming">{{ lang.t().liveUpcoming }}</span>
             </div>
           }
         </div>
@@ -74,14 +74,14 @@
 
     <!-- 📚 Course by course breakdown -->
     <section class="mc-courses-section">
-      <h2 class="mc-section-title">📚 Course অনুযায়ী</h2>
+      <h2 class="mc-section-title">📚 {{ lang.t().mcByCourseSec }}</h2>
 
       @if (courses().length === 0) {
         <div class="mc-empty">
           <span>📭</span>
-          <h3>কোনো enrolled course নেই</h3>
-          <p>Course এ enroll করলে এখানে live class দেখতে পাবে।</p>
-          <a routerLink="/courses" class="mc-browse-btn">Courses দেখো →</a>
+          <h3>{{ lang.t().mcNoEnrolled }}</h3>
+          <p>{{ lang.t().mcNoEnrolledDesc }}</p>
+          <a routerLink="/courses" class="mc-browse-btn">{{ lang.t().mcBrowse }}</a>
         </div>
       }
 
@@ -103,9 +103,9 @@
 
             <!-- Live classes of this course -->
             @if (course.isLoadingLive) {
-              <p class="mc-live-loading">লোড হচ্ছে...</p>
+              <p class="mc-live-loading">{{ lang.t().mcCourseLoading }}</p>
             } @else if (course.liveClasses.length === 0) {
-              <p class="mc-live-none">এই course এ এখনো কোনো live class schedule হয়নি।</p>
+              <p class="mc-live-none">{{ lang.t().mcNoLiveForCourse }}</p>
             } @else {
               <div class="mc-live-list">
                 @for (lc of course.liveClasses; track lc.id) {
@@ -117,12 +117,12 @@
                     <div class="mc-live-row-action">
                       @if (lc.isActive) {
                         <a [routerLink]="['/live-class', lc.id]" class="mc-join-btn mc-join-btn-sm">
-                          🔴 Join
+                          🔴 {{ lang.t().liveJoin }}
                         </a>
                       } @else if (lc.isEnded) {
-                        <span class="mc-badge mc-badge-ended">Ended</span>
+                        <span class="mc-badge mc-badge-ended">{{ lang.t().liveEnded }}</span>
                       } @else {
-                        <span class="mc-badge mc-badge-upcoming">Upcoming</span>
+                        <span class="mc-badge mc-badge-upcoming">{{ lang.t().liveUpcoming }}</span>
                       }
                     </div>
                   </div>

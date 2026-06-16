@@ -1,17 +1,17 @@
 <app-navbar></app-navbar>
 
 <main class="cert-page">
-  <h1>🎓 My Certificates</h1>
+  <h1>🎓 {{ lang.t().certTitle }}</h1>
 
   @if (isLoading()) {
-    <p class="loading">Loading...</p>
+    <p class="loading">{{ lang.t().commonLoading }}</p>
   } @else if (certs().length === 0) {
     <div class="cert-empty">
       <div class="empty-icon">📚</div>
-      <h2>No Courses Enrolled</h2>
-      <p>Enroll in a course first to receive certificates.</p>
+      <h2>{{ lang.t().certNoCourses }}</h2>
+      <p>{{ lang.t().certNoCoursesDesc }}</p>
       <button class="go-courses-btn" (click)="goToCourses()">
-        🎓 View Courses
+        🎓 {{ lang.t().certViewCourses }}
       </button>
     </div>
   } @else {
@@ -31,26 +31,26 @@
 
           <div class="cert-content">
             <p class="student-name">{{ cert.studentName }}</p>
-            
+
             @if (cert.isIssued) {
               <span class="cert-date">
-                Issued: {{ cert.issuedAt | date:'mediumDate' }}
+                {{ lang.t().certIssuedOn }} {{ cert.issuedAt | date:'mediumDate' }}
               </span>
               <div class="cert-status issued">
-                ✓ Certificate Issued
+                ✓ {{ lang.t().certIssuedStatus }}
               </div>
               <button class="download-btn" (click)="downloadCertificate(cert)">
-                ⬇️ Download PDF
+                ⬇️ {{ lang.t().certDownloadPdf }}
               </button>
             } @else {
               <div class="cert-status locked">
-                🔒 Pending Teacher Approval
+                🔒 {{ lang.t().certPending }}
               </div>
               <p class="lock-message">
-                You can download the certificate once the teacher issues it.
+                {{ lang.t().certLockMsg }}
               </p>
               <button class="download-btn disabled" disabled>
-                ⬇️ Download (Locked)
+                ⬇️ {{ lang.t().certDownloadLocked }}
               </button>
             }
           </div>

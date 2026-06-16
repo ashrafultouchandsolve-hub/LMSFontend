@@ -1,0 +1,109 @@
+<section class="cx-section">
+  <div class="cx-head">
+    <h2>📝 {{ lang.t().exSectionTitle }}</h2>
+    <p>{{ lang.t().exManageSub }}</p>
+  </div>
+
+  <div class="cx-grid">
+    @for (exam of examSlots(); track $index; let i = $index) {
+      <article class="cx-card cx-card--{{ examState(exam) }}" [class.cx-clickable]="!!exam && exam.isPublished"
+        (click)="exam && exam.isPublished && openDetails(exam)">
+        <div class="cx-card-head">
+          <h3>{{ i === 0 ? lang.t().exFirst : i === 1 ? lang.t().exSecond : lang.t().exFinal }}</h3>
+          @switch (examState(exam)) {
+            @case ('locked') { <span class="cx-badge cx-badge--locked">🔒 {{ lang.t().exLocked }}</span> }
+            @case ('open') {
+              @if (exam!.submitted) { <span class="cx-badge cx-badge--ok">{{ lang.t().exSubmitted }}</span> }
+              @else { <span class="cx-badge cx-badge--started">🟢 {{ lang.t().exStarted }}</span> }
+            }
+            @case ('closed') {
+              <span class="cx-badge" [class.cx-badge--ok]="exam!.submitted" [class.cx-badge--miss]="!exam!.submitted">
+                {{ exam!.submitted ? (exam!.graded ? lang.t().exGraded : lang.t().exSubmitted) : lang.t().exMissed }}
+              </span>
+            }
+          }
+        </div>
+
+        @if (examState(exam) === 'locked') {
+          <div class="cx-locked">
+            <span class="cx-lock">🔒</span>
+            <p>{{ lang.t().exNotAvailable }}</p>
+          </div>
+        } @else if (exam) {
+          <p class="cx-line">⏰ {{ lang.t().exDeadline }}: {{ exam.deadline | date:'dd MMM, hh:mm a' }}</p>
+
+          @if (examState(exam) === 'open') {
+            <span class="cx-count cx-count--live">⏳ {{ daysToDeadline(exam) }} {{ daysToDeadline(exam) === 1 ? lang.t().exDayLeft : lang.t().exDaysLeft }}</span>
+            <div class="cx-actions" (click)="$event.stopPropagation()">
+              @if (exam.hasQuestion) {
+                <button type="button" class="cx-q" (click)="viewQuestion(exam)">📄 {{ lang.t().exViewPdf }}</button>
+              }
+              <label class="cx-upload">
+                📎 {{ examAnswerNames()[exam.id] || lang.t().exUpload }}
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png,image/*,application/pdf" hidden (change)="onFileSelected(exam.id, $event)" />
+              </label>
+              <button type="button" class="cx-submit" [disabled]="!examAnswerNames()[exam.id] || submittingExamId() === exam.id" (click)="submit(exam)">
+                {{ submittingExamId() === exam.id ? lang.t().exSubmitting : lang.t().exSubmit }}
+              </button>
+            </div>
+            @if (exam.graded) {
+              <div class="cx-result">🏆 {{ lang.t().exMarks }}: <strong>{{ exam.marks }}/{{ exam.totalMarks }}</strong></div>
+            } @else if (exam.submitted) {
+              <span class="cx-sub-ok">✓ {{ lang.t().exSubmitted }}</span>
+            }
+          } @else {
+            @if (exam.submitted) {
+              @if (exam.graded) {
+                <div class="cx-result">🏆 {{ lang.t().exMarks }}: <strong>{{ exam.marks }}/{{ exam.totalMarks }}</strong></div>
+              } @else {
+                <span class="cx-sub-ok">✓ {{ lang.t().exSubmitted }}</span>
+              }
+            } @else {
+              <span class="cx-missed">⛔ {{ lang.t().exMissed }}</span>
+            }
+          }
+
+          <button type="button" class="cx-details-btn" (click)="$event.stopPropagation(); openDetails(exam)">{{ lang.t().exDetails }} →</button>
+        }
+      </article>
+    }
+  </div>
+</section>
+
+<!-- Details modal -->
+@if (detailsExam(); as ex) {
+  <div class="cx-modal-backdrop" (click)="closeDetails()">
+    <div class="cx-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="cx-modal-head">
+        <h3>{{ ex.title }}</h3>
+        <button type="button" class="cx-modal-x" (click)="closeDetails()" aria-label="Close">✕</button>
+      </div>
+      <div class="cx-modal-body">
+        <p class="cx-d-line">🟢 <strong>{{ lang.t().exStarted }}:</strong> {{ ex.startDate | date:'medium' }}</p>
+        <p class="cx-d-line">⏰ <strong>{{ lang.t().exDeadline }}:</strong> {{ ex.deadline | date:'medium' }}</p>
+        <p class="cx-d-line">🎯 <strong>{{ lang.t().exTotalMarks }}:</strong> {{ ex.totalMarks }}</p>
+        @if (ex.instruction) {
+          <p class="cx-d-line">📝 <strong>{{ lang.t().exInstruction }}:</strong> {{ ex.instruction }}</p>
+        }
+
+        <div class="cx-d-actions">
+          @if (ex.hasQuestion) {
+            <button type="button" class="cx-q" (click)="viewQuestion(ex)">📄 {{ lang.t().exQuestion }}: {{ lang.t().exViewPdf }}</button>
+          }
+          @if (ex.submitted) {
+            <button type="button" class="cx-q" (click)="viewMyAnswer(ex)">👁️ {{ lang.t().exYourAnswer }}</button>
+          }
+        </div>
+
+        @if (ex.graded) {
+          <div class="cx-result cx-result--big">
+            🏆 {{ lang.t().exMarks }}: <strong>{{ ex.marks }}/{{ ex.totalMarks }}</strong>
+            @if (ex.feedback) { <p class="cx-feedback">💬 {{ lang.t().exFeedback }}: {{ ex.feedback }}</p> }
+          </div>
+        } @else if (ex.submitted) {
+          <p class="cx-await">{{ lang.t().exAwaitingResult }}</p>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -8,7 +8,7 @@ import {
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
-import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
+import { CourseDto, CourseTeacher, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
@@ -52,6 +52,7 @@ export class CourseDetails {
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
   protected readonly isEnrolled = signal(false);
   protected readonly isCheckingEnrollment = signal(false);
+  protected readonly teachers = signal<CourseTeacher[]>([]);
   
   // Rating signals
   protected readonly averageRating = signal(0);
@@ -63,6 +64,11 @@ export class CourseDetails {
   protected readonly ratingMessage = signal('');
   protected readonly isWishlisted = signal(false);
 protected readonly isTogglingWishlist = signal(false);
+
+  // Course-details card stats
+  protected readonly enrollmentCount = signal(0);
+  protected readonly videoCount = signal(0);
+  protected readonly practiceCount = signal(0);
   
 readonly lang = inject(LanguageService);
   protected readonly shortDescriptionLimit = 280;
@@ -155,7 +161,40 @@ readonly lang = inject(LanguageService);
   }
 
   protected getInstructorInitial(name: string): string {
-    return name.trim().charAt(0).toUpperCase() || 'I';
+    return (name ?? '').trim().charAt(0).toUpperCase() || 'I';
+  }
+
+  protected teacherImageUrl(path: string | null | undefined): string {
+    return this.learningApi.buildDownloadUrl(path ?? '');
+  }
+
+  private async loadTeachers(courseId: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.learningApi.getCourseTeachers(courseId));
+      const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+      this.teachers.set(arr.map((t: any) => ({
+        id: t.id ?? t.Id,
+        fullName: t.fullName ?? t.FullName ?? 'Instructor',
+        bio: t.bio ?? t.Bio ?? null,
+        profileImagePath: t.profileImagePath ?? t.ProfileImagePath ?? null,
+        facebookLink: t.facebookLink ?? t.FacebookLink ?? null,
+        youtubeLink: t.youtubeLink ?? t.YoutubeLink ?? null,
+      })));
+    } catch {
+      this.teachers.set([]);
+    }
+  }
+
+  private async loadStats(courseId: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.learningApi.getCourseStats(courseId));
+      const d = res?.data ?? res?.Data ?? null;
+      if (d) {
+        this.enrollmentCount.set(d.enrollmentCount ?? d.EnrollmentCount ?? 0);
+        this.videoCount.set(d.videoCount ?? d.VideoCount ?? 0);
+        this.practiceCount.set(d.practiceCount ?? d.PracticeCount ?? 0);
+      }
+    } catch { /* stats are best-effort */ }
   }
 
   private async loadCourseDetails(): Promise<void> {
@@ -189,6 +228,8 @@ readonly lang = inject(LanguageService);
 
       this.course.set(this.mapCourseForView(matchedCourse));
       this.isImageBroken.set(false);
+      void this.loadTeachers(courseId);
+      void this.loadStats(courseId);
 
       const currentUserId = this.authService.getCurrentUser()?.id ?? '';
       if (currentUserId) {

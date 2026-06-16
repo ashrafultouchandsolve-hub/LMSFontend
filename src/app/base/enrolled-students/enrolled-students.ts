@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { LearningApiService } from '../../Service/learning-api.service';
+import { LanguageService } from '../../Service/language.service';
 
 type Student = {
   userId: string;
@@ -20,6 +21,7 @@ type Student = {
 export class EnrolledStudents implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(LearningApiService);
+  protected readonly lang = inject(LanguageService);
 
   protected readonly students = signal<Student[]>([]);
   protected readonly issuedUserIds = signal<string[]>([]);

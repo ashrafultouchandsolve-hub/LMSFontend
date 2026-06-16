@@ -1,34 +1,33 @@
 <main class="payment-page">
-	<a routerLink="/homepage" class="back-link">&larr; Back to Home</a>
+	<a routerLink="/homepage" class="back-link">&larr; {{ lang.t().payBackHome }}</a>
 
 	<section class="payment-shell">
 
 		<!-- LEFT: Summary Card -->
 		<article class="summary-card">
-			<p class="eyebrow">Secure Payment</p>
+			<p class="eyebrow">{{ lang.t().paySecure }}</p>
 			<h1>{{ courseTitle() }}</h1>
 			<p class="summary-note">
-				আপনাকে SSLCommerz-এর নিরাপদ payment gateway তে redirect করা হবে।
-				সেখানে Card, bKash, Nagad সহ সব method দিয়ে payment করতে পারবেন।
+				{{ lang.t().paySummaryNote }}
 			</p>
 
 			<div class="amount-box">
-				<span>Payable Amount</span>
+				<span>{{ lang.t().payPayable }}</span>
 				<strong>{{ totalPayableText() }}</strong>
 			</div>
 
-			<h2>Accepted Payment Methods</h2>
+			<h2>{{ lang.t().payMethods }}</h2>
 			<div class="method-list">
-				<div class="method-btn">💳 Credit / Debit Card</div>
+				<div class="method-btn">💳 {{ lang.t().payCard }}</div>
 				<div class="method-btn">📱 bKash</div>
 				<div class="method-btn">📱 Nagad</div>
-				<div class="method-btn">🏦 Internet Banking</div>
+				<div class="method-btn">🏦 {{ lang.t().payInternetBanking }}</div>
 			</div>
 		</article>
 
 		<!-- RIGHT: Confirm Card -->
 		<article class="form-card">
-			<h2>Order Summary</h2>
+			<h2>{{ lang.t().payOrderSummary }}</h2>
 
 			@if (message()) {
 				<p
@@ -42,15 +41,15 @@
 
 			<div class="order-info">
 				<div class="order-row">
-					<span>Course</span>
+					<span>{{ lang.t().payCourse }}</span>
 					<strong>{{ courseTitle() }}</strong>
 				</div>
 				<div class="order-row">
-					<span>Amount</span>
+					<span>{{ lang.t().payAmount }}</span>
 					<strong class="amount-highlight">{{ totalPayableText() }}</strong>
 				</div>
 				<div class="order-row">
-					<span>Gateway</span>
+					<span>{{ lang.t().payGateway }}</span>
 					<strong>🔒 SSLCommerz</strong>
 				</div>
 			</div>
@@ -58,7 +57,7 @@
 			<div class="ssl-notice">
 				<span class="lock-icon">🔐</span>
 				<p>
-					আপনার payment তথ্য সম্পূর্ণ নিরাপদ। SSLCommerz Bangladesh-এর সবচেয়ে বিশ্বস্ত payment gateway।
+					{{ lang.t().paySslNotice }}
 				</p>
 			</div>
 
@@ -69,15 +68,14 @@
 				(click)="initiatePayment()"
 			>
 				@if (isProcessing()) {
-					<span class="btn-spinner"></span> Redirecting to Gateway...
+					<span class="btn-spinner"></span> {{ lang.t().payRedirecting }}
 				} @else {
-					🔒 Pay {{ totalPayableText() }} Securely
+					🔒 {{ lang.t().payPay }} {{ totalPayableText() }} {{ lang.t().paySecurely }}
 				}
 			</button>
 
 			<p class="secure-note">
-				By clicking Pay, you agree to our Terms &amp; Conditions.
-				No card info is stored on our servers.
+				{{ lang.t().paySecureNote }}
 			</p>
 		</article>
 

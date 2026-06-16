@@ -5,11 +5,11 @@
 
   <aside class="sidebar" aria-label="Teacher dashboard navigation">
     <div class="sidebar-head">
-      <h2>⚙ Admin Panel</h2>
+      <h2>⚙ {{ lang.t().tcAdminPanel }}</h2>
     </div>
 
     <nav class="sidebar-nav">
-      @for (item of sidebarItems; track item.key) {
+      @for (item of sidebarItems(); track item.key) {
         <button
           type="button"
           class="side-link"
@@ -21,7 +21,11 @@
       }
     </nav>
 
-    <button type="button" class="back-site" (click)="goToHome()">← Back to Site</button>
+    @if (isAdminMode()) {
+      <button type="button" class="back-site" (click)="goToAdmin()">← {{ lang.t().tcBackToAdmin }}</button>
+    } @else {
+      <button type="button" class="back-site" (click)="goToHome()">← {{ lang.t().tcBackToSite }}</button>
+    }
   </aside>
 
   <section class="dashboard-area">
@@ -31,20 +35,81 @@
 
     @if (activeSidebarKey() === 'teacher-profile') {
       <app-teacher-profile></app-teacher-profile>
+    } @else if (activeSidebarKey() === 'live') {
+      <header class="toolbar">
+        <div>
+          <h1>{{ lang.t().tcLiveTitle }}</h1>
+          <p>{{ lang.t().tcLiveSub }}</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <!-- Start a free live class -->
+        <div class="flp-start">
+          <h3>{{ lang.t().tcLiveStartHeading }}</h3>
+          <div class="flp-form">
+            <input type="text" [(ngModel)]="freeLiveTitle" [placeholder]="lang.t().tcLiveTitlePlaceholder" maxlength="80" />
+            <input type="text" [(ngModel)]="freeLiveDesc" [placeholder]="lang.t().tcLiveDescPlaceholder" maxlength="160" />
+            <button type="button" class="btn btn-primary flp-golive" (click)="startFreeLive()" [disabled]="isStartingFree()">
+              {{ isStartingFree() ? lang.t().tpSaving : '🔴 ' + lang.t().tcLiveGoLive }}
+            </button>
+          </div>
+          <p class="flp-note">💡 {{ lang.t().tcLiveNote }}</p>
+        </div>
+
+        <!-- My free live classes -->
+        <h3 class="flp-list-title">{{ lang.t().tcLiveMine }}</h3>
+        @if (isLoadingFree()) {
+          <p class="loading">{{ lang.t().aiLoading }}</p>
+        } @else if (myFreeClasses().length === 0) {
+          <p class="empty-state">{{ lang.t().tcLiveNoneMine }}</p>
+        } @else {
+          <div class="flp-cards">
+            @for (fc of myFreeClasses(); track fc.id) {
+              <div class="flp-card" [class.flp-card--ended]="!fc.isActive">
+                <div class="flp-card-head">
+                  @if (fc.isActive) {
+                    <span class="flp-live"><span class="flp-dot"></span> {{ lang.t().flLiveNow }}</span>
+                  } @else {
+                    <span class="flp-ended">{{ lang.t().tcLiveEnded }}</span>
+                  }
+                </div>
+                <h4>{{ fc.title }}</h4>
+                @if (fc.description) { <p class="flp-desc">{{ fc.description }}</p> }
+
+                @if (fc.isActive) {
+                  <div class="flp-link-row">
+                    <input type="text" readonly [value]="buildFreeLink(fc.id)" />
+                    <button type="button" class="btn btn-outline" (click)="copyFreeLink(fc.id)">
+                      {{ copiedFreeId() === fc.id ? '✓ ' + lang.t().tcLiveCopied : lang.t().tcLiveCopy }}
+                    </button>
+                  </div>
+                  <div class="flp-actions">
+                    <button type="button" class="btn btn-primary" (click)="openFreeRoom(fc.id)">▶ {{ lang.t().tcLiveOpenRoom }}</button>
+                    <button type="button" class="btn btn-danger" (click)="endFreeLive(fc.id)">🔴 {{ lang.t().tcLiveEnd }}</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
     } @else if (selectedCourse() === null) {
       <header class="toolbar">
         <div>
-          <h1>Courses</h1>
-          <p>Manage course content, thumbnails, and publish status.</p>
+          <h1>{{ isLiveTeacherMode() ? lang.t().tcMyCoursesLive : lang.t().tcSideCourses }}{{ categoryFilter() ? ' · ' + categoryFilter() : '' }}</h1>
+          <p>{{ isLiveTeacherMode() ? lang.t().tcLiveCoursesSub : lang.t().tcCoursesSub }}</p>
         </div>
-        <button type="button" class="btn btn-primary" (click)="openNewCourseModal()">+ New Course</button>
+        @if (isAdminMode()) {
+          <button type="button" class="btn btn-primary" (click)="openNewCourseModal()">+ {{ lang.t().tcNewCourse }}</button>
+        }
       </header>
 
       <section class="panel" aria-label="Course list">
         <input
           type="search"
           class="search-input"
-          placeholder="Search courses..."
+          [placeholder]="lang.t().tcSearchCourses"
           [value]="searchTerm()"
           (input)="updateSearchTerm($any($event.target).value)" />
 
@@ -52,15 +117,15 @@
           <table>
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Level</th>
-                <th>Price</th>
-                <th>Lessons</th>
-                <th>Students</th>
-                <th>Rating</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{{ lang.t().tcThTitle }}</th>
+                <th>{{ lang.t().tcThCategory }}</th>
+                <th>{{ lang.t().tcThLevel }}</th>
+                <th>{{ lang.t().tcThPrice }}</th>
+                <th>{{ lang.t().tcThLessons }}</th>
+                <th>{{ lang.t().tcThStudents }}</th>
+                <th>{{ lang.t().tcThRating }}</th>
+                <th>{{ lang.t().tcThStatus }}</th>
+                <th>{{ lang.t().tcThActions }}</th>
               </tr>
             </thead>
             <tbody>
@@ -85,26 +150,30 @@
                     @if (course.totalRatings > 0) {
                       <span class="rating-pill">⭐ {{ course.averageRating.toFixed(1) }} ({{ course.totalRatings }})</span>
                     } @else {
-                      <span class="rating-pill rating-pill-empty">No ratings</span>
+                      <span class="rating-pill rating-pill-empty">{{ lang.t().tcNoRatings }}</span>
                     }
                   </td>
                   <td>
                     <span class="status" [class.live]="course.published">
-                      {{ course.published ? 'Published' : 'Draft' }}
+                      {{ course.published ? lang.t().cdPublished : lang.t().cdDraft }}
                     </span>
                   </td>
                   <td class="actions-cell">
-                    <button type="button" class="btn btn-students" (click)="goToStudents(course.id)">👥 Students ({{ course.students }})</button>
-                    <button type="button" class="btn btn-outline" (click)="openLessons(course.id)">Lessons</button>
-                    <button type="button" class="btn btn-ghost" (click)="openEditCourseModal(course.id)">Edit</button>
-                    <button type="button" class="btn btn-danger" (click)="deleteCourse(course.id)">Delete</button>
+                    @if (isAdminMode()) {
+                      <button type="button" class="btn btn-students" (click)="goToStudents(course.id)">👥 {{ lang.t().tcBtnStudents }} ({{ course.students }})</button>
+                      <button type="button" class="btn btn-outline" (click)="openLessons(course.id)">{{ lang.t().tcBtnLessons }}</button>
+                      <button type="button" class="btn btn-ghost" (click)="openEditCourseModal(course.id)">{{ lang.t().commonEdit }}</button>
+                      <button type="button" class="btn btn-danger" (click)="deleteCourse(course.id)">{{ lang.t().commonDelete }}</button>
+                    } @else {
+                      <button type="button" class="btn btn-primary" (click)="openLessons(course.id)">🔴 {{ lang.t().tcManageLive }}</button>
+                    }
                   </td>
                 </tr>
               }
 
               @if (!isLoadingCourses() && filteredCourses().length === 0) {
                 <tr>
-                  <td colspan="9" class="empty-state">No course found.</td>
+                  <td colspan="9" class="empty-state">{{ lang.t().tcNoCourse }}</td>
                 </tr>
               }
             </tbody>
@@ -112,25 +181,28 @@
         </div>
 
         @if (isLoadingCourses()) {
-          <p class="loading-text">Loading courses...</p>
+          <p class="loading-text">{{ lang.t().tcLoadingCourses }}</p>
         }
       </section>
     } @else {
       <header class="toolbar">
         <div>
-          <button type="button" class="link-btn" (click)="closeLessonsView()">← Back to Courses</button>
-          <h1>Lessons for {{ currentCourseName() }}</h1>
-          <p>Add or edit lesson videos and resources from this panel.</p>
+          <button type="button" class="link-btn" (click)="closeLessonsView()">← {{ lang.t().tcBackToCourses }}</button>
+          <h1>{{ lang.t().tcLessonsFor }} {{ currentCourseName() }}</h1>
+          <p>{{ lang.t().tcLessonsSub }}</p>
         </div>
         <div class="toolbar-actions">
-          <button type="button" class="btn btn-outline live-btn" (click)="openLiveModal()">📺 Live Class Schedule করো</button>
-          <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ Add Lesson</button>
+          <button type="button" class="btn btn-outline live-btn" (click)="openLiveModal()">📺 {{ lang.t().tcLiveSchedule }}</button>
+          @if (isAdminMode()) {
+            <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ {{ lang.t().tcAddLesson }}</button>
+          }
         </div>
       </header>
 
+      @if (isAdminMode()) {
       <section class="panel lesson-list" aria-label="Lesson list">
         @if (isLoadingLessons()) {
-          <p class="loading-text">Loading lessons...</p>
+          <p class="loading-text">{{ lang.t().tcLoadingLessons }}</p>
         }
 
         @for (lesson of sortedLessons(); track lesson.id) {
@@ -145,44 +217,46 @@
                 <span>{{ lesson.videoType }}</span>
                 <span>{{ lesson.durationMinutes }}min</span>
                 @if (lesson.isPreview) {
-                  <span class="chip">Preview</span>
+                  <span class="chip">{{ lang.t().tcPreview }}</span>
                 }
               </div>
             </div>
             <div class="lesson-actions">
               @if (lesson.videoUrl) {
                 <a class="btn btn-outline" [href]="lesson.videoUrl" target="_blank" rel="noopener noreferrer">
-                  Open Video
+                  {{ lang.t().tcOpenVideo }}
                 </a>
               }
               @if (lesson.thumbnailUrl) {
                 <a class="btn btn-outline" [href]="lesson.thumbnailUrl" target="_blank" rel="noopener noreferrer">
-                  Thumbnail
+                  {{ lang.t().tcThumbnail }}
                 </a>
               }
-              <button type="button" class="btn btn-ghost" (click)="openEditLessonModal(lesson.id)">Edit</button>
-              <button type="button" class="btn btn-danger" (click)="deleteLesson(lesson.id)">Delete</button>
+              <button type="button" class="btn btn-ghost" (click)="openEditLessonModal(lesson.id)">{{ lang.t().commonEdit }}</button>
+              <button type="button" class="btn btn-danger" (click)="deleteLesson(lesson.id)">{{ lang.t().commonDelete }}</button>
 
-                 <a [routerLink]="['/quiz-editor', lesson.id]" [queryParams]="{ title: lesson.title }" class="btn btn-quiz">Add Quiz</a>
+                 <a [routerLink]="['/quiz-editor', lesson.id]" [queryParams]="{ title: lesson.title }" class="btn btn-quiz">{{ lang.t().tcAddQuiz }}</a>
             </div>
           </article>
         }
 
         @if (!isLoadingLessons() && sortedLessons().length === 0) {
-          <p class="empty-state">No lesson found for this course.</p>
+          <p class="empty-state">{{ lang.t().tcNoLesson }}</p>
         }
       </section>
+      }
 
+      @if (isLiveTeacherMode()) {
       <section class="panel live-panel" aria-label="Scheduled live classes">
         <div class="live-panel-head">
           <div>
-            <h2>Scheduled Live Classes</h2>
-            <p>এই course-এর live session schedule, start, join আর end এখান থেকে manage করো।</p>
+            <h2>{{ lang.t().tcScheduledLive }}</h2>
+            <p>{{ lang.t().tcLivePanelSub }}</p>
           </div>
         </div>
 
         @if (isLoadingLiveClasses()) {
-          <p class="loading-text">Loading live classes...</p>
+          <p class="loading-text">{{ lang.t().tcLoadingLive }}</p>
         } @else if (liveClasses().length > 0) {
           <div class="live-list">
             @for (lc of liveClasses(); track lc.id) {
@@ -196,22 +270,115 @@
                 </div>
                 <div class="live-item-actions">
                   @if (!lc.isActive && !lc.isEnded) {
-                    <button type="button" class="btn btn-danger" (click)="startLiveClass(lc.id)">🔴 Start</button>
+                    <button type="button" class="btn btn-danger" (click)="startLiveClass(lc.id)">🔴 {{ lang.t().tcStart }}</button>
                   }
                   @if (lc.isActive) {
-                    <a [routerLink]="['/live-class', lc.id]" class="btn btn-outline">Join →</a>
-                    <button type="button" class="btn btn-danger" (click)="endLiveClass(lc.id)">End</button>
+                    <a [routerLink]="['/live-class', lc.id]" class="btn btn-outline">{{ lang.t().liveJoin }} →</a>
+                    <button type="button" class="btn btn-danger" (click)="endLiveClass(lc.id)">{{ lang.t().tcEnd }}</button>
                   }
                   @if (lc.isEnded) {
-                    <span class="chip live-ended">Ended</span>
+                    <span class="chip live-ended">{{ lang.t().liveEnded }}</span>
                   }
                 </div>
               </article>
             }
           </div>
         } @else {
-          <p class="empty-state">এখনো কোনো live class schedule করা হয়নি।</p>
+          <p class="empty-state">{{ lang.t().tcNoLiveScheduled }}</p>
         }
+      </section>
+      }
+
+      <!-- Practice materials: admin only -->
+      @if (isAdminMode()) {
+        <section class="panel pm-panel" aria-label="Practice materials">
+          <div class="live-panel-head">
+            <div>
+              <h2>🎯 {{ lang.t().pmTitle }}</h2>
+              <p>{{ lang.t().pmSub }}</p>
+            </div>
+          </div>
+
+          <!-- Add / edit form -->
+          <div class="pm-form">
+            <input type="text" class="pm-input" [(ngModel)]="pmTitle" [placeholder]="lang.t().pmFieldName" maxlength="80" />
+            <input type="text" class="pm-input" [(ngModel)]="pmDesc" [placeholder]="lang.t().pmDescPlaceholder" maxlength="160" />
+            <label class="btn btn-outline pm-file">
+              📎 {{ pmFileName || lang.t().pmChooseFile }}
+              <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden (change)="onPracticeFileSelected($event)" />
+            </label>
+            <button type="button" class="btn btn-primary" [disabled]="isSavingPractice()" (click)="savePractice()">
+              {{ isSavingPractice() ? lang.t().tpSaving : (pmEditingId ? lang.t().commonSave : lang.t().pmAdd) }}
+            </button>
+            @if (pmEditingId) {
+              <button type="button" class="btn btn-ghost" (click)="resetPracticeForm()">{{ lang.t().commonCancel }}</button>
+            }
+          </div>
+
+          <!-- Existing materials -->
+          @if (practiceMaterials().length === 0) {
+            <p class="empty-state">{{ lang.t().pmNone }}</p>
+          } @else {
+            <div class="pm-list">
+              @for (m of practiceMaterials(); track m.id) {
+                <div class="pm-row">
+                  <span class="pm-badge pm-badge--{{ m.fileType === 'PDF' ? 'pdf' : 'doc' }}">{{ m.fileType }}</span>
+                  <div class="pm-row-info">
+                    <strong>{{ m.title }}</strong>
+                    @if (m.description) { <span>{{ m.description }}</span> }
+                  </div>
+                  <button type="button" class="btn btn-outline" (click)="viewPractice(m.id)">📄 {{ lang.t().pmOpen }}</button>
+                  <button type="button" class="btn btn-ghost" (click)="editPractice(m)">{{ lang.t().commonEdit }}</button>
+                  <button type="button" class="btn btn-danger" (click)="deletePractice(m.id)">{{ lang.t().commonDelete }}</button>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      <!-- Exams: admin authors (create/edit/upload question); admin + appointed teacher grade -->
+      <section class="panel exam-author-panel" aria-label="Exams">
+        <div class="live-panel-head">
+          <div>
+            <h2>📝 {{ lang.t().exManageExams }}</h2>
+            <p>{{ lang.t().exManageSub }}</p>
+          </div>
+        </div>
+        <div class="exam-author-grid">
+          @for (ex of examSlots(); track $index; let i = $index) {
+            <div class="exam-author-card">
+              <div class="exam-author-head">
+                <h3>{{ i === 0 ? lang.t().exFirst : i === 1 ? lang.t().exSecond : lang.t().exFinal }}</h3>
+                @if (ex?.isPublished) {
+                  <span class="exam-badge exam-badge--ok">{{ lang.t().exPublished }}</span>
+                } @else {
+                  <span class="exam-badge exam-badge--locked">{{ lang.t().exUnpublished }}</span>
+                }
+              </div>
+              @if (ex) {
+                <p class="exam-author-line"><strong>{{ ex.title }}</strong></p>
+                <p class="exam-author-line">{{ lang.t().exDeadline }}: {{ ex.deadline | date:'dd MMM yyyy, hh:mm a' }}</p>
+                <p class="exam-author-line">{{ lang.t().exTotalMarks }}: {{ ex.totalMarks }}</p>
+              } @else {
+                <p class="exam-author-line muted">—</p>
+              }
+              <div class="exam-author-actions">
+                <button type="button" class="btn btn-outline" (click)="openExamModal(i + 1)">{{ ex ? lang.t().commonEdit : lang.t().exSaveExam }}</button>
+                @if (ex) {
+                  <label class="btn btn-outline exam-q-upload">
+                    {{ uploadingQuestionSlot() === (i + 1) ? '⏳' : (ex.hasQuestion ? lang.t().exReplaceQuestion : lang.t().exUploadQuestion) }}
+                    <input type="file" accept="application/pdf,.pdf" hidden (change)="onExamQuestionSelected(i + 1, $event)" />
+                  </label>
+                  @if (ex.hasQuestion) {
+                    <button type="button" class="btn btn-outline" (click)="viewExamQuestion(ex.id)">📄 {{ lang.t().exViewPdf }}</button>
+                  }
+                  <button type="button" class="btn btn-primary" (click)="openExamSubs(ex.id)">{{ lang.t().exViewSubmissions }}</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
       </section>
     }
   </section>
@@ -220,31 +387,105 @@
     <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Live class dialog" (click)="closeLiveModal()">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-head">
-          <h2>📺 Live Class তৈরি করো</h2>
+          <h2>📺 {{ lang.t().tcCreateLiveTitle }}</h2>
           <button type="button" class="icon-btn" (click)="closeLiveModal()">✕</button>
         </div>
 
         <div class="form-grid">
           <label class="full">
-            <span>Title *</span>
-            <input type="text" [(ngModel)]="liveTitle" placeholder="e.g. Chapter 5 Discussion" />
+            <span>{{ lang.t().commonTitle }} *</span>
+            <input type="text" [(ngModel)]="liveTitle" [placeholder]="lang.t().tcLiveTitlePlaceholder" />
           </label>
 
           <label class="full">
-            <span>Description</span>
-            <textarea rows="2" [(ngModel)]="liveDesc" placeholder="কী নিয়ে class হবে..."></textarea>
+            <span>{{ lang.t().commonDescription }}</span>
+            <textarea rows="2" [(ngModel)]="liveDesc" [placeholder]="lang.t().tcLiveDescPlaceholder"></textarea>
           </label>
 
           <label class="full">
-            <span>Scheduled At *</span>
+            <span>{{ lang.t().tcScheduledAt }} *</span>
             <input type="datetime-local" [(ngModel)]="liveScheduledAt" />
           </label>
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-ghost" (click)="closeLiveModal()">Cancel</button>
-          <button type="button" class="btn btn-primary" (click)="createLiveClass()">📺 Create Live Class</button>
+          <button type="button" class="btn btn-ghost" (click)="closeLiveModal()">{{ lang.t().commonCancel }}</button>
+          <button type="button" class="btn btn-primary" (click)="createLiveClass()">📺 {{ lang.t().tcCreateLiveBtn }}</button>
         </div>
+      </div>
+    </div>
+  }
+
+  <!-- Exam create/edit modal -->
+  @if (showExamModal()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" (click)="closeExamModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h2>📝 {{ lang.t().exManageExams }}</h2>
+          <button type="button" class="icon-btn" (click)="closeExamModal()">✕</button>
+        </div>
+        <div class="form-grid">
+          <label class="full">
+            <span>{{ lang.t().commonTitle }} *</span>
+            <input type="text" [(ngModel)]="examTitle" [placeholder]="lang.t().exTitlePlaceholder" />
+          </label>
+          <label class="full">
+            <span>{{ lang.t().exInstruction }}</span>
+            <textarea rows="2" [(ngModel)]="examInstruction" [placeholder]="lang.t().exInstructionPlaceholder"></textarea>
+          </label>
+          <label>
+            <span>{{ lang.t().exDurationDays }} *</span>
+            <input type="number" [(ngModel)]="examDurationDays" min="1" />
+          </label>
+          <label>
+            <span>{{ lang.t().exTotalMarks }}</span>
+            <input type="number" [(ngModel)]="examTotalMarks" min="0" />
+          </label>
+          <p class="full exam-modal-hint">⏱️ {{ lang.t().exDurationHint }}</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="closeExamModal()">{{ lang.t().commonCancel }}</button>
+          <button type="button" class="btn btn-primary" [disabled]="isSavingExam()" (click)="saveExam()">
+            {{ isSavingExam() ? lang.t().tpSaving : lang.t().exSaveExam }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Exam submissions + grading modal -->
+  @if (showExamSubsModal()) {
+    <div class="modal-backdrop" role="dialog" aria-modal="true" (click)="closeExamSubs()">
+      <div class="modal-card modal-wide" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h2>📥 {{ lang.t().exViewSubmissions }}</h2>
+          <button type="button" class="icon-btn" (click)="closeExamSubs()">✕</button>
+        </div>
+        @if (examSubs().length === 0) {
+          <p class="empty-state">{{ lang.t().exNoSubmissions }}</p>
+        } @else {
+          <div class="exam-subs-list">
+            @for (s of examSubs(); track s.submissionId) {
+              <div class="exam-sub-row">
+                <div class="exam-sub-info">
+                  <strong>{{ s.studentName }}</strong>
+                  <span>{{ lang.t().exSubmittedAt }}: {{ s.submittedAt | date:'dd MMM, hh:mm a' }}</span>
+                  @if (s.gradedByAdmin && !isAdminMode()) {
+                    <span class="exam-lock-note">🔒 {{ lang.t().exGradedByAdmin }}</span>
+                  }
+                </div>
+                <button type="button" class="btn btn-outline" (click)="downloadSubmission(s)">⬇ {{ lang.t().exDownload }}</button>
+                <input class="exam-mark-input" type="number" min="0" [(ngModel)]="gradeInputs[s.submissionId].marks"
+                  [disabled]="s.gradedByAdmin && !isAdminMode()"
+                  [placeholder]="lang.t().exMarks + ' /' + examSubsTotalMarks()" />
+                <input class="exam-fb-input" type="text" [(ngModel)]="gradeInputs[s.submissionId].feedback"
+                  [disabled]="s.gradedByAdmin && !isAdminMode()"
+                  [placeholder]="lang.t().exFeedback" />
+                <button type="button" class="btn btn-primary" [disabled]="s.gradedByAdmin && !isAdminMode()" (click)="gradeSubmission(s)">{{ lang.t().exSaveGrade }}</button>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
   }
@@ -259,47 +500,71 @@
 
         <form class="form-grid" [formGroup]="courseForm" (ngSubmit)="saveCourse()">
           <label>
-            <span>Title *</span>
+            <span>{{ lang.t().commonTitle }} *</span>
             <input type="text" formControlName="title" />
           </label>
 
          <label>
-            <span>Category *</span>
+            <span>{{ lang.t().tcThCategory }} *</span>
             <select formControlName="category" class="category-select">
-              <optgroup label="📘 SSC">
-                <option value="SSC 2027">SSC 2027 — Final Preparation</option>
-                <option value="SSC 2026">SSC 2026 — Final Preparation</option>
-              </optgroup>
-              <optgroup label="📗 HSC">
-                <option value="HSC 2027">HSC 2027 — Final Preparation</option>
-                <option value="HSC 2026">HSC 2026 — Final Preparation</option>
-              </optgroup>
-              <optgroup label="🎯 Admission">
-                <option value="Admission English">Admission English</option>
-                <option value="Admission Science">Admission Science</option>
-              </optgroup>
-              <optgroup label="⚡ Skills">
-                <option value="Skills Development">Skills Development</option>
-                <option value="Communication">Communication Skills</option>
-              </optgroup>
-              <optgroup label="📚 Other">
-                <option value="General">General</option>
-              </optgroup>
+              <option value="" disabled>{{ lang.t().tcSelectCategory }}</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.name">{{ cat.name }}</option>
+              }
             </select>
+            @if (categories().length === 0) {
+              <small class="field-hint">{{ lang.t().tcNoCategoriesHint }}</small>
+            }
           </label>
 
           <label class="full">
-            <span>Description *</span>
+            <span>{{ lang.t().commonDescription }} *</span>
             <textarea rows="3" formControlName="description"></textarea>
           </label>
 
-          <label>
-            <span>Instructor Name</span>
-            <input type="text" formControlName="instructorName" />
+          <label class="full">
+            <span>{{ lang.t().tcAppointTeacher }} * <small class="appoint-hint">({{ lang.t().tcAppointMulti }})</small></span>
+            @if (approvedTeachers().length === 0) {
+              <p class="empty-state">{{ lang.t().tcSelectTeacher }}</p>
+            } @else {
+              <div class="ms-dropdown">
+                <div class="ms-trigger" [class.ms-trigger--open]="teacherDropdownOpen()" (click)="teacherDropdownOpen.set(!teacherDropdownOpen())">
+                  @if (selectedTeacherObjs().length === 0) {
+                    <span class="ms-placeholder">{{ lang.t().tcChooseTeachers }}</span>
+                  } @else {
+                    <span class="ms-chips">
+                      @for (t of selectedTeacherObjs(); track t.id) {
+                        <span class="ms-chip">
+                          {{ t.fullName }}
+                          <span class="ms-chip-x" (click)="$event.stopPropagation(); toggleTeacher(t.id)" aria-label="Remove">✕</span>
+                        </span>
+                      }
+                    </span>
+                  }
+                  <span class="ms-caret">▾</span>
+                </div>
+
+                @if (teacherDropdownOpen()) {
+                  <div class="ms-backdrop" (click)="teacherDropdownOpen.set(false)"></div>
+                  <div class="ms-panel">
+                    @for (t of approvedTeachers(); track t.id) {
+                      <button type="button" class="ms-option" [class.ms-option--on]="isTeacherSelected(t.id)" (click)="toggleTeacher(t.id)">
+                        <span class="ms-check">{{ isTeacherSelected(t.id) ? '✓' : '' }}</span>
+                        <span class="ms-opt-text">
+                          <span class="ms-opt-name">{{ t.fullName }}</span>
+                          <span class="ms-opt-email">{{ t.email }}</span>
+                        </span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+              <small class="appoint-count">{{ selectedTeacherIds().length }} {{ lang.t().tcSelectedCount }}</small>
+            }
           </label>
 
           <label>
-            <span>Level</span>
+            <span>{{ lang.t().tcLevelLabel }}</span>
             <select formControlName="level">
               <option value="Beginner">Beginner</option>
               <option value="Intermediate">Intermediate</option>
@@ -308,22 +573,22 @@
           </label>
 
           <label>
-            <span>Price (0 = Free)</span>
+            <span>{{ lang.t().tcPriceLabel }}</span>
             <input type="number" formControlName="price" />
           </label>
 
           <label>
-            <span>Duration (minutes)</span>
+            <span>{{ lang.t().tcDurationLabel }}</span>
             <input type="number" formControlName="durationMinutes" />
           </label>
 
           <label class="full">
-            <span>Thumbnail URL</span>
+            <span>{{ lang.t().tcThumbnailUrl }}</span>
             <input type="url" formControlName="thumbnailUrl" placeholder="https://example.com/thumbnail.jpg" />
           </label>
 
           <label class="full upload-field">
-            <span>Or Upload Thumbnail Image</span>
+            <span>{{ lang.t().tcUploadThumb }}</span>
             <input type="file" accept="image/*" (change)="onThumbnailSelected($event)" />
           </label>
 
@@ -338,12 +603,12 @@
 
           <label class="checkbox full">
             <input type="checkbox" formControlName="published" />
-            <span>Publish course</span>
+            <span>{{ lang.t().tcPublishCourse }}</span>
           </label>
 
           <div class="modal-actions full">
-            <button type="button" class="btn btn-ghost" (click)="closeCourseModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary" [disabled]="isCourseFormInvalid()">Save Course</button>
+            <button type="button" class="btn btn-ghost" (click)="closeCourseModal()">{{ lang.t().commonCancel }}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isCourseFormInvalid()">{{ lang.t().tcSaveCourse }}</button>
           </div>
         </form>
       </div>
@@ -360,17 +625,17 @@
 
         <form class="form-grid" [formGroup]="lessonForm" (ngSubmit)="saveLesson()">
           <label class="full">
-            <span>Lesson Title *</span>
+            <span>{{ lang.t().tcLessonTitle }} *</span>
             <input type="text" formControlName="title" />
           </label>
 
           <label class="full">
-            <span>Description</span>
+            <span>{{ lang.t().commonDescription }}</span>
             <textarea rows="3" formControlName="description"></textarea>
           </label>
 
           <label>
-            <span>Video Type</span>
+            <span>{{ lang.t().tcVideoType }}</span>
             <select formControlName="videoType">
               <option value="YouTube">YouTube</option>
               <option value="Vimeo">Vimeo</option>
@@ -379,24 +644,24 @@
           </label>
 
           <label>
-            <span>Order Index</span>
+            <span>{{ lang.t().tcOrderIndex }}</span>
             <input type="number" formControlName="orderIndex" />
           </label>
 
           <label class="full">
-            <span>Video URL</span>
+            <span>{{ lang.t().tcVideoUrl }}</span>
             <input type="url" formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=..." />
           </label>
 
           <label class="full upload-field">
-            <span>Or Upload Video File</span>
+            <span>{{ lang.t().tcUploadVideo }}</span>
             <input type="file" accept="video/*" (change)="onLessonVideoFileSelected($event)" [disabled]="isUploadingVideo()" />
           </label>
 
           @if (isUploadingVideo()) {
             <div class="full video-upload-progress">
               <div class="progress-info">
-                <span class="progress-label">Uploading video...</span>
+                <span class="progress-label">{{ lang.t().tcUploadingVideo }}</span>
                 <span class="progress-percentage">{{ videoUploadProgress() }}%</span>
               </div>
               <div class="progress-bar-container">
@@ -406,7 +671,7 @@
           }
 
           <label class="full upload-field">
-            <span>Lesson Thumbnail (optional)</span>
+            <span>{{ lang.t().tcLessonThumb }}</span>
             <input type="file" accept="image/*" (change)="onLessonThumbnailSelected($event)" />
           </label>
 
@@ -420,23 +685,23 @@
           }
 
           <label>
-            <span>Duration (minutes)</span>
+            <span>{{ lang.t().tcDurationLabel }}</span>
             <input type="number" formControlName="durationMinutes" />
           </label>
 
           <label>
-            <span>Resource URL (optional)</span>
+            <span>{{ lang.t().tcResourceUrl }}</span>
             <input type="url" formControlName="resourceUrl" />
           </label>
 
           <label class="checkbox full">
             <input type="checkbox" formControlName="isPreview" />
-            <span>Free preview lesson</span>
+            <span>{{ lang.t().tcFreePreview }}</span>
           </label>
 
           <div class="modal-actions full">
-            <button type="button" class="btn btn-ghost" (click)="closeLessonModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary" [disabled]="isLessonFormInvalid()">Save Lesson</button>
+            <button type="button" class="btn btn-ghost" (click)="closeLessonModal()">{{ lang.t().commonCancel }}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isLessonFormInvalid()">{{ lang.t().tcSaveLesson }}</button>
           </div>
         </form>
       </div>
@@ -451,16 +716,16 @@
   <div class="modal-backdrop" (click)="showStudentsPanel.set(false)">
     <div class="students-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>📋 Enrolled Students — {{ selectedCourse()?.title }}</h3>
+        <h3>📋 {{ lang.t().esTitle }} — {{ selectedCourse()?.title }}</h3>
         <button (click)="showStudentsPanel.set(false)">✕</button>
       </div>
       <table class="students-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Enrolled</th>
-            <th>Certificate</th>
+            <th>{{ lang.t().commonName }}</th>
+            <th>{{ lang.t().commonEmail }}</th>
+            <th>{{ lang.t().tcEnrolled }}</th>
+            <th>{{ lang.t().esThCert }}</th>
           </tr>
         </thead>
         <tbody>
@@ -471,13 +736,13 @@
               <td>{{ student.enrolledAt | date:'mediumDate' }}</td>
               <td>
                 @if (issuedCertificates().includes(student.userId)) {
-                  <span class="cert-issued">✅ Issued</span>
+                  <span class="cert-issued">✅ {{ lang.t().esIssued }}</span>
                 } @else {
-                  <button 
+                  <button
                     class="issue-cert-btn"
                     [disabled]="issuingCertificate() === student.userId"
                     (click)="issueCertificate(student)">
-                    {{ issuingCertificate() === student.userId ? '...' : '🎓 Issue' }}
+                    {{ issuingCertificate() === student.userId ? '...' : ('🎓 ' + lang.t().tcIssue) }}
                   </button>
                 }
               </td>

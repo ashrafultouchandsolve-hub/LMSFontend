@@ -1,0 +1,32 @@
+<section class="cp-section">
+  <div class="cp-head">
+    <h2>🎯 {{ lang.t().ecHubPractice }}</h2>
+    <p>{{ lang.t().pmStudentSub }}</p>
+  </div>
+
+  @if (isLoading()) {
+    <p class="cp-loading">{{ lang.t().lcJoining }}</p>
+  } @else if (materials().length === 0) {
+    <div class="cp-empty">
+      <span class="cp-empty-ico">🗂️</span>
+      <h3>{{ lang.t().pmNone }}</h3>
+      <p>{{ lang.t().pmNoneDesc }}</p>
+    </div>
+  } @else {
+    <div class="cp-grid">
+      @for (m of materials(); track m.id) {
+        <article class="cp-card cp-card--{{ m.fileType === 'PDF' ? 'pdf' : 'doc' }}">
+          <div class="cp-card-top">
+            <span class="cp-card-ico">{{ icon(m.fileType) }}</span>
+            <span class="cp-card-type">{{ m.fileType }}</span>
+          </div>
+          <h3 class="cp-card-title">{{ m.title }}</h3>
+          @if (m.description) {
+            <p class="cp-card-desc">{{ m.description }}</p>
+          }
+          <button type="button" class="cp-open" (click)="open(m)">⬇ {{ lang.t().pmOpen }}</button>
+        </article>
+      }
+    </div>
+  }
+</section>

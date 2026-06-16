@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 
 interface QuizForm {
   question: string;
@@ -27,6 +28,7 @@ export class QuizEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private api = inject(LearningApiService);
+  protected readonly lang = inject(LanguageService);
 
 
   lessonId = signal('');

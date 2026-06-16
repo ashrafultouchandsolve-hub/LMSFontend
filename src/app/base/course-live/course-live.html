@@ -1,0 +1,44 @@
+<section class="cl-section">
+  <div class="cl-head">
+    <h2>📺 {{ lang.t().ecLiveClasses }}</h2>
+    <span class="cl-count">{{ liveClasses().length }} {{ lang.t().ecScheduled }}</span>
+  </div>
+
+  @if (isLoading()) {
+    <p class="cl-loading">{{ lang.t().lcJoining }}</p>
+  } @else if (activeLiveClass(); as active) {
+    <div class="cl-active">
+      <div class="cl-pulse"></div>
+      <div class="cl-active-info">
+        <strong>🔴 {{ lang.t().ecLiveNow }}: {{ active.title }}</strong>
+        @if (active.description) { <p>{{ active.description }}</p> }
+      </div>
+      <a [routerLink]="['/live-class', active.id]" class="cl-join">{{ lang.t().ecJoinNow }} →</a>
+    </div>
+  }
+
+  @if (liveClasses().length === 0) {
+    <p class="cl-empty">{{ lang.t().ecNoLive }}</p>
+  } @else {
+    <div class="cl-list">
+      @for (lc of liveClasses(); track lc.id) {
+        @if (!lc.isActive) {
+          <article class="cl-card" [class.cl-card--ended]="lc.isEnded">
+            <div class="cl-card-info">
+              <p class="cl-card-title">{{ lc.title }}</p>
+              <p class="cl-card-time">🕐 {{ lc.scheduledAt | date:'dd MMM, hh:mm a' }}</p>
+              @if (lc.description) { <p class="cl-card-desc">{{ lc.description }}</p> }
+            </div>
+            <div class="cl-card-status">
+              @if (lc.isEnded) {
+                <span class="cl-badge cl-badge--ended">{{ lang.t().liveEnded }}</span>
+              } @else {
+                <span class="cl-badge cl-badge--up">{{ lang.t().ecUpcoming }}</span>
+              }
+            </div>
+          </article>
+        }
+      }
+    </div>
+  }
+</section>

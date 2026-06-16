@@ -1,8 +1,8 @@
 <main class="assignment-page">
 	<app-navbar></app-navbar>
 	<header class="assign-header">
-		<h1>My Assignments</h1>
-		<p>তোমার সব assignment এখানে থাকবে। সময়মতো জমা দাও!</p>
+		<h1>{{ lang.t().asgTitle }}</h1>
+		<p>{{ lang.t().asgSub }}</p>
 	</header>
 
 	<section class="assign-list">
@@ -11,16 +11,16 @@
 			<div class="assign-icon">📝</div>
 			<div class="assign-info">
 				<h2>Module 1: HTML Basics</h2>
-				<p>Due: ৩০ এপ্রিল ২০২৬</p>
-				<span class="assign-status">Status: Pending</span>
+				<p>{{ lang.t().asgDue }} ৩০ এপ্রিল ২০২৬</p>
+				<span class="assign-status">{{ lang.t().asgStatus }} {{ lang.t().asgPending }}</span>
 			</div>
-			<button class="assign-btn" disabled>Submit</button>
+			<button class="assign-btn" disabled>{{ lang.t().asgSubmit }}</button>
 		</article>
 
 		<!-- Empty state -->
 		<div class="assign-empty">
-			<h3>কোনো assignment পাওয়া যায়নি</h3>
-			<p>নতুন assignment এলে এখানে দেখতে পাবে।</p>
+			<h3>{{ lang.t().asgEmpty }}</h3>
+			<p>{{ lang.t().asgEmptyDesc }}</p>
 		</div>
 	</section>
 </main>

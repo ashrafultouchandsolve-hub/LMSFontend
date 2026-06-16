@@ -115,6 +115,9 @@
     #f7f8fc;
   min-height: 100vh;
   padding: 0 0 2rem;
+  position: relative;
+  overflow-x: clip;
+  isolation: isolate;
 }
 .back-link {
   display: inline-flex;
@@ -133,6 +136,8 @@
   width: 100%;
   margin: auto;
   padding: 0 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 .slide-thumb-img {
   width: 100%;
@@ -141,28 +146,98 @@
   border-radius: 4px;
 }
 
-/* HEADER */
+/* HEADER — animated learning banner */
 .page-head {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 0.15rem;
 
-  min-height: 52px;
-  padding: 0.5rem 0.6rem;
+  min-height: 72px;
+  padding: 0.9rem 1.4rem;
 
-  border-radius: 16px;
-  background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+  border-radius: 18px;
+  background: linear-gradient(120deg, #1e3a8a, #1d4ed8, #0ea5e9, #06b6d4, #1d4ed8);
+  background-size: 300% 300%;
+  animation: headFlow 14s ease infinite;
   color: white;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 14px 40px -12px rgba(29, 78, 216, 0.55);
+  isolation: isolate;
 }
+
+/* moving sheen sweeping across the header */
+.page-head::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: headSheen 6s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* faint moving grid → "learning platform" tech vibe */
+.page-head::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  animation: gridDrift 20s linear infinite;
+  z-index: -1;
+  opacity: 0.5;
+  mask-image: radial-gradient(circle at 80% 50%, #000, transparent 70%);
+}
+
+@keyframes headFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes headSheen {
+  0% { transform: translateX(-100%); }
+  55%, 100% { transform: translateX(100%); }
+}
+@keyframes gridDrift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(28px, 28px); }
+}
+
 .page-head h1 {
-  font-size: 1.2rem;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* little animated "live learning" pip before the title */
+.page-head h1::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7dd3fc;
+  box-shadow: 0 0 0 0 rgba(125, 211, 252, 0.7);
+  animation: titlePip 2.2s ease-out infinite;
+  flex-shrink: 0;
+}
+@keyframes titlePip {
+  0% { box-shadow: 0 0 0 0 rgba(125, 211, 252, 0.7); }
+  70%, 100% { box-shadow: 0 0 0 12px rgba(125, 211, 252, 0); }
 }
 
 .page-head p {
   font-size: 0.85rem;
-  margin-top: 0.3rem;
+  margin: 0;
+  opacity: 0.9;
+  font-weight: 500;
 }
 
 /* 🔥 SLIDER */
@@ -972,4 +1047,634 @@
 .live-badge-ended {
   background: #f3f4f6;
   color: #9ca3af;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✨ ADVANCED MOTION LAYER — senior-designer redesign
+   Scroll-driven (pure CSS scroll-timeline), graceful degradation.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Top scroll-progress bar (fills as you scroll the page) ── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  z-index: 200;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #1d4ed8, #0ea5e9, #06b6d4, #22d3ee);
+  background-size: 200% 100%;
+  box-shadow: 0 1px 12px rgba(14, 165, 233, 0.6);
+  animation: progressGrow linear, progressHue 6s linear infinite;
+  animation-timeline: scroll(root block), none;
+}
+@keyframes progressGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes progressHue { to { background-position: 200% 0; } }
+
+/* ── 2. Traveling "learning journey" line on the left ──
+   A vertical spine with a glowing marker that travels down with scroll. */
+.journey-spine {
+  position: fixed;
+  left: 18px;
+  top: 96px;
+  bottom: 48px;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg,
+    rgba(29, 78, 216, 0.05),
+    rgba(14, 165, 233, 0.35),
+    rgba(29, 78, 216, 0.05));
+  z-index: 60;
+  pointer-events: none;
+}
+/* the segment already "travelled" — bright trail */
+.journey-spine::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  transform-origin: top;
+  transform: scaleY(0);
+  background: linear-gradient(180deg, #1d4ed8, #0ea5e9, #22d3ee);
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.7);
+  animation: spineFill linear;
+  animation-timeline: scroll(root block);
+}
+@keyframes spineFill { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* the glowing dot that rides along with the scroll */
+.journey-marker {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff, #0ea5e9 55%, #1d4ed8);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2), 0 0 18px rgba(14, 165, 233, 0.9);
+  transform: translate(-50%, -50%);
+  animation: markerTravel linear, markerPulse 1.8s ease-in-out infinite;
+  animation-timeline: scroll(root block), none;
+}
+@keyframes markerTravel { from { top: 0; } to { top: 100%; } }
+@keyframes markerPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 14px rgba(14, 165, 233, 0.8); }
+  50%      { box-shadow: 0 0 0 7px rgba(14, 165, 233, 0.05), 0 0 22px rgba(34, 211, 238, 1); }
+}
+
+/* ── 3. Ambient floating orbs (slow drifting background life) ── */
+.ambient-orbs {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.ambient-orbs .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.orb-1 {
+  width: 340px; height: 340px;
+  top: 8%; left: -60px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.55), transparent 70%);
+  animation: drift1 22s ease-in-out infinite;
+}
+.orb-2 {
+  width: 420px; height: 420px;
+  top: 45%; right: -120px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.45), transparent 70%);
+  animation: drift2 28s ease-in-out infinite;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  bottom: 6%; left: 35%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.4), transparent 70%);
+  animation: drift3 25s ease-in-out infinite;
+}
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 40px) scale(1.12); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-70px, -50px) scale(1.08); }
+}
+@keyframes drift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -60px) scale(1.15); }
+}
+
+/* ── 4. Reveal-on-scroll for major sections (view-timeline) ──
+   Gated by @supports so unsupported browsers always show content. */
+@supports (animation-timeline: view()) {
+  .video-panel,
+  .lesson-sidebar,
+  .live-section,
+  .teacher-card,
+  .comments-card {
+    animation: revealUp linear both;
+    animation-timeline: view();
+    animation-range: entry 2% cover 22%;
+  }
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(46px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* comment bubbles pop in one-by-one as they enter view */
+  .comment-item {
+    animation: bubbleIn linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* lesson rows slide in from the side */
+  .lesson-item {
+    animation: rowIn linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(22px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+}
+
+/* ── 5. Section polish: glass cards + animated gradient borders ── */
+.video-panel,
+.lesson-sidebar,
+.comments-card,
+.live-section {
+  position: relative;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, rgba(29, 78, 216, 0.25), rgba(14, 165, 233, 0.05) 40%, rgba(34, 211, 238, 0.25)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 18px 50px -28px rgba(15, 23, 42, 0.4);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+.video-panel:hover,
+.comments-card:hover,
+.live-section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 60px -26px rgba(29, 78, 216, 0.45);
+}
+
+/* ── 6. Slider cards: shimmer sweep + lift, active glow ── */
+.slide-card {
+  position: relative;
+}
+.slide-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+.slide-card:hover::after { transform: translateX(120%); }
+.slide-card.active {
+  animation: activeGlow 2.4s ease-in-out infinite;
+}
+@keyframes activeGlow {
+  0%, 100% { box-shadow: 0 8px 20px rgba(29, 78, 216, 0.3); }
+  50%      { box-shadow: 0 10px 30px rgba(14, 165, 233, 0.55); }
+}
+
+/* play icon gentle bob on hover */
+.slide-card:hover .slide-thumb { transform: scale(1.04); transition: transform 0.4s ease; }
+
+/* ── 7. Active lesson row: animated left accent bar ── */
+.lesson-item {
+  position: relative;
+  overflow: hidden;
+}
+.lesson-item-active::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #ffffff, #7dd3fc);
+  animation: accentRise 0.5s ease both;
+}
+@keyframes accentRise {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* ── 8. Quiz button: shine on hover ── */
+.start-quiz-btn { position: relative; overflow: hidden; }
+.start-quiz-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.start-quiz-btn:hover:not(:disabled):not(.disabled)::after { transform: translateX(120%); }
+
+/* ── 9. Teacher card: animated gradient + avatar ring ── */
+.teacher-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(120deg, #0f172a, #15233f, #0f172a);
+  background-size: 200% 200%;
+  animation: headFlow 16s ease infinite;
+  align-items: center;
+}
+.teacher-avatar {
+  position: relative;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.teacher-avatar::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(#0ea5e9, #22d3ee, #6366f1, #0ea5e9);
+  animation: spin 4s linear infinite;
+  z-index: -1;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.teacher-name { font-weight: 700; margin: 0; }
+.teacher-role { margin: 2px 0 0; opacity: 0.7; font-size: 0.82rem; }
+
+/* ── 10. Respect reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  .page-head,
+  .scroll-progress,
+  .journey-marker,
+  .journey-spine::before,
+  .ambient-orbs .orb {
+    animation: none !important;
+  }
+  .scroll-progress { transform: scaleX(1); }
+  .journey-spine::before { transform: scaleY(1); }
+}
+
+/* ── Recorded live classes ─────────────────────────────────────── */
+.rec-block {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px dashed rgba(99, 102, 241, 0.25);
+}
+.rec-block-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1f2540;
+  margin: 0 0 14px;
+}
+.rec-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.rec-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(84, 98, 154, 0.16);
+  box-shadow: 0 8px 22px rgba(20, 26, 56, 0.06);
+}
+.rec-thumb {
+  display: grid;
+  place-items: center;
+  width: 46px; height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-size: 22px;
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+}
+.rec-info { flex: 1; min-width: 0; }
+.rec-title { margin: 0; font-size: 14.5px; font-weight: 700; color: #1c2142; }
+.rec-time { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
+.rec-desc { margin: 4px 0 0; font-size: 12.5px; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rec-watch-btn {
+  flex-shrink: 0;
+  border: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 8px 18px -8px rgba(99, 102, 241, 0.8);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.rec-watch-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+.rec-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(6, 9, 16, 0.82);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  display: grid; place-items: center;
+  padding: 20px;
+}
+.rec-modal {
+  width: 100%;
+  max-width: 900px;
+  background: #0d1018;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9);
+}
+.rec-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #13161e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.rec-modal-head h3 { margin: 0; font-size: 15px; font-weight: 700; color: #fff; }
+.rec-modal-close {
+  background: none; border: 0; cursor: pointer;
+  color: rgba(255, 255, 255, 0.6); font-size: 18px;
+}
+.rec-modal-close:hover { color: #fff; }
+.rec-modal-video {
+  width: 100%;
+  max-height: 70vh;
+  display: block;
+  background: #000;
+}
+
+/* hide heavy decorations on small screens */
+@media (max-width: 900px) {
+  .journey-spine { display: none; }
+  .ambient-orbs .orb { opacity: 0.35; }
+}
+/* ── Exam section ───────────────────────────────────────────────── */
+.exam-section {
+  margin: 22px 0;
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  box-shadow: 0 12px 30px -16px rgba(20, 26, 56, 0.18);
+}
+.exam-section-head { margin-bottom: 18px; }
+.exam-section-head h2 { margin: 0; font-size: 20px; font-weight: 800; color: #111827; }
+.exam-section-head p { margin: 4px 0 0; font-size: 13px; color: #6b7280; }
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+.exam-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  background: linear-gradient(165deg, #f8fafc, #eef2f9);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.exam-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -18px rgba(99, 102, 241, 0.35); }
+.exam-card--locked { opacity: 0.72; filter: grayscale(0.3); }
+
+.exam-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.exam-card-head h3 { margin: 0; font-size: 17px; font-weight: 800; color: #1c2142; }
+
+.exam-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+  padding: 4px 10px; border-radius: 20px; white-space: nowrap;
+}
+.exam-badge--pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.exam-badge--ok { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.exam-badge--miss { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.exam-badge--locked { background: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; }
+
+.exam-locked-body { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 0; color: #6b7280; }
+.exam-lock-big { font-size: 38px; }
+.exam-locked-body p { margin: 0; font-size: 13.5px; }
+
+.exam-line { margin: 0; font-size: 13.5px; color: #374151; line-height: 1.5; }
+.exam-line strong { color: #1f2937; }
+.exam-note { color: #4b5563; }
+
+.exam-q-btn {
+  align-self: flex-start;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  font-size: 13px; font-weight: 700;
+  padding: 7px 12px; border-radius: 10px; cursor: pointer;
+  transition: background 0.2s ease;
+}
+.exam-q-btn:hover { background: rgba(99, 102, 241, 0.16); }
+
+.exam-actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.exam-upload {
+  flex: 1; min-width: 130px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 12px; border-radius: 10px; cursor: pointer;
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  background: #fff; color: #4b5563; font-size: 12.5px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.exam-upload:hover { border-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
+.exam-submit-btn {
+  border: 0; cursor: pointer;
+  font-size: 13px; font-weight: 700; color: #fff;
+  padding: 9px 18px; border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 8px 18px -8px rgba(99, 102, 241, 0.8);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.exam-submit-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+.exam-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.exam-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.exam-countdown {
+  font-size: 12px; font-weight: 700; color: #b45309;
+  background: #fff7ed; border: 1px solid #fed7aa; padding: 4px 10px; border-radius: 20px;
+}
+.exam-myans {
+  border: 1px solid rgba(15, 23, 42, 0.15); background: #fff; color: #374151;
+  font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 10px; cursor: pointer;
+}
+.exam-myans:hover { background: #f3f4f6; }
+
+.exam-result {
+  margin-top: 6px; padding: 10px 12px; border-radius: 12px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 1px solid #a7f3d0;
+}
+.exam-marks { font-size: 14px; color: #065f46; }
+.exam-marks strong { font-size: 16px; }
+.exam-feedback { margin: 6px 0 0; font-size: 12.5px; color: #047857; line-height: 1.5; }
+.exam-await { margin: 4px 0 0; font-size: 12.5px; color: #6b7280; font-style: italic; }
+.exam-missed-note { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: #b91c1c; }
+
+@media (max-width: 600px) {
+  .exam-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Exam launch button ─────────────────────────────────────────── */
+.exam-launch { margin: 22px 0 0; }
+.exam-launch-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.exam-launch-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -16px rgba(99, 102, 241, 0.5); }
+.exam-launch-ico {
+  display: grid; place-items: center;
+  width: 40px; height: 40px; flex-shrink: 0;
+  border-radius: 12px; font-size: 20px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+.exam-launch-text { flex: 1; text-align: left; font-size: 17px; font-weight: 800; color: #1c2142; }
+.exam-launch-caret { font-size: 13px; color: #6366f1; font-weight: 700; }
+
+/* ── Enrolled course hub (4 catchy cards) ───────────────────────── */
+.hub-wrap {
+  max-width: 880px;
+  margin: 6px auto 0;
+}
+.hub-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 78, 216, 0.22);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1d4ed8;
+  font-weight: 700; font-size: 0.85rem; text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.hub-back:hover { background: #eff6ff; transform: translateX(-3px); }
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.hub-card {
+  --a1: #818cf8; --a2: #4f46e5; --glow: rgba(99, 102, 241, 0.3);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "ico title go" "ico sub go";
+  column-gap: 16px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  background: #fff;
+  box-shadow: 0 10px 26px -18px rgba(20, 26, 56, 0.25);
+  transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.hub-card:hover { transform: translateY(-5px); border-color: var(--a1); box-shadow: 0 22px 44px -22px var(--glow); }
+.hub-card:focus-visible { outline: 3px solid var(--a1); outline-offset: 2px; }
+.hub-card--practice { --a1: #fbbf24; --a2: #ea580c; --glow: rgba(234, 88, 12, 0.3); }
+.hub-card--live     { --a1: #fb7185; --a2: #e11d48; --glow: rgba(225, 29, 72, 0.3); }
+.hub-card--record   { --a1: #818cf8; --a2: #4f46e5; --glow: rgba(99, 102, 241, 0.3); }
+.hub-card--exam     { --a1: #a78bfa; --a2: #7c3aed; --glow: rgba(124, 58, 237, 0.3); }
+.hub-ico {
+  grid-area: ico;
+  display: grid; place-items: center;
+  width: 56px; height: 56px; margin: 0;
+  border-radius: 16px; font-size: 26px; color: #fff;
+  background: linear-gradient(145deg, var(--a1), var(--a2));
+  box-shadow: 0 8px 18px -8px var(--glow);
+}
+.hub-title { grid-area: title; align-self: end; font-size: 17px; font-weight: 800; color: #1c2142; letter-spacing: -0.2px; }
+.hub-sub { grid-area: sub; align-self: start; font-size: 12.5px; color: #6b7280; font-weight: 500; }
+.hub-go {
+  grid-area: go; align-self: center;
+  width: 32px; height: 32px; display: grid; place-items: center;
+  border-radius: 50%; font-size: 15px; font-weight: 700;
+  color: var(--a2);
+  background: color-mix(in srgb, var(--a1) 16%, #fff);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.hub-card:hover .hub-go { transform: translateX(3px); background: color-mix(in srgb, var(--a1) 28%, #fff); }
+
+/* Instructor strip — clean light card */
+.hub-instructor {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 26px -18px rgba(20, 26, 56, 0.3);
+}
+.hub-instructor-avatar {
+  display: grid; place-items: center;
+  width: 46px; height: 46px; flex-shrink: 0;
+  border-radius: 50%; color: #fff; font-weight: 800; font-size: 1.1rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+.hub-instructor-info { display: flex; flex-direction: column; min-width: 0; }
+.hub-instructor-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #8b93a7; }
+.hub-instructor-name { font-size: 1rem; font-weight: 800; color: #1c2142; }
+.hub-instructor-badge { margin-left: auto; font-size: 22px; opacity: 0.8; }
+
+/* Back button shown above each opened section */
+.view-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 6px 0 14px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 78, 216, 0.25);
+  background: #fff;
+  color: #1d4ed8;
+  font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  box-shadow: 0 6px 16px -10px rgba(29,78,216,0.5);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.view-back:hover { background: #eff6ff; transform: translateX(-2px); }
+
+/* Practice placeholder */
+.hub-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; text-align: center;
+  max-width: 880px; margin: 0 auto;
+  padding: 64px 20px; border-radius: 20px;
+  background: #fff; border: 1px dashed rgba(15,23,42,0.15);
+}
+.hub-empty-ico { font-size: 52px; }
+.hub-empty h2 { margin: 0; font-size: 22px; color: #1c2142; }
+.hub-empty p { margin: 0; color: #6b7280; }
+
+@media (max-width: 640px) {
+  .hub-grid { grid-template-columns: 1fr; }
 }

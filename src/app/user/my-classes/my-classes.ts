@@ -5,6 +5,7 @@ import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { LanguageService } from '../../Service/language.service';
 
 type CourseWithLive = {
   id: string;
@@ -26,6 +27,7 @@ export class MyClasses {
   private readonly learningApi = inject(LearningApiService);
   private readonly liveClassService = inject(LiveClassService);
   private readonly authService = inject(AuthService);
+  protected readonly lang = inject(LanguageService);
 
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');

@@ -1,4 +1,15 @@
 <section class="enrolled-shell">
+  <!-- 🎯 Scroll-driven decorations (pure CSS scroll-timeline) -->
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <div class="ambient-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+  <div class="journey-spine" aria-hidden="true">
+    <span class="journey-marker"></span>
+  </div>
+
   <main class="enrolled-page">
     <app-navbar></app-navbar>
 
@@ -9,6 +20,63 @@
       </header>
     }
 
+    @if (view() === 'hub') {
+      <!-- HUB: catchy cards -->
+      <div class="hub-wrap">
+      <a routerLink="/courses" class="hub-back">← {{ lang.t().ecAllCourses }}</a>
+      <div class="hub-grid">
+        <button type="button" class="hub-card hub-card--practice" (click)="setView('practice')">
+          <span class="hub-ico">🎯</span>
+          <span class="hub-title">{{ lang.t().ecHubPractice }}</span>
+          <span class="hub-sub">{{ lang.t().ecHubPracticeSub }}</span>
+          <span class="hub-go">→</span>
+        </button>
+        <button type="button" class="hub-card hub-card--live" (click)="setView('live')">
+          <span class="hub-ico">📺</span>
+          <span class="hub-title">{{ lang.t().ecHubLive }}</span>
+          <span class="hub-sub">{{ lang.t().ecHubLiveSub }}</span>
+          <span class="hub-go">→</span>
+        </button>
+        <button type="button" class="hub-card hub-card--record" (click)="setView('record')">
+          <span class="hub-ico">🎬</span>
+          <span class="hub-title">{{ lang.t().ecHubRecord }}</span>
+          <span class="hub-sub">{{ lang.t().ecHubRecordSub }}</span>
+          <span class="hub-go">→</span>
+        </button>
+        <button type="button" class="hub-card hub-card--exam" (click)="setView('exam')">
+          <span class="hub-ico">📝</span>
+          <span class="hub-title">{{ lang.t().ecHubExam }}</span>
+          <span class="hub-sub">{{ lang.t().ecHubExamSub }}</span>
+          <span class="hub-go">→</span>
+        </button>
+      </div>
+
+      <div class="hub-instructor">
+        <div class="hub-instructor-avatar">{{ instructorInitial() }}</div>
+        <div class="hub-instructor-info">
+          <span class="hub-instructor-label">{{ lang.t().ecInstructor }}</span>
+          <span class="hub-instructor-name">{{ courseMeta()?.instructorName }}</span>
+        </div>
+        <span class="hub-instructor-badge">🎓</span>
+      </div>
+      </div>
+    } @else {
+      <button type="button" class="view-back" (click)="backToHub()">{{ lang.t().ecBack }}</button>
+
+      @if (view() === 'practice' && courseId()) {
+        <app-course-practice [courseId]="courseId()"></app-course-practice>
+      }
+
+      @if (view() === 'live' && courseId()) {
+        <app-course-live [courseId]="courseId()"></app-course-live>
+        <app-course-recordings [courseId]="courseId()"></app-course-recordings>
+      }
+
+      @if (view() === 'exam' && courseId()) {
+        <app-course-exams [courseId]="courseId()"></app-course-exams>
+      }
+
+      @if (view() === 'record') {
     <div class="lesson-layout">
       <section class="video-panel">
         @if (selectedLesson(); as currentLesson) {
@@ -18,11 +86,14 @@
               frameborder="0" allowfullscreen></iframe>
           } @else {
             <div class="plyr-wrap">
+              <!-- src programmatically set হয় initPlyr() এ — HLS.js এর সাথে conflict এড়াতে [src] binding রাখা হয়নি -->
               <video
                 #videoPlayer
                 class="lesson-player"
-                [src]="selectedVideoUrl()"
                 [attr.data-lesson-id]="selectedLesson()!.id"
+                controlsList="nodownload"
+                disablePictureInPicture
+                oncontextmenu="return false"
                 playsinline
                 (loadedmetadata)="onVideoLoaded($event, selectedLesson()!.id)"
                 (ended)="onVideoEnded($event, selectedLesson()!.id)">
@@ -91,67 +162,6 @@
         }
       </aside>
     </div>
-
-    <!-- ✅ Live Class Section -->
-    <section class="live-section">
-      <div class="live-section-head">
-        <h2>📺 Live Classes</h2>
-        <span class="live-count">{{ liveClasses().length }} scheduled</span>
-      </div>
-
-      @if (isLoadingLive()) {
-        <p class="live-loading">Live class লোড হচ্ছে...</p>
-      } @else if (activeLiveClass(); as active) {
-        <!-- Active class — সবার আগে দেখাও -->
-        <div class="live-active-banner">
-          <div class="live-pulse-dot"></div>
-          <div class="live-active-info">
-            <strong>🔴 এখন চলছে: {{ active.title }}</strong>
-            @if (active.description) {
-              <p>{{ active.description }}</p>
-            }
-          </div>
-          <a [routerLink]="['/live-class', active.id]" class="live-join-btn">
-            Join Now →
-          </a>
-        </div>
-      }
-
-      @if (liveClasses().length === 0) {
-        <p class="live-empty">এই course এ এখনো কোনো live class schedule করা হয়নি।</p>
-      } @else {
-        <div class="live-list">
-          @for (lc of liveClasses(); track lc.id) {
-            @if (!lc.isActive) {
-              <div class="live-card" [class.live-card-ended]="lc.isEnded">
-                <div class="live-card-info">
-                  <p class="live-card-title">{{ lc.title }}</p>
-                  <p class="live-card-time">🕐 {{ formatScheduled(lc.scheduledAt) }}</p>
-                  @if (lc.description) {
-                    <p class="live-card-desc">{{ lc.description }}</p>
-                  }
-                </div>
-                <div class="live-card-status">
-                  @if (lc.isEnded) {
-                    <span class="live-badge live-badge-ended">Ended</span>
-                  } @else {
-                    <span class="live-badge live-badge-upcoming">Upcoming</span>
-                  }
-                </div>
-              </div>
-            }
-          }
-        </div>
-      }
-    </section>
-
-    <section class="teacher-card">
-      <div class="teacher-avatar">{{ instructorInitial() }}</div>
-      <div>
-        <p class="teacher-name">{{ courseMeta()?.instructorName }}</p>
-        <p class="teacher-role">{{ lang.t().ecInstructor }}</p>
-      </div>
-    </section>
 
     <section class="comments-card">
       <div class="comments-header">
@@ -235,5 +245,7 @@
         }
       </div>
     </section>
+      }
+    }
   </main>
 </section>

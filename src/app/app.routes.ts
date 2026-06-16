@@ -6,6 +6,7 @@ import { HomePage } from './base/home-page/home-page';
 import { authGuard } from './guards/auth.guard';
 import { teacherGuard } from './guards/teacher.guard';
 import { adminGuard } from './guards/admin-guard' // ✅ নতুন
+import { studentGuard } from './guards/student.guard';
 import { Profile } from './base/profile/profile';
 import { CourseDetails } from './base/course-details/course-details';
 import { Payment } from './shared/payment/payment';
@@ -21,6 +22,7 @@ import { VideoHistoryComponent } from './base/video-history/video-history';
 import { Leaderboard } from './base/leaderboard/leaderboard';
 import { EnrolledStudents } from './base/enrolled-students/enrolled-students';
 import { FreeClass } from './base/free-class/free-class';
+import { FreeLive } from './base/free-live/free-live';
 import { LiveClassRoom } from './shared/live-class-room/live-class-room';
 
 export const routes: Routes = [
@@ -37,6 +39,12 @@ export const routes: Routes = [
         loadComponent: () => import('./base/teacher/teacher').then((m) => m.Teacher),
         canActivate: [authGuard, teacherGuard],
     },
+    // ✅ Admin course manager — reuses the authoring UI, admin-only
+    {
+        path: 'course-manager',
+        loadComponent: () => import('./base/teacher/teacher').then((m) => m.Teacher),
+        canActivate: [authGuard, adminGuard],
+    },
     // ✅ Admin route — শুধু Admin ঢুকতে পারবে
     {
         path: 'admin',
@@ -51,10 +59,10 @@ export const routes: Routes = [
     { path: 'assignments', component: Assignment, canActivate: [authGuard] },
     { path: 'myClasses', component: MyClasses, canActivate: [authGuard] },
     { path: 'certificates', component: Certificates, canActivate: [authGuard] },
-    { path: 'quiz-editor/:lessonId', component: QuizEditorComponent, canActivate: [authGuard, teacherGuard] },
+    { path: 'quiz-editor/:lessonId', component: QuizEditorComponent, canActivate: [authGuard, adminGuard] },
     { path: 'quiz/:lessonId', component: QuizAttemptComponent, canActivate: [authGuard] },
     { path: 'history', component: VideoHistoryComponent, canActivate: [authGuard] },
-    { path: 'enrolled-students/:courseId', component: EnrolledStudents, canActivate: [authGuard, teacherGuard] },
+    { path: 'enrolled-students/:courseId', component: EnrolledStudents, canActivate: [authGuard, adminGuard] },
     {
   path: 'live-class/:id',
   loadComponent: () => import('./shared/live-class-room/live-class-room').then(m => m.LiveClassRoom),
@@ -69,6 +77,13 @@ export const routes: Routes = [
   loadComponent: () => import('./base/store/store').then(m => m.Store),
 },
 {path: 'free-class', component: FreeClass, canActivate: [authGuard]},
-    { path: 'leaderboard', component: Leaderboard },
+    // 🔴 Free public live classes — anyone can join WITHOUT login/register
+    { path: 'free-live', component: FreeLive },
+    {
+      path: 'free-live/:id',
+      loadComponent: () => import('./shared/live-class-room/live-class-room').then(m => m.LiveClassRoom),
+      data: { free: true },
+    },
+    { path: 'leaderboard', component: Leaderboard, canActivate: [studentGuard] },
     { path: '**', redirectTo: 'homepage' },
 ];

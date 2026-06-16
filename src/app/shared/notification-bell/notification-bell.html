@@ -18,9 +18,9 @@
 
         <!-- Header -->
         <div class="notif-header">
-          <span class="notif-header-title">Notifications</span>
+          <span class="notif-header-title">{{ lang.t().nbTitle }}</span>
           @if (unreadCount() > 0) {
-            <button class="notif-read-all" (click)="markAllRead()">Mark all as read</button>
+            <button class="notif-read-all" (click)="markAllRead()">{{ lang.t().nbMarkAll }}</button>
           }
         </div>
 
@@ -45,7 +45,7 @@
           @empty {
             <div class="notif-empty">
               <span>🔔</span>
-              <p>No notifications</p>
+              <p>{{ lang.t().nbEmpty }}</p>
             </div>
           }
         </div>

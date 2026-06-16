@@ -5,10 +5,10 @@
 
   <header class="toolbar">
     <div>
-      <h1>Store Items</h1>
-      <p>Manage books, materials, and study resources.</p>
+      <h1>{{ lang.t().aiTitle }}</h1>
+      <p>{{ lang.t().aiSub }}</p>
     </div>
-    <button type="button" class="btn btn-primary" (click)="openNewItemModal()">+ Add New Item</button>
+    <button type="button" class="btn btn-primary" (click)="openNewItemModal()">+ {{ lang.t().aiAddNew }}</button>
   </header>
 
   <section class="panel">
@@ -16,12 +16,12 @@
       <input
         type="search"
         class="search-input"
-        placeholder="Search items..."
+        [placeholder]="lang.t().aiSearch"
         [value]="searchTerm()"
         (input)="updateSearchTerm($any($event.target).value)" />
 
       <select class="filter-select" [value]="selectedCategory()" (change)="updateCategory($any($event.target).value)">
-        <option value="">All Categories</option>
+        <option value="">{{ lang.t().aiAllCategories }}</option>
         @for (cat of categories; track cat) {
           <option [value]="cat">{{ cat }}</option>
         }
@@ -29,9 +29,9 @@
     </div>
 
     @if (isLoading()) {
-      <p class="loading">Loading items...</p>
+      <p class="loading">{{ lang.t().aiLoading }}</p>
     } @else if (filteredItems().length === 0) {
-      <p class="empty-state">No items found.</p>
+      <p class="empty-state">{{ lang.t().aiNoItems }}</p>
     } @else {
       <div class="items-grid">
         @for (item of filteredItems(); track item.id) {
@@ -44,7 +44,7 @@
                 <div class="image-placeholder">📦</div>
               }
               <div class="item-badge" [class.available]="item.isAvailable">
-                {{ item.isAvailable ? 'Available' : 'Unavailable' }}
+                {{ item.isAvailable ? lang.t().aiAvailable : lang.t().aiUnavailable }}
               </div>
             </div>
 
@@ -59,17 +59,17 @@
               </div>
 
               @if (item.fileUrl) {
-                <a [href]="learningApi.downloadStoreItemPdf(item.id)" target="_blank" class="file-link">📥 Download</a>
+                <a [href]="learningApi.downloadStoreItemPdf(item.id)" target="_blank" class="file-link">📥 {{ lang.t().stDownload }}</a>
               }
             </div>
 
             <!-- Actions -->
             <div class="item-actions">
               <button type="button" class="btn btn-outline" (click)="openEditItemModal(item)" [disabled]="isSaving()">
-                Edit
+                {{ lang.t().commonEdit }}
               </button>
               <button type="button" class="btn btn-danger" (click)="deleteItem(item.id)" [disabled]="isSaving()">
-                Delete
+                {{ lang.t().commonDelete }}
               </button>
             </div>
           </div>
@@ -83,20 +83,20 @@
     <div class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal-card">
         <div class="modal-head">
-          <h2>{{ editingItemId() ? 'Edit Item' : 'Add New Item' }}</h2>
+          <h2>{{ editingItemId() ? lang.t().aiEditItem : lang.t().aiAddItem }}</h2>
           <button type="button" class="icon-btn" (click)="closeModal()">✕</button>
         </div>
 
         <form class="form-grid" [formGroup]="itemForm" (ngSubmit)="saveItem()">
           <!-- Title -->
           <label>
-            <span>Title *</span>
-            <input type="text" formControlName="title" placeholder="Enter item title" />
+            <span>{{ lang.t().commonTitle }} *</span>
+            <input type="text" formControlName="title" [placeholder]="lang.t().aiTitlePlaceholder" />
           </label>
 
           <!-- Category -->
           <label>
-            <span>Category *</span>
+            <span>{{ lang.t().tcThCategory }} *</span>
             <select formControlName="category">
               @for (cat of categories; track cat) {
                 <option [value]="cat">{{ cat }}</option>
@@ -106,25 +106,25 @@
 
           <!-- Price -->
           <label>
-            <span>Price (৳) *</span>
+            <span>{{ lang.t().aiPrice }} *</span>
             <input type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
           </label>
 
           <!-- Description -->
           <label class="full">
-            <span>Description *</span>
-            <textarea rows="4" formControlName="description" placeholder="Enter item description"></textarea>
+            <span>{{ lang.t().commonDescription }} *</span>
+            <textarea rows="4" formControlName="description" [placeholder]="lang.t().aiDescPlaceholder"></textarea>
           </label>
 
           <!-- File URL -->
           <label class="full">
-            <span>Download File URL</span>
+            <span>{{ lang.t().aiFileUrl }}</span>
             <input type="url" formControlName="fileUrl" placeholder="https://example.com/file.pdf" />
           </label>
 
           <!-- PDF Upload -->
           <label class="full upload-field">
-            <span>Upload PDF File</span>
+            <span>{{ lang.t().aiUploadPdf }}</span>
             <input type="file" accept="application/pdf" (change)="onPdfSelected($event)" />
             @if (selectedPdfName()) {
               <div class="file-info">✓ {{ selectedPdfName() }}</div>
@@ -133,7 +133,7 @@
 
           <!-- Image Upload -->
           <label class="full upload-field">
-            <span>Item Image</span>
+            <span>{{ lang.t().aiItemImage }}</span>
             <input type="file" accept="image/*" (change)="onImageSelected($event)" />
           </label>
 
@@ -146,10 +146,10 @@
           <!-- Modal Actions -->
           <div class="modal-actions full">
             <button type="button" class="btn btn-ghost" (click)="closeModal()" [disabled]="isSaving()">
-              Cancel
+              {{ lang.t().commonCancel }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="isSaving() || itemForm.invalid">
-              {{ isSaving() ? 'Saving...' : 'Save Item' }}
+              {{ isSaving() ? lang.t().tpSaving : lang.t().aiSaveItem }}
             </button>
           </div>
         </form>

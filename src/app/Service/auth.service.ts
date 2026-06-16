@@ -95,6 +95,15 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  // Profile edit এর পরে cached name/fields update করুন (token অপরিবর্তিত)
+  updateCurrentUser(patch: Record<string, any>): void {
+    const current = this.currentUserSubject.value;
+    if (!current) return;
+    const updated = { ...current, ...patch };
+    this.jwtService.setUser(updated);
+    this.currentUserSubject.next(updated);
+  }
+
   // Logged in আছেন কিনা check করুন
   isLoggedIn(): boolean {
     return this.isLoggedInSubject.value && !this.jwtService.isTokenExpired();

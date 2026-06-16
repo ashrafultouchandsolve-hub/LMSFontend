@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { Navbar } from '../../shared/navbar/navbar';
+import { LanguageService } from '../../Service/language.service';
 
 type QuizItem = {
   id: string;
@@ -28,6 +29,7 @@ export class QuizAttemptComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private api = inject(LearningApiService);
+  protected readonly lang = inject(LanguageService);
   private authService = inject(AuthService);
   private toastr = inject(ToastrService);
 

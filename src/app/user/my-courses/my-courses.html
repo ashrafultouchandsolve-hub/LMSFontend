@@ -82,10 +82,15 @@
 						<ul class="course-points">
 							<li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
 							<li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
-							<li><strong>{{ lang.t().courseLessons }}</strong> {{ course.lessonCount }}</li>
 							<li><strong>{{ lang.t().courseDuration }}</strong> {{ formatDuration(course.durationMinutes) }}</li>
-							
+
 						</ul>
+
+						<div class="course-stats" aria-label="Course statistics">
+							<span class="cstat"><span class="cstat-num">👥 {{ course.enrollmentCount }}</span><small>{{ lang.t().cdStudents }}</small></span>
+							<span class="cstat"><span class="cstat-num">🎬 {{ course.videoCount }}</span><small>{{ lang.t().cdTotalVideos }}</small></span>
+							<span class="cstat"><span class="cstat-num">📝 {{ course.practiceCount }}</span><small>{{ lang.t().cdTotalPractice }}</small></span>
+						</div>
 
 						@if (course.totalRatings && course.totalRatings > 0) {
 							<div class="course-rating">

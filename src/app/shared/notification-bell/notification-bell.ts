@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NotificationService, Notification } from '../../Service/notification-service';
 import { AuthService } from '../../Service/auth.service';
+import { LanguageService } from '../../Service/language.service';
 
 @Component({
   selector: 'app-notification-bell',
@@ -14,6 +15,7 @@ export class NotificationBell implements OnInit {
   private readonly svc       = inject(NotificationService);
   protected readonly authSvc   = inject(AuthService);
   private readonly router    = inject(Router);
+  protected readonly lang    = inject(LanguageService);
 
   readonly notifications = signal<Notification[]>([]);
   readonly unreadCount   = signal(0);

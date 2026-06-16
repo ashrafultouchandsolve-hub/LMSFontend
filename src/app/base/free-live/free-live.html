@@ -1,0 +1,77 @@
+<app-navbar></app-navbar>
+
+<div class="fl-page">
+  <!-- Hero -->
+  <header class="fl-hero">
+    <span class="fl-hero-blob fl-hero-blob--1" aria-hidden="true"></span>
+    <span class="fl-hero-blob fl-hero-blob--2" aria-hidden="true"></span>
+    <div class="fl-hero-inner">
+      <span class="fl-badge"><span class="fl-badge-dot"></span> {{ lang.t().flBadge }}</span>
+      <h1>{{ lang.t().flTitle }}</h1>
+      <p>{{ lang.t().flSubtitle }}</p>
+      <button type="button" class="fl-refresh" (click)="refresh()">⟳ {{ lang.t().flRefresh }}</button>
+    </div>
+  </header>
+
+  <main class="fl-body">
+    @if (isLoading()) {
+      <div class="fl-state">
+        <div class="fl-spinner"></div>
+        <p>{{ lang.t().flLoading }}</p>
+      </div>
+    } @else if (classes().length === 0) {
+      <div class="fl-state fl-empty">
+        <div class="fl-empty-icon">📡</div>
+        <h3>{{ lang.t().flNoneTitle }}</h3>
+        <p>{{ lang.t().flNoneDesc }}</p>
+      </div>
+    } @else {
+      <div class="fl-grid">
+        @for (c of classes(); track c.id) {
+          <article class="fl-card">
+            <div class="fl-card-top">
+              <span class="fl-live-tag"><span class="fl-live-dot"></span> {{ lang.t().flLiveNow }}</span>
+            </div>
+            <h3 class="fl-card-title">{{ c.title }}</h3>
+            @if (c.description) {
+              <p class="fl-card-desc">{{ c.description }}</p>
+            }
+            <div class="fl-card-host">
+              <span class="fl-host-ava">🧑‍🏫</span>
+              <span class="fl-host-text">{{ lang.t().flHostedBy }} <strong>{{ c.hostName || 'Instructor' }}</strong></span>
+            </div>
+            <button type="button" class="fl-join-btn" (click)="openJoin(c.id)">
+              ▶ {{ lang.t().flJoin }}
+            </button>
+          </article>
+        }
+      </div>
+    }
+
+    <p class="fl-foot-hint">💡 {{ lang.t().flGuestHint }}</p>
+  </main>
+</div>
+
+<!-- Join modal -->
+@if (joiningId()) {
+  <div class="fl-modal-backdrop" (click)="cancelJoin()">
+    <div class="fl-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <h3>{{ lang.t().flJoinModalTitle }}</h3>
+      <p>{{ lang.t().flJoinModalDesc }}</p>
+      <label class="fl-field">
+        <span>{{ lang.t().flNameLabel }}</span>
+        <input
+          type="text"
+          [(ngModel)]="joinName"
+          [placeholder]="lang.t().flNamePlaceholder"
+          (keyup.enter)="confirmJoin()"
+          maxlength="40"
+          autofocus />
+      </label>
+      <div class="fl-modal-actions">
+        <button type="button" class="fl-btn-ghost" (click)="cancelJoin()">{{ lang.t().flCancel }}</button>
+        <button type="button" class="fl-btn-primary" (click)="confirmJoin()">{{ lang.t().flEnterRoom }}</button>
+      </div>
+    </div>
+  </div>
+}

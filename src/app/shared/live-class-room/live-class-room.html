@@ -2,23 +2,40 @@
 
   <!-- Header -->
   <div class="lc-header">
-    <a routerLink="/homepage" class="lc-back">← Back</a>
+    <a routerLink="/homepage" class="lc-back">← {{ lang.t().commonBack }}</a>
     <div class="lc-title-wrap">
       @if (!isLoading() && !error()) {
         <span class="lc-live-dot"></span>
         <h1>{{ title() }}</h1>
+        @if (recState() === 'recording') {
+          <span class="lc-rec-badge"><span class="lc-rec-dot"></span> {{ lang.t().lcRecBadge }}</span>
+        }
       }
     </div>
     @if (isTeacher() && !isLoading() && !error()) {
-      <button class="lc-end-btn" (click)="endClass()">🔴 End Class</button>
+      <button class="lc-end-btn" (click)="endClass()" [disabled]="recState() === 'uploading'">
+        @if (recState() === 'uploading') {
+          {{ lang.t().lcRecUploading }} {{ uploadPct() }}%
+        } @else {
+          🔴 {{ lang.t().lcEndClass }}
+        }
+      </button>
     }
   </div>
+
+  <!-- Dismissible note -->
+  @if (recNote()) {
+    <div class="lc-rec-note">
+      <span>{{ recNote() }}</span>
+      <button type="button" (click)="recNote.set('')" aria-label="Dismiss">✕</button>
+    </div>
+  }
 
   <!-- Loading -->
   @if (isLoading()) {
     <div class="lc-loading">
       <div class="lc-spinner"></div>
-      <p>Joining live class...</p>
+      <p>{{ lang.t().lcJoining }}</p>
     </div>
   }
 
@@ -27,13 +44,41 @@
     <div class="lc-error">
       <span>😕</span>
       <h3>{{ error() }}</h3>
-      <a routerLink="/homepage" class="lc-back-btn">Go to Homepage</a>
+      <a routerLink="/homepage" class="lc-back-btn">{{ lang.t().lcGoHome }}</a>
     </div>
   }
 
   <!-- Jitsi Meet container — Jitsi will be injected into this div instead of an iframe -->
   @if (!isLoading() && !error()) {
     <div id="jitsi-container" class="lc-frame"></div>
+  }
+
+  <!-- Teacher: auto-record prompt (one click = the gesture browsers need for screen capture) -->
+  @if (showRecordPrompt()) {
+    <div class="lc-rec-prompt-backdrop">
+      <div class="lc-rec-prompt" role="dialog" aria-modal="true">
+        <div class="lc-rec-prompt-icon">⏺️</div>
+        <h2>{{ lang.t().lcRecPromptTitle }}</h2>
+        <p>{{ lang.t().lcRecPromptDesc }}</p>
+        <p class="lc-rec-browser-note">💡 {{ lang.t().lcRecBrowserNote }}</p>
+        <div class="lc-rec-prompt-actions">
+          <button type="button" class="lc-rec-skip" (click)="skipRecording()">{{ lang.t().lcRecSkip }}</button>
+          <button type="button" class="lc-rec-start" (click)="startRecording()">⏺️ {{ lang.t().lcRecStart }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Upload overlay -->
+  @if (recState() === 'uploading') {
+    <div class="lc-rec-prompt-backdrop">
+      <div class="lc-rec-prompt">
+        <div class="lc-spinner"></div>
+        <h2>{{ lang.t().lcRecUploading }}</h2>
+        <div class="lc-upload-bar"><span [style.width.%]="uploadPct()"></span></div>
+        <p>{{ uploadPct() }}%</p>
+      </div>
+    </div>
   }
 
 </div>

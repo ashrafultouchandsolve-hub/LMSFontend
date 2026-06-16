@@ -2,20 +2,25 @@
 
   <app-navbar></app-navbar>
 
+  <!-- Scroll progress indicator (fx) -->
+  <div class="scroll-progress" aria-hidden="true">
+    <div class="scroll-progress-bar"></div>
+  </div>
+
   <!-- ─── HERO SLIDER ───────────────────────────────── -->
   <section class="hero-slider">
     <div class="slides-track" [style.transform]="'translateX(-' + activeSlide() * 100 + '%)'">
 
       <!-- Slide 1 — SSC 2027 -->
-      <div class="slide slide-1">
+      <div class="slide slide-1" [class.is-active]="activeSlide() === 0">
         <div class="slide-copy">
           <span class="slide-badge">🎯 Final Preparation</span>
           <h1>SSC 2027 <span class="slide-accent">Complete Course</span></h1>
           <p>Get complete preparation — all subjects in one place. Bengali, English, Math and everything.</p>
           <div class="slide-actions">
-            <a routerLink="/courses" [queryParams]="{category: 'SSC 2027'}" class="slide-btn-primary">Explore Courses
+            <a routerLink="/courses" [queryParams]="{category: 'SSC 2027'}" class="slide-btn-primary" data-magnetic>Explore Courses
               →</a>
-            <a href="#tracks" class="slide-btn-ghost">All Categories</a>
+            <a href="#tracks" class="slide-btn-ghost" data-magnetic>All Categories</a>
           </div>
         </div>
         <div class="slide-visual">
@@ -27,20 +32,21 @@
             <span>✅</span>
             <div><strong>Live MCQ</strong><span>Practice Daily</span></div>
           </div>
+          <div class="slide-orb" aria-hidden="true"></div>
           <div class="slide-blob slide-blob--1"></div>
           <div class="slide-blob slide-blob--2"></div>
         </div>
       </div>
 
       <!-- Slide 2 — HSC 2027 -->
-      <div class="slide slide-2">
+      <div class="slide slide-2" [class.is-active]="activeSlide() === 1">
         <div class="slide-copy">
           <span class="slide-badge">🏆 Top Rated</span>
           <h1>HSC 2027 <span class="slide-accent">Master Class</span></h1>
           <p>Complete HSC preparation with Admission English, Skills Development. With Expert Teachers.</p>
           <div class="slide-actions">
-            <a routerLink="/courses" [queryParams]="{category: 'HSC 2027'}" class="slide-btn-primary">Enroll Now →</a>
-            <a href="#tracks" class="slide-btn-ghost">All Courses</a>
+            <a routerLink="/courses" [queryParams]="{category: 'HSC 2027'}" class="slide-btn-primary" data-magnetic>Enroll Now →</a>
+            <a href="#tracks" class="slide-btn-ghost" data-magnetic>All Courses</a>
           </div>
         </div>
         <div class="slide-visual">
@@ -52,21 +58,22 @@
             <span>🔥</span>
             <div><strong>Admission</strong><span>English Special</span></div>
           </div>
+          <div class="slide-orb" aria-hidden="true"></div>
           <div class="slide-blob slide-blob--1"></div>
           <div class="slide-blob slide-blob--2"></div>
         </div>
       </div>
 
       <!-- Slide 3 — Skills Development -->
-      <div class="slide slide-3">
+      <div class="slide slide-3" [class.is-active]="activeSlide() === 2">
         <div class="slide-copy">
           <span class="slide-badge">⚡ New Course</span>
           <h1>Skills <span class="slide-accent">Development</span></h1>
           <p>Prepare yourself for the future. Communication, Critical Thinking and more.</p>
           <div class="slide-actions">
-            <a routerLink="/courses" [queryParams]="{category: 'Skills Development'}" class="slide-btn-primary">Get
+            <a routerLink="/courses" [queryParams]="{category: 'Skills Development'}" class="slide-btn-primary" data-magnetic>Get
               Started →</a>
-            <a href="#tracks" class="slide-btn-ghost">View Details</a>
+            <a href="#tracks" class="slide-btn-ghost" data-magnetic>View Details</a>
           </div>
         </div>
         <div class="slide-visual">
@@ -78,11 +85,19 @@
             <span>🚀</span>
             <div><strong>Career</strong><span>Ready</span></div>
           </div>
+          <div class="slide-orb" aria-hidden="true"></div>
           <div class="slide-blob slide-blob--1"></div>
           <div class="slide-blob slide-blob--2"></div>
         </div>
       </div>
 
+    </div>
+
+    <!-- FX: mouse-following glow + floating particles (decorative) -->
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-particles" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
     </div>
 
     <!-- Dots -->
@@ -98,9 +113,10 @@
     <button class="slider-arrow slider-arrow--prev" (click)="prevSlide()" aria-label="Previous slide">‹</button>
     <button class="slider-arrow slider-arrow--next" (click)="nextSlide()" aria-label="Next slide">›</button>
 
-    <a routerLink="/free-class" class="free-bubble">
-      <span class="free-bubble-icon">🎁</span>
-      <span class="free-bubble-text">Free<br>Classes</span>
+    <a routerLink="/free-live" class="free-bubble free-bubble--live">
+      <span class="free-bubble-live-dot" aria-hidden="true"></span>
+      <span class="free-bubble-icon">🔴</span>
+      <span class="free-bubble-text">{{ lang.t().heroFreeLiveTop }}<br>{{ lang.t().heroFreeLiveBottom }}</span>
     </a>
   </section>
   <br>
@@ -109,33 +125,37 @@
 
   <!-- ─── CATEGORY SECTION ───────────────────────────── -->
   <section class="category-section" id="tracks">
-    <div class="category-header">
+    <div class="category-header" data-reveal>
       <h2>Learn by Category</h2>
       <p>Choose the right course based on your goals</p>
     </div>
     <div class="category-grid">
-      <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="cat-pill cat-pill--ssc">
+      <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="cat-pill cat-pill--ssc" data-reveal
+        style="--rd:.05s">
         <span class="cat-pill-icon">📘</span>
         <div>
           <strong>SSC 2027</strong>
           <span>Final Preparation</span>
         </div>
       </a>
-      <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="cat-pill cat-pill--hsc">
+      <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="cat-pill cat-pill--hsc" data-reveal
+        style="--rd:.12s">
         <span class="cat-pill-icon">📗</span>
         <div>
           <strong>HSC 2027</strong>
           <span>Final Preparation</span>
         </div>
       </a>
-      <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="cat-pill cat-pill--admission">
+      <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="cat-pill cat-pill--admission"
+        data-reveal style="--rd:.19s">
         <span class="cat-pill-icon">🎯</span>
         <div>
           <strong>Admission English</strong>
           <span>University Prep</span>
         </div>
       </a>
-      <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="cat-pill cat-pill--skills">
+      <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="cat-pill cat-pill--skills"
+        data-reveal style="--rd:.26s">
         <span class="cat-pill-icon">⚡</span>
         <div>
           <strong>Skills Development</strong>
@@ -148,7 +168,7 @@
 
   <!-- ─── COURSES ───────────────────────────────────── -->
   <section class="cats-section">
-    <h2 class="cats-title">
+    <h2 class="cats-title" data-reveal>
       {{ lang.t().sectionH2Line1 }}<br>
       {{ lang.t().sectionH2Line2 }}
     </h2>
@@ -164,12 +184,12 @@
       <p>{{ lang.t().coursesNoneDesc }}</p>
     </article>
     } @else {
-    <div class="cats-carousel-shell">
+    <div class="cats-carousel-shell" data-reveal>
       <button type="button" class="cats-arrow cats-arrow--prev" (click)="scrollCourses('previous')"
         aria-label="Scroll left">‹</button>
       <div #courseTrackViewport class="cats-viewport">
         @for (course of courses(); track course.id; let i = $index) {
-        <article class="cat-card" [style]="'--card-color:' + getCardColor(i)"
+        <article class="cat-card" [style]="'--card-color:' + getCardColor(i) + ';--i:' + i" data-tilt
           [attr.data-index]="(i + 1).toString().padStart(2, '0')">
           <div class="cat-img-wrap">
             <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title" loading="eager"
@@ -190,7 +210,9 @@
             <h3>{{ course.title }}</h3>
             <p class="cat-desc">{{ course.description }}</p>
             <ul class="cat-meta">
-              <li>📚 {{ course.lessonCount }} {{ lang.t().courseLessons }}</li>
+              <li>👥 {{ course.enrollmentCount }} {{ lang.t().cdStudents }}</li>
+              <li>🎬 {{ course.videoCount }} {{ lang.t().cdTotalVideos }}</li>
+              <li>📝 {{ course.practiceCount }} {{ lang.t().cdTotalPractice }}</li>
               <li>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
               <li>💰 {{ formatPrice(course.price) }}</li>
             </ul>
@@ -201,7 +223,9 @@
             </div>
             }
             <div class="cat-footer">
-              @if (!isTeacher()) {
+              @if (isAdmin()) {
+              <a routerLink="/course-manager" class="cat-btn cat-btn--manage">⚙️ {{ lang.t().courseManage }}</a>
+              } @else if (!isTeacher()) {
               @if (course.isEnrolled) {
               <a [routerLink]="['/course-details', course.id]" class="cat-btn cat-btn--enrolled">{{
                 lang.t().courseEnrolled }}</a>
@@ -237,7 +261,7 @@
   <section class="about-section" id="aboutUs">
 
     <!-- Header -->
-    <div class="about-header">
+    <div class="about-header" data-reveal>
       <span class="about-tag">💡 About Us</span>
       <h2>About <span class="about-accent">"Nirvor Nije Sikhi"</span></h2>
       <p>Not the biggest. The bravest. Built for SSC &amp; HSC students who want to conquer English.</p>
@@ -247,7 +271,7 @@
     <div class="about-cards">
 
       <!-- Card 1 — Mission -->
-      <article class="about-card about-card--purple">
+      <article class="about-card about-card--purple" data-reveal data-tilt style="--rd:.05s">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🎯</div>
@@ -260,7 +284,7 @@
       </article>
 
       <!-- Card 2 — Vision -->
-      <article class="about-card about-card--blue">
+      <article class="about-card about-card--blue" data-reveal data-tilt style="--rd:.12s">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🌍</div>
@@ -273,7 +297,7 @@
       </article>
 
       <!-- Card 3 — Community -->
-      <article class="about-card about-card--teal">
+      <article class="about-card about-card--teal" data-reveal data-tilt style="--rd:.19s">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🤝</div>
@@ -286,7 +310,7 @@
       </article>
 
       <!-- Card 4 — Mentors -->
-      <article class="about-card about-card--orange">
+      <article class="about-card about-card--orange" data-reveal data-tilt style="--rd:.26s">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">🧑‍🏫</div>
@@ -299,7 +323,7 @@
       </article>
 
       <!-- Card 5 — Growth -->
-      <article class="about-card about-card--green">
+      <article class="about-card about-card--green" data-reveal data-tilt style="--rd:.33s">
         <div class="about-card-glow"></div>
         <div class="about-card-top">
           <div class="about-card-icon">📈</div>
@@ -312,7 +336,7 @@
       </article>
 
       <!-- Card 6 — Quote -->
-      <article class="about-card about-card--quote">
+      <article class="about-card about-card--quote" data-reveal data-tilt style="--rd:.4s">
         <div class="about-card-glow"></div>
         <div class="quote-mark">“</div>
         <p class="about-quote-text">We believe every student can master English with the right system and consistent guidance.</p>
@@ -325,13 +349,13 @@
 
   <!-- ─── REVIEWS SECTION ────────────────────────────── -->
   <section id="successStory" class="review-section">
-    <div class="review-header">
+    <div class="review-header" data-reveal>
       <span class="review-tag">💬 Reviews</span>
       <h2>Student <span class="review-accent">Feedback</span></h2>
       <p>Real stories from learners who study with us.</p>
     </div>
 
-    <div class="review-slider-wrap">
+    <div class="review-slider-wrap" data-reveal data-reveal-zoom>
       <button class="review-arrow review-arrow--prev" (click)="prevReview()" aria-label="Previous review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round">
@@ -342,8 +366,8 @@
       <div class="review-track-outer">
         <div class="review-track" [style.transform]="'translateX(-' + activeReview() * 100 + '%)'">
 
-          @for (review of reviews; track review.name) {
-          <div class="review-card">
+          @for (review of reviews; track review.name; let i = $index) {
+          <div class="review-card" [class.is-active]="activeReview() === i">
 
             <!-- Left: Quote -->
             <div class="review-card-left">
@@ -418,9 +442,89 @@
     </div>
 
   </section>
+  <!-- ─── HOW IT WORKS / WHAT YOU GET ────────────────── -->
+  <section class="workflow-section" id="howItWorks">
+    <span class="wf-blob wf-blob--1" aria-hidden="true"></span>
+    <span class="wf-blob wf-blob--2" aria-hidden="true"></span>
+
+    <div class="wf-header" data-reveal>
+      <span class="wf-tag">{{ lang.t().wfTag }}</span>
+      <h2>{{ lang.t().wfTitle }} <span class="wf-accent">{{ lang.t().wfTitleAccent }}</span></h2>
+      <p>{{ lang.t().wfSubtitle }}</p>
+    </div>
+
+    <div class="wf-grid">
+      <!-- LEFT: interactive feature list -->
+      <div class="wf-list" data-reveal>
+        @for (f of workflowFeatures(); track f.label; let i = $index) {
+          <button type="button" class="wf-item" [class.wf-item--active]="activeFeature() === i"
+            (click)="selectFeature(i)" [style.--wd]="(i * 0.05) + 's'">
+            <span class="wf-item-num">{{ i + 1 < 10 ? '0' : '' }}{{ i + 1 }}</span>
+            <span class="wf-item-icon">{{ f.icon }}</span>
+            <span class="wf-item-label">{{ f.label }}</span>
+            <span class="wf-item-go" aria-hidden="true">→</span>
+          </button>
+        }
+      </div>
+
+      <!-- RIGHT: live phone preview -->
+      <div class="wf-stage" data-reveal>
+        <div class="wf-glow-ring" aria-hidden="true"></div>
+
+        <!-- floating: live class card -->
+        <div class="wf-float wf-float--live">
+          <span class="wf-live-dot" aria-hidden="true"></span>
+          <div class="wf-float-body">
+            <span class="wf-float-title">{{ lang.t().wfLiveBadge }}</span>
+            <span class="wf-float-sub">{{ lang.t().wfLiveTime }}</span>
+          </div>
+          <button type="button" class="wf-join-btn">{{ lang.t().wfJoinBtn }}</button>
+        </div>
+
+        <!-- floating: chat bubble -->
+        <div class="wf-float wf-float--chat">
+          <span class="wf-chat-ava" aria-hidden="true">👨‍🏫</span>
+          <div class="wf-float-body">
+            <span class="wf-float-title">{{ lang.t().wfChatName }}</span>
+            <span class="wf-chat-msg">{{ lang.t().wfChatMsg }}</span>
+          </div>
+        </div>
+
+        <!-- the phone -->
+        <div class="wf-phone">
+          <span class="wf-phone-notch" aria-hidden="true"></span>
+          <div class="wf-phone-screen">
+            <div class="wf-screen-top">
+              <span class="wf-brand-dot" aria-hidden="true"></span>
+              <span class="wf-brand-name">Nirvor</span>
+              <span class="wf-screen-joined">🟢 {{ lang.t().wfJoined }}</span>
+            </div>
+
+            @for (f of [workflowFeatures()[activeFeature()]]; track activeFeature()) {
+              <div class="wf-screen-feature">
+                <div class="wf-screen-icon">{{ f.icon }}</div>
+                <h4>{{ f.label }}</h4>
+                <p>{{ f.desc }}</p>
+              </div>
+            }
+
+            <div class="wf-screen-dots">
+              @for (f of workflowFeatures(); track f.label; let i = $index) {
+                <button type="button" class="wf-screen-dot" [class.active]="activeFeature() === i"
+                  (click)="selectFeature(i)" [attr.aria-label]="f.label"></button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <span class="wf-stage-hint">{{ lang.t().wfScreenHint }}</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ─── FEATURES ──────────────────────────────────── -->
   <section class="community-section">
-    <div class="community-header">
+    <div class="community-header" data-reveal>
       <span class="community-tag">🌐 Our Family</span>
       <h2>Join Our <span class="community-accent">Community</span></h2>
       <p>Connect with thousands of students — Learn together, Grow together.</p>
@@ -429,7 +533,8 @@
     <div class="community-cards">
 
       <!-- Facebook Group Card -->
-      <a href="https://www.facebook.com/Nirvoor/" target="_blank" class="comm-card comm-card--fb">
+      <a href="https://www.facebook.com/Nirvoor/" target="_blank" class="comm-card comm-card--fb" data-reveal data-tilt
+        style="--rd:.05s">
         <div class="comm-card-glow"></div>
         <div class="comm-card-icon">
           <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
@@ -448,7 +553,8 @@
       </a>
 
       <!-- YouTube Channel Card -->
-      <a href="https://www.nirvoor.com/" target="_blank" class="comm-card comm-card--yt">
+      <a href="https://www.nirvoor.com/" target="_blank" class="comm-card comm-card--yt" data-reveal data-tilt
+        style="--rd:.15s">
         <div class="comm-card-glow"></div>
         <div class="comm-card-icon">
           <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
@@ -469,7 +575,7 @@
       </a>
 
       <!-- Free Classes Card -->
-      <a routerLink="/free-class" class="comm-card comm-card--free">
+      <a routerLink="/free-class" class="comm-card comm-card--free" data-reveal data-tilt style="--rd:.25s">
         <div class="comm-card-glow"></div>
         <div class="comm-card-icon">🎁</div>
         <div class="comm-card-body">
@@ -496,7 +602,7 @@
     <div class="footer-grid">
 
       <!-- Col 1 — Brand -->
-      <div class="footer-col footer-col--brand">
+      <div class="footer-col footer-col--brand" data-reveal style="--rd:.05s">
         <a routerLink="/homepage" class="footer-logo-link">
           <img src="/tns.png" alt="Touch & Solve" class="footer-logo" />
         </a>
@@ -512,7 +618,7 @@
       </div>
 
       <!-- Col 2 — Explore -->
-      <div class="footer-col">
+      <div class="footer-col" data-reveal style="--rd:.12s">
         <h5 class="footer-col-title">Explore</h5>
         <ul class="footer-col-links">
           <li><a routerLink="/courses">Courses</a></li>
@@ -523,7 +629,7 @@
       </div>
 
       <!-- Col 3 — Company -->
-      <div class="footer-col">
+      <div class="footer-col" data-reveal style="--rd:.19s">
         <h5 class="footer-col-title">Company</h5>
         <ul class="footer-col-links">
           <li><a href="#aboutUs">About Us</a></li>
@@ -534,7 +640,7 @@
       </div>
 
       <!-- Col 4 — Mobile App -->
-      <div class="footer-col footer-col--app">
+      <div class="footer-col footer-col--app" data-reveal style="--rd:.26s">
         <h5 class="footer-col-title">Mobile App</h5>
         <p class="footer-app-desc">Learn anywhere, anytime with our mobile app.</p>
         <div class="footer-app-btns">
