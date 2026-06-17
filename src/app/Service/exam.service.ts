@@ -8,6 +8,7 @@ export interface ExamView {
   slot: number;                 // 1 = 1st, 2 = 2nd, 3 = Final
   title: string;
   instruction: string;
+  estimatedDate?: string | null;   // display-only estimate (student-card countdown)
   startDate: string;
   deadline: string;
   durationMinutes: number;
@@ -40,6 +41,7 @@ export interface SaveExamDto {
   slot: number;
   title: string;
   instruction: string;
+  estimatedDate?: string | null; // display-only estimate (student-card countdown)
   durationMinutes: number;      // window length; start/deadline are set when the question is uploaded
   totalMarks: number;
 }

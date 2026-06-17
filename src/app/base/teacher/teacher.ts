@@ -196,7 +196,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     price: [0, [Validators.min(0)]],
     durationMinutes: [0, [Validators.min(0)]],
     thumbnailUrl: [''],
-    published: [false],
+    published: [true],
     teacherUserId: [''],
   });
 
@@ -366,7 +366,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       price: 0,
       durationMinutes: 0,
       thumbnailUrl: '',
-      published: false,
+      published: true,
       teacherUserId: '',
     });
     this.showCourseModal.set(true);
@@ -446,7 +446,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         level: formValue.level,
         price: Number(formValue.price || 0),
         durationMinutes: Number(formValue.durationMinutes || 0),
-        isPublished: formValue.published,
+        isPublished: true,   // courses are published/active by default (publish toggle removed)
         teacherUserId: teacherIds[0],
         teacherUserIds: teacherIds,
       };
@@ -520,8 +520,15 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected examSlotEditing = 1;
   protected examTitle = '';
   protected examInstruction = '';
-  protected examDurationDays = 1;   // exam window length in days (starts when the question is uploaded)
+  protected examDurationMinutes = 30;   // answer-upload window in minutes (starts when the question is uploaded)
+  protected examEstimatedDate = '';     // yyyy-MM-dd — display-only estimate for the student-card countdown
   protected examTotalMarks = 0;
+  protected readonly examDurationOptions = [
+    { value: 30, label: '30 min' },
+    { value: 60, label: '1 hr' },
+    { value: 90, label: '1.5 hr' },
+    { value: 120, label: '2 hr' },
+  ];
   protected readonly isSavingExam = signal(false);
   protected readonly uploadingQuestionSlot = signal<number | null>(null);
 
@@ -536,6 +543,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     slot: e.slot ?? e.Slot,
     title: e.title ?? e.Title ?? '',
     instruction: e.instruction ?? e.Instruction ?? '',
+    estimatedDate: e.estimatedDate ?? e.EstimatedDate ?? null,
     startDate: e.startDate ?? e.StartDate,
     deadline: e.deadline ?? e.Deadline,
     durationMinutes: e.durationMinutes ?? e.DurationMinutes ?? 0,
@@ -569,7 +577,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.examSlotEditing = slot;
     this.examTitle = ex?.title ?? '';
     this.examInstruction = ex?.instruction ?? '';
-    this.examDurationDays = ex && ex.durationMinutes > 0 ? Math.max(1, Math.round(ex.durationMinutes / 1440)) : 1;
+    this.examDurationMinutes = ex && ex.durationMinutes > 0 ? ex.durationMinutes : 30;
+    this.examEstimatedDate = ex?.estimatedDate ? ex.estimatedDate.substring(0, 10) : '';
     this.examTotalMarks = ex?.totalMarks ?? 0;
     this.showExamModal.set(true);
   }
@@ -581,8 +590,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected async saveExam(): Promise<void> {
     const course = this.selectedCourse();
     if (!course) return;
-    if (!this.examTitle.trim() || !this.examDurationDays || this.examDurationDays < 1) {
-      this.setNotice('Exam title and a duration (days) are required.', 'error');
+    if (!this.examTitle.trim() || !this.examDurationMinutes || this.examDurationMinutes < 1) {
+      this.setNotice('Exam title and a duration are required.', 'error');
       return;
     }
     this.isSavingExam.set(true);
@@ -592,7 +601,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         slot: this.examSlotEditing,
         title: this.examTitle.trim(),
         instruction: this.examInstruction.trim(),
-        durationMinutes: Number(this.examDurationDays) * 1440,
+        estimatedDate: this.examEstimatedDate || null,
+        durationMinutes: Number(this.examDurationMinutes),
         totalMarks: Number(this.examTotalMarks || 0),
       }));
       await this.loadExams(course.id);

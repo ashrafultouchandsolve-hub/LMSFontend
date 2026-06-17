@@ -49,6 +49,7 @@ export class CourseDetails {
   protected readonly userName = signal('');
   protected readonly userRole = signal<number | null>(null);
   protected readonly isTeacher = computed(() => this.userRole() === 1);
+  protected readonly isAdmin = computed(() => this.userRole() === 2);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
   protected readonly isEnrolled = signal(false);
   protected readonly isCheckingEnrollment = signal(false);

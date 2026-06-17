@@ -33,7 +33,8 @@ export class CourseExams implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     void this.load();
-    this.timer = setInterval(() => this.nowTick.set(Date.now()), 60000);
+    // tick every second so the live "min left" countdown updates accurately
+    this.timer = setInterval(() => this.nowTick.set(Date.now()), 1000);
   }
 
   ngOnDestroy(): void {
@@ -55,6 +56,7 @@ export class CourseExams implements OnInit, OnDestroy {
     slot: e.slot ?? e.Slot,
     title: e.title ?? e.Title ?? '',
     instruction: e.instruction ?? e.Instruction ?? '',
+    estimatedDate: e.estimatedDate ?? e.EstimatedDate ?? null,
     startDate: e.startDate ?? e.StartDate,
     deadline: e.deadline ?? e.Deadline,
     durationMinutes: e.durationMinutes ?? e.DurationMinutes ?? 0,
@@ -86,6 +88,29 @@ export class CourseExams implements OnInit, OnDestroy {
     return ms <= 0 ? 0 : Math.ceil(ms / 86400000);
   }
   protected daysToDeadline(exam: ExamView): number { return this.daysTo(exam.deadline); }
+
+  /** Live time-left for a started exam: "30 min left" / "1 hr 20 min left" / "2 days left". */
+  protected examTimeLeft(exam: ExamView): string {
+    const ms = new Date(exam.deadline).getTime() - this.nowTick();
+    const t = this.lang.t();
+    if (ms <= 0) return '';
+    const totalMin = Math.ceil(ms / 60000);
+    if (totalMin >= 1440) {
+      const d = Math.ceil(totalMin / 1440);
+      return `${d} ${d === 1 ? t.exDayLeft : t.exDaysLeft}`;
+    }
+    if (totalMin >= 60) {
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      return m > 0 ? `${h} ${t.exHr} ${m} ${t.exMin} ${t.exLeft}` : `${h} ${t.exHr} ${t.exLeft}`;
+    }
+    return `${totalMin} ${t.exMin} ${t.exLeft}`;
+  }
+  protected daysToEstimated(exam: ExamView): number { return exam.estimatedDate ? this.daysTo(exam.estimatedDate) : 0; }
+  /** Estimate date exists and is still in the future. */
+  protected estimateUpcoming(exam: ExamView | null): boolean {
+    return !!exam?.estimatedDate && new Date(exam.estimatedDate).getTime() > this.nowTick();
+  }
 
   // ── actions ─────────────────────────────────────────────────────
   protected onFileSelected(examId: string, event: Event): void {

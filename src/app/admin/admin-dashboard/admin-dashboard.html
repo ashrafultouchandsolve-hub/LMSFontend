@@ -102,7 +102,7 @@
         type="text"
         class="search-input"
         [placeholder]="lang.t().adSearchNameEmail"
-        [(ngModel)]="teacherSearch"
+        [ngModel]="teacherSearch()" (ngModelChange)="teacherSearch.set($event)"
       />
     </div>
     <div class="table-container">
@@ -155,7 +155,7 @@
         type="text"
         class="search-input"
         [placeholder]="lang.t().adSearchNameEmail"
-        [(ngModel)]="studentSearch"
+        [ngModel]="studentSearch()" (ngModelChange)="studentSearch.set($event)"
       />
     </div>
     <div class="table-container">
@@ -202,7 +202,7 @@
 
     <div class="cat-create-row">
       <input type="text" class="search-input" [placeholder]="lang.t().adCategoryNamePlaceholder"
-        [(ngModel)]="newCategoryName" (keyup.enter)="createCategory()" />
+        [ngModel]="newCategoryName()" (ngModelChange)="newCategoryName.set($event)" (keyup.enter)="createCategory()" />
       <button class="btn btn-primary" (click)="createCategory()">+ {{ lang.t().adAddCategory }}</button>
     </div>
 
@@ -223,7 +223,7 @@
           </div>
           <div class="cat-card-body">
             @if (editingCategoryId() === cat.id) {
-              <input type="text" class="search-input" [(ngModel)]="editingCategoryName" (keyup.enter)="saveCategory(cat.id)" />
+              <input type="text" class="search-input" [ngModel]="editingCategoryName()" (ngModelChange)="editingCategoryName.set($event)" (keyup.enter)="saveCategory(cat.id)" />
               <div class="cat-sec-actions">
                 <button class="btn btn-primary" (click)="saveCategory(cat.id)">{{ lang.t().commonSave }}</button>
                 <button class="btn btn-ghost" (click)="cancelEditCategory()">{{ lang.t().commonCancel }}</button>
@@ -250,14 +250,13 @@
     <div class="page-header">
       <h1>{{ lang.t().tcSideCourses }}</h1>
       <p>{{ lang.t().adCoursesSub }}</p>
-      <button class="btn btn-primary" (click)="manageCourses()">📚 {{ lang.t().adAuthorCourses }}</button>
     </div>
     <div class="search-box">
       <input
         type="text"
         class="search-input"
         [placeholder]="lang.t().adSearchCourseTeacher"
-        [(ngModel)]="courseSearch"
+        [ngModel]="courseSearch()" (ngModelChange)="courseSearch.set($event)"
       />
     </div>
     <div class="table-container">
@@ -302,7 +301,7 @@
         type="text"
         class="search-input"
         [placeholder]="lang.t().adSearchComment"
-        [(ngModel)]="searchQuery"
+        [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
       />
     </div>
     <div class="comments-list">
@@ -317,7 +316,7 @@
         @if (editingCommentId() === comment.id) {
         <!-- Edit mode -->
         <div class="edit-mode">
-          <textarea class="edit-textarea" [(ngModel)]="editingContent" rows="3"></textarea>
+          <textarea class="edit-textarea" [ngModel]="editingContent()" (ngModelChange)="editingContent.set($event)" rows="3"></textarea>
           <div class="edit-actions">
             <button class="btn btn-approve" (click)="saveEdit(comment.id)">{{ lang.t().commonSave }}</button>
             <button class="btn btn-block" (click)="cancelEdit()">{{ lang.t().commonCancel }}</button>

@@ -358,7 +358,12 @@
               </div>
               @if (ex) {
                 <p class="exam-author-line"><strong>{{ ex.title }}</strong></p>
-                <p class="exam-author-line">{{ lang.t().exDeadline }}: {{ ex.deadline | date:'dd MMM yyyy, hh:mm a' }}</p>
+                @if (ex.estimatedDate) {
+                  <p class="exam-author-line">📅 {{ lang.t().exEstimatedStart }}: {{ ex.estimatedDate | date:'dd MMM yyyy' }}</p>
+                }
+                @if (ex.isPublished) {
+                  <p class="exam-author-line">{{ lang.t().exDeadline }}: {{ ex.deadline | date:'dd MMM yyyy, hh:mm a' }}</p>
+                }
                 <p class="exam-author-line">{{ lang.t().exTotalMarks }}: {{ ex.totalMarks }}</p>
               } @else {
                 <p class="exam-author-line muted">—</p>
@@ -435,11 +440,20 @@
           </label>
           <label>
             <span>{{ lang.t().exDurationDays }} *</span>
-            <input type="number" [(ngModel)]="examDurationDays" min="1" />
+            <select [(ngModel)]="examDurationMinutes">
+              @for (opt of examDurationOptions; track opt.value) {
+                <option [ngValue]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
           </label>
           <label>
             <span>{{ lang.t().exTotalMarks }}</span>
             <input type="number" [(ngModel)]="examTotalMarks" min="0" />
+          </label>
+          <label class="full">
+            <span>📅 {{ lang.t().exEstimatedDate }}</span>
+            <input type="date" [(ngModel)]="examEstimatedDate" />
+            <small class="exam-modal-hint">{{ lang.t().exEstimatedHint }}</small>
           </label>
           <p class="full exam-modal-hint">⏱️ {{ lang.t().exDurationHint }}</p>
         </div>
@@ -601,10 +615,6 @@
             </div>
           }
 
-          <label class="checkbox full">
-            <input type="checkbox" formControlName="published" />
-            <span>{{ lang.t().tcPublishCourse }}</span>
-          </label>
 
           <div class="modal-actions full">
             <button type="button" class="btn btn-ghost" (click)="closeCourseModal()">{{ lang.t().commonCancel }}</button>

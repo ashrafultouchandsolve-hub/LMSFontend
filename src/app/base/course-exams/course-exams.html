@@ -26,14 +26,24 @@
 
         @if (examState(exam) === 'locked') {
           <div class="cx-locked">
-            <span class="cx-lock">🔒</span>
-            <p>{{ lang.t().exNotAvailable }}</p>
+            @if (exam && exam.estimatedDate) {
+              <span class="cx-lock">📅</span>
+              <p class="cx-est-line">{{ lang.t().exEstimatedStart }}: <strong>{{ exam.estimatedDate | date:'dd MMM yyyy' }}</strong></p>
+              @if (estimateUpcoming(exam)) {
+                <span class="cx-count">⏳ {{ daysToEstimated(exam) }} {{ daysToEstimated(exam) === 1 ? lang.t().exDayLeft : lang.t().exDaysLeft }}</span>
+              } @else {
+                <span class="cx-count">{{ lang.t().exStartingSoon }}</span>
+              }
+            } @else {
+              <span class="cx-lock">🔒</span>
+              <p>{{ lang.t().exNotAvailable }}</p>
+            }
           </div>
         } @else if (exam) {
           <p class="cx-line">⏰ {{ lang.t().exDeadline }}: {{ exam.deadline | date:'dd MMM, hh:mm a' }}</p>
 
           @if (examState(exam) === 'open') {
-            <span class="cx-count cx-count--live">⏳ {{ daysToDeadline(exam) }} {{ daysToDeadline(exam) === 1 ? lang.t().exDayLeft : lang.t().exDaysLeft }}</span>
+            <span class="cx-count cx-count--live">⏳ {{ examTimeLeft(exam) }}</span>
             <div class="cx-actions" (click)="$event.stopPropagation()">
               @if (exam.hasQuestion) {
                 <button type="button" class="cx-q" (click)="viewQuestion(exam)">📄 {{ lang.t().exViewPdf }}</button>

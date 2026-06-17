@@ -46,6 +46,9 @@ export interface Translations {
   cdLoginToEnroll: string; cdCategory: string; cdLevel: string; cdLessonsCount: string;
   cdDuration: string; cdStatus: string; cdPublished: string; cdDraft: string;
   cdStudents: string; cdTotalVideos: string; cdTotalPractice: string; cdFreeLiveNote: string;
+  cdIncludes: string; cdIncLive: string; cdFree: string; cdIncVideos: string; cdIncPractice: string;
+  cdIncStudents: string; cdIncCert: string; cdPriceLabel: string; cdContinue: string; cdRatings: string;
+  cdRateThis: string; cdClose: string; cdInWishlist: string; cdAddWishlist: string; cdUpdating: string; cdAdding: string;
   // Enrolled Course
   ecBack: string; ecNoLesson: string; ecLessons: string; ecInstructor: string;
   // Profile
@@ -181,6 +184,7 @@ export interface Translations {
   exLocked: string; exNotAvailable: string; exPending: string; exSubmitted: string; exGraded: string;
   exMissed: string; exClosed: string; exDeadline: string; exInstruction: string; exQuestion: string;
   exViewPdf: string; exUpload: string; exSubmit: string; exSubmitting: string; exDaysLeft: string;
+  exHr: string; exMin: string; exLeft: string;
   exDayLeft: string; exYourAnswer: string; exMarks: string; exFeedback: string; exAwaitingResult: string;
   // Exams (admin/teacher authoring + grading)
   exManageExams: string; exManageSub: string; exTitlePlaceholder: string; exInstructionPlaceholder: string;
@@ -189,6 +193,7 @@ export interface Translations {
   exViewSubmissions: string; exNoSubmissions: string; exDownload: string; exSaveGrade: string; exSubmittedAt: string;
   exUpcoming: string; exStartsIn: string; exStartDate: string; exDetails: string; exDay: string; exDays: string; exGradedByAdmin: string;
   exStarted: string; exDurationDays: string; exDurationHint: string;
+  exEstimatedDate: string; exEstimatedHint: string; exEstimatedStart: string; exStartingSoon: string;
   // Course live component
   ecLiveClasses: string; ecScheduled: string; ecLiveNow: string; ecJoinNow: string; ecNoLive: string; ecUpcoming: string;
   ecHubPractice: string; ecHubPracticeSub: string; ecHubLive: string; ecHubLiveSub: string;
@@ -270,6 +275,9 @@ const EN: Translations = {
   cdEnrollNow: 'Enroll Now', cdLoginToEnroll: 'Login to Enroll', cdCategory: 'Category', cdLevel: 'Level',
   cdLessonsCount: 'Lessons', cdDuration: 'Duration', cdStatus: 'Status', cdPublished: 'Published', cdDraft: 'Draft',
   cdStudents: 'Enrolled Students', cdTotalVideos: 'Total Videos', cdTotalPractice: 'Total Practice', cdFreeLiveNote: '🎥 3 live classes are free',
+  cdIncludes: 'This course includes', cdIncLive: '3 live classes', cdFree: 'Free', cdIncVideos: 'Video lessons', cdIncPractice: 'Practice materials',
+  cdIncStudents: 'Students enrolled', cdIncCert: 'Certificate of completion', cdPriceLabel: 'Course price', cdContinue: 'Continue Learning →', cdRatings: 'ratings',
+  cdRateThis: '⭐ Rate this course', cdClose: 'Close', cdInWishlist: 'In Wishlist', cdAddWishlist: 'Add to Wishlist', cdUpdating: 'Updating…', cdAdding: 'Adding…',
   ecBack: '← Back to Course', ecNoLesson: 'No lesson selected', ecLessons: 'Lessons', ecInstructor: 'Instructor',
   profileRole: 'Role', profileDashboard: 'Student dashboard', profileWeekly: 'Weekly performance', profileLive: 'Live',
   profileCompletion: 'completion', profileCompleted: 'Completed', profileRemaining: 'Remaining',
@@ -424,13 +432,15 @@ const EN: Translations = {
   exLocked: 'Locked', exNotAvailable: 'Not available yet', exPending: 'Pending', exSubmitted: 'Submitted', exGraded: 'Graded',
   exMissed: 'Missed', exClosed: 'Closed — deadline passed', exDeadline: 'Deadline', exInstruction: 'Instruction', exQuestion: 'Question',
   exViewPdf: 'View PDF', exUpload: 'Choose answer file', exSubmit: 'Submit', exSubmitting: 'Submitting…', exDaysLeft: 'days left',
+  exHr: 'hr', exMin: 'min', exLeft: 'left',
   exDayLeft: 'day left', exYourAnswer: 'Your answer', exMarks: 'Marks', exFeedback: 'Feedback', exAwaitingResult: 'Awaiting result…',
   exManageExams: 'Exams', exManageSub: 'Set questions & deadlines, and grade submissions.', exTitlePlaceholder: 'Exam title', exInstructionPlaceholder: 'Note / instruction for students',
   exTotalMarks: 'Total marks', exDurationMin: 'Duration (min)', exDeadlineField: 'Deadline', exSaveExam: 'Save exam',
   exUploadQuestion: 'Upload question PDF', exReplaceQuestion: 'Replace question', exPublished: 'Live', exUnpublished: 'Locked (no question)',
   exViewSubmissions: 'Submissions', exNoSubmissions: 'No submissions yet', exDownload: 'Download', exSaveGrade: 'Save', exSubmittedAt: 'Submitted',
   exUpcoming: 'Upcoming', exStartsIn: 'Starts in', exStartDate: 'Started', exDetails: 'View details', exDay: 'day', exDays: 'days', exGradedByAdmin: 'Graded by admin',
-  exStarted: 'Exam Started', exDurationDays: 'Exam duration (days)', exDurationHint: 'The exam starts the moment you upload the question. Students can submit answers for this many days after that.',
+  exStarted: 'Exam Started', exDurationDays: 'Exam duration', exDurationHint: 'The exam timer starts the moment you upload the question. Students get this long to submit answers.',
+  exEstimatedDate: 'Estimated start date', exEstimatedHint: 'Shown to students as a countdown — it does NOT start the exam.', exEstimatedStart: 'Estimated start', exStartingSoon: 'Starting soon',
   ecLiveClasses: 'Live Classes', ecScheduled: 'scheduled', ecLiveNow: 'Live now', ecJoinNow: 'Join Now', ecNoLive: 'No live class scheduled for this course yet.', ecUpcoming: 'Upcoming',
   ecHubPractice: 'Practice', ecHubPracticeSub: 'Sharpen your skills', ecHubLive: 'Live Class', ecHubLiveSub: 'Join live & watch recordings',
   ecHubRecord: 'Recorded Videos', ecHubRecordSub: 'Lessons, notes & quizzes', ecHubExam: 'Exam', ecHubExamSub: 'Take your exams', ecComingSoon: 'Coming soon — stay tuned!', ecAllCourses: 'All Courses',
@@ -517,6 +527,9 @@ const BN: Translations = {
   cdEnrollNow: 'এখনই ভর্তি হন', cdLoginToEnroll: 'ভর্তি হতে লগইন করুন', cdCategory: 'বিষয়', cdLevel: 'স্তর',
   cdLessonsCount: 'পাঠ', cdDuration: 'সময়কাল', cdStatus: 'অবস্থা', cdPublished: 'প্রকাশিত', cdDraft: 'ড্রাফট',
   cdStudents: 'নিবন্ধিত শিক্ষার্থী', cdTotalVideos: 'মোট ভিডিও', cdTotalPractice: 'মোট প্র্যাকটিস', cdFreeLiveNote: '🎥 ৩টি লাইভ ক্লাস ফ্রি',
+  cdIncludes: 'এই কোর্সে যা পাবেন', cdIncLive: '৩টি লাইভ ক্লাস', cdFree: 'ফ্রি', cdIncVideos: 'ভিডিও লেসন', cdIncPractice: 'প্র্যাকটিস ম্যাটেরিয়াল',
+  cdIncStudents: 'শিক্ষার্থী ভর্তি', cdIncCert: 'সমাপনী সার্টিফিকেট', cdPriceLabel: 'কোর্স ফি', cdContinue: 'শেখা চালিয়ে যান →', cdRatings: 'রেটিং',
+  cdRateThis: '⭐ এই কোর্স রেট করুন', cdClose: 'বন্ধ', cdInWishlist: 'উইশলিস্টে আছে', cdAddWishlist: 'উইশলিস্টে যোগ করুন', cdUpdating: 'আপডেট হচ্ছে…', cdAdding: 'যোগ হচ্ছে…',
   ecBack: '← কোর্সে ফিরুন', ecNoLesson: 'কোনো পাঠ নির্বাচিত হয়নি', ecLessons: 'পাঠসমূহ', ecInstructor: 'প্রশিক্ষক',
   profileRole: 'ভূমিকা', profileDashboard: 'শিক্ষার্থী ড্যাশবোর্ড', profileWeekly: 'সাপ্তাহিক পারফরম্যান্স', profileLive: 'লাইভ',
   profileCompletion: 'সম্পন্ন', profileCompleted: 'সম্পন্ন হয়েছে', profileRemaining: 'বাকি আছে',
@@ -671,13 +684,15 @@ const BN: Translations = {
   exLocked: 'লক', exNotAvailable: 'এখনো উপলব্ধ নয়', exPending: 'বাকি আছে', exSubmitted: 'জমা হয়েছে', exGraded: 'মূল্যায়িত',
   exMissed: 'মিস হয়েছে', exClosed: 'বন্ধ — সময় শেষ', exDeadline: 'শেষ তারিখ', exInstruction: 'নির্দেশনা', exQuestion: 'প্রশ্ন',
   exViewPdf: 'PDF দেখুন', exUpload: 'উত্তর ফাইল দিন', exSubmit: 'জমা দিন', exSubmitting: 'জমা হচ্ছে…', exDaysLeft: 'দিন বাকি',
+  exHr: 'ঘণ্টা', exMin: 'মিনিট', exLeft: 'বাকি',
   exDayLeft: 'দিন বাকি', exYourAnswer: 'আপনার উত্তর', exMarks: 'নম্বর', exFeedback: 'মন্তব্য', exAwaitingResult: 'ফলাফলের অপেক্ষায়…',
   exManageExams: 'পরীক্ষা', exManageSub: 'প্রশ্ন ও সময়সীমা সেট করুন এবং খাতা মূল্যায়ন করুন।', exTitlePlaceholder: 'পরীক্ষার শিরোনাম', exInstructionPlaceholder: 'শিক্ষার্থীদের জন্য নির্দেশনা',
   exTotalMarks: 'পূর্ণমান', exDurationMin: 'সময় (মিনিট)', exDeadlineField: 'শেষ তারিখ', exSaveExam: 'পরীক্ষা সেভ করুন',
   exUploadQuestion: 'প্রশ্ন PDF আপলোড', exReplaceQuestion: 'প্রশ্ন বদলান', exPublished: 'লাইভ', exUnpublished: 'লক (প্রশ্ন নেই)',
   exViewSubmissions: 'জমা', exNoSubmissions: 'এখনো কেউ জমা দেয়নি', exDownload: 'ডাউনলোড', exSaveGrade: 'সেভ', exSubmittedAt: 'জমা',
   exUpcoming: 'আসছে', exStartsIn: 'শুরু হবে', exStartDate: 'শুরু হয়েছে', exDetails: 'বিস্তারিত দেখুন', exDay: 'দিনে', exDays: 'দিনে', exGradedByAdmin: 'অ্যাডমিন মূল্যায়ন করেছে',
-  exStarted: 'পরীক্ষা শুরু', exDurationDays: 'পরীক্ষার সময়সীমা (দিন)', exDurationHint: 'প্রশ্ন আপলোড করার সাথে সাথেই পরীক্ষা শুরু হয়ে যায়। এরপর এত দিন পর্যন্ত শিক্ষার্থীরা উত্তর জমা দিতে পারবে।',
+  exStarted: 'পরীক্ষা শুরু', exDurationDays: 'পরীক্ষার সময়সীমা', exDurationHint: 'প্রশ্ন আপলোড করার সাথে সাথেই পরীক্ষার টাইমার শুরু হয়। এই সময়ের মধ্যে শিক্ষার্থীরা উত্তর জমা দিতে পারবে।',
+  exEstimatedDate: 'আনুমানিক শুরুর তারিখ', exEstimatedHint: 'শিক্ষার্থীদের কাছে কাউন্টডাউন হিসেবে দেখাবে — এটা পরীক্ষা শুরু করে না।', exEstimatedStart: 'আনুমানিক শুরু', exStartingSoon: 'খুব শিগগিরই শুরু',
   ecLiveClasses: 'লাইভ ক্লাস', ecScheduled: 'নির্ধারিত', ecLiveNow: 'এখন লাইভ', ecJoinNow: 'জয়েন করুন', ecNoLive: 'এই কোর্সে এখনো কোনো লাইভ ক্লাস নেই।', ecUpcoming: 'আসছে',
   ecHubPractice: 'প্র্যাকটিস', ecHubPracticeSub: 'নিজেকে ঝালিয়ে নাও', ecHubLive: 'লাইভ ক্লাস', ecHubLiveSub: 'লাইভ জয়েন ও রেকর্ডিং দেখো',
   ecHubRecord: 'রেকর্ডেড ভিডিও', ecHubRecordSub: 'পাঠ, নোট ও কুইজ', ecHubExam: 'পরীক্ষা', ecHubExamSub: 'পরীক্ষা দাও', ecComingSoon: 'শীঘ্রই আসছে — অপেক্ষা করো!', ecAllCourses: 'সব কোর্স',
