@@ -464,6 +464,32 @@
 	text-align: center;
 }
 
+/* ── Free live classes section (un-enrolled users) ───────── */
+.cd-free-live {
+	margin-top: 0.95rem;
+	padding: 0.9rem;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(239, 68, 68, 0.06), rgba(14, 165, 233, 0.06));
+	border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.cd-free-live h3 { margin: 0 0 0.4rem; font-size: 1rem; color: #b91c1c; }
+.cd-free-live-lead { margin: 0 0 0.7rem; font-size: 0.84rem; line-height: 1.5; color: #475569; }
+.cd-follow-btn {
+	width: 100%;
+	border: 1.5px solid #2563eb;
+	background: #2563eb;
+	color: #fff;
+	border-radius: 10px;
+	font-weight: 700;
+	font-size: 0.88rem;
+	padding: 0.7rem;
+	cursor: pointer;
+	transition: background 0.18s, transform 0.15s;
+}
+.cd-follow-btn:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
+.cd-follow-btn.following { background: #ecfdf3; color: #15803d; border-color: #86efac; }
+.cd-follow-btn:disabled { opacity: 0.7; cursor: wait; }
+
 .wishlist-button {
 	display: block;
 	width: 100%;

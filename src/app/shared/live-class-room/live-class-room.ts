@@ -73,8 +73,8 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
 
-        // Auto-prompt the teacher to record (course classes only — free classes aren't recorded)
-        if (this.isTeacher() && !free) {
+        // Auto-prompt the host to record — both course AND free classes are recorded now.
+        if (this.isTeacher()) {
           this.showRecordPrompt.set(true);
         }
 
@@ -238,12 +238,15 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
       });
     };
 
-    // Course classes with a recording → upload first, then end + leave.
-    if (blob && blob.size > 0 && !this.isFree()) {
+    // Any class (course OR free) with a recording → upload first, then end + leave.
+    if (blob && blob.size > 0) {
       this.recState.set('uploading');
       this.uploadPct.set(0);
       const file = new File([blob], `recording-${this.classId()}.webm`, { type: blob.type || 'video/webm' });
-      this.svc.uploadRecording(this.classId(), file).subscribe({
+      const upload$ = this.isFree()
+        ? this.svc.uploadFreeRecording(this.classId(), file)
+        : this.svc.uploadRecording(this.classId(), file);
+      upload$.subscribe({
         next: (event) => {
           if (event.type === HttpEventType.UploadProgress && event.total) {
             this.uploadPct.set(Math.round((100 * event.loaded) / event.total));

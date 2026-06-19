@@ -125,6 +125,13 @@ protected liveScheduledAt = '';
   protected readonly selectedTeacherIds = signal<string[]>([]);
   protected readonly teacherDropdownOpen = signal(false);
 
+  /** Fixed category list for course creation (matches the home/courses page) + an "Other" bucket. Admins pick from this, no free text. */
+  protected readonly courseCategoryOptions = [
+    'SSC 2027', 'SSC 2026', 'HSC 2027', 'HSC 2026',
+    'Admission English', 'Admission Science',
+    'Skills Development', 'Communication', 'General', 'Other',
+  ];
+
   /** The approved-teacher objects that are currently selected (for chips). */
   protected readonly selectedTeacherObjs = computed(() => {
     const ids = this.selectedTeacherIds();
@@ -281,6 +288,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   // ── Free public live classes (anyone can join without login) ─────
   protected freeLiveTitle = '';
   protected freeLiveDesc = '';
+  protected freeLiveCourseId = '';   // which of the teacher's assigned courses this free class is for
   protected readonly myFreeClasses = signal<FreeLiveClass[]>([]);
   protected readonly isStartingFree = signal(false);
   protected readonly isLoadingFree = signal(false);
@@ -300,19 +308,33 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
   protected async startFreeLive(): Promise<void> {
     const title = this.freeLiveTitle.trim();
+    if (!this.freeLiveCourseId) {
+      this.setNotice('Choose which course this free live class is for.', 'error');
+      return;
+    }
     if (!title) {
       this.setNotice('Live class title required.', 'error');
       return;
     }
 
+    // Soft warning: 3 free classes per course is the guideline.
+    try {
+      const cntRes: any = await firstValueFrom(this.liveClassService.freeCount(this.freeLiveCourseId));
+      const n = cntRes?.data ?? cntRes?.Data ?? 0;
+      if (n >= 3 && !window.confirm(`This course already has ${n} free live classes (3 is the suggested limit). Start another free class anyway?`)) {
+        return;
+      }
+    } catch { /* best-effort; don't block */ }
+
     this.isStartingFree.set(true);
     try {
       const res: any = await firstValueFrom(
-        this.liveClassService.startFree({ title, description: this.freeLiveDesc.trim() }),
+        this.liveClassService.startFree({ courseId: this.freeLiveCourseId, title, description: this.freeLiveDesc.trim() }),
       );
       const newId = res?.data?.id ?? res?.Data?.Id ?? null;
       this.freeLiveTitle = '';
       this.freeLiveDesc = '';
+      this.freeLiveCourseId = '';
       await this.loadMyFreeClasses();
       this.setNotice('Free live class is now LIVE. Share the link or open the room.', 'success');
       if (newId) this.router.navigateByUrl(`/free-live/${newId}`);
@@ -884,6 +906,15 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       return;
     }
 
+    // Soft warning: encourage 3 free live classes before paid ones.
+    try {
+      const cntRes: any = await firstValueFrom(this.liveClassService.freeCount(selected.id));
+      const n = cntRes?.data ?? cntRes?.Data ?? 0;
+      if (n < 3 && !window.confirm(`You've done only ${n} of the 3 suggested free live classes for this course. Create this paid live class anyway?`)) {
+        return;
+      }
+    } catch { /* best-effort; don't block */ }
+
     try {
       await firstValueFrom(this.liveClassService.create({
         courseId: selected.id,
@@ -1087,7 +1118,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   }
 
   protected readonly canRenderThumbnail = (value: string): boolean => {
-    return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/');
+    return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/') || value.startsWith('blob:');
   };
 
   protected getImageUrl(path: string | null): string {

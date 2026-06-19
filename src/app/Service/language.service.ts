@@ -46,6 +46,7 @@ export interface Translations {
   cdLoginToEnroll: string; cdCategory: string; cdLevel: string; cdLessonsCount: string;
   cdDuration: string; cdStatus: string; cdPublished: string; cdDraft: string;
   cdStudents: string; cdTotalVideos: string; cdTotalPractice: string; cdFreeLiveNote: string;
+  cdFreeLiveTitle: string; cdFreeLiveLead: string; cdFollow: string; cdFollowing: string; cdFollowLogin: string;
   cdIncludes: string; cdIncLive: string; cdFree: string; cdIncVideos: string; cdIncPractice: string;
   cdIncStudents: string; cdIncCert: string; cdPriceLabel: string; cdContinue: string; cdRatings: string;
   cdRateThis: string; cdClose: string; cdInWishlist: string; cdAddWishlist: string; cdUpdating: string; cdAdding: string;
@@ -68,6 +69,9 @@ export interface Translations {
   profileAddress: string; profileInstitution: string; profileClass: string;
   profileGuardianName: string; profileGuardianPhone: string;
   profileFacebook: string; profileLinkedIn: string; profileBio: string; profileBioPlaceholder: string;
+  profileInstructorArea: string; profileAdminArea: string; profileCourses: string; profileTeacherNoBio: string;
+  profileManageCourses: string; profileBrowseCourses: string; profileHome: string;
+  profileAdminPanel: string; profileCourseManager: string; profileInstructors: string; profileYoutube: string;
   // Login
   loginEyebrow: string; loginTitle: string; loginLead: string; loginSecure: string; loginMode: string;
   loginF1Title: string; loginF1Desc: string; loginF2Title: string; loginF2Desc: string; loginF3Title: string; loginF3Desc: string;
@@ -144,7 +148,7 @@ export interface Translations {
   tcAdminPanel: string; tcSideDashboard: string; tcSideCourses: string; tcSideUsers: string;
   tcSideEnrollments: string; tcSideProfile: string; tcBackToSite: string; tcSideLive: string;
   // Teacher free live class panel
-  tcLiveTitle: string; tcLiveSub: string; tcLiveStartHeading: string;
+  tcLiveTitle: string; tcLiveSub: string; tcLiveStartHeading: string; tcLivePickCourse: string;
   tcLiveGoLive: string; tcLiveNote: string; tcLiveMine: string;
   tcLiveNoneMine: string; tcLiveEnded: string; tcLiveCopy: string; tcLiveCopied: string;
   tcLiveOpenRoom: string; tcLiveEnd: string;
@@ -209,6 +213,7 @@ export interface Translations {
   tcAppointMulti: string; tcSelectedCount: string; cdCourseTeachers: string; tcChooseTeachers: string;
   // Admin dashboard
   adTeachers: string; adStudents: string; adComments: string; adAnnouncements: string; adStoreItems: string;
+  adNavTeachers: string; adNavStudents: string; adNavCategories: string; adNavCourses: string; adNavComments: string; adCreateCategory: string;
   adOverview: string; adTotalStudents: string; adActiveTeachers: string; adPendingApprovals: string;
   adTotalCourses: string; adTotalEnrollments: string; adWaitingApproval: string; adReviewNow: string;
   adTeachersSub: string; adSearchNameEmail: string; adThCourses: string; adApprove: string; adBlock: string;
@@ -275,6 +280,7 @@ const EN: Translations = {
   cdEnrollNow: 'Enroll Now', cdLoginToEnroll: 'Login to Enroll', cdCategory: 'Category', cdLevel: 'Level',
   cdLessonsCount: 'Lessons', cdDuration: 'Duration', cdStatus: 'Status', cdPublished: 'Published', cdDraft: 'Draft',
   cdStudents: 'Enrolled Students', cdTotalVideos: 'Total Videos', cdTotalPractice: 'Total Practice', cdFreeLiveNote: '🎥 3 live classes are free',
+  cdFreeLiveTitle: 'Free live classes', cdFreeLiveLead: 'Join this course\'s live classes free — even without enrolling. Follow to get notified the moment the teacher goes live.', cdFollow: 'Follow free live classes', cdFollowing: 'Following — we\'ll notify you', cdFollowLogin: 'Log in to follow',
   cdIncludes: 'This course includes', cdIncLive: '3 live classes', cdFree: 'Free', cdIncVideos: 'Video lessons', cdIncPractice: 'Practice materials',
   cdIncStudents: 'Students enrolled', cdIncCert: 'Certificate of completion', cdPriceLabel: 'Course price', cdContinue: 'Continue Learning →', cdRatings: 'ratings',
   cdRateThis: '⭐ Rate this course', cdClose: 'Close', cdInWishlist: 'In Wishlist', cdAddWishlist: 'Add to Wishlist', cdUpdating: 'Updating…', cdAdding: 'Adding…',
@@ -295,6 +301,9 @@ const EN: Translations = {
   profileAddress: 'Address', profileInstitution: 'Institution / School', profileClass: 'Class / Grade',
   profileGuardianName: 'Guardian Name', profileGuardianPhone: 'Guardian Phone',
   profileFacebook: 'Facebook', profileLinkedIn: 'LinkedIn', profileBio: 'About / Bio', profileBioPlaceholder: 'Write a short bio about yourself…',
+  profileInstructorArea: 'Instructor Area', profileAdminArea: 'Admin Area', profileCourses: 'Courses', profileTeacherNoBio: 'Add a short bio so students can learn about you.',
+  profileManageCourses: 'Manage Courses & Live', profileBrowseCourses: 'Browse Courses', profileHome: 'Home',
+  profileAdminPanel: 'Admin Dashboard', profileCourseManager: 'Course Manager', profileInstructors: 'Instructors', profileYoutube: 'YouTube',
   loginEyebrow: 'Welcome back', loginTitle: 'Login to continue your learning journey.',
   loginLead: 'Access your lessons, progress dashboard, and skill streaks from one focused workspace.',
   loginSecure: 'Secure access', loginMode: 'Black-blue learning mode',
@@ -381,6 +390,7 @@ const EN: Translations = {
   tcSideEnrollments: 'Enrollments', tcSideProfile: 'My Profile', tcBackToSite: 'Back to Site', tcSideLive: 'Live Class',
   tcLiveTitle: 'Free Live Class', tcLiveSub: 'Start a public live class anyone can join — no login or registration needed.',
   tcLiveStartHeading: 'Start a new free live class',
+  tcLivePickCourse: 'Select a course…',
   tcLiveGoLive: 'Go Live', tcLiveNote: 'Once you go live, share the link and anyone can join instantly as a guest.',
   tcLiveMine: 'My Live Classes', tcLiveNoneMine: 'You have no active free live classes. Start one above.',
   tcLiveEnded: 'Ended', tcLiveCopy: 'Copy Link', tcLiveCopied: 'Copied', tcLiveOpenRoom: 'Open Room', tcLiveEnd: 'End',
@@ -457,6 +467,7 @@ const EN: Translations = {
   tcAppointTeacher: 'Appoint Teacher(s)', tcSelectTeacher: 'No approved teachers yet',
   tcAppointMulti: 'select one or more', tcSelectedCount: 'selected', cdCourseTeachers: 'Your Instructors', tcChooseTeachers: 'Select teacher(s)…',
   adTeachers: 'Teachers', adStudents: 'Students', adComments: 'Comments', adAnnouncements: 'Announcements', adStoreItems: 'Store Items',
+  adNavTeachers: 'Manage Teachers', adNavStudents: 'Manage Students', adNavCategories: 'Manage Categories', adNavCourses: 'Manage Courses', adNavComments: 'Manage Comments', adCreateCategory: 'Create a new category',
   adOverview: 'Overview of your platform', adTotalStudents: 'Total Students', adActiveTeachers: 'Active Teachers',
   adPendingApprovals: 'Pending Approvals', adTotalCourses: 'Total Courses', adTotalEnrollments: 'Total Enrollments',
   adWaitingApproval: 'teacher(s) waiting for approval.', adReviewNow: 'Review Now →',
@@ -527,6 +538,7 @@ const BN: Translations = {
   cdEnrollNow: 'এখনই ভর্তি হন', cdLoginToEnroll: 'ভর্তি হতে লগইন করুন', cdCategory: 'বিষয়', cdLevel: 'স্তর',
   cdLessonsCount: 'পাঠ', cdDuration: 'সময়কাল', cdStatus: 'অবস্থা', cdPublished: 'প্রকাশিত', cdDraft: 'ড্রাফট',
   cdStudents: 'নিবন্ধিত শিক্ষার্থী', cdTotalVideos: 'মোট ভিডিও', cdTotalPractice: 'মোট প্র্যাকটিস', cdFreeLiveNote: '🎥 ৩টি লাইভ ক্লাস ফ্রি',
+  cdFreeLiveTitle: 'ফ্রি লাইভ ক্লাস', cdFreeLiveLead: 'এনরোল না করেও এই কোর্সের লাইভ ক্লাস ফ্রিতে করুন। Follow করলে টিচার লাইভে এলে সঙ্গে সঙ্গে নোটিফিকেশন পাবেন।', cdFollow: 'ফ্রি লাইভ ক্লাস Follow করুন', cdFollowing: 'Following — নোটিফিকেশন পাবেন', cdFollowLogin: 'Follow করতে লগইন করুন',
   cdIncludes: 'এই কোর্সে যা পাবেন', cdIncLive: '৩টি লাইভ ক্লাস', cdFree: 'ফ্রি', cdIncVideos: 'ভিডিও লেসন', cdIncPractice: 'প্র্যাকটিস ম্যাটেরিয়াল',
   cdIncStudents: 'শিক্ষার্থী ভর্তি', cdIncCert: 'সমাপনী সার্টিফিকেট', cdPriceLabel: 'কোর্স ফি', cdContinue: 'শেখা চালিয়ে যান →', cdRatings: 'রেটিং',
   cdRateThis: '⭐ এই কোর্স রেট করুন', cdClose: 'বন্ধ', cdInWishlist: 'উইশলিস্টে আছে', cdAddWishlist: 'উইশলিস্টে যোগ করুন', cdUpdating: 'আপডেট হচ্ছে…', cdAdding: 'যোগ হচ্ছে…',
@@ -547,6 +559,9 @@ const BN: Translations = {
   profileAddress: 'ঠিকানা', profileInstitution: 'প্রতিষ্ঠান / স্কুল', profileClass: 'শ্রেণি / গ্রেড',
   profileGuardianName: 'অভিভাবকের নাম', profileGuardianPhone: 'অভিভাবকের ফোন',
   profileFacebook: 'ফেসবুক', profileLinkedIn: 'লিংকডইন', profileBio: 'পরিচিতি / বায়ো', profileBioPlaceholder: 'নিজের সম্পর্কে সংক্ষেপে লিখুন…',
+  profileInstructorArea: 'ইন্সট্রাক্টর এরিয়া', profileAdminArea: 'অ্যাডমিন এরিয়া', profileCourses: 'কোর্স', profileTeacherNoBio: 'একটি সংক্ষিপ্ত বায়ো যোগ করুন যাতে শিক্ষার্থীরা আপনাকে জানতে পারে।',
+  profileManageCourses: 'কোর্স ও লাইভ ম্যানেজ', profileBrowseCourses: 'কোর্স দেখুন', profileHome: 'হোম',
+  profileAdminPanel: 'অ্যাডমিন ড্যাশবোর্ড', profileCourseManager: 'কোর্স ম্যানেজার', profileInstructors: 'ইন্সট্রাক্টর', profileYoutube: 'ইউটিউব',
   loginEyebrow: 'স্বাগতম', loginTitle: 'আপনার শিক্ষার যাত্রা চালিয়ে যেতে লগইন করুন।',
   loginLead: 'একটি ফোকাসড ওয়ার্কস্পেস থেকে আপনার পাঠ, অগ্রগতি ড্যাশবোর্ড এবং স্কিল স্ট্রিক অ্যাক্সেস করুন।',
   loginSecure: 'নিরাপদ প্রবেশ', loginMode: 'ব্ল্যাক-ব্লু লার্নিং মোড',
@@ -633,6 +648,7 @@ const BN: Translations = {
   tcSideEnrollments: 'এনরোলমেন্ট', tcSideProfile: 'আমার প্রোফাইল', tcBackToSite: 'সাইটে ফিরুন', tcSideLive: 'লাইভ ক্লাস',
   tcLiveTitle: 'ফ্রি লাইভ ক্লাস', tcLiveSub: 'এমন একটি পাবলিক লাইভ ক্লাস শুরু করুন যেখানে যে কেউ লগইন বা রেজিস্ট্রেশন ছাড়াই যোগ দিতে পারে।',
   tcLiveStartHeading: 'নতুন ফ্রি লাইভ ক্লাস শুরু করুন',
+  tcLivePickCourse: 'একটি কোর্স বেছে নিন…',
   tcLiveGoLive: 'লাইভ শুরু করুন', tcLiveNote: 'লাইভ শুরু হলে লিংক শেয়ার করুন — যে কেউ গেস্ট হিসেবে সাথে সাথে যোগ দিতে পারবে।',
   tcLiveMine: 'আমার লাইভ ক্লাস', tcLiveNoneMine: 'আপনার কোনো সক্রিয় ফ্রি লাইভ ক্লাস নেই। উপরে থেকে একটি শুরু করুন।',
   tcLiveEnded: 'শেষ', tcLiveCopy: 'লিংক কপি', tcLiveCopied: 'কপি হয়েছে', tcLiveOpenRoom: 'রুম খুলুন', tcLiveEnd: 'শেষ করুন',
@@ -709,6 +725,7 @@ const BN: Translations = {
   tcAppointTeacher: 'শিক্ষক নিযুক্ত করুন', tcSelectTeacher: 'এখনো কোনো অনুমোদিত শিক্ষক নেই',
   tcAppointMulti: 'এক বা একাধিক বেছে নিন', tcSelectedCount: 'জন নির্বাচিত', cdCourseTeachers: 'আপনার শিক্ষকগণ', tcChooseTeachers: 'শিক্ষক বেছে নিন…',
   adTeachers: 'শিক্ষক', adStudents: 'শিক্ষার্থী', adComments: 'কমেন্ট', adAnnouncements: 'ঘোষণা', adStoreItems: 'স্টোর আইটেম',
+  adNavTeachers: 'শিক্ষক ম্যানেজ', adNavStudents: 'শিক্ষার্থী ম্যানেজ', adNavCategories: 'ক্যাটাগরি ম্যানেজ', adNavCourses: 'কোর্স ম্যানেজ', adNavComments: 'কমেন্ট ম্যানেজ', adCreateCategory: 'নতুন ক্যাটাগরি তৈরি করুন',
   adOverview: 'আপনার প্ল্যাটফর্মের সংক্ষিপ্ত চিত্র', adTotalStudents: 'মোট শিক্ষার্থী', adActiveTeachers: 'সক্রিয় শিক্ষক',
   adPendingApprovals: 'অনুমোদনের অপেক্ষায়', adTotalCourses: 'মোট কোর্স', adTotalEnrollments: 'মোট এনরোলমেন্ট',
   adWaitingApproval: 'জন শিক্ষক অনুমোদনের অপেক্ষায়।', adReviewNow: 'এখন পর্যালোচনা →',

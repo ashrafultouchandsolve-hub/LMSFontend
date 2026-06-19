@@ -38,7 +38,13 @@ const CATEGORIES = [
   { label: 'Skills Development', value: 'Skills Development', icon: '⚡' },
   { label: 'Communication',      value: 'Communication',      icon: '💬' },
   { label: 'General',            value: 'General',            icon: '📚' },
+  { label: 'Other',              value: 'Other',              icon: '📦' },
 ];
+
+/** Categories that have a dedicated pill; anything else falls under "Other". */
+const KNOWN_CATEGORIES = new Set(
+  CATEGORIES.filter((c) => c.value !== 'All' && c.value !== 'Other').map((c) => c.value),
+);
 
 @Component({
   selector: 'app-courses',
@@ -62,6 +68,14 @@ export class Courses {
   protected readonly activeCategory = signal('All');
   protected readonly categories = CATEGORIES;
 
+  // ✅ Sidebar category dropdown open/close state
+  protected readonly categoryDropdownOpen = signal(false);
+
+  /** Active category-র icon/label (dropdown toggle-এ দেখানোর জন্য)। */
+  protected readonly activeCategoryMeta = computed(() =>
+    CATEGORIES.find(c => c.value === this.activeCategory()) ?? CATEGORIES[0]
+  );
+
   protected readonly hasCourses = computed(() => this.courses().length > 0);
 
   // ✅ category + search দুটো মিলিয়ে filter
@@ -70,7 +84,11 @@ export class Courses {
     const cat  = this.activeCategory();
 
     return this.courses().filter((course) => {
-      const matchesCat  = cat === 'All' || course.category === cat;
+      const matchesCat  = cat === 'All'
+        ? true
+        : cat === 'Other'
+          ? !KNOWN_CATEGORIES.has(course.category)   // anything without a dedicated pill
+          : course.category === cat;
       const matchesTerm = !term || [
         course.title, course.description,
         course.category, course.instructorName, course.level,
@@ -88,19 +106,38 @@ export class Courses {
     return currentUser?.role === 1;
   });
 
-  // ✅ Sidebar এ শুধু course আছে এমন category দেখাবে
+  // ✅ Sidebar এ admin-এর পুরো course category সেট দেখাবে (course না থাকলেও) — শুধু 'Other' দেখাবে যদি কোনো
+  //    non-standard category-র course থাকে।
   protected readonly availableCategories = computed(() => {
-    const existing = new Set(this.courses().map(c => c.category));
-    return CATEGORIES.filter(c => c.value === 'All' || existing.has(c.value));
+    const hasOther = this.courses().some(c => !KNOWN_CATEGORIES.has(c.category));
+    return CATEGORIES.filter(c => c.value !== 'Other' || hasOther);
   });
+
+  /** Course count per category pill (handles All / Other / specific). */
+  protected categoryCount(value: string): number {
+    const list = this.courses();
+    if (value === 'All') return list.length;
+    if (value === 'Other') return list.filter(c => !KNOWN_CATEGORIES.has(c.category)).length;
+    return list.filter(c => c.category === value).length;
+  }
 
   constructor() {
     void this.loadAllCourses();
   }
 
-  // ✅ Category select করো
+  // ✅ Category select করো (select করলে dropdown বন্ধ হয়ে যাবে)
   protected setCategory(value: string): void {
     this.activeCategory.set(value);
+    this.categoryDropdownOpen.set(false);
+  }
+
+  // ✅ Category dropdown খোলা/বন্ধ
+  protected toggleCategoryDropdown(): void {
+    this.categoryDropdownOpen.update(open => !open);
+  }
+
+  protected closeCategoryDropdown(): void {
+    this.categoryDropdownOpen.set(false);
   }
 
   protected updateSearchTerm(term: string): void {

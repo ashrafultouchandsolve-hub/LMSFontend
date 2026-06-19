@@ -96,9 +96,11 @@
                 <strong>{{ course.title }}</strong>
                 <span>{{ course.instructorName }} · {{ course.category }}</span>
               </div>
-              <span class="mc-live-count">
-                {{ totalLive(course) }} live
-              </span>
+              @if (course.isFollowed) {
+                <span class="mc-free-tag">🔔 Following · Free</span>
+              } @else {
+                <span class="mc-live-count">{{ totalLive(course) }} live</span>
+              }
             </div>
 
             <!-- Live classes of this course -->
@@ -116,7 +118,7 @@
                     </div>
                     <div class="mc-live-row-action">
                       @if (lc.isActive) {
-                        <a [routerLink]="['/live-class', lc.id]" class="mc-join-btn mc-join-btn-sm">
+                        <a [routerLink]="[lc.isFree ? '/free-live' : '/live-class', lc.id]" class="mc-join-btn mc-join-btn-sm">
                           🔴 {{ lang.t().liveJoin }}
                         </a>
                       } @else if (lc.isEnded) {

@@ -11,6 +11,7 @@ import { AuthService } from '../../Service/auth.service';
 import { CourseDto, CourseTeacher, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { LiveClassService } from '../../Service/live-class-service';
 
 type CourseDetailsView = {
   id: string;
@@ -39,6 +40,13 @@ export class CourseDetails {
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly liveClass = inject(LiveClassService);
+
+  // Free live class interest (follow)
+  protected readonly isInterested = signal(false);
+  protected readonly isTogglingInterest = signal(false);
+  /** Free live-class section shows for everyone EXCEPT enrolled students / staff. */
+  protected readonly showFreeSection = computed(() => !this.isEnrolled() && !this.isTeacher() && !this.isAdmin());
 
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
@@ -248,6 +256,7 @@ readonly lang = inject(LanguageService);
       if (this.isLoggedIn()) {
         await this.checkEnrollment(courseId);
         await this.loadUserRating(courseId);
+        await this.loadInterest(courseId);
       }
     } catch {
       this.errorMessage.set('Course details লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।');
@@ -302,6 +311,34 @@ readonly lang = inject(LanguageService);
     } catch (error) {
       console.error('Error loading rating summary:', error);
     }
+  }
+
+  private async loadInterest(courseId: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.liveClass.getInterest(courseId));
+      this.isInterested.set(Boolean(res?.data?.interested ?? res?.Data?.interested ?? false));
+    } catch { /* ignore */ }
+  }
+
+  /** Follow / unfollow this course's free live classes. Logged-out users are sent to login. */
+  protected async toggleInterest(): Promise<void> {
+    if (!this.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    const course = this.course();
+    if (!course) return;
+    this.isTogglingInterest.set(true);
+    try {
+      if (this.isInterested()) {
+        await firstValueFrom(this.liveClass.removeInterest(course.id));
+        this.isInterested.set(false);
+      } else {
+        await firstValueFrom(this.liveClass.setInterest(course.id));
+        this.isInterested.set(true);
+      }
+    } catch { /* ignore */ }
+    finally { this.isTogglingInterest.set(false); }
   }
 
   protected async loadUserRating(courseId: string): Promise<void> {

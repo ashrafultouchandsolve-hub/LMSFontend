@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import Hls from 'hls.js';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { LearningApiService } from '../../Service/learning-api.service';
@@ -17,6 +17,8 @@ import { LanguageService } from '../../Service/language.service';
 })
 export class CourseRecordings implements OnInit, OnDestroy {
   @Input({ required: true }) courseId!: string;
+  /** When true, load the course's FREE live-class recordings instead of the paid ones. */
+  @Input() free = false;
 
   private readonly liveClassService = inject(LiveClassService);
   private readonly learningApi = inject(LearningApiService);
@@ -40,7 +42,10 @@ export class CourseRecordings implements OnInit, OnDestroy {
 
   private async load(): Promise<void> {
     try {
-      const res: any = await firstValueFrom(this.liveClassService.getCourseRecordings(this.courseId));
+      const source$: Observable<any> = this.free
+        ? this.liveClassService.getFreeCourseRecordings(this.courseId)
+        : this.liveClassService.getCourseRecordings(this.courseId);
+      const res: any = await firstValueFrom(source$);
       const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
       this.recordings.set(arr.map((item: any) => ({
         id: item.id ?? item.Id ?? '',

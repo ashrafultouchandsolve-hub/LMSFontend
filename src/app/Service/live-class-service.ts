@@ -13,10 +13,13 @@ export interface LiveClass {
   roomUrl: string;
   recordingPath?: string;
   recordingStatus?: string;
+  isFree?: boolean;   // true → free live class (join via /free-live/:id)
 }
 
 export interface FreeLiveClass {
   id: string;
+  courseId?: string;
+  courseTitle?: string;
   title: string;
   description: string;
   hostName?: string;
@@ -68,7 +71,7 @@ export class LiveClassService {
 
   // ── Free / public live classes ─────────────────────────────────
   /** Teacher: start a free public live class (anyone can join, no login). */
-  startFree(dto: { title: string; description: string }): Observable<any> {
+  startFree(dto: { courseId: string; title: string; description: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/free/start`, dto);
   }
 
@@ -91,5 +94,44 @@ export class LiveClassService {
   /** Teacher: end a free live class. */
   endFree(id: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/free/end/${id}`, {});
+  }
+
+  /** Teacher: upload a free live class recording (with progress events). */
+  uploadFreeRecording(id: string, file: File): Observable<HttpEvent<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/free/recording/${id}`, formData, {
+      reportProgress: true,
+      observe: 'events',
+    });
+  }
+
+  /** A course's free live-class recordings (anonymous — un-enrolled users can watch). */
+  getFreeCourseRecordings(courseId: string): Observable<{ data: FreeLiveClass[] }> {
+    return this.http.get<any>(`${this.baseUrl}/free/course/${courseId}/recordings`);
+  }
+
+  /** A course's currently-active free live classes. */
+  getCourseActiveFree(courseId: string): Observable<{ data: FreeLiveClass[] }> {
+    return this.http.get<any>(`${this.baseUrl}/free/course/${courseId}/active`);
+  }
+
+  /** Teacher: how many free classes already created for a course (for the "3 free" warning). */
+  freeCount(courseId: string): Observable<{ data: number }> {
+    return this.http.get<any>(`${this.baseUrl}/free/count/${courseId}`);
+  }
+
+  // ── Course interest (follow free live classes) ─────────────────
+  setInterest(courseId: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/free/interest/${courseId}`, {});
+  }
+  removeInterest(courseId: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/free/interest/${courseId}`);
+  }
+  getInterest(courseId: string): Observable<{ data: { interested: boolean } }> {
+    return this.http.get<any>(`${this.baseUrl}/free/interest/${courseId}`);
+  }
+  getMyInterests(): Observable<{ data: string[] }> {
+    return this.http.get<any>(`${this.baseUrl}/free/my-interests`);
   }
 }

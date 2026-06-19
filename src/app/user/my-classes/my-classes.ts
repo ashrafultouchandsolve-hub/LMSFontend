@@ -14,11 +14,12 @@ type CourseWithLive = {
   category: string;
   liveClasses: LiveClass[];
   isLoadingLive: boolean;
+  isFollowed?: boolean;   // followed (un-enrolled) course → live-only, no recordings
 };
 
 @Component({
   selector: 'app-my-classes',
-  imports: [RouterLink,Navbar], 
+  imports: [RouterLink, Navbar],
   templateUrl: './my-classes.html',
   styleUrl: './my-classes.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -124,6 +125,35 @@ export class MyClasses {
           }
         })
       );
+
+      // ৪. Followed (interested, non-enrolled) courses → show their FREE live classes too
+      try {
+        const intRes: any = await firstValueFrom(this.liveClassService.getMyInterests());
+        const interestedIds: string[] = (intRes?.data ?? intRes?.Data ?? []) as string[];
+        const enrolledIds = new Set(enrolledCourses.map(c => c.id));
+        const followedCourses = allCourses.filter(c => interestedIds.includes(c.id) && !enrolledIds.has(c.id));
+
+        await Promise.all(followedCourses.map(async (course) => {
+          try {
+            const res: any = await firstValueFrom(this.liveClassService.getCourseActiveFree(course.id));
+            const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+            const liveClasses: LiveClass[] = arr.map((item: any) => ({
+              id: item.id ?? item.Id ?? '',
+              title: item.title ?? item.Title ?? '',
+              description: item.description ?? item.Description ?? '',
+              scheduledAt: item.createdAt ?? item.CreatedAt ?? '',
+              isActive: true,
+              isEnded: false,
+              roomUrl: '',
+              isFree: true,
+            }));
+            this.courses.update(list => [...list, {
+              id: course.id, title: course.title, instructorName: course.instructorName,
+              category: course.category, liveClasses, isLoadingLive: false, isFollowed: true,
+            }]);
+          } catch { /* ignore a course's free-class load failure */ }
+        }));
+      } catch { /* not logged in / no interests */ }
 
     } catch {
       this.errorMessage.set('Classes লোড করা যায়নি।');

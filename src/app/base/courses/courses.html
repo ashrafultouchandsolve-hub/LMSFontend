@@ -3,29 +3,40 @@
 
   <div class="courses-layout">
 
-    <!-- ✅ Category Sidebar -->
+    <!-- ✅ Category Sidebar (dropdown) -->
     <aside class="category-sidebar">
       <h3 class="sidebar-title">📂 Browse by Category</h3>
-      <ul class="category-list">
-        @for (cat of availableCategories(); track cat.value) {
-          <li>
-            <button
-              class="category-btn"
-              [class.active]="activeCategory() === cat.value"
-              (click)="setCategory(cat.value)">
-              <span class="cat-icon">{{ cat.icon }}</span>
-              <span class="cat-label">{{ cat.label }}</span>
-              @if (cat.value === 'All') {
-                <span class="cat-count">{{ courses().length }}</span>
-              } @else {
-                <span class="cat-count">
-                  {{ (courses().filter((c) => c.category === cat.value)).length }}
-                </span>
-              }
-            </button>
-          </li>
+
+      <div class="category-dropdown" [class.open]="categoryDropdownOpen()">
+        <button
+          type="button"
+          class="category-dropdown-toggle"
+          (click)="toggleCategoryDropdown()"
+          [attr.aria-expanded]="categoryDropdownOpen()">
+          <span class="cat-icon">{{ activeCategoryMeta().icon }}</span>
+          <span class="cat-label">{{ activeCategoryMeta().value === 'All' ? 'All Courses' : activeCategoryMeta().label }}</span>
+          <span class="cat-count">{{ categoryCount(activeCategory()) }}</span>
+          <span class="dropdown-arrow" aria-hidden="true">▾</span>
+        </button>
+
+        @if (categoryDropdownOpen()) {
+          <div class="category-backdrop" (click)="closeCategoryDropdown()"></div>
+          <ul class="category-list">
+            @for (cat of availableCategories(); track cat.value) {
+              <li>
+                <button
+                  class="category-btn"
+                  [class.active]="activeCategory() === cat.value"
+                  (click)="setCategory(cat.value)">
+                  <span class="cat-icon">{{ cat.icon }}</span>
+                  <span class="cat-label">{{ cat.label }}</span>
+                  <span class="cat-count">{{ categoryCount(cat.value) }}</span>
+                </button>
+              </li>
+            }
+          </ul>
         }
-      </ul>
+      </div>
     </aside>
 
     <!-- Right side: search + grid -->
@@ -46,6 +57,7 @@
 
         <section class="courses-search" aria-label="Search courses">
           <label class="search-field">
+            <span class="search-icon" aria-hidden="true">🔍</span>
             <input
               type="search"
               class="search-input"

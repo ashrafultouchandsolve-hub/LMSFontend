@@ -6,10 +6,11 @@
 			<div class="save-toast" role="status">✅ {{ lang.t().profileUpdated }}</div>
 		}
 
-		<section class="info-card" aria-label="User profile details">
+		<!-- ── Common header ─────────────────────────────── -->
+		<section class="info-card" [class.info-card--staff]="!isStudent()" aria-label="User profile details">
 			<div class="avatar-wrap">
-				@if (avatarUrl()) {
-					<img class="avatar-img" [src]="avatarUrl()" [alt]="userName()"
+				@if (headerAvatar()) {
+					<img class="avatar-img" [src]="headerAvatar()" [alt]="userName()"
 						(error)="$any($event.target).style.display='none'" />
 				} @else {
 					<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
@@ -18,259 +19,287 @@
 			<div class="user-info">
 				<h2>{{ userName() }}</h2>
 				<p>{{ userEmail() }}</p>
-				<span class="role-badge">{{ lang.t().profileRole }}: {{ userRole() }}</span>
+				<span class="role-badge" [class.role-badge--teacher]="isTeacher()" [class.role-badge--admin]="isAdmin()">{{ userRole() }}</span>
 			</div>
-			@if (!isTeacher()) {
-				<button type="button" class="edit-profile-btn" (click)="openEdit()">
-					✎ {{ lang.t().profileEdit }}
-				</button>
+			@if (isStudent()) {
+				<button type="button" class="edit-profile-btn" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+			} @else if (isTeacher()) {
+				<button type="button" class="edit-profile-btn" (click)="openTeacherEdit()">✎ {{ lang.t().profileEdit }}</button>
 			}
 		</section>
 
-		<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
-			<div class="panel-header">
-				<div>
-					<p class="panel-label">{{ lang.t().profileDashboard }}</p>
-					<h2>Performance</h2>
+		<!-- ══════════════ STUDENT ══════════════ -->
+		@if (isStudent()) {
+			<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
+				<div class="panel-header">
+					<div>
+						<p class="panel-label">{{ lang.t().profileDashboard }}</p>
+						<h2>Performance</h2>
+					</div>
+					<span class="live-badge">
+						<span class="live-dot" aria-hidden="true"></span>
+						{{ lang.t().profileLive }}
+					</span>
 				</div>
-				<span class="live-badge">
-					<span class="live-dot" aria-hidden="true"></span>
-					{{ lang.t().profileLive }}
-				</span>
-			</div>
-			<div class="ring-wrap">
-				<div class="progress-ring" [attr.role]="'img'" [attr.aria-label]="percentageScore() + '% quiz completion'">
-					<svg class="ring-svg" viewBox="0 0 120 120">
-						<circle cx="60" cy="60" r="50" class="ring-track" />
-						<circle cx="60" cy="60" r="50" class="ring-fill" [style.--percentage]="percentageScore() + '%'" />
-					</svg>
-					<div class="ring-core">
-						<strong>{{ percentageScore() | number: '1.0-0' }}%</strong>
-						<span>{{ lang.t().profileCompletion }}</span>
+				<div class="ring-wrap">
+					<div class="progress-ring" [attr.role]="'img'" [attr.aria-label]="percentageScore() + '% quiz completion'">
+						<svg class="ring-svg" viewBox="0 0 120 120">
+							<circle cx="60" cy="60" r="50" class="ring-track" />
+							<circle cx="60" cy="60" r="50" class="ring-fill" [style.--percentage]="percentageScore() + '%'" />
+						</svg>
+						<div class="ring-core">
+							<strong>{{ percentageScore() | number: '1.0-0' }}%</strong>
+							<span>{{ lang.t().profileCompletion }}</span>
+						</div>
+					</div>
+					<div class="ring-legend">
+						<div class="legend-item">
+							<span class="legend-dot legend-done" aria-hidden="true"></span>
+							<span>Correct ({{ correctAnswers() }})</span>
+						</div>
+						<div class="legend-item">
+							<span class="legend-dot legend-remain" aria-hidden="true"></span>
+							<span>Wrong ({{ wrongAnswers() }})</span>
+						</div>
 					</div>
 				</div>
-				<div class="ring-legend">
-					<div class="legend-item">
-						<span class="legend-dot legend-done" aria-hidden="true"></span>
-						<span>Correct ({{ correctAnswers() }})</span>
-					</div>
-					<div class="legend-item">
-						<span class="legend-dot legend-remain" aria-hidden="true"></span>
-						<span>Wrong ({{ wrongAnswers() }})</span>
-					</div>
-				</div>
-			</div>
-			<div class="dashboard-list">
-				<div class="dashboard-row">
-					<span class="row-icon" aria-hidden="true">✅</span>
-					<span>Correct Answers</span>
-					<strong class="row-value row-ok">{{ correctAnswers() }}</strong>
-				</div>
-				<div class="dashboard-row">
-					<span class="row-icon" aria-hidden="true">❌</span>
-					<span>Wrong Answers</span>
-					<strong class="row-value row-err">{{ wrongAnswers() }}</strong>
-				</div>
-				<div class="dashboard-row">
-					<span class="row-icon" aria-hidden="true">📊</span>
-					<span>MCQ Score</span>
-					<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
-				</div>
-				@if (hasExamPerf()) {
+				<div class="dashboard-list">
 					<div class="dashboard-row">
-						<span class="row-icon" aria-hidden="true">📝</span>
-						<span>Exam Score ({{ examPerf()?.obtained }}/{{ examPerf()?.max }})</span>
-						<strong class="row-value row-ok">{{ examPercentage() | number: '1.0-0' }}%</strong>
+						<span class="row-icon" aria-hidden="true">✅</span>
+						<span>Correct Answers</span>
+						<strong class="row-value row-ok">{{ correctAnswers() }}</strong>
+					</div>
+					<div class="dashboard-row">
+						<span class="row-icon" aria-hidden="true">❌</span>
+						<span>Wrong Answers</span>
+						<strong class="row-value row-err">{{ wrongAnswers() }}</strong>
+					</div>
+					<div class="dashboard-row">
+						<span class="row-icon" aria-hidden="true">📊</span>
+						<span>MCQ Score</span>
+						<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
+					</div>
+					@if (hasExamPerf()) {
+						<div class="dashboard-row">
+							<span class="row-icon" aria-hidden="true">📝</span>
+							<span>Exam Score ({{ examPerf()?.obtained }}/{{ examPerf()?.max }})</span>
+							<strong class="row-value row-ok">{{ examPercentage() | number: '1.0-0' }}%</strong>
+						</div>
+					}
+				</div>
+			</aside>
+
+			<section class="future-card" aria-label="Future learning features">
+				<h3>{{ lang.t().profileActivity }}</h3>
+				<p>{{ lang.t().profileActivityDesc }}</p>
+				<div class="action-grid">
+					<button type="button" routerLink="/myClasses" class="future-btn">{{ lang.t().profileMyClasses }}</button>
+					<button type="button" routerLink="/my-courses" class="future-btn future-btn--notif">
+						{{ lang.t().profileMyCourses }}
+						@if (lessonNotifCount() > 0) { <span class="future-btn-badge">{{ lessonNotifCount() }}</span> }
+					</button>
+					<button type="button" routerLink="/assignments" class="future-btn future-btn--notif">
+						{{ lang.t().profileAssignments }}
+						@if (quizNotifCount() > 0) { <span class="future-btn-badge">{{ quizNotifCount() }}</span> }
+					</button>
+					<button type="button" routerLink="/certificates" class="future-btn future-btn--notif">
+						{{ lang.t().profileCertificates }}
+						@if (certNotifCount() > 0) { <span class="future-btn-badge">{{ certNotifCount() }}</span> }
+					</button>
+				</div>
+			</section>
+
+			<div class="profile-tabs">
+				<button type="button" class="profile-tab" [class.active]="activeTab() === 'profile'" (click)="switchTab('profile')">👤 Profile</button>
+				<button type="button" class="profile-tab" [class.active]="activeTab() === 'wishlist'" (click)="switchTab('wishlist')">
+					♥ Wishlist
+					@if (wishlist().length > 0) { <span class="tab-badge">{{ wishlist().length }}</span> }
+				</button>
+			</div>
+
+			@if (activeTab() === 'profile') {
+				<section class="details-card" aria-label="Profile details">
+					<div class="details-head">
+						<h3>{{ lang.t().profileDetails }}</h3>
+						<button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+					</div>
+
+					@if (profile()?.bio) {
+						<div class="about-block">
+							<span class="about-label">{{ lang.t().profileAboutSection }}</span>
+							<p class="about-text">{{ profile()?.bio }}</p>
+						</div>
+					}
+
+					<div class="details-grid">
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileFullName }}</span>
+							<span class="detail-value">{{ profile()?.fullName || userName() }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
+							<span class="detail-value">{{ profile()?.email || userEmail() }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profilePhone }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileDob }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileGender }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileClass }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileInstitution }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item detail-item--wide">
+							<span class="detail-label">{{ lang.t().profileAddress }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileGuardianName }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
+							<span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
+						</div>
+						@if (profile()?.facebookLink) {
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileFacebook }}</span>
+								<a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
+							</div>
+						}
+						@if (profile()?.linkedInLink) {
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
+								<a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
+							</div>
+						}
+					</div>
+
+					@if (!hasDetails()) {
+						<div class="details-empty">
+							<p>{{ lang.t().profileAddInfo }}</p>
+							<button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
+						</div>
+					}
+				</section>
+			}
+
+			@if (activeTab() === 'wishlist') {
+				<section class="wishlist-section">
+					@if (isLoadingWishlist()) {
+						<div class="wishlist-loading">Loading...</div>
+					} @else if (wishlist().length === 0) {
+						<div class="wishlist-empty">
+							<div class="wishlist-empty-icon">💔</div>
+							<h3>Wishlist খালি</h3>
+							<p>কোনো course wishlist এ নেই।</p>
+							<a routerLink="/courses" class="browse-btn">Browse Courses</a>
+						</div>
+					} @else {
+						<div class="wishlist-grid">
+							@for (item of wishlist(); track item.courseId) {
+								<div class="wishlist-card">
+									<div class="wishlist-thumb">
+										<img [src]="getImageUrl(item.thumbnailPath)" [alt]="item.title" (error)="$any($event.target).style.display='none'" />
+									</div>
+									<div class="wishlist-card-body">
+										<span class="wishlist-level">{{ item.level }}</span>
+										<h3>{{ item.title }}</h3>
+										<p>{{ item.instructorName }}</p>
+										<div class="wishlist-card-footer">
+											<strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
+											<div class="wishlist-actions">
+												<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View Course</a>
+												@if (item.isEnrolled) {
+													<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled</a>
+												} @else {
+													<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enrolled-btn wishlist-enroll-btn">Enroll Now</a>
+												}
+											</div>
+										</div>
+									</div>
+								</div>
+							}
+						</div>
+					}
+				</section>
+			}
+		}
+
+		<!-- ══════════════ TEACHER ══════════════ -->
+		@if (isTeacher()) {
+			<section class="role-panel reveal-up" aria-label="Instructor area">
+				<div class="role-head">
+					<div>
+						<p class="panel-label">{{ lang.t().profileRole }}</p>
+						<h2>{{ lang.t().profileInstructorArea }}</h2>
+					</div>
+					<div class="role-stat-badge">
+						<strong>{{ teacherCourseCount() }}</strong>
+						<span>{{ lang.t().profileCourses }}</span>
+					</div>
+				</div>
+
+				<div class="about-block">
+					<span class="about-label">{{ lang.t().profileAboutSection }}</span>
+					@if (teacherProfile()?.bio) {
+						<p class="about-text">{{ teacherProfile()?.bio }}</p>
+					} @else {
+						<p class="about-text muted">{{ lang.t().profileTeacherNoBio }}</p>
+					}
+				</div>
+
+				@if (teacherProfile()?.facebookLink || teacherProfile()?.youtubeLink) {
+					<div class="role-social">
+						@if (teacherProfile()?.facebookLink) {
+							<a class="role-social-link role-social-link--fb" [href]="teacherProfile()?.facebookLink" target="_blank" rel="noopener">f &nbsp;{{ lang.t().profileFacebook }}</a>
+						}
+						@if (teacherProfile()?.youtubeLink) {
+							<a class="role-social-link role-social-link--yt" [href]="teacherProfile()?.youtubeLink" target="_blank" rel="noopener">▶ &nbsp;{{ lang.t().profileYoutube }}</a>
+						}
 					</div>
 				}
-			</div>
-		</aside>
 
-		<section class="future-card" aria-label="Future learning features">
-  <h3>{{ lang.t().profileActivity }}</h3>
-  <p>{{ lang.t().profileActivityDesc }}</p>
-  <div class="action-grid">
+				<div class="role-links">
+					<a routerLink="/course-manager" class="role-link role-link--primary"><span class="role-link-ic">📚</span>{{ lang.t().profileManageCourses }}</a>
+					<a routerLink="/courses" class="role-link"><span class="role-link-ic">🎓</span>{{ lang.t().profileBrowseCourses }}</a>
+					<a routerLink="/homepage" class="role-link"><span class="role-link-ic">🏠</span>{{ lang.t().profileHome }}</a>
+				</div>
+			</section>
+		}
 
-    <button type="button" routerLink="/myClasses" class="future-btn">
-      {{ lang.t().profileMyClasses }}
-    </button>
-
-    <!-- ✅ My Courses — lesson notification দেখাবে -->
-    <button type="button" routerLink="/my-courses" class="future-btn future-btn--notif">
-      {{ lang.t().profileMyCourses }}
-      @if (lessonNotifCount() > 0) {
-        <span class="future-btn-badge">{{ lessonNotifCount() }}</span>
-      }
-    </button>
-
-    <!-- ✅ Assignments — quiz notification দেখাবে -->
-    <button type="button" routerLink="/assignments" class="future-btn future-btn--notif">
-      {{ lang.t().profileAssignments }}
-      @if (quizNotifCount() > 0) {
-        <span class="future-btn-badge">{{ quizNotifCount() }}</span>
-      }
-    </button>
-
-    <!-- ✅ Certificates — certificate notification দেখাবে -->
-    <button type="button" routerLink="/certificates" class="future-btn future-btn--notif">
-      {{ lang.t().profileCertificates }}
-      @if (certNotifCount() > 0) {
-        <span class="future-btn-badge">{{ certNotifCount() }}</span>
-      }
-    </button>
-
-  </div>
-</section>
-
-		<!-- Tab buttons -->
-<div class="profile-tabs">
-  <button type="button"
-    class="profile-tab"
-    [class.active]="activeTab() === 'profile'"
-    (click)="switchTab('profile')">
-    👤 Profile
-  </button>
-  <button type="button"
-    class="profile-tab"
-    [class.active]="activeTab() === 'wishlist'"
-    (click)="switchTab('wishlist')">
-    ♥ Wishlist
-    @if (wishlist().length > 0) {
-      <span class="tab-badge">{{ wishlist().length }}</span>
-    }
-  </button>
-</div>
-
-<!-- Profile content -->
-@if (activeTab() === 'profile') {
-  @if (!isTeacher()) {
-    <section class="details-card" aria-label="Profile details">
-      <div class="details-head">
-        <h3>{{ lang.t().profileDetails }}</h3>
-        <button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
-      </div>
-
-      @if (profile()?.bio) {
-        <div class="about-block">
-          <span class="about-label">{{ lang.t().profileAboutSection }}</span>
-          <p class="about-text">{{ profile()?.bio }}</p>
-        </div>
-      }
-
-      <div class="details-grid">
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileFullName }}</span>
-          <span class="detail-value">{{ profile()?.fullName || userName() }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
-          <span class="detail-value">{{ profile()?.email || userEmail() }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profilePhone }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileDob }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileGender }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileClass }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileInstitution }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item detail-item--wide">
-          <span class="detail-label">{{ lang.t().profileAddress }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileGuardianName }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
-          <span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
-        </div>
-        @if (profile()?.facebookLink) {
-          <div class="detail-item">
-            <span class="detail-label">{{ lang.t().profileFacebook }}</span>
-            <a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
-          </div>
-        }
-        @if (profile()?.linkedInLink) {
-          <div class="detail-item">
-            <span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
-            <a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
-          </div>
-        }
-      </div>
-
-      @if (!hasDetails()) {
-        <div class="details-empty">
-          <p>{{ lang.t().profileAddInfo }}</p>
-          <button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
-        </div>
-      }
-    </section>
-  }
-}
-
-<!-- Wishlist content -->
-@if (activeTab() === 'wishlist') {
-  <section class="wishlist-section">
-
-    @if (isLoadingWishlist()) {
-      <div class="wishlist-loading">Loading...</div>
-    } @else if (wishlist().length === 0) {
-      <div class="wishlist-empty">
-        <div class="wishlist-empty-icon">💔</div>
-        <h3>Wishlist খালি</h3>
-        <p>কোনো course wishlist এ নেই।</p>
-        <a routerLink="/courses" class="browse-btn">Browse Courses</a>
-      </div>
-    } @else {
-      <div class="wishlist-grid">
-        @for (item of wishlist(); track item.courseId) {
-          <div class="wishlist-card">
-            <div class="wishlist-thumb">
-              <img [src]="getImageUrl(item.thumbnailPath)"
-                [alt]="item.title"
-                (error)="$any($event.target).style.display='none'" />
-            </div>
-            <div class="wishlist-card-body">
-              <span class="wishlist-level">{{ item.level }}</span>
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.instructorName }}</p>
-              <div class="wishlist-card-footer">
-                <strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
-							<div class="wishlist-actions">
-								<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View Course</a>
-								@if (item.isEnrolled) {
-									<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled</a>
-								} @else {
-									<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enrolled-btn wishlist-enroll-btn">Enroll Now</a>
-								}
-							</div>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-    }
-
-  </section>
-}
+		<!-- ══════════════ ADMIN ══════════════ -->
+		@if (isAdmin()) {
+			<section class="role-panel reveal-up" aria-label="Admin area">
+				<div class="role-head">
+					<div>
+						<p class="panel-label">{{ lang.t().profileRole }}</p>
+						<h2>{{ lang.t().profileAdminArea }}</h2>
+					</div>
+				</div>
+				<div class="admin-hub-grid">
+					<a routerLink="/admin" class="hub-link hub-link--primary"><span class="hub-ic">📊</span><span>{{ lang.t().profileAdminPanel }}</span></a>
+					<a routerLink="/course-manager" class="hub-link"><span class="hub-ic">📚</span><span>{{ lang.t().profileCourseManager }}</span></a>
+					<a routerLink="/courses" class="hub-link"><span class="hub-ic">🎓</span><span>{{ lang.t().profileBrowseCourses }}</span></a>
+					<a routerLink="/instructors" class="hub-link"><span class="hub-ic">👨‍🏫</span><span>{{ lang.t().profileInstructors }}</span></a>
+				</div>
+			</section>
+		}
 	</section>
 
-	<!-- ── Edit Profile Modal ───────────────────────────── -->
-	@if (isEditing()) {
+	<!-- ── Student edit modal ───────────────────────────── -->
+	@if (isEditing() && isStudent()) {
 		<div class="edit-overlay" (click)="closeEdit()">
 			<div class="edit-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
 				<div class="edit-modal-head">
@@ -279,11 +308,8 @@
 				</div>
 
 				<div class="edit-modal-body">
-					@if (saveError()) {
-						<div class="edit-error" role="alert">{{ saveError() }}</div>
-					}
+					@if (saveError()) { <div class="edit-error" role="alert">{{ saveError() }}</div> }
 
-					<!-- Photo -->
 					<div class="edit-photo-row">
 						<div class="edit-photo-preview">
 							@if (imagePreview()) {
@@ -303,7 +329,6 @@
 						</div>
 					</div>
 
-					<!-- Basic info -->
 					<p class="edit-section-title">{{ lang.t().profileBasicInfo }}</p>
 					<div class="edit-grid">
 						<label class="edit-field">
@@ -346,7 +371,6 @@
 						</label>
 					</div>
 
-					<!-- Optional info -->
 					<p class="edit-section-title">{{ lang.t().profileOptionalInfo }}
 						<span class="edit-section-hint">{{ lang.t().profileOptionalHint }}</span>
 					</p>
@@ -377,6 +401,63 @@
 				<div class="edit-modal-foot">
 					<button type="button" class="edit-cancel" (click)="closeEdit()" [disabled]="isSaving()">{{ lang.t().profileCancel }}</button>
 					<button type="button" class="edit-save" (click)="saveProfile()" [disabled]="isSaving()">
+						{{ isSaving() ? lang.t().profileSaving : lang.t().profileSave }}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+
+	<!-- ── Teacher edit modal ───────────────────────────── -->
+	@if (isEditing() && isTeacher()) {
+		<div class="edit-overlay" (click)="closeEdit()">
+			<div class="edit-modal edit-modal--sm" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="edit-modal-head">
+					<h3>{{ lang.t().profileEdit }}</h3>
+					<button type="button" class="edit-close" (click)="closeEdit()" aria-label="Close">✕</button>
+				</div>
+
+				<div class="edit-modal-body">
+					@if (saveError()) { <div class="edit-error" role="alert">{{ saveError() }}</div> }
+
+					<div class="edit-photo-row">
+						<div class="edit-photo-preview">
+							@if (imagePreview()) {
+								<img [src]="imagePreview()" alt="Preview" />
+							} @else if (headerAvatar()) {
+								<img [src]="headerAvatar()" alt="Current" (error)="$any($event.target).style.display='none'" />
+							} @else {
+								<span class="edit-photo-initial">{{ userName().charAt(0).toUpperCase() || 'T' }}</span>
+							}
+						</div>
+						<div class="edit-photo-actions">
+							<label class="edit-photo-btn">
+								{{ lang.t().profileChangePhoto }}
+								<input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+							</label>
+							<span class="edit-photo-hint">{{ lang.t().profilePhotoHint }}</span>
+						</div>
+					</div>
+
+					<div class="edit-grid">
+						<label class="edit-field edit-field--wide">
+							<span>{{ lang.t().profileBio }}</span>
+							<textarea rows="3" [placeholder]="lang.t().profileBioPlaceholder" [(ngModel)]="teacherForm.bio"></textarea>
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileFacebook }}</span>
+							<input type="url" placeholder="https://facebook.com/…" [(ngModel)]="teacherForm.facebookLink" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileYoutube }}</span>
+							<input type="url" placeholder="https://youtube.com/…" [(ngModel)]="teacherForm.youtubeLink" />
+						</label>
+					</div>
+				</div>
+
+				<div class="edit-modal-foot">
+					<button type="button" class="edit-cancel" (click)="closeEdit()" [disabled]="isSaving()">{{ lang.t().profileCancel }}</button>
+					<button type="button" class="edit-save" (click)="saveTeacherProfile()" [disabled]="isSaving()">
 						{{ isSaving() ? lang.t().profileSaving : lang.t().profileSave }}
 					</button>
 				</div>

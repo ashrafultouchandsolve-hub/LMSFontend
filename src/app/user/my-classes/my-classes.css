@@ -260,6 +260,16 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+.mc-free-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
 /* Live rows inside course card */
 .mc-live-loading,

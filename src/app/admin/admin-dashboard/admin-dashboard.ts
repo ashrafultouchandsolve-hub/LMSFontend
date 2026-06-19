@@ -125,16 +125,54 @@ annSubmitting  = signal(false);
   filteredCourses = computed(() => {
     const query = this.courseSearch().toLowerCase().trim();
     if (!query) return this.courses();
-    
+
     return this.courses().filter(course =>
       course.title.toLowerCase().includes(query) ||
       course.teacherName.toLowerCase().includes(query)
     );
   });
 
+  // Which category dropdowns are expanded in the Courses tab
+  expandedCats = signal<string[]>([]);
+  toggleCat(category: string): void {
+    this.expandedCats.update((a) => a.includes(category) ? a.filter((x) => x !== category) : [...a, category]);
+  }
+  /** A group is open if explicitly expanded, or while searching (auto-expand matches). */
+  isCatOpen(category: string): boolean {
+    return this.expandedCats().includes(category) || !!this.courseSearch().trim();
+  }
+
+  /** Courses grouped by category (sorted), so the admin list is organized, not one flat serial list. */
+  coursesByCategory = computed(() => {
+    const groups = new Map<string, AdminCourse[]>();
+    for (const c of this.filteredCourses()) {
+      const key = (c.category && c.category.trim()) || 'Uncategorized';
+      (groups.get(key) ?? groups.set(key, []).get(key)!).push(c);
+    }
+    return [...groups.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([category, courses]) => ({ category, courses }));
+  });
+
   // Comment edit state
   editingCommentId = signal<string | null>(null);
   editingContent   = signal('');
+
+  /** Fixed categories (match home/navbar/courses). Admin clicks a card → adds courses inside that category. */
+  readonly fixedCategories = [
+    { name: 'SSC 2027', icon: '📘' },
+    { name: 'SSC 2026', icon: '📘' },
+    { name: 'HSC 2027', icon: '📗' },
+    { name: 'HSC 2026', icon: '📗' },
+    { name: 'Admission English', icon: '🎯' },
+    { name: 'Admission Science', icon: '🔬' },
+    { name: 'Skills Development', icon: '⚡' },
+    { name: 'Communication', icon: '💬' },
+    { name: 'General', icon: '📚' },
+  ];
+  categoryCourseCount(name: string): number {
+    return this.courses().filter(c => c.category === name).length;
+  }
 
   ngOnInit() {
     const savedTab = this.getStoredTab();
@@ -156,7 +194,7 @@ annSubmitting  = signal(false);
       case 'teachers': this.loadTeachers(); break;
       case 'students': this.loadStudents(); break;
       case 'courses': this.loadCourses(); break;
-      case 'categories': this.loadCategories(); break;
+      case 'categories': this.loadCourses(); break;   // courses power the per-category counts on the fixed cards
       case 'comments': this.loadComments(); break;
       case 'store-items': break;
       case 'announcements': this.loadAnnouncements(); break;

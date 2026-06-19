@@ -32,6 +32,7 @@
             <div class="fl-card-top">
               <span class="fl-live-tag"><span class="fl-live-dot"></span> {{ lang.t().flLiveNow }}</span>
             </div>
+            @if (c.courseTitle) { <span class="fl-card-course">🗂️ {{ c.courseTitle }}</span> }
             <h3 class="fl-card-title">{{ c.title }}</h3>
             @if (c.description) {
               <p class="fl-card-desc">{{ c.description }}</p>

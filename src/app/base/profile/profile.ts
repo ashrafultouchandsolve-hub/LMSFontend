@@ -66,8 +66,13 @@ export class Profile implements OnInit {
   protected readonly userEmail = computed(() => this.user()?.email || 'No email found');
   protected readonly isLoggedIn = computed(() => !!this.user());
   protected readonly isTeacher = computed(() => this.user()?.role === 1);
+  protected readonly isAdmin = computed(() => this.user()?.role === 2);
+  protected readonly isStudent = computed(() => (this.user()?.role ?? 0) === 0);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
-  protected readonly userRole = computed(() => this.user()?.role === 1 ? 'Instructor' : 'Student');
+  protected readonly userRole = computed(() => {
+    const r = this.user()?.role;
+    return r === 2 ? 'Admin' : r === 1 ? 'Instructor' : 'Student';
+  });
 
   // ── Student profile / edit ───────────────────────────────
   protected readonly profile = signal<StudentProfileDto | null>(null);
@@ -83,6 +88,17 @@ export class Profile implements OnInit {
   /** Resolved avatar image (uploaded photo or selected preview). */
   protected readonly avatarUrl = computed(() => {
     const path = this.profile()?.profileImagePath;
+    return path ? this.learningApi.buildDownloadUrl(path) : '';
+  });
+
+  // ── Teacher profile ──────────────────────────────────────
+  protected readonly teacherProfile = signal<any | null>(null);
+  protected teacherForm = { bio: '', facebookLink: '', youtubeLink: '' };
+  protected readonly teacherCourseCount = computed(() => this.teacherProfile()?.courseCount ?? this.teacherProfile()?.CourseCount ?? 0);
+
+  /** Header avatar — student photo, teacher photo, or '' (initial fallback). */
+  protected readonly headerAvatar = computed(() => {
+    const path = this.isTeacher() ? this.teacherProfile()?.profileImagePath : this.profile()?.profileImagePath;
     return path ? this.learningApi.buildDownloadUrl(path) : '';
   });
 
@@ -114,23 +130,74 @@ export class Profile implements OnInit {
 readonly quizNotifCount   = signal(0);
 readonly certNotifCount   = signal(0);
 
+  private loadedRole = false;
+
   constructor() {
     this.authService.currentUser$.pipe(takeUntilDestroyed()).subscribe((currentUser: ProfileUser | null) => {
       this.user.set(currentUser);
-      if (currentUser?.id) {
-        void this.loadWishlist();
-      }
+      this.loadForRole();
     });
     const currentUser = this.authService.getCurrentUser() as ProfileUser | null;
-    if (currentUser) {
-      this.user.set(currentUser);
+    if (currentUser) this.user.set(currentUser);
+    this.loadForRole();
+  }
+
+  /** Load only the data relevant to the logged-in role (students get progress/wishlist; teachers get their instructor profile; admins need nothing). */
+  private loadForRole(): void {
+    if (!this.user()?.id || this.loadedRole) return;
+    this.loadedRole = true;
+    if (this.isStudent()) {
       void this.loadWishlist();
+      void this.loadQuizProgress();
+      void this.loadExamPerformance();
+      void this.loadProfile();
+    } else if (this.isTeacher()) {
+      void this.loadTeacherProfile();
     }
-    
-    // Load quiz progress - get first lesson ID
-    void this.loadQuizProgress();
-    void this.loadExamPerformance();
-    void this.loadProfile();
+  }
+
+  private async loadTeacherProfile(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.learningApi.getMyInstructorProfile());
+      const d = res?.data ?? res?.Data ?? null;
+      if (d) this.teacherProfile.set(d);
+    } catch { /* ignore */ }
+  }
+
+  protected openTeacherEdit(): void {
+    const t = this.teacherProfile();
+    this.teacherForm = {
+      bio: t?.bio ?? '',
+      facebookLink: t?.facebookLink ?? '',
+      youtubeLink: t?.youtubeLink ?? '',
+    };
+    this.selectedImageFile = null;
+    this.imagePreview.set(null);
+    this.saveError.set(null);
+    this.saveSuccess.set(false);
+    this.isEditing.set(true);
+  }
+
+  protected async saveTeacherProfile(): Promise<void> {
+    this.isSaving.set(true);
+    this.saveError.set(null);
+    try {
+      await firstValueFrom(this.learningApi.updateInstructorProfile({
+        bio: this.teacherForm.bio || undefined,
+        facebookLink: this.teacherForm.facebookLink || undefined,
+        youtubeLink: this.teacherForm.youtubeLink || undefined,
+      }));
+      if (this.selectedImageFile) {
+        await firstValueFrom(this.learningApi.uploadInstructorProfileImage(this.selectedImageFile));
+      }
+      await this.loadTeacherProfile();
+      this.saveSuccess.set(true);
+      this.isEditing.set(false);
+    } catch (err: any) {
+      this.saveError.set(err?.error?.Message ?? err?.error?.message ?? 'Could not save profile. Please try again.');
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   private emptyForm(): EditForm {

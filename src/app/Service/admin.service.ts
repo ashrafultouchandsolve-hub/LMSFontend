@@ -30,6 +30,7 @@ export interface AdminStudent {
 export interface AdminCourse {
   id: string;
   title: string;
+  category: string;
   price: number;
   teacherName: string;
   enrollmentCount: number;

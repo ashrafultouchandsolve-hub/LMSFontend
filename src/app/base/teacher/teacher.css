@@ -645,12 +645,17 @@ label span {
 }
 
 label.full,
+.appoint-field.full,
 .modal-actions.full,
 .preview-wrap.full,
 .checkbox.full,
 .upload-field.full {
   grid-column: 1 / -1;
 }
+
+/* appoint-field is a <div> (not <label>) so option buttons inside don't trigger label click-forwarding */
+.appoint-field { display: grid; gap: 5px; }
+.appoint-field > span { color: rgba(23, 27, 47, 0.66); font-size: 0.86rem; font-weight: 700; }
 
 .upload-field input[type='file'] {
   min-height: auto;
@@ -798,10 +803,33 @@ label.full,
 }
 .flp-start h3 { margin: 0 0 12px; font-size: 1.02rem; color: #2a2f50; }
 .flp-form {
-  display: grid;
-  grid-template-columns: 1.4fr 1.6fr auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: stretch;
+}
+.flp-form input { flex: 1 1 180px; min-width: 150px; }
+.flp-form select {
+  flex: 1 1 200px;
+  min-width: 160px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(84, 98, 154, 0.28);
+  background: #fff;
+  font-size: 0.92rem;
+  outline: none;
+  color: #1c2142;
+}
+.flp-form select:focus { border-color: #5f6ecc; box-shadow: 0 0 0 3px rgba(95, 110, 204, 0.15); }
+.flp-course-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.1);
+  padding: 2px 9px;
+  border-radius: 999px;
+  margin-bottom: 6px;
 }
 .flp-form input {
   padding: 10px 13px;

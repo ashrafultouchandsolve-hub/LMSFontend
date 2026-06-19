@@ -137,7 +137,17 @@
 					<a routerLink="/login" class="enroll-button enroll-link">{{ lang.t().cdLoginToEnroll }}</a>
 				}
 
-				<p class="free-live-note">{{ lang.t().cdFreeLiveNote }}</p>
+				@if (showFreeSection()) {
+					<section class="cd-free-live">
+						<h3>🔴 {{ lang.t().cdFreeLiveTitle }}</h3>
+						<p class="cd-free-live-lead">{{ lang.t().cdFreeLiveLead }}</p>
+						<button type="button" class="cd-follow-btn" [class.following]="isInterested()" [disabled]="isTogglingInterest()" (click)="toggleInterest()">
+							@if (!isLoggedIn()) { 🔔 {{ lang.t().cdFollowLogin }} }
+							@else if (isInterested()) { ✓ {{ lang.t().cdFollowing }} }
+							@else { 🔔 {{ lang.t().cdFollow }} }
+						</button>
+					</section>
+				}
 
 				<!-- Wishlist -->
 				<button

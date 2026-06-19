@@ -48,6 +48,12 @@
         <div class="flp-start">
           <h3>{{ lang.t().tcLiveStartHeading }}</h3>
           <div class="flp-form">
+            <select [(ngModel)]="freeLiveCourseId" class="flp-course-select">
+              <option value="" disabled>{{ lang.t().tcLivePickCourse }}</option>
+              @for (c of courses(); track c.id) {
+                <option [value]="c.id">{{ c.title }}</option>
+              }
+            </select>
             <input type="text" [(ngModel)]="freeLiveTitle" [placeholder]="lang.t().tcLiveTitlePlaceholder" maxlength="80" />
             <input type="text" [(ngModel)]="freeLiveDesc" [placeholder]="lang.t().tcLiveDescPlaceholder" maxlength="160" />
             <button type="button" class="btn btn-primary flp-golive" (click)="startFreeLive()" [disabled]="isStartingFree()">
@@ -74,6 +80,7 @@
                     <span class="flp-ended">{{ lang.t().tcLiveEnded }}</span>
                   }
                 </div>
+                @if (fc.courseTitle) { <span class="flp-course-tag">🗂️ {{ fc.courseTitle }}</span> }
                 <h4>{{ fc.title }}</h4>
                 @if (fc.description) { <p class="flp-desc">{{ fc.description }}</p> }
 
@@ -520,14 +527,16 @@
 
          <label>
             <span>{{ lang.t().tcThCategory }} *</span>
-            <select formControlName="category" class="category-select">
-              <option value="" disabled>{{ lang.t().tcSelectCategory }}</option>
-              @for (cat of categories(); track cat.id) {
-                <option [value]="cat.name">{{ cat.name }}</option>
-              }
-            </select>
-            @if (categories().length === 0) {
-              <small class="field-hint">{{ lang.t().tcNoCategoriesHint }}</small>
+            @if (categoryFilter()) {
+              <input type="text" class="category-select" [value]="courseForm.controls.category.value" disabled />
+              <small class="field-hint">🔒 {{ courseForm.controls.category.value }}</small>
+            } @else {
+              <select formControlName="category" class="category-select">
+                <option value="" disabled>{{ lang.t().tcSelectCategory }}</option>
+                @for (cat of courseCategoryOptions; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
             }
           </label>
 
@@ -536,7 +545,7 @@
             <textarea rows="3" formControlName="description"></textarea>
           </label>
 
-          <label class="full">
+          <div class="appoint-field full">
             <span>{{ lang.t().tcAppointTeacher }} * <small class="appoint-hint">({{ lang.t().tcAppointMulti }})</small></span>
             @if (approvedTeachers().length === 0) {
               <p class="empty-state">{{ lang.t().tcSelectTeacher }}</p>
@@ -575,7 +584,7 @@
               </div>
               <small class="appoint-count">{{ selectedTeacherIds().length }} {{ lang.t().tcSelectedCount }}</small>
             }
-          </label>
+          </div>
 
           <label>
             <span>{{ lang.t().tcLevelLabel }}</span>

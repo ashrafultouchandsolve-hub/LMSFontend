@@ -228,6 +228,7 @@ export class LearningApiService {
 
 
 
+
   getTeacherCourses(): Observable<ApiResponse<CourseDto[]>> {
     return this.withFallback((baseUrl) =>
       this.http.get<ApiResponse<CourseDto[]>>(`${baseUrl}/course/getbyteacher`),
@@ -602,6 +603,11 @@ export class LearningApiService {
 
   getInstructorProfile(teacherId: string): Observable<any> {
     return this.withFallback((base) => this.http.get<any>(`${base}/Instructor/${teacherId}`));
+  }
+
+  /** Logged-in teacher's own profile (for the profile page). */
+  getMyInstructorProfile(): Observable<any> {
+    return this.withFallback((base) => this.http.get<any>(`${base}/Instructor/me`));
   }
 
   updateInstructorProfile(dto: { bio?: string; facebookLink?: string; youtubeLink?: string }): Observable<any> {
