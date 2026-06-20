@@ -506,10 +506,73 @@ p {
   color: #6b7280;
 }
 
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+/* ── "Learn by Category" auto-slider (continuous right→left marquee) ── */
+.cat-marquee-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
+}
+.cat-marquee {
+  width: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+.cat-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation-name: catMarquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  /* animation-duration is set inline (scales with category count for constant speed) */
+}
+.cat-marquee.is-paused .cat-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes catMarquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+/* Show 4 pills at a time (responsive down to 3 / 2 via container size) */
+.cat-marquee .cat-pill {
+  flex: 0 0 auto;
+  width: calc((100cqw - 3 * 16px) / 4);
+}
+@container (max-width: 860px) {
+  .cat-marquee .cat-pill { width: calc((100cqw - 2 * 16px) / 3); }
+}
+@container (max-width: 560px) {
+  .cat-marquee .cat-pill { width: calc((100cqw - 16px) / 2); }
+}
+
+.cat-marquee-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1.5px solid #c7d2fe;
+  background: #fff;
+  color: #6d28d9;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -8px rgba(109, 40, 217, 0.45);
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.cat-marquee-toggle:hover {
+  background: #f5f3ff;
+  border-color: #a78bfa;
+  transform: scale(1.07);
+}
+
+/* Respect reduced-motion: stop auto-scroll, let users scroll manually instead */
+@media (prefers-reduced-motion: reduce) {
+  .cat-marquee { overflow-x: auto; }
+  .cat-marquee-track { animation: none; }
 }
 
 .cat-pill {

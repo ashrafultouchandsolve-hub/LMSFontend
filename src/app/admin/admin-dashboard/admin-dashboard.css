@@ -1027,6 +1027,49 @@
 .cat-create-row .search-input { flex: 1; }
 .cat-create-row .btn-primary { white-space: nowrap; }
 
+/* Readable input on the light create card (override the dark-theme search-input vars) */
+.cat-create-input {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1.5px solid #c7d2fe;
+  box-shadow: none;
+  font-weight: 600;
+}
+.cat-create-input::placeholder { color: #94a3b8; font-weight: 500; }
+.cat-create-input:focus {
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.14);
+  transform: none;
+}
+
+/* Pretty "Add Category" button */
+.cat-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 13px 22px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.6);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.cat-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -8px rgba(79, 70, 229, 0.72);
+  filter: brightness(1.06);
+}
+.cat-add-btn:active { transform: translateY(0); }
+
+/* Breathing room between the create box and the category cards */
+.fcat-grid { margin-top: 8px; }
+
 /* Courses grouped by category — collapsible dropdowns */
 .course-cat-group {
   margin-bottom: 12px;
@@ -1124,6 +1167,61 @@
   font-size: 0.82rem;
   font-weight: 700;
   color: #1d4ed8;
+}
+/* Card is now a container (not a single click target) */
+.fcat-card { cursor: default; width: 100%; }
+.fcat-action-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.fcat-edit-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid #c7d2fe;
+  border-radius: 9px;
+  font: inherit;
+  font-weight: 700;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+}
+.fcat-edit-input::selection { background: #ddd6fe; color: #1e1b4b; }
+.fcat-edit-input:focus { border-color: #6d28d9; box-shadow: 0 0 0 3px rgba(109,40,217,0.12); }
+.fcat-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  width: 100%;
+}
+.fcat-tool {
+  background: #f1f5f9;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+.fcat-tool:hover { background: #e2e8f0; color: #0f172a; }
+.fcat-tool--save { background: #6d28d9; border-color: #6d28d9; color: #fff; }
+.fcat-tool--save:hover { background: #5b21b6; color: #fff; }
+.fcat-tool--danger { color: #b91c1c; }
+.fcat-tool--danger:hover { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+.fcat-fixed {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #64748b;
+  padding: 5px 4px;
 }
 .cat-card {
   border: 1px solid rgba(15, 23, 42, 0.07);

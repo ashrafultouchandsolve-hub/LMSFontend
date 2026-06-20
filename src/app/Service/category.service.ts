@@ -8,6 +8,31 @@ export interface Category {
   name: string;
   thumbnailPath?: string | null;
   createdAt?: string;
+  isFixed?: boolean;
+}
+
+/**
+ * The default categories that ship with the platform (mirrors the backend's
+ * CategoryController.FixedCategoryNames). They can be renamed by admin but never deleted.
+ */
+export const FIXED_CATEGORY_NAMES = [
+  'SSC 2027', 'SSC 2026', 'HSC 2027', 'HSC 2026',
+  'Admission English', 'Admission Science',
+  'Skills Development', 'Communication', 'General',
+] as const;
+
+/** Derive a display emoji for a category from its name (keyword match, default 📚). */
+export function categoryIcon(name: string): string {
+  const n = (name ?? '').toLowerCase();
+  if (n === 'all') return '🗂';
+  if (n === 'other') return '📦';
+  if (n.includes('ssc')) return '📘';
+  if (n.includes('hsc')) return '📗';
+  if (n.includes('admission')) return '🎯';
+  if (n.includes('skill')) return '⚡';
+  if (n.includes('communicat')) return '💬';
+  if (n.includes('general')) return '📚';
+  return '📚';
 }
 
 @Injectable({ providedIn: 'root' })

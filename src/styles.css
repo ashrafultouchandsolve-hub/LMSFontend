@@ -286,3 +286,13 @@ a {
 	background: rgba(78, 182, 255, 0.28);
 	color: #ffffff;
 }
+
+/* Inputs sit on light backgrounds — keep selected text dark so it stays readable. */
+input::selection, textarea::selection {
+	background: rgba(124, 58, 237, 0.22);
+	color: #0f172a;
+}
+input::-moz-selection, textarea::-moz-selection {
+	background: rgba(124, 58, 237, 0.22);
+	color: #0f172a;
+}

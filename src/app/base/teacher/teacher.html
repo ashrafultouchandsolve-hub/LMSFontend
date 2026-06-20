@@ -199,7 +199,9 @@
           <p>{{ lang.t().tcLessonsSub }}</p>
         </div>
         <div class="toolbar-actions">
-          <button type="button" class="btn btn-outline live-btn" (click)="openLiveModal()">📺 {{ lang.t().tcLiveSchedule }}</button>
+          @if (isLiveTeacherMode()) {
+            <button type="button" class="btn btn-outline live-btn" (click)="openLiveModal()">📺 {{ lang.t().tcLiveSchedule }}</button>
+          }
           @if (isAdminMode()) {
             <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ {{ lang.t().tcAddLesson }}</button>
           }
@@ -308,6 +310,10 @@
 
           <!-- Add / edit form -->
           <div class="pm-form">
+            <select class="pm-input pm-type-select" [(ngModel)]="pmType" [attr.aria-label]="lang.t().pmTypeLabel">
+              <option value="Board">📘 {{ lang.t().pmTypeBoard }}</option>
+              <option value="ModelTest">📝 {{ lang.t().pmTypeModel }}</option>
+            </select>
             <input type="text" class="pm-input" [(ngModel)]="pmTitle" [placeholder]="lang.t().pmFieldName" maxlength="80" />
             <input type="text" class="pm-input" [(ngModel)]="pmDesc" [placeholder]="lang.t().pmDescPlaceholder" maxlength="160" />
             <label class="btn btn-outline pm-file">
@@ -332,6 +338,7 @@
                   <span class="pm-badge pm-badge--{{ m.fileType === 'PDF' ? 'pdf' : 'doc' }}">{{ m.fileType }}</span>
                   <div class="pm-row-info">
                     <strong>{{ m.title }}</strong>
+                    <span class="pm-type-tag">{{ m.type === 'ModelTest' ? '📝 ' + lang.t().pmTypeModel : '📘 ' + lang.t().pmTypeBoard }}</span>
                     @if (m.description) { <span>{{ m.description }}</span> }
                   </div>
                   <button type="button" class="btn btn-outline" (click)="viewPractice(m.id)">📄 {{ lang.t().pmOpen }}</button>

@@ -129,40 +129,28 @@
       <h2>Learn by Category</h2>
       <p>Choose the right course based on your goals</p>
     </div>
-    <div class="category-grid">
-      <a routerLink="/courses" [queryParams]="{category:'SSC 2027'}" class="cat-pill cat-pill--ssc" data-reveal
-        style="--rd:.05s">
-        <span class="cat-pill-icon">📘</span>
-        <div>
-          <strong>SSC 2027</strong>
-          <span>Final Preparation</span>
+
+    @if (visibleCategories().length > 0) {
+    <div class="cat-marquee-wrap">
+      <div class="cat-marquee" [class.is-paused]="categorySlidePaused()">
+        <div class="cat-marquee-track" [style.animation-duration]="catMarqueeDuration() + 's'">
+          @for (cat of categoriesLoop(); track $index) {
+          <a routerLink="/courses" [queryParams]="{category: cat.name}" [class]="'cat-pill ' + pillVariant($index)"
+            [attr.aria-hidden]="$index >= visibleCategories().length ? 'true' : null" [attr.tabindex]="$index >= visibleCategories().length ? -1 : null">
+            <span class="cat-pill-icon">{{ catIcon(cat.name) }}</span>
+            <div>
+              <strong>{{ cat.name }}</strong>
+            </div>
+          </a>
+          }
         </div>
-      </a>
-      <a routerLink="/courses" [queryParams]="{category:'HSC 2027'}" class="cat-pill cat-pill--hsc" data-reveal
-        style="--rd:.12s">
-        <span class="cat-pill-icon">📗</span>
-        <div>
-          <strong>HSC 2027</strong>
-          <span>Final Preparation</span>
-        </div>
-      </a>
-      <a routerLink="/courses" [queryParams]="{category:'Admission English'}" class="cat-pill cat-pill--admission"
-        data-reveal style="--rd:.19s">
-        <span class="cat-pill-icon">🎯</span>
-        <div>
-          <strong>Admission English</strong>
-          <span>University Prep</span>
-        </div>
-      </a>
-      <a routerLink="/courses" [queryParams]="{category:'Skills Development'}" class="cat-pill cat-pill--skills"
-        data-reveal style="--rd:.26s">
-        <span class="cat-pill-icon">⚡</span>
-        <div>
-          <strong>Skills Development</strong>
-          <span>Career Growth</span>
-        </div>
-      </a>
+      </div>
+      <button type="button" class="cat-marquee-toggle" (click)="toggleCategorySlide()"
+        [attr.aria-label]="categorySlidePaused() ? 'Play category slider' : 'Pause category slider'">
+        {{ categorySlidePaused() ? '▶' : '⏸' }}
+      </button>
     </div>
+    }
   </section>
   <br>
 

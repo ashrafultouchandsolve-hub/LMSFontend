@@ -3,12 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
 
+export type PracticeType = 'Board' | 'ModelTest';
+
 export interface PracticeMaterial {
   id: string;
   title: string;
   description: string;
   hasFile: boolean;
   fileType: string;   // 'PDF' | 'DOC' | 'DOCX'
+  type: PracticeType; // 'Board' = Previous Board Question, 'ModelTest' = Special Model Test Question
   createdAt: string;
 }
 
@@ -21,21 +24,23 @@ export class PracticeService {
     return this.http.get<any>(`${this.baseUrl}/course/${courseId}`);
   }
 
-  /** Admin: add a material (name + description + 1 file). */
-  create(courseId: string, title: string, description: string, file: File): Observable<any> {
+  /** Admin: add a material (name + description + type + 1 file). */
+  create(courseId: string, title: string, description: string, type: PracticeType, file: File): Observable<any> {
     const fd = new FormData();
     fd.append('courseId', courseId);
     fd.append('title', title);
     fd.append('description', description ?? '');
+    fd.append('type', type);
     fd.append('file', file);
     return this.http.post<any>(`${this.baseUrl}/create`, fd);
   }
 
-  /** Admin: edit title/description (+ optionally replace the file). */
-  update(id: string, title: string, description: string, file?: File | null): Observable<any> {
+  /** Admin: edit title/description/type (+ optionally replace the file). */
+  update(id: string, title: string, description: string, type: PracticeType, file?: File | null): Observable<any> {
     const fd = new FormData();
     fd.append('title', title);
     fd.append('description', description ?? '');
+    fd.append('type', type);
     if (file) fd.append('file', file);
     return this.http.put<any>(`${this.baseUrl}/update/${id}`, fd);
   }

@@ -205,6 +205,7 @@ export interface Translations {
   // Practice materials
   pmTitle: string; pmSub: string; pmStudentSub: string; pmFieldName: string; pmDescPlaceholder: string;
   pmChooseFile: string; pmAdd: string; pmOpen: string; pmNone: string; pmNoneDesc: string;
+  pmTypeBoard: string; pmTypeModel: string; pmTypeLabel: string; pmLocked: string; pmLockedMsg: string; pmBack: string;
   // Admin role-restructure: categories, course manager, appointment
   navAdmin: string; adCategories: string; adCategoriesSub: string; adCategoryNamePlaceholder: string;
   adAddCategory: string; adNoCategories: string; adManageCourses: string; adSetImage: string; adAuthorCourses: string;
@@ -457,6 +458,8 @@ const EN: Translations = {
   pmTitle: 'Practice Materials', pmSub: 'Upload PDFs/DOCs students can study (board questions, model tests, notes…).', pmStudentSub: 'Study materials shared by your instructor.',
   pmFieldName: 'Field name (e.g. Previous Board Questions)', pmDescPlaceholder: 'Short description (optional)',
   pmChooseFile: 'Choose PDF / DOC', pmAdd: 'Add material', pmOpen: 'Open', pmNone: 'No practice materials yet', pmNoneDesc: 'Practice materials will appear here once your instructor uploads them.',
+  pmTypeBoard: 'Previous Board Question', pmTypeModel: 'Special Model Test Question', pmTypeLabel: 'Question type',
+  pmLocked: 'Locked', pmLockedMsg: 'No questions have been added here yet. Please check back soon.', pmBack: 'Back',
   navAdmin: 'Admin Panel',
   adCategories: 'Categories', adCategoriesSub: 'Create categories, then build courses inside each one.',
   adCategoryNamePlaceholder: 'New category name (e.g. SSC 2027)', adAddCategory: 'Add Category',
@@ -715,6 +718,8 @@ const BN: Translations = {
   pmTitle: 'প্র্যাকটিস ম্যাটেরিয়াল', pmSub: 'শিক্ষার্থীদের জন্য PDF/DOC আপলোড করুন (বোর্ড প্রশ্ন, মডেল টেস্ট, নোট…)।', pmStudentSub: 'আপনার শিক্ষকের শেয়ার করা স্টাডি ম্যাটেরিয়াল।',
   pmFieldName: 'ফিল্ডের নাম (যেমন: বিগত বোর্ড প্রশ্ন)', pmDescPlaceholder: 'সংক্ষিপ্ত বিবরণ (ঐচ্ছিক)',
   pmChooseFile: 'PDF / DOC বেছে নিন', pmAdd: 'যোগ করুন', pmOpen: 'খুলুন', pmNone: 'এখনো কোনো প্র্যাকটিস ম্যাটেরিয়াল নেই', pmNoneDesc: 'শিক্ষক আপলোড করলে এখানে দেখা যাবে।',
+  pmTypeBoard: 'বিগত বোর্ড প্রশ্ন', pmTypeModel: 'স্পেশাল মডেল টেস্ট প্রশ্ন', pmTypeLabel: 'প্রশ্নের ধরন',
+  pmLocked: 'লকড', pmLockedMsg: 'এখানে এখনো কোনো প্রশ্ন যোগ করা হয়নি। শীঘ্রই আবার দেখুন।', pmBack: 'পিছনে',
   navAdmin: 'অ্যাডমিন প্যানেল',
   adCategories: 'ক্যাটাগরি', adCategoriesSub: 'ক্যাটাগরি তৈরি করুন, তারপর প্রতিটির ভেতরে কোর্স বানান।',
   adCategoryNamePlaceholder: 'নতুন ক্যাটাগরির নাম (যেমন: SSC 2027)', adAddCategory: 'ক্যাটাগরি যোগ করুন',

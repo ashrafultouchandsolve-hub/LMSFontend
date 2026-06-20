@@ -6,15 +6,51 @@
 
   @if (isLoading()) {
     <p class="cp-loading">{{ lang.t().lcJoining }}</p>
-  } @else if (materials().length === 0) {
-    <div class="cp-empty">
-      <span class="cp-empty-ico">🗂️</span>
-      <h3>{{ lang.t().pmNone }}</h3>
-      <p>{{ lang.t().pmNoneDesc }}</p>
+  } @else if (selectedType() === null) {
+
+    <!-- Gateway: two section cards -->
+    @if (lockNotice()) {
+      <div class="cp-lock-notice">🔒 {{ lockNotice() }}</div>
+    }
+
+    <div class="cp-gate">
+      <!-- Previous Board Question -->
+      <button type="button" class="cp-gate-card cp-gate-card--board" [class.locked]="count('Board') === 0"
+        (click)="openType('Board')">
+        <span class="cp-gate-ico">📘</span>
+        <h3 class="cp-gate-title">{{ lang.t().pmTypeBoard }}</h3>
+        @if (count('Board') > 0) {
+          <span class="cp-gate-count">{{ count('Board') }}</span>
+          <span class="cp-gate-go">{{ lang.t().pmOpen }} →</span>
+        } @else {
+          <span class="cp-gate-lock">🔒 {{ lang.t().pmLocked }}</span>
+        }
+      </button>
+
+      <!-- Special Model Test Question -->
+      <button type="button" class="cp-gate-card cp-gate-card--model" [class.locked]="count('ModelTest') === 0"
+        (click)="openType('ModelTest')">
+        <span class="cp-gate-ico">📝</span>
+        <h3 class="cp-gate-title">{{ lang.t().pmTypeModel }}</h3>
+        @if (count('ModelTest') > 0) {
+          <span class="cp-gate-count">{{ count('ModelTest') }}</span>
+          <span class="cp-gate-go">{{ lang.t().pmOpen }} →</span>
+        } @else {
+          <span class="cp-gate-lock">🔒 {{ lang.t().pmLocked }}</span>
+        }
+      </button>
     </div>
+
   } @else {
+
+    <!-- A section's materials -->
+    <button type="button" class="cp-back" (click)="back()">← {{ lang.t().pmBack }}</button>
+    <h3 class="cp-sub-title">
+      {{ selectedType() === 'ModelTest' ? '📝 ' + lang.t().pmTypeModel : '📘 ' + lang.t().pmTypeBoard }}
+    </h3>
+
     <div class="cp-grid">
-      @for (m of materials(); track m.id) {
+      @for (m of selectedMaterials(); track m.id) {
         <article class="cp-card cp-card--{{ m.fileType === 'PDF' ? 'pdf' : 'doc' }}">
           <div class="cp-card-top">
             <span class="cp-card-ico">{{ icon(m.fileType) }}</span>
@@ -28,5 +64,6 @@
         </article>
       }
     </div>
+
   }
 </section>

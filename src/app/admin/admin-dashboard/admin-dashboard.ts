@@ -8,7 +8,7 @@ import { AdminItem } from '../admin-item/admin-item';
 import { AnnouncementBanner } from '../announcement-banner/announcement-banner';
 import { Announcement, AnnouncementService } from '../../Service/announcement-service';
 import { LanguageService } from '../../Service/language.service';
-import { Category, CategoryService } from '../../Service/category.service';
+import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { LearningApiService } from '../../Service/learning-api.service';
 
 type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements';
@@ -158,18 +158,10 @@ annSubmitting  = signal(false);
   editingCommentId = signal<string | null>(null);
   editingContent   = signal('');
 
-  /** Fixed categories (match home/navbar/courses). Admin clicks a card → adds courses inside that category. */
-  readonly fixedCategories = [
-    { name: 'SSC 2027', icon: '📘' },
-    { name: 'SSC 2026', icon: '📘' },
-    { name: 'HSC 2027', icon: '📗' },
-    { name: 'HSC 2026', icon: '📗' },
-    { name: 'Admission English', icon: '🎯' },
-    { name: 'Admission Science', icon: '🔬' },
-    { name: 'Skills Development', icon: '⚡' },
-    { name: 'Communication', icon: '💬' },
-    { name: 'General', icon: '📚' },
-  ];
+  /** Emoji for a category card (derived from its name — shared with home & courses pages). */
+  catIcon(name: string): string {
+    return categoryIcon(name);
+  }
   categoryCourseCount(name: string): number {
     return this.courses().filter(c => c.category === name).length;
   }
@@ -194,7 +186,7 @@ annSubmitting  = signal(false);
       case 'teachers': this.loadTeachers(); break;
       case 'students': this.loadStudents(); break;
       case 'courses': this.loadCourses(); break;
-      case 'categories': this.loadCourses(); break;   // courses power the per-category counts on the fixed cards
+      case 'categories': this.loadCourses(); this.loadCategories(); break;   // courses power per-category counts; categories are the admin-managed list
       case 'comments': this.loadComments(); break;
       case 'store-items': break;
       case 'announcements': this.loadAnnouncements(); break;
@@ -272,10 +264,15 @@ annSubmitting  = signal(false);
 
   createCategory() {
     const name = this.newCategoryName().trim();
-    if (!name) return;
+    if (!name) { this.showMessage('Type a category name first.', 'error'); return; }
+    // Block duplicates up-front (case-insensitive) so the admin gets instant, clear feedback.
+    if (this.categories().some(c => c.name.toLowerCase() === name.toLowerCase())) {
+      this.showMessage(`A category named "${name}" already exists.`, 'error');
+      return;
+    }
     this.categoryService.create(name).subscribe({
       next: () => { this.showMessage('Category created.', 'success'); this.newCategoryName.set(''); this.loadCategories(); },
-      error: (e) => this.showMessage(e?.error?.message ?? 'Failed to create category.', 'error')
+      error: (e) => this.showMessage(this.categoryError(e, 'Failed to create category.'), 'error')
     });
   }
 
@@ -291,10 +288,10 @@ annSubmitting  = signal(false);
 
   saveCategory(id: string) {
     const name = this.editingCategoryName().trim();
-    if (!name) return;
+    if (!name) { this.showMessage('Category name is required.', 'error'); return; }
     this.categoryService.update(id, name).subscribe({
-      next: () => { this.showMessage('Category updated.', 'success'); this.cancelEditCategory(); this.loadCategories(); },
-      error: () => this.showMessage('Failed to update category.', 'error')
+      next: (res: any) => { this.showMessage(res?.message ?? res?.Message ?? 'Category updated.', 'success'); this.cancelEditCategory(); this.loadCategories(); },
+      error: (e) => this.showMessage(this.categoryError(e, 'Failed to update category.'), 'error')
     });
   }
 
@@ -302,8 +299,13 @@ annSubmitting  = signal(false);
     if (!confirm('Delete this category? Courses in it keep their category name.')) return;
     this.categoryService.delete(id).subscribe({
       next: () => { this.showMessage('Category deleted.', 'success'); this.loadCategories(); },
-      error: () => this.showMessage('Failed to delete category.', 'error')
+      error: (e) => this.showMessage(this.categoryError(e, 'Failed to delete category.'), 'error')
     });
+  }
+
+  /** Pull the exact message the API returned (handles camelCase + PascalCase bodies). */
+  private categoryError(e: any, fallback: string): string {
+    return e?.error?.message ?? e?.error?.Message ?? fallback;
   }
 
   onCategoryImageSelected(event: Event, id: string) {

@@ -4,7 +4,11 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { Navbar } from '../../shared/navbar/navbar';
+
+/** A selectable option in the sidebar dropdown. */
+type CategoryOption = { label: string; value: string; icon: string };
 
 type CoursesViewItem = {
   id: string;
@@ -26,26 +30,6 @@ type CoursesViewItem = {
   totalRatings?: number;
 };
 
-// ✅ সব category গুলো এখানে define করা আছে
-const CATEGORIES = [
-  { label: 'All',                value: 'All',                icon: '🗂' },
-  { label: 'SSC 2027',           value: 'SSC 2027',           icon: '📘' },
-  { label: 'SSC 2026',           value: 'SSC 2026',           icon: '📘' },
-  { label: 'HSC 2027',           value: 'HSC 2027',           icon: '📗' },
-  { label: 'HSC 2026',           value: 'HSC 2026',           icon: '📗' },
-  { label: 'Admission English',  value: 'Admission English',  icon: '🎯' },
-  { label: 'Admission Science',  value: 'Admission Science',  icon: '🎯' },
-  { label: 'Skills Development', value: 'Skills Development', icon: '⚡' },
-  { label: 'Communication',      value: 'Communication',      icon: '💬' },
-  { label: 'General',            value: 'General',            icon: '📚' },
-  { label: 'Other',              value: 'Other',              icon: '📦' },
-];
-
-/** Categories that have a dedicated pill; anything else falls under "Other". */
-const KNOWN_CATEGORIES = new Set(
-  CATEGORIES.filter((c) => c.value !== 'All' && c.value !== 'Other').map((c) => c.value),
-);
-
 @Component({
   selector: 'app-courses',
   imports: [RouterLink, Navbar],
@@ -56,6 +40,7 @@ const KNOWN_CATEGORIES = new Set(
 export class Courses {
   private readonly authService  = inject(AuthService);
   private readonly learningApi  = inject(LearningApiService);
+  private readonly categoryService = inject(CategoryService);
   private readonly route        = inject(ActivatedRoute);
   readonly lang                 = inject(LanguageService);
 
@@ -66,15 +51,24 @@ export class Courses {
 
   // ✅ Active category — homepage থেকে queryParam আসলে সেটা set হবে
   protected readonly activeCategory = signal('All');
-  protected readonly categories = CATEGORIES;
+
+  // ✅ Admin-managed categories (loaded from backend — shared with home page & admin)
+  protected readonly dynamicCategories = signal<Category[]>([]);
+
+  /** Category names that have a dedicated entry; anything else falls under "Other". */
+  private readonly knownCategoryNames = computed(
+    () => new Set(this.dynamicCategories().map(c => c.name)),
+  );
 
   // ✅ Sidebar category dropdown open/close state
   protected readonly categoryDropdownOpen = signal(false);
 
   /** Active category-র icon/label (dropdown toggle-এ দেখানোর জন্য)। */
-  protected readonly activeCategoryMeta = computed(() =>
-    CATEGORIES.find(c => c.value === this.activeCategory()) ?? CATEGORIES[0]
-  );
+  protected readonly activeCategoryMeta = computed<CategoryOption>(() => {
+    const val = this.activeCategory();
+    return this.availableCategories().find(c => c.value === val)
+        ?? { label: val, value: val, icon: categoryIcon(val) };
+  });
 
   protected readonly hasCourses = computed(() => this.courses().length > 0);
 
@@ -87,7 +81,7 @@ export class Courses {
       const matchesCat  = cat === 'All'
         ? true
         : cat === 'Other'
-          ? !KNOWN_CATEGORIES.has(course.category)   // anything without a dedicated pill
+          ? !this.knownCategoryNames().has(course.category)   // anything without a dedicated category
           : course.category === cat;
       const matchesTerm = !term || [
         course.title, course.description,
@@ -106,23 +100,40 @@ export class Courses {
     return currentUser?.role === 1;
   });
 
-  // ✅ Sidebar এ admin-এর পুরো course category সেট দেখাবে (course না থাকলেও) — শুধু 'Other' দেখাবে যদি কোনো
-  //    non-standard category-র course থাকে।
-  protected readonly availableCategories = computed(() => {
-    const hasOther = this.courses().some(c => !KNOWN_CATEGORIES.has(c.category));
-    return CATEGORIES.filter(c => c.value !== 'Other' || hasOther);
+  // ✅ Sidebar dropdown: All + admin-managed categories that actually HAVE courses
+  //    (empty categories are hidden from students), + Other only if some course
+  //    has a category that's no longer in the managed list.
+  protected readonly availableCategories = computed<CategoryOption[]>(() => {
+    const courseCategoryNames = new Set(this.courses().map(c => c.category));
+    const opts: CategoryOption[] = [{ label: 'All', value: 'All', icon: '🗂' }];
+    for (const c of this.dynamicCategories()) {
+      if (courseCategoryNames.has(c.name)) {
+        opts.push({ label: c.name, value: c.name, icon: categoryIcon(c.name) });
+      }
+    }
+    const hasOther = this.courses().some(c => !this.knownCategoryNames().has(c.category));
+    if (hasOther) opts.push({ label: 'Other', value: 'Other', icon: '📦' });
+    return opts;
   });
 
   /** Course count per category pill (handles All / Other / specific). */
   protected categoryCount(value: string): number {
     const list = this.courses();
     if (value === 'All') return list.length;
-    if (value === 'Other') return list.filter(c => !KNOWN_CATEGORIES.has(c.category)).length;
+    if (value === 'Other') return list.filter(c => !this.knownCategoryNames().has(c.category)).length;
     return list.filter(c => c.category === value).length;
   }
 
   constructor() {
     void this.loadAllCourses();
+    this.loadCategories();
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (res: any) => this.dynamicCategories.set(res?.data ?? res?.Data ?? []),
+      error: () => this.dynamicCategories.set([]),
+    });
   }
 
   // ✅ Category select করো (select করলে dropdown বন্ধ হয়ে যাবে)

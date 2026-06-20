@@ -200,14 +200,52 @@
       <p>{{ lang.t().adCategoriesSub }}</p>
     </div>
 
+    <!-- Add a new category -->
+    <div class="cat-create-card">
+      <span class="cat-create-title">➕ Add a new category</span>
+      <div class="cat-create-row">
+        <input
+          type="text"
+          class="search-input cat-create-input"
+          placeholder="Type a category name, e.g. SSC 2028"
+          [ngModel]="newCategoryName()" (ngModelChange)="newCategoryName.set($event)"
+          (keyup.enter)="createCategory()" />
+        <button type="button" class="cat-add-btn" (click)="createCategory()">+ Add Category</button>
+      </div>
+    </div>
+
     <div class="fcat-grid">
-      @for (cat of fixedCategories; track cat.name) {
-        <button type="button" class="fcat-card" (click)="manageCourses(cat.name)">
-          <span class="fcat-icon">{{ cat.icon }}</span>
-          <span class="fcat-name">{{ cat.name }}</span>
-          <span class="fcat-count">{{ categoryCourseCount(cat.name) }} {{ lang.t().tcSideCourses }}</span>
-          <span class="fcat-action">📚 {{ lang.t().adManageCourses }} →</span>
-        </button>
+      @for (cat of categories(); track cat.id) {
+        <div class="fcat-card">
+          @if (editingCategoryId() === cat.id) {
+            <span class="fcat-icon">{{ catIcon(cat.name) }}</span>
+            <input
+              type="text"
+              class="fcat-edit-input"
+              [ngModel]="editingCategoryName()" (ngModelChange)="editingCategoryName.set($event)"
+              (keyup.enter)="saveCategory(cat.id)" />
+            <div class="fcat-tools">
+              <button type="button" class="fcat-tool fcat-tool--save" (click)="saveCategory(cat.id)">✓ Save</button>
+              <button type="button" class="fcat-tool" (click)="cancelEditCategory()">Cancel</button>
+            </div>
+          } @else {
+            <span class="fcat-icon">{{ catIcon(cat.name) }}</span>
+            <span class="fcat-name">{{ cat.name }}</span>
+            <span class="fcat-count">{{ categoryCourseCount(cat.name) }} {{ lang.t().tcSideCourses }}</span>
+            <button type="button" class="fcat-action fcat-action-btn" (click)="manageCourses(cat.name)">📚 {{ lang.t().adManageCourses }} →</button>
+            <div class="fcat-tools">
+              <button type="button" class="fcat-tool" (click)="startEditCategory(cat)">✏️ Rename</button>
+              @if (cat.isFixed) {
+                <span class="fcat-fixed" title="Default category — cannot be deleted">🔒 Fixed</span>
+              } @else {
+                <button type="button" class="fcat-tool fcat-tool--danger" (click)="deleteCategory(cat.id)">🗑 Delete</button>
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (categories().length === 0) {
+        <p class="empty-row">{{ isLoading() ? 'Loading…' : 'No categories yet.' }}</p>
       }
     </div>
     }

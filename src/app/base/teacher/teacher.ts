@@ -14,7 +14,7 @@ import {
 } from '../../Service/learning-api.service';
 import { FreeLiveClass, LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { ExamService, ExamView, ExamSubmissionView } from '../../Service/exam.service';
-import { PracticeService, PracticeMaterial } from '../../Service/practice.service';
+import { PracticeService, PracticeMaterial, PracticeType } from '../../Service/practice.service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 import { environment } from '../../../environments/environments';
@@ -483,13 +483,24 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         targetCourseId = createResult.data;
       }
 
+      // Course is already saved at this point; the thumbnail is a separate step.
+      // Capture its error on its own so we don't mislabel a rejected image as "course not saved".
       const thumbnailFile = this.selectedCourseThumbnailFile();
+      let thumbnailError: unknown = null;
       if (targetCourseId && thumbnailFile) {
-        await firstValueFrom(this.learningApi.uploadCourseThumbnail(targetCourseId, thumbnailFile));
+        try {
+          await firstValueFrom(this.learningApi.uploadCourseThumbnail(targetCourseId, thumbnailFile));
+        } catch (thumbErr) {
+          thumbnailError = thumbErr;
+        }
       }
 
       await this.reloadCourses();
-      this.setNotice('কোর্স সফলভাবে সংরক্ষণ হয়েছে।', 'success');
+      if (thumbnailError) {
+        this.setNotice(this.extractApiErrorMessage(thumbnailError, 'কোর্স সেভ হয়েছে, কিন্তু কভার ইমেজ আপলোড হয়নি।'), 'error');
+      } else {
+        this.setNotice('কোর্স সফলভাবে সংরক্ষণ হয়েছে।', 'success');
+      }
       this.closeCourseModal();
     } catch (error) {
       this.setNotice(this.extractApiErrorMessage(error, 'কোর্স সংরক্ষণ করা যায়নি।'), 'error');
@@ -716,6 +727,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected pmEditingId: string | null = null;
   protected pmTitle = '';
   protected pmDesc = '';
+  protected pmType: PracticeType = 'Board';
   private pmFile: File | null = null;
   protected pmFileName = '';
 
@@ -729,6 +741,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         description: m.description ?? m.Description ?? '',
         hasFile: m.hasFile ?? m.HasFile ?? false,
         fileType: (m.fileType ?? m.FileType ?? 'PDF').toUpperCase(),
+        type: (m.type ?? m.Type) === 'ModelTest' ? 'ModelTest' : 'Board',
         createdAt: m.createdAt ?? m.CreatedAt,
       })));
     } catch {
@@ -747,6 +760,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.pmEditingId = null;
     this.pmTitle = '';
     this.pmDesc = '';
+    this.pmType = 'Board';
     this.pmFile = null;
     this.pmFileName = '';
   }
@@ -755,6 +769,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.pmEditingId = m.id;
     this.pmTitle = m.title;
     this.pmDesc = m.description;
+    this.pmType = m.type;
     this.pmFile = null;
     this.pmFileName = '';
   }
@@ -773,9 +788,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.isSavingPractice.set(true);
     try {
       if (this.pmEditingId) {
-        await firstValueFrom(this.practiceService.update(this.pmEditingId, this.pmTitle.trim(), this.pmDesc.trim(), this.pmFile));
+        await firstValueFrom(this.practiceService.update(this.pmEditingId, this.pmTitle.trim(), this.pmDesc.trim(), this.pmType, this.pmFile));
       } else {
-        await firstValueFrom(this.practiceService.create(course.id, this.pmTitle.trim(), this.pmDesc.trim(), this.pmFile!));
+        await firstValueFrom(this.practiceService.create(course.id, this.pmTitle.trim(), this.pmDesc.trim(), this.pmType, this.pmFile!));
       }
       await this.loadPractice(course.id);
       this.resetPracticeForm();
@@ -1000,12 +1015,20 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         targetLessonId = createResult.data;
       }
 
+      // Lesson is already saved; thumbnail + video are separate uploads.
+      // Capture each error on its own so a rejected image/video isn't mislabeled as "lesson not saved".
       const lessonThumbnailFile = this.selectedLessonThumbnailFile();
+      let lessonThumbnailError: unknown = null;
       if (targetLessonId && lessonThumbnailFile) {
-        await firstValueFrom(this.learningApi.uploadLessonThumbnail(targetLessonId, lessonThumbnailFile));
+        try {
+          await firstValueFrom(this.learningApi.uploadLessonThumbnail(targetLessonId, lessonThumbnailFile));
+        } catch (thumbErr) {
+          lessonThumbnailError = thumbErr;
+        }
       }
 
       const lessonVideoFile = this.selectedLessonVideoFile();
+      let lessonVideoError: unknown = null;
       if (targetLessonId && lessonVideoFile) {
         this.isUploadingVideo.set(true);
         this.videoUploadProgress.set(0);
@@ -1034,7 +1057,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
             });
           });
         } catch (uploadError) {
-          throw uploadError;
+          lessonVideoError = uploadError;
         }
       } else if (targetLessonId && formValue.videoUrl.trim()) {
         await firstValueFrom(this.learningApi.setLessonVideoUrl(targetLessonId, formValue.videoUrl.trim()));
@@ -1042,7 +1065,15 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
       await this.loadLessons(selected.id);
       await this.reloadCourses();
-      this.setNotice('লেসন সফলভাবে সংরক্ষণ হয়েছে।', 'success');
+
+      if (lessonThumbnailError || lessonVideoError) {
+        const parts: string[] = [];
+        if (lessonThumbnailError) parts.push(this.extractApiErrorMessage(lessonThumbnailError, 'থাম্বনেইল আপলোড হয়নি।'));
+        if (lessonVideoError) parts.push(this.extractApiErrorMessage(lessonVideoError, 'ভিডিও আপলোড হয়নি।'));
+        this.setNotice('লেসন সেভ হয়েছে, তবে: ' + parts.join(' | '), 'error');
+      } else {
+        this.setNotice('লেসন সফলভাবে সংরক্ষণ হয়েছে।', 'success');
+      }
       this.closeLessonModal();
     } catch (error) {
       this.setNotice(this.extractApiErrorMessage(error, 'লেসন সংরক্ষণ করা যায়নি।'), 'error');

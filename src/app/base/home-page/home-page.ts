@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 type LearningHighlight = { title: string; description: string; };
@@ -40,6 +41,7 @@ type HomeCourse = {
 export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private readonly authService  = inject(AuthService);
   private readonly learningApi  = inject(LearningApiService);
+  private readonly categoryService = inject(CategoryService);
   readonly lang                 = inject(LanguageService);
   private readonly zone        = inject(NgZone);
   private readonly hostRef     = inject(ElementRef<HTMLElement>);
@@ -55,6 +57,34 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   protected readonly userRole         = signal<number | null>(null);
   protected readonly isLoadingCourses = signal(false);
   protected readonly courses          = signal<HomeCourse[]>([]);
+  protected readonly categories       = signal<Category[]>([]);
+
+  /** Emoji for a category pill (shared with admin & courses pages). */
+  protected catIcon(name: string): string { return categoryIcon(name); }
+
+  /** Cycle the 4 pill colour variants so dynamic categories keep visual variety. */
+  private readonly pillVariants = ['cat-pill--ssc', 'cat-pill--hsc', 'cat-pill--admission', 'cat-pill--skills'];
+  protected pillVariant(i: number): string { return this.pillVariants[i % this.pillVariants.length]; }
+
+  // ── "Learn by Category" auto-slider (continuous right→left marquee, student-pausable) ──
+  protected readonly categorySlidePaused = signal(false);
+  protected toggleCategorySlide(): void { this.categorySlidePaused.update(p => !p); }
+
+  /** Only categories that actually have at least one course — empty ones are hidden from students. */
+  protected readonly visibleCategories = computed(() => {
+    const courseCategoryNames = new Set(this.courses().map(c => c.category));
+    return this.categories().filter(c => courseCategoryNames.has(c.name));
+  });
+
+  /** Categories rendered twice back-to-back so the marquee loops seamlessly. */
+  protected readonly categoriesLoop = computed(() => {
+    const list = this.visibleCategories();
+    return list.length ? [...list, ...list] : [];
+  });
+
+  /** Duration scales with count → constant, gentle scroll speed regardless of how many categories exist.
+   *  Higher seconds-per-card = slower slide. */
+  protected readonly catMarqueeDuration = computed(() => Math.max(38, this.visibleCategories().length * 6));
   protected readonly isTeacher        = computed(() => this.userRole() === 1);
   protected readonly isAdmin          = computed(() => this.userRole() === 2);
   protected readonly activeReview = signal(0);
@@ -95,6 +125,7 @@ private reviewInterval: any;
     }
 
     void this.loadAllCourses();
+    this.loadCategories();
 
     // ✅ Auto-slide every 5 seconds
     this.sliderInterval = setInterval(() => {
@@ -353,6 +384,13 @@ private reviewInterval: any;
     if (!viewport) return;
     const cardWidth = viewport.querySelector<HTMLElement>('.track-card')?.getBoundingClientRect().width ?? 320;
     viewport.scrollBy({ left: direction === 'next' ? (cardWidth + 18) * 1.05 : -(cardWidth + 18) * 1.05, behavior: 'smooth' });
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (res: any) => this.categories.set(res?.data ?? res?.Data ?? []),
+      error: () => this.categories.set([]),
+    });
   }
 
   private async loadAllCourses(): Promise<void> {
