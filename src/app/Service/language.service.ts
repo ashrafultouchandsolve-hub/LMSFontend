@@ -49,6 +49,12 @@ export interface Translations {
   cdDuration: string; cdStatus: string; cdPublished: string; cdDraft: string;
   cdStudents: string; cdTotalVideos: string; cdTotalPractice: string; cdFreeLiveNote: string;
   cdFreeLiveTitle: string; cdFreeLiveLead: string; cdFollow: string; cdFollowing: string; cdFollowLogin: string;
+  // Teacher evaluation
+  teEvalButton: string; teTitle: string; teLead: string; teAnonNote: string;
+  teTeaching: string; teKnowledge: string; teClarity: string; teSupport: string; teOverall: string;
+  teCommentPh: string; teSubmit: string; teSubmitting: string; teSubmitted: string; teUpdate: string;
+  teLoginMsg: string; teLoginBtn: string; teNotEnrolled: string; teBrowse: string;
+  teNotCompleted: string; teBackToCourse: string; teNoTeachers: string; teGenericErr: string;
   cdIncludes: string; cdIncLive: string; cdFree: string; cdIncVideos: string; cdIncPractice: string;
   cdIncStudents: string; cdIncCert: string; cdPriceLabel: string; cdContinue: string; cdRatings: string;
   cdRateThis: string; cdClose: string; cdInWishlist: string; cdAddWishlist: string; cdUpdating: string; cdAdding: string;
@@ -291,6 +297,28 @@ const EN: Translations = {
   cdLessonsCount: 'Lessons', cdDuration: 'Duration', cdStatus: 'Status', cdPublished: 'Published', cdDraft: 'Draft',
   cdStudents: 'Enrolled Students', cdTotalVideos: 'Total Videos', cdTotalPractice: 'Total Practice', cdFreeLiveNote: '🎥 3 live classes are free',
   cdFreeLiveTitle: 'Free live classes', cdFreeLiveLead: 'Join this course\'s live classes free — even without enrolling. Follow to get notified the moment the teacher goes live.', cdFollow: 'Follow free live classes', cdFollowing: 'Following — we\'ll notify you', cdFollowLogin: 'Log in to follow',
+  teEvalButton: 'Teacher Evaluation',
+  teTitle: 'Teacher Evaluation',
+  teLead: 'Rate your teacher(s) for this completed course. Your feedback helps them improve.',
+  teAnonNote: 'Your evaluation is anonymous — teachers see only the overall ratings, never who submitted them.',
+  teTeaching: 'Teaching quality',
+  teKnowledge: 'Subject knowledge',
+  teClarity: 'Clarity of explanation',
+  teSupport: 'Support & responsiveness',
+  teOverall: 'Overall',
+  teCommentPh: 'Optional — share what went well or what could be better…',
+  teSubmit: 'Submit evaluation',
+  teSubmitting: 'Submitting…',
+  teSubmitted: 'Submitted',
+  teUpdate: 'Update evaluation',
+  teLoginMsg: 'Please log in to evaluate the teacher.',
+  teLoginBtn: 'Log in',
+  teNotEnrolled: 'Only enrolled students can evaluate this course.',
+  teBrowse: 'Browse courses',
+  teNotCompleted: 'This course is not completed yet. Teacher evaluation opens once it is marked completed.',
+  teBackToCourse: 'Back to course',
+  teNoTeachers: 'No teacher is assigned to this course yet.',
+  teGenericErr: 'Could not load the evaluation. Please try again later.',
   cdIncludes: 'This course includes', cdIncLive: '3 live classes', cdFree: 'Free', cdIncVideos: 'Video lessons', cdIncPractice: 'Practice materials',
   cdIncStudents: 'Students enrolled', cdIncCert: 'Certificate of completion', cdPriceLabel: 'Course price', cdContinue: 'Continue Learning →', cdRatings: 'ratings',
   cdRateThis: '⭐ Rate this course', cdClose: 'Close', cdInWishlist: 'In Wishlist', cdAddWishlist: 'Add to Wishlist', cdUpdating: 'Updating…', cdAdding: 'Adding…',
@@ -559,6 +587,28 @@ const BN: Translations = {
   cdLessonsCount: 'পাঠ', cdDuration: 'সময়কাল', cdStatus: 'অবস্থা', cdPublished: 'প্রকাশিত', cdDraft: 'ড্রাফট',
   cdStudents: 'নিবন্ধিত শিক্ষার্থী', cdTotalVideos: 'মোট ভিডিও', cdTotalPractice: 'মোট প্র্যাকটিস', cdFreeLiveNote: '🎥 ৩টি লাইভ ক্লাস ফ্রি',
   cdFreeLiveTitle: 'ফ্রি লাইভ ক্লাস', cdFreeLiveLead: 'এনরোল না করেও এই কোর্সের লাইভ ক্লাস ফ্রিতে করুন। Follow করলে টিচার লাইভে এলে সঙ্গে সঙ্গে নোটিফিকেশন পাবেন।', cdFollow: 'ফ্রি লাইভ ক্লাস Follow করুন', cdFollowing: 'Following — নোটিফিকেশন পাবেন', cdFollowLogin: 'Follow করতে লগইন করুন',
+  teEvalButton: 'টিচার ইভ্যালুয়েশন',
+  teTitle: 'টিচার ইভ্যালুয়েশন',
+  teLead: 'এই সম্পন্ন কোর্সের টিচারকে রেটিং দিন। আপনার মতামত টিচারকে আরও ভালো হতে সাহায্য করবে।',
+  teAnonNote: 'আপনার মূল্যায়ন গোপন — টিচার শুধু সামগ্রিক রেটিং দেখবেন, কে দিয়েছে তা কখনো দেখবেন না।',
+  teTeaching: 'পড়ানোর মান',
+  teKnowledge: 'বিষয়ের জ্ঞান',
+  teClarity: 'বোঝানোর স্পষ্টতা',
+  teSupport: 'সাহায্য ও সাড়া',
+  teOverall: 'সামগ্রিক',
+  teCommentPh: 'ঐচ্ছিক — কী ভালো লেগেছে বা কী আরও ভালো হতে পারত লিখুন…',
+  teSubmit: 'মূল্যায়ন জমা দিন',
+  teSubmitting: 'জমা হচ্ছে…',
+  teSubmitted: 'জমা হয়েছে',
+  teUpdate: 'মূল্যায়ন আপডেট করুন',
+  teLoginMsg: 'টিচারকে মূল্যায়ন করতে অনুগ্রহ করে লগইন করুন।',
+  teLoginBtn: 'লগইন',
+  teNotEnrolled: 'শুধু এনরোল করা শিক্ষার্থীরাই এই কোর্স মূল্যায়ন করতে পারবে।',
+  teBrowse: 'কোর্স দেখুন',
+  teNotCompleted: 'এই কোর্সটি এখনো সম্পন্ন হয়নি। কোর্স সম্পন্ন হিসেবে চিহ্নিত হলে মূল্যায়ন চালু হবে।',
+  teBackToCourse: 'কোর্সে ফিরে যান',
+  teNoTeachers: 'এই কোর্সে এখনো কোনো টিচার অ্যাসাইন করা হয়নি।',
+  teGenericErr: 'মূল্যায়ন লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।',
   cdIncludes: 'এই কোর্সে যা পাবেন', cdIncLive: '৩টি লাইভ ক্লাস', cdFree: 'ফ্রি', cdIncVideos: 'ভিডিও লেসন', cdIncPractice: 'প্র্যাকটিস ম্যাটেরিয়াল',
   cdIncStudents: 'শিক্ষার্থী ভর্তি', cdIncCert: 'সমাপনী সার্টিফিকেট', cdPriceLabel: 'কোর্স ফি', cdContinue: 'শেখা চালিয়ে যান →', cdRatings: 'রেটিং',
   cdRateThis: '⭐ এই কোর্স রেট করুন', cdClose: 'বন্ধ', cdInWishlist: 'উইশলিস্টে আছে', cdAddWishlist: 'উইশলিস্টে যোগ করুন', cdUpdating: 'আপডেট হচ্ছে…', cdAdding: 'যোগ হচ্ছে…',

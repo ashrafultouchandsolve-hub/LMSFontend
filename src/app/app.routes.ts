@@ -85,5 +85,11 @@ export const routes: Routes = [
       data: { free: true },
     },
     { path: 'leaderboard', component: Leaderboard, canActivate: [studentGuard] },
+    // 📝 Enrolled student evaluates the teacher(s) of a completed course
+    {
+      path: 'teacher-evaluation/:courseId',
+      loadComponent: () => import('./base/teacher-evaluation/teacher-evaluation').then((m) => m.TeacherEvaluation),
+      canActivate: [authGuard],
+    },
     { path: '**', redirectTo: 'homepage' },
 ];

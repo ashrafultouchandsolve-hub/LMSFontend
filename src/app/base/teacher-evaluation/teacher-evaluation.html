@@ -1,0 +1,109 @@
+<main class="te-page">
+  <app-navbar></app-navbar>
+
+  <header class="te-header">
+    <h1>📝 {{ lang.t().teTitle }}</h1>
+    @if (courseTitle()) {
+      <p class="te-course">{{ courseTitle() }}</p>
+    }
+    <p class="te-lead">{{ lang.t().teLead }}</p>
+  </header>
+
+  @if (isLoading()) {
+    <div class="te-state">
+      <div class="te-spinner"></div>
+      <p>{{ lang.t().commonLoading }}</p>
+    </div>
+  } @else if (errorKind()) {
+    <div class="te-state te-error">
+      @switch (errorKind()) {
+        @case ('login') {
+          <span>🔒</span>
+          <p>{{ lang.t().teLoginMsg }}</p>
+          <a routerLink="/login" class="te-cta">{{ lang.t().teLoginBtn }}</a>
+        }
+        @case ('notEnrolled') {
+          <span>🎓</span>
+          <p>{{ lang.t().teNotEnrolled }}</p>
+          <a routerLink="/courses" class="te-cta">{{ lang.t().teBrowse }}</a>
+        }
+        @case ('notCompleted') {
+          <span>⏳</span>
+          <p>{{ lang.t().teNotCompleted }}</p>
+          <a [routerLink]="['/course-details', courseId()]" class="te-cta">{{ lang.t().teBackToCourse }}</a>
+        }
+        @case ('noTeachers') {
+          <span>👤</span>
+          <p>{{ lang.t().teNoTeachers }}</p>
+        }
+        @default {
+          <span>😕</span>
+          <p>{{ lang.t().teGenericErr }}</p>
+        }
+      }
+    </div>
+  } @else {
+    <p class="te-anon-note">🔒 {{ lang.t().teAnonNote }}</p>
+
+    <div class="te-list">
+      @for (f of forms(); track f.teacher.id) {
+        <section class="te-card">
+          <div class="te-card-head">
+            @if (teacherImg(f.teacher)) {
+              <img class="te-avatar" [src]="teacherImg(f.teacher)" [alt]="f.teacher.fullName" />
+            } @else {
+              <div class="te-avatar te-avatar-fallback">{{ initial(f.teacher.fullName) }}</div>
+            }
+            <div class="te-teacher-meta">
+              <strong>{{ f.teacher.fullName }}</strong>
+              @if (f.submitted) {
+                <span class="te-done-chip">✓ {{ lang.t().teSubmitted }}</span>
+              }
+            </div>
+          </div>
+
+          @for (c of criteria; track c) {
+            <div class="te-row">
+              <span class="te-crit">{{ criterionLabel(c) }}</span>
+              <div class="te-stars">
+                @for (s of stars; track s) {
+                  <button type="button" class="te-star" [class.on]="score(f, c) >= s"
+                          (click)="setScore(f.teacher.id, c, s)"
+                          [attr.aria-label]="s + ' / 5'">★</button>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="te-row te-row-overall">
+            <span class="te-crit">{{ lang.t().teOverall }}</span>
+            <div class="te-stars">
+              @for (s of stars; track s) {
+                <button type="button" class="te-star te-star-lg" [class.on]="f.overall >= s"
+                        (click)="setScore(f.teacher.id, 'overall', s)"
+                        [attr.aria-label]="s + ' / 5'">★</button>
+              }
+            </div>
+          </div>
+
+          <textarea class="te-comment" rows="3"
+                    [ngModel]="f.comment"
+                    (ngModelChange)="setComment(f.teacher.id, $event)"
+                    [placeholder]="lang.t().teCommentPh"></textarea>
+
+          <button type="button" class="te-submit"
+                  [disabled]="!isComplete(f) || f.submitting"
+                  (click)="submit(f)">
+            @if (f.submitting) { {{ lang.t().teSubmitting }} }
+            @else if (f.submitted) { ✓ {{ lang.t().teUpdate }} }
+            @else { {{ lang.t().teSubmit }} }
+          </button>
+        </section>
+      }
+    </div>
+
+    <div class="te-foot">
+      <a [routerLink]="['/course-details', courseId()]" class="te-back-link">← {{ lang.t().teBackToCourse }}</a>
+    </div>
+  }
+</main>

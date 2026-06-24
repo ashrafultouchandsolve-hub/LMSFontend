@@ -33,6 +33,7 @@ type LessonView = {
 type CourseMetaView = {
   title: string;
   instructorName: string;
+  isCompleted: boolean;
 };
 
 type CourseCommentView = {
@@ -605,7 +606,11 @@ constructor(private readonly sanitizer: DomSanitizer) {
       const matchedCourse = rawCourses.find((course) => course.id === id);
       if (!matchedCourse) return null;
 
-      return { title: matchedCourse.title, instructorName: matchedCourse.instructorName };
+      return {
+        title: matchedCourse.title,
+        instructorName: matchedCourse.instructorName,
+        isCompleted: (matchedCourse as { isCompleted?: boolean }).isCompleted ?? false,
+      };
     } catch {
       return null;
     }

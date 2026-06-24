@@ -129,6 +129,9 @@
 							<button type="button" class="enroll-button enroll-button-muted" disabled>{{ lang.t().cdCheckingEnrollment }}</button>
 						} @else if (isEnrolled()) {
 							<a [routerLink]="['/enrolled-course', selectedCourse.id]" class="enroll-button enroll-button-success enroll-link">{{ lang.t().cdContinue }}</a>
+							@if (selectedCourse.isCompleted) {
+								<a [routerLink]="['/teacher-evaluation', selectedCourse.id]" class="enroll-button enroll-link cd-eval-btn">📝 {{ lang.t().teEvalButton }}</a>
+							}
 						} @else {
 							<a [routerLink]="['/payment']" [queryParams]="{ courseId: selectedCourse.id, courseTitle: selectedCourse.title, amount: selectedCourse.price }" class="enroll-button enroll-link">🎓 {{ lang.t().cdEnrollNow }}</a>
 						}

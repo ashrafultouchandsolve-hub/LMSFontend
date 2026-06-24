@@ -17,6 +17,9 @@
       <header class="page-head">
         <h1>{{ meta.title }}</h1>
         <p>{{ lang.t().ecLessons }} {{ lang.t().profileDashboard }}</p>
+        @if (meta.isCompleted) {
+          <a [routerLink]="['/teacher-evaluation', courseId()]" class="ec-eval-btn">📝 {{ lang.t().teEvalButton }}</a>
+        }
       </header>
     }
 

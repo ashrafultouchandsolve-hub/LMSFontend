@@ -24,6 +24,7 @@ type CourseDetailsView = {
   durationMinutes: number;
   thumbnailUrl: string;
   isPublished: boolean;
+  isCompleted: boolean;
   lessonCount: number;
   createdAt: string | null;
 };
@@ -278,6 +279,7 @@ readonly lang = inject(LanguageService);
       durationMinutes: course.durationMinutes,
       thumbnailUrl: this.learningApi.buildDownloadUrl(course.thumbnailPath),
       isPublished: course.isPublished,
+      isCompleted: course.isCompleted ?? false,
       lessonCount: course.lessonCount ?? 0,
       createdAt: course.createdAt ?? null,
     };

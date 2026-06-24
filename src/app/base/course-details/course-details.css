@@ -2,6 +2,16 @@
 	display: block;
 }
 
+/* Teacher-evaluation button (enrolled + completed course) */
+.cd-eval-btn {
+	margin-top: 10px;
+	background: linear-gradient(135deg, #f59e0b, #f97316) !important;
+	color: #fff !important;
+}
+.cd-eval-btn:hover {
+	filter: brightness(1.05);
+}
+
 /* Topbar: match home-page styling but slightly more compact for details view */
 .topbar {
 	display: flex;

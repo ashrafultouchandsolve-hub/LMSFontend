@@ -1,0 +1,107 @@
+.te-page {
+  min-height: 100vh;
+  padding: 28px 20px 64px;
+  background: linear-gradient(120deg, #f7faff 60%, #eef2fb 100%);
+  color: #1a2a3a;
+  font-family: 'Sora', 'Inter', sans-serif;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.te-header { text-align: center; margin: 18px 0 22px; }
+.te-header h1 { font-size: 1.7rem; font-weight: 800; color: #111827; margin: 0 0 6px; }
+.te-course { font-size: 1rem; font-weight: 700; color: #4f46e5; margin: 0 0 6px; }
+.te-lead { color: #6b7280; margin: 0; font-size: 0.9rem; }
+
+.te-anon-note {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #6b7280;
+  background: #eef2ff;
+  border: 1px solid #e0e7ff;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin: 0 0 18px;
+}
+
+/* States */
+.te-state {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 60px 16px; text-align: center; color: #6b7280;
+}
+.te-state span { font-size: 46px; }
+.te-spinner {
+  width: 34px; height: 34px; border: 3px solid #e5e7eb; border-top-color: #6366f1;
+  border-radius: 50%; animation: te-spin 0.8s linear infinite;
+}
+@keyframes te-spin { to { transform: rotate(360deg); } }
+.te-cta {
+  background: #6366f1; color: #fff; padding: 10px 24px; border-radius: 8px;
+  text-decoration: none; font-weight: 700; font-size: 0.9rem; margin-top: 6px;
+}
+
+/* Cards */
+.te-list { display: flex; flex-direction: column; gap: 18px; }
+.te-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+  padding: 20px 22px; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.te-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.te-avatar {
+  width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  border: 2px solid #eef2ff;
+}
+.te-avatar-fallback {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+  font-weight: 800; font-size: 1.1rem;
+}
+.te-teacher-meta { display: flex; flex-direction: column; gap: 3px; }
+.te-teacher-meta strong { font-size: 1rem; font-weight: 700; color: #111827; }
+.te-done-chip {
+  align-self: flex-start; font-size: 0.72rem; font-weight: 700;
+  background: #dcfce7; color: #15803d; padding: 2px 9px; border-radius: 999px;
+}
+
+/* Rating rows */
+.te-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 8px 0; border-bottom: 1px dashed #f1f3f7;
+}
+.te-row-overall { border-bottom: none; margin-top: 4px; padding-top: 12px; border-top: 2px solid #f1f3f7; }
+.te-crit { font-size: 0.9rem; font-weight: 600; color: #374151; }
+.te-row-overall .te-crit { font-weight: 800; color: #111827; }
+
+.te-stars { display: flex; gap: 2px; }
+.te-star {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  font-size: 1.35rem; line-height: 1; color: #d1d5db; transition: transform 0.08s, color 0.1s;
+}
+.te-star-lg { font-size: 1.7rem; }
+.te-star:hover { transform: scale(1.15); }
+.te-star.on { color: #f59e0b; }
+
+.te-comment {
+  width: 100%; margin-top: 14px; padding: 11px 13px; border: 1px solid #e5e7eb;
+  border-radius: 10px; font-family: inherit; font-size: 0.88rem; color: #1a2a3a;
+  resize: vertical; box-sizing: border-box;
+}
+.te-comment:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+
+.te-submit {
+  margin-top: 14px; width: 100%; background: #6366f1; color: #fff; border: none;
+  padding: 11px 18px; border-radius: 10px; font-weight: 700; font-size: 0.92rem;
+  cursor: pointer; transition: background 0.15s;
+}
+.te-submit:hover:not(:disabled) { background: #4f46e5; }
+.te-submit:disabled { background: #c7cad6; cursor: not-allowed; }
+
+.te-foot { text-align: center; margin-top: 24px; }
+.te-back-link { color: #6366f1; text-decoration: none; font-weight: 700; font-size: 0.9rem; }
+.te-back-link:hover { text-decoration: underline; }
+
+@media (max-width: 560px) {
+  .te-page { padding: 18px 12px 48px; }
+  .te-card { padding: 16px 16px; }
+  .te-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
