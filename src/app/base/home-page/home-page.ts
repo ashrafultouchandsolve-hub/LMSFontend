@@ -27,7 +27,7 @@ type HomeCourse = {
   category: string; instructorName: string;
   lessonCount: number; durationMinutes: number;
   enrollmentCount: number; videoCount: number; practiceCount: number;
-  price: number; thumbnailUrl: string; isEnrolled: boolean;
+  price: number; thumbnailUrl: string; isEnrolled: boolean; isCompleted: boolean;
   averageRating?: number; totalRatings?: number;
 };
 
@@ -440,6 +440,7 @@ private reviewInterval: any;
       practiceCount: dto.practiceCount ?? 0,
       thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
       isEnrolled: false,
+      isCompleted: dto.isCompleted ?? false,
     };
   }
 

@@ -229,10 +229,15 @@
               <button type="button" class="fcat-tool" (click)="cancelEditCategory()">Cancel</button>
             </div>
           } @else {
-            <span class="fcat-icon">{{ catIcon(cat.name) }}</span>
+            <div class="fcat-top">
+              <span class="fcat-icon">{{ catIcon(cat.name) }}</span>
+              <span class="fcat-count">{{ categoryCourseCount(cat.name) }} {{ lang.t().tcSideCourses }}</span>
+            </div>
             <span class="fcat-name">{{ cat.name }}</span>
-            <span class="fcat-count">{{ categoryCourseCount(cat.name) }} {{ lang.t().tcSideCourses }}</span>
-            <button type="button" class="fcat-action fcat-action-btn" (click)="manageCourses(cat.name)">📚 {{ lang.t().adManageCourses }} →</button>
+            <button type="button" class="fcat-manage" (click)="manageCourses(cat.name)">
+              <span>📚 {{ lang.t().adManageCourses }}</span>
+              <span class="fcat-manage-arrow">→</span>
+            </button>
             <div class="fcat-tools">
               <button type="button" class="fcat-tool" (click)="startEditCategory(cat)">✏️ Rename</button>
               @if (cat.isFixed) {
@@ -250,60 +255,9 @@
     </div>
     }
 
-    <!-- ========== COURSES ========== -->
+    <!-- ========== COURSES (full course-manager embedded) ========== -->
     @if (activeTab() === 'courses') {
-    <div class="page-header">
-      <h1>{{ lang.t().tcSideCourses }}</h1>
-      <p>{{ lang.t().adCoursesSub }}</p>
-    </div>
-    <div class="search-box">
-      <input
-        type="text"
-        class="search-input"
-        [placeholder]="lang.t().adSearchCourseTeacher"
-        [ngModel]="courseSearch()" (ngModelChange)="courseSearch.set($event)"
-      />
-    </div>
-    @if (filteredCourses().length === 0) {
-      <p class="empty-row">{{ lang.t().adNoCourses }}</p>
-    }
-    @for (group of coursesByCategory(); track group.category) {
-      <div class="course-cat-group" [class.open]="isCatOpen(group.category)">
-        <button type="button" class="course-cat-head" (click)="toggleCat(group.category)" [attr.aria-expanded]="isCatOpen(group.category)">
-          <span class="course-cat-caret">▾</span>
-          <span class="course-cat-name">🗂️ {{ group.category }}</span>
-          <span class="course-cat-count">{{ group.courses.length }}</span>
-        </button>
-        @if (isCatOpen(group.category)) {
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>{{ lang.t().tcThTitle }}</th>
-                  <th>{{ lang.t().adThTeacher }}</th>
-                  <th>{{ lang.t().tcThPrice }}</th>
-                  <th>{{ lang.t().adThEnrollments }}</th>
-                  <th>{{ lang.t().tcThActions }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (course of group.courses; track course.id) {
-                <tr>
-                  <td>{{ course.title }}</td>
-                  <td>{{ course.teacherName }}</td>
-                  <td>৳{{ course.price }}</td>
-                  <td>{{ course.enrollmentCount }}</td>
-                  <td class="actions-cell">
-                    <button class="btn btn-delete" (click)="deleteCourse(course.id)">{{ lang.t().commonDelete }}</button>
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      </div>
-    }
+      <app-teacher [embedded]="true"></app-teacher>
     }
 
     <!-- ========== COMMENTS ========== -->

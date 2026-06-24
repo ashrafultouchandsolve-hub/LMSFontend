@@ -49,6 +49,16 @@ export class LiveClassService {
     return this.http.put(`${this.baseUrl}/end/${id}`, {});
   }
 
+  /** Teacher: rename / edit a live class (or its recording). */
+  updateLiveClass(id: string, dto: { title: string; description: string }): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}`, dto);
+  }
+
+  /** Teacher: delete a live class and its recording. */
+  deleteLiveClass(id: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`);
+  }
+
   join(id: string): Observable<{ roomUrl: string; userName: string; title: string }> {
     return this.http.get<any>(`${this.baseUrl}/join/${id}`);
   }
@@ -67,6 +77,11 @@ export class LiveClassService {
   /** A course's live-class recordings (for the in-course Live Class section). */
   getCourseRecordings(courseId: string): Observable<{ data: LiveClass[] }> {
     return this.http.get<any>(`${this.baseUrl}/course/${courseId}/recordings`);
+  }
+
+  /** Active scheduled (course) live classes for the current user — enrolled or taught. */
+  getMyActiveScheduled(): Observable<{ data: any[] }> {
+    return this.http.get<any>(`${this.baseUrl}/my-active`);
   }
 
   // ── Free / public live classes ─────────────────────────────────

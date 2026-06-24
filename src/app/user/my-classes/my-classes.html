@@ -40,7 +40,7 @@
                   <p class="mc-active-desc">{{ lc.description }}</p>
                 }
               </div>
-              <a [routerLink]="['/live-class', lc.id]" class="mc-join-btn">
+              <a [routerLink]="[lc.isFree ? '/free-live' : '/live-class', lc.id]" class="mc-join-btn">
                 {{ lang.t().liveJoinNow }}
               </a>
             </div>
@@ -76,7 +76,7 @@
     <section class="mc-courses-section">
       <h2 class="mc-section-title">📚 {{ lang.t().mcByCourseSec }}</h2>
 
-      @if (courses().length === 0) {
+      @if (breakdownCourses().length === 0) {
         <div class="mc-empty">
           <span>📭</span>
           <h3>{{ lang.t().mcNoEnrolled }}</h3>
@@ -86,7 +86,7 @@
       }
 
       <div class="mc-course-list">
-        @for (course of courses(); track course.id) {
+        @for (course of breakdownCourses(); track course.id) {
           <div class="mc-course-card">
 
             <!-- Course header -->
@@ -96,11 +96,7 @@
                 <strong>{{ course.title }}</strong>
                 <span>{{ course.instructorName }} · {{ course.category }}</span>
               </div>
-              @if (course.isFollowed) {
-                <span class="mc-free-tag">🔔 Following · Free</span>
-              } @else {
-                <span class="mc-live-count">{{ totalLive(course) }} live</span>
-              }
+              <span class="mc-live-count">{{ totalLive(course) }} live</span>
             </div>
 
             <!-- Live classes of this course -->

@@ -31,6 +31,11 @@
           <article class="fl-card">
             <div class="fl-card-top">
               <span class="fl-live-tag"><span class="fl-live-dot"></span> {{ lang.t().flLiveNow }}</span>
+              @if (c.kind === 'scheduled') {
+                <span class="fl-kind-tag fl-kind-tag--course">🎓 {{ lang.t().flKindCourse }}</span>
+              } @else {
+                <span class="fl-kind-tag fl-kind-tag--free">🔓 {{ lang.t().flKindFree }}</span>
+              }
             </div>
             @if (c.courseTitle) { <span class="fl-card-course">🗂️ {{ c.courseTitle }}</span> }
             <h3 class="fl-card-title">{{ c.title }}</h3>
@@ -41,9 +46,15 @@
               <span class="fl-host-ava">🧑‍🏫</span>
               <span class="fl-host-text">{{ lang.t().flHostedBy }} <strong>{{ c.hostName || 'Instructor' }}</strong></span>
             </div>
-            <button type="button" class="fl-join-btn" (click)="openJoin(c.id)">
-              ▶ {{ lang.t().flJoin }}
-            </button>
+            @if (c.kind === 'scheduled') {
+              <button type="button" class="fl-join-btn" (click)="joinScheduled(c.id)">
+                ▶ {{ lang.t().flJoin }}
+              </button>
+            } @else {
+              <button type="button" class="fl-join-btn" (click)="openJoin(c.id)">
+                ▶ {{ lang.t().flJoin }}
+              </button>
+            }
           </article>
         }
       </div>

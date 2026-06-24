@@ -5,6 +5,7 @@ export type Language = 'en' | 'bn';
 export interface Translations {
   // Navbar (navLive = public free live classes link)
   navTracks: string; navCourses: string; navVision: string; navLogin: string; navLive: string;
+  navLiveFree: string; navLiveScheduled: string; navLiveNone: string; navLiveViewAll: string;
   navGetStarted: string; navLogout: string; navProfile: string; navTeacher: string; navHi: string;
   // Hero
   heroEyebrow: string; heroH1Part1: string; heroH1Accent: string; heroH1Part2: string;
@@ -23,6 +24,7 @@ export interface Translations {
   coursesSearchHint: string; coursesSearchLabel: string; coursesSearchPlaceholder: string; coursesBackHome: string;
   courseCategory: string; courseInstructor: string; courseLessons: string; courseDuration: string;
   coursePrice: string; courseSeeMore: string; courseEnrolled: string; courseEnrollNow: string;
+  courseCompleted: string; tcMarkCompleted: string; tcMarkOngoing: string;
   courseStartLearning: string; courseDurationUnit: string; courseManage: string;
   // Features
   feature1Title: string; feature1Desc: string; feature2Title: string; feature2Desc: string; feature3Title: string; feature3Desc: string;
@@ -155,6 +157,7 @@ export interface Translations {
   // Public free live page
   flBadge: string; flTitle: string; flSubtitle: string; flRefresh: string; flLoading: string;
   flNoneTitle: string; flNoneDesc: string; flLiveNow: string; flHostedBy: string; flJoin: string;
+  flKindCourse: string; flKindFree: string;
   flGuestHint: string; flJoinModalTitle: string; flJoinModalDesc: string; flNameLabel: string;
   flNamePlaceholder: string; flCancel: string; flEnterRoom: string;
   tcCoursesSub: string; tcNewCourse: string; tcSearchCourses: string;
@@ -183,6 +186,10 @@ export interface Translations {
   lcRecPromptDesc: string; lcRecBrowserNote: string; lcRecStart: string; lcRecSkip: string;
   lcRecDenied: string; lcRecStoppedShare: string; lcRecUploadFailed: string;
   recSectionTitle: string; recWatch: string;
+  recManageTitle: string; recManageSub: string; recNone: string; recLoading: string;
+  recStatusReady: string; recStatusProcessing: string; recStatusFailed: string;
+  recTitleRequired: string; recUpdated: string; recUpdateFailed: string;
+  recDeleteConfirm: string; recDeleted: string; recDeleteFailed: string; recWatchFailed: string;
   // Exams (student)
   exSectionTitle: string; exCourseTitle: string; exFirst: string; exSecond: string; exFinal: string;
   exLocked: string; exNotAvailable: string; exPending: string; exSubmitted: string; exGraded: string;
@@ -234,6 +241,7 @@ export interface Translations {
 
 const EN: Translations = {
   navTracks: 'Tracks', navCourses: 'Courses', navVision: 'Vision', navLogin: 'Login', navLive: 'Live',
+  navLiveFree: 'Free live', navLiveScheduled: 'Course live', navLiveNone: 'No live class right now', navLiveViewAll: 'View all live classes',
   navGetStarted: 'Get started', navLogout: 'Logout', navProfile: 'Profile', navTeacher: 'Instructor', navHi: 'Hi,',
   heroEyebrow: 'Trusted learning ecosystem', heroH1Part1: 'Learn in-demand', heroH1Accent: 'skills', heroH1Part2: 'with structured paths.',
   heroLead: 'Grow from fundamentals to advanced implementation through mentor-guided modules and hands-on labs designed for real-world outcomes.',
@@ -253,7 +261,8 @@ const EN: Translations = {
   coursesBackHome: 'Back To Home',
   courseCategory: 'Category:', courseInstructor: 'Instructor:', courseLessons: 'Lessons:',
   courseDuration: 'Duration:', coursePrice: 'Price:', courseSeeMore: 'See more',
-  courseEnrolled: 'Enrolled', courseEnrollNow: 'Enroll Now', courseStartLearning: 'Start learning', courseDurationUnit: 'min', courseManage: 'Manage',
+  courseEnrolled: 'Enrolled', courseEnrollNow: 'Enroll Now', courseStartLearning: 'Start learning', courseDurationUnit: 'months', courseManage: 'Manage',
+  courseCompleted: 'Completed', tcMarkCompleted: '✓ Mark Completed', tcMarkOngoing: '↺ Mark Ongoing',
   feature1Title: 'Outcome-based curriculum', feature1Desc: 'Follow role-focused modules designed around practical, job-ready outcomes.',
   feature2Title: 'Progress and performance analytics', feature2Desc: 'Track completion, assessment scores, and learning consistency in one dashboard.',
   feature3Title: 'Mentor-guided growth', feature3Desc: 'Get structured feedback and guidance to accelerate your learning path.',
@@ -388,7 +397,7 @@ const EN: Translations = {
   qeSaving: 'Saving...', qeSavedQuizzes: 'Saved Quizzes',
   commonEdit: 'Edit', commonDelete: 'Delete', commonName: 'Name', commonTitle: 'Title', commonDescription: 'Description',
   tcAdminPanel: 'Admin Panel', tcSideDashboard: 'Dashboard', tcSideCourses: 'Courses', tcSideUsers: 'Users',
-  tcSideEnrollments: 'Enrollments', tcSideProfile: 'My Profile', tcBackToSite: 'Back to Site', tcSideLive: 'Live Class',
+  tcSideEnrollments: 'Enrollments', tcSideProfile: 'My Profile', tcBackToSite: 'Back to Site', tcSideLive: 'Free Live Class',
   tcLiveTitle: 'Free Live Class', tcLiveSub: 'Start a public live class anyone can join — no login or registration needed.',
   tcLiveStartHeading: 'Start a new free live class',
   tcLivePickCourse: 'Select a course…',
@@ -399,6 +408,7 @@ const EN: Translations = {
   flRefresh: 'Refresh', flLoading: 'Loading live classes...',
   flNoneTitle: 'No live classes right now', flNoneDesc: 'There are no free live classes streaming at the moment. Check back soon!',
   flLiveNow: 'Live Now', flHostedBy: 'Hosted by', flJoin: 'Join Class',
+  flKindCourse: 'Course', flKindFree: 'Free',
   flGuestHint: 'You can join any free live class without an account — just enter your name.',
   flJoinModalTitle: 'Join the live class', flJoinModalDesc: 'Enter a name to show to others, then jump right in.',
   flNameLabel: 'Your name (optional)', flNamePlaceholder: 'e.g. Rahim', flCancel: 'Cancel', flEnterRoom: 'Enter Room',
@@ -414,7 +424,7 @@ const EN: Translations = {
   tcLoadingLive: 'Loading live classes...', tcStart: 'Start', tcEnd: 'End', tcNoLiveScheduled: 'No live class scheduled yet.',
   tcCreateLiveTitle: 'Create Live Class', tcScheduledAt: 'Scheduled At', tcLiveTitlePlaceholder: 'e.g. Chapter 5 Discussion',
   tcLiveDescPlaceholder: 'What the class is about...', tcCreateLiveBtn: 'Create Live Class',
-  tcInstructorName: 'Instructor Name', tcLevelLabel: 'Level', tcPriceLabel: 'Price (0 = Free)', tcDurationLabel: 'Duration (minutes)',
+  tcInstructorName: 'Instructor Name', tcLevelLabel: 'Level', tcPriceLabel: 'Price (0 = Free)', tcDurationLabel: 'Duration (months)',
   tcThumbnailUrl: 'Thumbnail URL', tcUploadThumb: 'Or Upload Thumbnail Image', tcPublishCourse: 'Publish course', tcSaveCourse: 'Save Course',
   tcLessonTitle: 'Lesson Title', tcVideoType: 'Video Type', tcOrderIndex: 'Order Index', tcVideoUrl: 'Video URL',
   tcUploadVideo: 'Or Upload Video File', tcUploadingVideo: 'Uploading video...', tcLessonThumb: 'Lesson Thumbnail (optional)',
@@ -439,6 +449,11 @@ const EN: Translations = {
   lcRecStoppedShare: 'Screen sharing stopped — your recording is saved. End the class to upload it.',
   lcRecUploadFailed: 'The recording could not be uploaded, but the class ended normally.',
   recSectionTitle: 'Recorded Live Classes', recWatch: 'Watch',
+  recManageTitle: '🎬 Class Recordings', recManageSub: 'Recorded live classes for this course. Rename or delete them.',
+  recNone: 'No recordings for this course yet.', recLoading: 'Loading recordings…',
+  recStatusReady: 'Ready', recStatusProcessing: 'Processing…', recStatusFailed: 'Failed',
+  recTitleRequired: 'Title is required.', recUpdated: 'Recording updated.', recUpdateFailed: 'Failed to update recording.',
+  recDeleteConfirm: 'Delete this recording? This cannot be undone.', recDeleted: 'Recording deleted.', recDeleteFailed: 'Failed to delete recording.', recWatchFailed: 'Could not open the recording.',
   exSectionTitle: 'My Exams', exCourseTitle: 'Course:', exFirst: '1st Exam', exSecond: '2nd Exam', exFinal: 'Final Exam',
   exLocked: 'Locked', exNotAvailable: 'Not available yet', exPending: 'Pending', exSubmitted: 'Submitted', exGraded: 'Graded',
   exMissed: 'Missed', exClosed: 'Closed — deadline passed', exDeadline: 'Deadline', exInstruction: 'Instruction', exQuestion: 'Question',
@@ -494,6 +509,7 @@ const EN: Translations = {
 
 const BN: Translations = {
   navTracks: 'ট্র্যাকস', navCourses: 'কোর্সসমূহ', navVision: 'আমাদের লক্ষ্য', navLogin: 'লগইন', navLive: 'লাইভ',
+  navLiveFree: 'ফ্রি লাইভ', navLiveScheduled: 'কোর্স লাইভ', navLiveNone: 'এখন কোনো লাইভ ক্লাস নেই', navLiveViewAll: 'সব লাইভ ক্লাস দেখুন',
   navGetStarted: 'শুরু করুন', navLogout: 'লগআউট', navProfile: 'প্রোফাইল', navTeacher: 'শিক্ষক', navHi: 'হ্যালো,',
   heroEyebrow: 'বিশ্বস্ত শিক্ষা প্ল্যাটফর্ম', heroH1Part1: 'চাহিদাসম্পন্ন', heroH1Accent: 'দক্ষতা', heroH1Part2: 'শিখুন কাঠামোবদ্ধ পথে।',
   heroLead: 'মেন্টর-গাইডেড মডিউল ও হ্যান্ডস-অন ল্যাবের মাধ্যমে বেসিক থেকে অ্যাডভান্সড পর্যন্ত শিখুন।',
@@ -513,7 +529,8 @@ const BN: Translations = {
   coursesBackHome: 'হোমে ফিরুন',
   courseCategory: 'বিষয়:', courseInstructor: 'প্রশিক্ষক:', courseLessons: 'পাঠ:',
   courseDuration: 'সময়কাল:', coursePrice: 'মূল্য:', courseSeeMore: 'আরো দেখুন',
-  courseEnrolled: 'ভর্তি হয়েছেন', courseEnrollNow: 'এখনই ভর্তি হন', courseStartLearning: 'শেখা শুরু করুন', courseDurationUnit: 'মিনিট', courseManage: 'ম্যানেজ',
+  courseEnrolled: 'ভর্তি হয়েছেন', courseEnrollNow: 'এখনই ভর্তি হন', courseStartLearning: 'শেখা শুরু করুন', courseDurationUnit: 'মাস', courseManage: 'ম্যানেজ',
+  courseCompleted: 'সম্পন্ন', tcMarkCompleted: '✓ সম্পন্ন করুন', tcMarkOngoing: '↺ চলমান করুন',
   feature1Title: 'ফলাফল-ভিত্তিক পাঠ্যক্রম', feature1Desc: 'বাস্তব, চাকরি-উপযোগী ফলাফলের উপর ভিত্তি করে রোল-কেন্দ্রিক মডিউল অনুসরণ করুন।',
   feature2Title: 'অগ্রগতি ও কর্মক্ষমতা বিশ্লেষণ', feature2Desc: 'একটি ড্যাশবোর্ডে সম্পন্নতা, মূল্যায়ন স্কোর ট্র্যাক করুন।',
   feature3Title: 'মেন্টর-গাইডেড বিকাশ', feature3Desc: 'আপনার শিক্ষার পথ ত্বরান্বিত করতে কাঠামোবদ্ধ গাইডেন্স পান।',
@@ -648,7 +665,7 @@ const BN: Translations = {
   qeSaving: 'সংরক্ষণ হচ্ছে...', qeSavedQuizzes: 'সংরক্ষিত কুইজ',
   commonEdit: 'এডিট', commonDelete: 'মুছুন', commonName: 'নাম', commonTitle: 'শিরোনাম', commonDescription: 'বিবরণ',
   tcAdminPanel: 'অ্যাডমিন প্যানেল', tcSideDashboard: 'ড্যাশবোর্ড', tcSideCourses: 'কোর্স', tcSideUsers: 'ব্যবহারকারী',
-  tcSideEnrollments: 'এনরোলমেন্ট', tcSideProfile: 'আমার প্রোফাইল', tcBackToSite: 'সাইটে ফিরুন', tcSideLive: 'লাইভ ক্লাস',
+  tcSideEnrollments: 'এনরোলমেন্ট', tcSideProfile: 'আমার প্রোফাইল', tcBackToSite: 'সাইটে ফিরুন', tcSideLive: 'ফ্রি লাইভ ক্লাস',
   tcLiveTitle: 'ফ্রি লাইভ ক্লাস', tcLiveSub: 'এমন একটি পাবলিক লাইভ ক্লাস শুরু করুন যেখানে যে কেউ লগইন বা রেজিস্ট্রেশন ছাড়াই যোগ দিতে পারে।',
   tcLiveStartHeading: 'নতুন ফ্রি লাইভ ক্লাস শুরু করুন',
   tcLivePickCourse: 'একটি কোর্স বেছে নিন…',
@@ -659,6 +676,7 @@ const BN: Translations = {
   flRefresh: 'রিফ্রেশ', flLoading: 'লাইভ ক্লাস লোড হচ্ছে...',
   flNoneTitle: 'এখন কোনো লাইভ ক্লাস নেই', flNoneDesc: 'এই মুহূর্তে কোনো ফ্রি লাইভ ক্লাস চলছে না। একটু পরে আবার দেখুন!',
   flLiveNow: 'এখন লাইভ', flHostedBy: 'হোস্ট করছেন', flJoin: 'ক্লাসে যোগ দিন',
+  flKindCourse: 'কোর্স', flKindFree: 'ফ্রি',
   flGuestHint: 'অ্যাকাউন্ট ছাড়াই যেকোনো ফ্রি লাইভ ক্লাসে যোগ দিতে পারেন — শুধু আপনার নাম লিখুন।',
   flJoinModalTitle: 'লাইভ ক্লাসে যোগ দিন', flJoinModalDesc: 'অন্যদের দেখানোর জন্য একটি নাম লিখুন, তারপর সরাসরি ঢুকে পড়ুন।',
   flNameLabel: 'আপনার নাম (ঐচ্ছিক)', flNamePlaceholder: 'যেমন: রহিম', flCancel: 'বাতিল', flEnterRoom: 'রুমে ঢুকুন',
@@ -674,7 +692,7 @@ const BN: Translations = {
   tcLoadingLive: 'লাইভ ক্লাস লোড হচ্ছে...', tcStart: 'শুরু', tcEnd: 'শেষ', tcNoLiveScheduled: 'এখনো কোনো লাইভ ক্লাস schedule করা হয়নি।',
   tcCreateLiveTitle: 'লাইভ ক্লাস তৈরি করুন', tcScheduledAt: 'নির্ধারিত সময়', tcLiveTitlePlaceholder: 'যেমন: অধ্যায় ৫ আলোচনা',
   tcLiveDescPlaceholder: 'কী নিয়ে class হবে...', tcCreateLiveBtn: 'লাইভ ক্লাস তৈরি',
-  tcInstructorName: 'প্রশিক্ষকের নাম', tcLevelLabel: 'স্তর', tcPriceLabel: 'মূল্য (০ = ফ্রি)', tcDurationLabel: 'সময়কাল (মিনিট)',
+  tcInstructorName: 'প্রশিক্ষকের নাম', tcLevelLabel: 'স্তর', tcPriceLabel: 'মূল্য (০ = ফ্রি)', tcDurationLabel: 'সময়কাল (মাস)',
   tcThumbnailUrl: 'থাম্বনেইল URL', tcUploadThumb: 'অথবা থাম্বনেইল ছবি আপলোড করুন', tcPublishCourse: 'কোর্স publish করুন', tcSaveCourse: 'কোর্স সংরক্ষণ',
   tcLessonTitle: 'পাঠের শিরোনাম', tcVideoType: 'ভিডিও টাইপ', tcOrderIndex: 'ক্রম সূচক', tcVideoUrl: 'ভিডিও URL',
   tcUploadVideo: 'অথবা ভিডিও ফাইল আপলোড করুন', tcUploadingVideo: 'ভিডিও আপলোড হচ্ছে...', tcLessonThumb: 'পাঠের থাম্বনেইল (ঐচ্ছিক)',
@@ -699,6 +717,11 @@ const BN: Translations = {
   lcRecStoppedShare: 'স্ক্রিন শেয়ার বন্ধ হয়েছে — রেকর্ডিং সেভ হয়ে আছে। আপলোড করতে ক্লাস শেষ করুন।',
   lcRecUploadFailed: 'রেকর্ডিং আপলোড করা যায়নি, তবে ক্লাস স্বাভাবিকভাবে শেষ হয়েছে।',
   recSectionTitle: 'রেকর্ড করা লাইভ ক্লাস', recWatch: 'দেখুন',
+  recManageTitle: '🎬 ক্লাস রেকর্ডিং', recManageSub: 'এই কোর্সের রেকর্ড করা লাইভ ক্লাস। নাম পরিবর্তন বা ডিলিট করুন।',
+  recNone: 'এই কোর্সে এখনো কোনো রেকর্ডিং নেই।', recLoading: 'রেকর্ডিং লোড হচ্ছে…',
+  recStatusReady: 'প্রস্তুত', recStatusProcessing: 'প্রসেসিং…', recStatusFailed: 'ব্যর্থ',
+  recTitleRequired: 'টাইটেল দিতে হবে।', recUpdated: 'রেকর্ডিং আপডেট হয়েছে।', recUpdateFailed: 'রেকর্ডিং আপডেট ব্যর্থ হয়েছে।',
+  recDeleteConfirm: 'এই রেকর্ডিং ডিলিট করবেন? এটি ফেরানো যাবে না।', recDeleted: 'রেকর্ডিং ডিলিট হয়েছে।', recDeleteFailed: 'রেকর্ডিং ডিলিট ব্যর্থ হয়েছে।', recWatchFailed: 'রেকর্ডিং খোলা যায়নি।',
   exSectionTitle: 'আমার পরীক্ষা', exCourseTitle: 'কোর্স:', exFirst: '১ম পরীক্ষা', exSecond: '২য় পরীক্ষা', exFinal: 'ফাইনাল পরীক্ষা',
   exLocked: 'লক', exNotAvailable: 'এখনো উপলব্ধ নয়', exPending: 'বাকি আছে', exSubmitted: 'জমা হয়েছে', exGraded: 'মূল্যায়িত',
   exMissed: 'মিস হয়েছে', exClosed: 'বন্ধ — সময় শেষ', exDeadline: 'শেষ তারিখ', exInstruction: 'নির্দেশনা', exQuestion: 'প্রশ্ন',

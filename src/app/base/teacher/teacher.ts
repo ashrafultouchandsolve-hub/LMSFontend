@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse, HttpEvent } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
@@ -33,6 +33,8 @@ type Lesson = {
   description: string;
   videoType: VideoType;
   videoUrl: string;
+  /** Raw backend file path for uploaded videos (empty for external/YouTube links). */
+  videoPath: string;
   durationMinutes: number;
   orderIndex: number;
   isPreview: boolean;
@@ -51,6 +53,7 @@ type Course = {
   durationMinutes: number;
   thumbnailUrl: string;
   published: boolean;
+  completed: boolean;
   students: number;
   averageRating: number;
   totalRatings: number;
@@ -66,6 +69,13 @@ type Course = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Teacher implements OnInit {
+  /**
+   * Embedded mode — when hosted inside another shell (e.g. the admin dashboard's
+   * "Manage Courses" tab) we hide this component's own navbar + dark sidebar and
+   * drop the full-viewport background, so only the course-management body shows.
+   */
+  readonly embedded = input(false);
+
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(NonNullableFormBuilder);
@@ -101,6 +111,12 @@ export class Teacher implements OnInit {
 
   protected readonly courses = signal<Course[]>([]);
 protected readonly liveClasses    = signal<LiveClass[]>([]);
+// Live-class recordings for the open course (teacher can rename / delete them)
+protected readonly courseRecordings = signal<LiveClass[]>([]);
+protected readonly isLoadingRecordings = signal(false);
+protected readonly editingRecordingId = signal<string | null>(null);
+protected editRecTitle = '';
+protected editRecDesc = '';
 protected readonly isCreatingLive = signal(false);
 protected liveTitle       = '';
 protected liveDesc        = '';
@@ -509,6 +525,19 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     }
   }
 
+  /** Admin: flip a course between "completed" and "ongoing". */
+  protected async toggleComplete(course: Course): Promise<void> {
+    const next = !course.completed;
+    if (next && !window.confirm('Mark this course as completed?')) return;
+    try {
+      await firstValueFrom(this.learningApi.setCourseCompleted(course.id, next));
+      this.courses.update(list => list.map(c => c.id === course.id ? { ...c, completed: next } : c));
+      this.setNotice(next ? 'Course marked as completed.' : 'Course set back to ongoing.', 'success');
+    } catch {
+      this.setNotice('Could not update course status.', 'error');
+    }
+  }
+
   protected async deleteCourse(courseId: string): Promise<void> {
     if (!this.authService.isLoggedIn()) {
       this.setNotice('আপনি লগইন করেন নি। প্রথমে লগইন করুন।', 'error');
@@ -537,6 +566,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.selectedCourseId.set(courseId);
     await this.loadLessons(courseId);
     await this.loadLiveClasses(courseId);
+    await this.loadRecordings(courseId);
     await this.loadExams(courseId);
     await this.loadPractice(courseId);
   }
@@ -878,6 +908,43 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       isPreview: lesson.isPreview,
     });
     this.showLessonModal.set(true);
+  }
+
+  /**
+   * Open a lesson video in a new tab.
+   * - Uploaded videos are served through a token-protected stream endpoint, so a
+   *   plain link 401s ("Video token required"). We fetch a signed token first and
+   *   open the signed URL.
+   * - External links (YouTube/Vimeo/Direct URL) are opened as-is.
+   */
+  protected async openVideo(lesson: Lesson): Promise<void> {
+    const rawUrl = lesson.videoUrl?.trim();
+    if (!rawUrl && !lesson.videoPath) {
+      return;
+    }
+
+    // Uploaded video — needs a fresh signed token to stream.
+    if (lesson.videoPath) {
+      try {
+        const res = await firstValueFrom(this.learningApi.getVideoToken(lesson.videoPath));
+        const isHls = lesson.videoPath.toLowerCase().endsWith('.m3u8');
+        const endpoint = isHls ? 'files/hls/playlist' : 'files/stream';
+        const params = new URLSearchParams({
+          path: lesson.videoPath,
+          token: res?.token ?? '',
+          exp: String(res?.exp ?? ''),
+        });
+        window.open(`${this.learningApi.getBaseUrl()}/${endpoint}?${params.toString()}`, '_blank', 'noopener');
+        return;
+      } catch {
+        // Token fetch failed — fall through and try the raw URL below.
+      }
+    }
+
+    // External link — make sure it has a protocol so the browser doesn't treat
+    // "youtube.com/..." as a relative app route.
+    const external = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+    window.open(external, '_blank', 'noopener');
   }
 
   protected closeLessonModal(): void {
@@ -1316,6 +1383,85 @@ private async loadTeacherCourses(): Promise<void> {
     }
   }
 
+  // ── Live-class recordings (shown inside the course, teacher-managed) ──
+  private async loadRecordings(courseId: string): Promise<void> {
+    this.isLoadingRecordings.set(true);
+    try {
+      const res: any = await firstValueFrom(this.liveClassService.getCourseRecordings(courseId));
+      const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+      this.courseRecordings.set(arr.map((item: any) => ({
+        id: item.id ?? item.Id ?? '',
+        title: item.title ?? item.Title ?? '',
+        description: item.description ?? item.Description ?? '',
+        scheduledAt: item.scheduledAt ?? item.ScheduledAt ?? '',
+        isActive: false,
+        isEnded: true,
+        roomUrl: '',
+        recordingPath: item.recordingPath ?? item.RecordingPath ?? '',
+        recordingStatus: item.recordingStatus ?? item.RecordingStatus ?? '',
+      })));
+    } catch {
+      this.courseRecordings.set([]);
+    } finally {
+      this.isLoadingRecordings.set(false);
+    }
+  }
+
+  /** Open a recording in a new tab via a signed token URL (raw stream, or HLS playlist for legacy). */
+  protected async watchRecording(rec: LiveClass): Promise<void> {
+    if (!rec.recordingPath) return;
+    const isHls = rec.recordingPath.toLowerCase().endsWith('.m3u8');
+    try {
+      const res = await firstValueFrom(this.learningApi.getVideoToken(rec.recordingPath));
+      const endpoint = isHls ? 'files/hls/playlist' : 'files/stream';
+      const params = new URLSearchParams({
+        path: rec.recordingPath,
+        token: res?.token ?? '',
+        exp: String(res?.exp ?? ''),
+      });
+      window.open(`${this.learningApi.getBaseUrl()}/${endpoint}?${params.toString()}`, '_blank', 'noopener');
+    } catch {
+      this.setNotice(this.lang.t().recWatchFailed, 'error');
+    }
+  }
+
+  protected startEditRecording(rec: LiveClass): void {
+    this.editingRecordingId.set(rec.id);
+    this.editRecTitle = rec.title;
+    this.editRecDesc = rec.description ?? '';
+  }
+
+  protected cancelEditRecording(): void {
+    this.editingRecordingId.set(null);
+  }
+
+  protected async saveRecording(rec: LiveClass): Promise<void> {
+    const title = this.editRecTitle.trim();
+    if (!title) {
+      this.setNotice(this.lang.t().recTitleRequired, 'error');
+      return;
+    }
+    try {
+      await firstValueFrom(this.liveClassService.updateLiveClass(rec.id, { title, description: this.editRecDesc.trim() }));
+      this.editingRecordingId.set(null);
+      await this.loadRecordings(this.selectedCourseId()!);
+      this.setNotice(this.lang.t().recUpdated, 'success');
+    } catch {
+      this.setNotice(this.lang.t().recUpdateFailed, 'error');
+    }
+  }
+
+  protected async deleteRecording(rec: LiveClass): Promise<void> {
+    if (!confirm(this.lang.t().recDeleteConfirm)) return;
+    try {
+      await firstValueFrom(this.liveClassService.deleteLiveClass(rec.id));
+      await this.loadRecordings(this.selectedCourseId()!);
+      this.setNotice(this.lang.t().recDeleted, 'success');
+    } catch {
+      this.setNotice(this.lang.t().recDeleteFailed, 'error');
+    }
+  }
+
   private async loadLessons(courseId: string): Promise<void> {
     this.isLoadingLessons.set(true);
 
@@ -1365,6 +1511,7 @@ private mapCourse(
     durationMinutes: dto.durationMinutes,
     thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
     published: dto.isPublished,
+    completed: dto.isCompleted ?? false,
     students: studentCount,
     averageRating,
     totalRatings,
@@ -1383,6 +1530,7 @@ private mapCourse(
       videoUrl: dto.videoPath
         ? this.learningApi.buildStreamUrl(dto.videoPath)
         : (dto.videoUrl ?? ''),
+      videoPath: dto.videoPath ?? '',
       durationMinutes: dto.durationMinutes,
       orderIndex: dto.orderIndex,
       isPreview: dto.isFreePreview,

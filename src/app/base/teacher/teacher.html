@@ -1,32 +1,36 @@
-<div class="teacher-root">
-<app-navbar></app-navbar>
+<div class="teacher-root" [class.embedded]="embedded()">
+@if (!embedded()) {
+  <app-navbar></app-navbar>
+}
 <main class="teacher-page">
   <!-- NAVBAR -->
 
-  <aside class="sidebar" aria-label="Teacher dashboard navigation">
-    <div class="sidebar-head">
-      <h2>⚙ {{ lang.t().tcAdminPanel }}</h2>
-    </div>
+  @if (!embedded()) {
+    <aside class="sidebar" aria-label="Teacher dashboard navigation">
+      <div class="sidebar-head">
+        <h2>⚙ {{ lang.t().tcAdminPanel }}</h2>
+      </div>
 
-    <nav class="sidebar-nav">
-      @for (item of sidebarItems(); track item.key) {
-        <button
-          type="button"
-          class="side-link"
-          [class.active]="item.key === activeSidebarKey()"
-          (click)="selectSidebar(item.key)">
-          <span class="icon">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
-        </button>
+      <nav class="sidebar-nav">
+        @for (item of sidebarItems(); track item.key) {
+          <button
+            type="button"
+            class="side-link"
+            [class.active]="item.key === activeSidebarKey()"
+            (click)="selectSidebar(item.key)">
+            <span class="icon">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+          </button>
+        }
+      </nav>
+
+      @if (isAdminMode()) {
+        <button type="button" class="back-site" (click)="goToAdmin()">← {{ lang.t().tcBackToAdmin }}</button>
+      } @else {
+        <button type="button" class="back-site" (click)="goToHome()">← {{ lang.t().tcBackToSite }}</button>
       }
-    </nav>
-
-    @if (isAdminMode()) {
-      <button type="button" class="back-site" (click)="goToAdmin()">← {{ lang.t().tcBackToAdmin }}</button>
-    } @else {
-      <button type="button" class="back-site" (click)="goToHome()">← {{ lang.t().tcBackToSite }}</button>
-    }
-  </aside>
+    </aside>
+  }
 
   <section class="dashboard-area">
     @if (notice()) {
@@ -102,6 +106,9 @@
         }
       </section>
     } @else if (selectedCourse() === null) {
+      @if (isAdminMode() && !embedded()) {
+        <button type="button" class="cm-back-btn" (click)="goToAdmin()">← {{ lang.t().tcBackToAdmin }}</button>
+      }
       <header class="toolbar">
         <div>
           <h1>{{ isLiveTeacherMode() ? lang.t().tcMyCoursesLive : lang.t().tcSideCourses }}{{ categoryFilter() ? ' · ' + categoryFilter() : '' }}</h1>
@@ -164,12 +171,18 @@
                     <span class="status" [class.live]="course.published">
                       {{ course.published ? lang.t().cdPublished : lang.t().cdDraft }}
                     </span>
+                    @if (course.completed) {
+                      <span class="status status-completed">✓ {{ lang.t().courseCompleted }}</span>
+                    }
                   </td>
                   <td class="actions-cell">
                     @if (isAdminMode()) {
                       <button type="button" class="btn btn-students" (click)="goToStudents(course.id)">👥 {{ lang.t().tcBtnStudents }} ({{ course.students }})</button>
                       <button type="button" class="btn btn-outline" (click)="openLessons(course.id)">{{ lang.t().tcBtnLessons }}</button>
                       <button type="button" class="btn btn-ghost" (click)="openEditCourseModal(course.id)">{{ lang.t().commonEdit }}</button>
+                      <button type="button" class="btn" [class.btn-complete]="!course.completed" [class.btn-ongoing]="course.completed" (click)="toggleComplete(course)">
+                        {{ course.completed ? lang.t().tcMarkOngoing : lang.t().tcMarkCompleted }}
+                      </button>
                       <button type="button" class="btn btn-danger" (click)="deleteCourse(course.id)">{{ lang.t().commonDelete }}</button>
                     } @else {
                       <button type="button" class="btn btn-primary" (click)="openLessons(course.id)">🔴 {{ lang.t().tcManageLive }}</button>
@@ -232,9 +245,9 @@
             </div>
             <div class="lesson-actions">
               @if (lesson.videoUrl) {
-                <a class="btn btn-outline" [href]="lesson.videoUrl" target="_blank" rel="noopener noreferrer">
+                <button type="button" class="btn btn-outline" (click)="openVideo(lesson)">
                   {{ lang.t().tcOpenVideo }}
-                </a>
+                </button>
               }
               @if (lesson.thumbnailUrl) {
                 <a class="btn btn-outline" [href]="lesson.thumbnailUrl" target="_blank" rel="noopener noreferrer">
@@ -294,6 +307,64 @@
           </div>
         } @else {
           <p class="empty-state">{{ lang.t().tcNoLiveScheduled }}</p>
+        }
+      </section>
+      }
+
+      <!-- Class recordings: in-course, managed by the appointed teacher or admin (rename / delete) -->
+      @if (isLiveTeacherMode() || isAdminMode()) {
+      <section class="panel rec-panel" aria-label="Class recordings">
+        <div class="live-panel-head">
+          <div>
+            <h2>{{ lang.t().recManageTitle }}</h2>
+            <p>{{ lang.t().recManageSub }}</p>
+          </div>
+        </div>
+
+        @if (isLoadingRecordings()) {
+          <p class="loading-text">{{ lang.t().recLoading }}</p>
+        } @else if (courseRecordings().length === 0) {
+          <p class="empty-state">{{ lang.t().recNone }}</p>
+        } @else {
+          <div class="rec-list">
+            @for (rec of courseRecordings(); track rec.id) {
+              <article class="rec-item">
+                @if (editingRecordingId() === rec.id) {
+                  <div class="rec-edit">
+                    <input type="text" [(ngModel)]="editRecTitle" [placeholder]="lang.t().tcLiveTitlePlaceholder" maxlength="80" />
+                    <input type="text" [(ngModel)]="editRecDesc" [placeholder]="lang.t().tcLiveDescPlaceholder" maxlength="160" />
+                    <div class="rec-edit-actions">
+                      <button type="button" class="btn btn-primary" (click)="saveRecording(rec)">✓ {{ lang.t().commonSave }}</button>
+                      <button type="button" class="btn btn-ghost" (click)="cancelEditRecording()">{{ lang.t().commonCancel }}</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="rec-item-info">
+                    <span class="rec-ico">🎬</span>
+                    <div class="rec-item-text">
+                      <strong>{{ rec.title }}</strong>
+                      <span class="rec-meta">
+                        🕐 {{ rec.scheduledAt | date:'dd MMM, hh:mm a' }}
+                        @if (rec.recordingStatus === 'Processing') {
+                          <span class="rec-status rec-status--processing">{{ lang.t().recStatusProcessing }}</span>
+                        } @else if (rec.recordingStatus === 'Failed') {
+                          <span class="rec-status rec-status--failed">{{ lang.t().recStatusFailed }}</span>
+                        } @else {
+                          <span class="rec-status rec-status--ready">{{ lang.t().recStatusReady }}</span>
+                        }
+                      </span>
+                      @if (rec.description) { <p class="rec-desc">{{ rec.description }}</p> }
+                    </div>
+                  </div>
+                  <div class="rec-item-actions">
+                    <button type="button" class="btn btn-outline" (click)="watchRecording(rec)">▶ {{ lang.t().recWatch }}</button>
+                    <button type="button" class="btn btn-ghost" (click)="startEditRecording(rec)">✏️ {{ lang.t().commonEdit }}</button>
+                    <button type="button" class="btn btn-danger" (click)="deleteRecording(rec)">🗑 {{ lang.t().commonDelete }}</button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
         }
       </section>
       }

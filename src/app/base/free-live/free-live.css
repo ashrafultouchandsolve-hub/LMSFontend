@@ -111,6 +111,12 @@
   border-color: rgba(129, 140, 248, 0.45);
   box-shadow: 0 28px 54px -26px rgba(99, 102, 241, 0.5);
 }
+.fl-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .fl-live-tag {
   display: inline-flex;
   align-items: center;
@@ -124,6 +130,27 @@
   border: 1px solid rgba(244, 63, 94, 0.32);
   padding: 4px 11px;
   border-radius: 20px;
+}
+/* Course vs Free distinguisher */
+.fl-kind-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.fl-kind-tag--course {
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.16);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+.fl-kind-tag--free {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.32);
 }
 .fl-live-dot {
   width: 8px; height: 8px; border-radius: 50%;

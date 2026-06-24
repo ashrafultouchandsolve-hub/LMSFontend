@@ -5,7 +5,13 @@
 
     <!-- ✅ Category Sidebar (dropdown) -->
     <aside class="category-sidebar">
-      <h3 class="sidebar-title">📂 Browse by Category</h3>
+      <div class="sidebar-head">
+        <span class="sidebar-head-icon" aria-hidden="true">📂</span>
+        <div class="sidebar-head-text">
+          <h3 class="sidebar-title">Browse by Category</h3>
+          <span class="sidebar-subtitle">{{ availableCategories().length }} groups · {{ categoryCount('All') }} courses</span>
+        </div>
+      </div>
 
       <div class="category-dropdown" [class.open]="categoryDropdownOpen()">
         <button
@@ -14,9 +20,14 @@
           (click)="toggleCategoryDropdown()"
           [attr.aria-expanded]="categoryDropdownOpen()">
           <span class="cat-icon">{{ activeCategoryMeta().icon }}</span>
-          <span class="cat-label">{{ activeCategoryMeta().value === 'All' ? 'All Courses' : activeCategoryMeta().label }}</span>
+          <span class="cat-text">
+            <span class="cat-eyebrow">Showing</span>
+            <span class="cat-label">{{ activeCategoryMeta().value === 'All' ? 'All Courses' : activeCategoryMeta().label }}</span>
+          </span>
           <span class="cat-count">{{ categoryCount(activeCategory()) }}</span>
-          <span class="dropdown-arrow" aria-hidden="true">▾</span>
+          <span class="dropdown-arrow" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </span>
         </button>
 
         @if (categoryDropdownOpen()) {
@@ -29,7 +40,12 @@
                   [class.active]="activeCategory() === cat.value"
                   (click)="setCategory(cat.value)">
                   <span class="cat-icon">{{ cat.icon }}</span>
-                  <span class="cat-label">{{ cat.label }}</span>
+                  <span class="cat-label">{{ cat.value === 'All' ? 'All Courses' : cat.label }}</span>
+                  @if (activeCategory() === cat.value) {
+                    <span class="cat-check" aria-hidden="true">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                  }
                   <span class="cat-count">{{ categoryCount(cat.value) }}</span>
                 </button>
               </li>
@@ -88,8 +104,16 @@
         <section class="courses-grid" aria-label="All courses list">
           @for (course of filteredCourses(); track course.id; let i = $index) {
             <article class="course-card" [style]="'--card-color:' + getCardColor(i)">
-              <div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
+              <div class="track-img" [class]="'track-img ' + getImageClass(course.level)">
                 <img class="track-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+                @if (course.isCompleted) {
+                  <span class="cc-completed">✓ {{ lang.t().courseCompleted }}</span>
+                }
+                @if (course.isEnrolled) {
+                  <span class="cc-enrolled-tag">✓ {{ lang.t().courseEnrolled }}</span>
+                } @else {
+                  <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
+                }
               </div>
               <div class="course-card-inner">
                 <span [class]="'course-badge ' + getLevelClass(course.level)">
@@ -97,18 +121,16 @@
                 </span>
                 <h3>{{ course.title }}</h3>
                 <p class="course-description">{{ course.description }}</p>
-                <a [routerLink]="['/course-details', course.id]" class="see-more-button">{{ lang.t().courseSeeMore }}</a>
-                <ul class="course-points">
-                  <li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
-                  <li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
-                  <li><strong>{{ lang.t().courseDuration }}</strong> {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
-                  <li><strong>{{ lang.t().coursePrice }}</strong> {{ formatPrice(course.price) }}</li>
-                </ul>
+                <div class="cc-meta-row">
+                  <span>👨‍🏫 <b>{{ course.instructorName }}</b></span>
+                  <span>🗂 <b>{{ course.category }}</b></span>
+                  <span>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</span>
+                </div>
 
-                <div class="course-stats" aria-label="Course statistics">
-                  <span class="cstat"><span class="cstat-num">👥 {{ course.enrollmentCount }}</span><small>{{ lang.t().cdStudents }}</small></span>
-                  <span class="cstat"><span class="cstat-num">🎬 {{ course.videoCount }}</span><small>{{ lang.t().cdTotalVideos }}</small></span>
-                  <span class="cstat"><span class="cstat-num">📝 {{ course.practiceCount }}</span><small>{{ lang.t().cdTotalPractice }}</small></span>
+                <div class="cc-stats" aria-label="Course statistics">
+                  <div class="cc-stat"><b>{{ course.enrollmentCount }}</b><small>{{ lang.t().cdStudents }}</small></div>
+                  <div class="cc-stat"><b>{{ course.videoCount }}</b><small>{{ lang.t().cdTotalVideos }}</small></div>
+                  <div class="cc-stat"><b>{{ course.practiceCount }}</b><small>{{ lang.t().cdTotalPractice }}</small></div>
                 </div>
 
                 @if (course.totalRatings && course.totalRatings > 0) {
@@ -119,28 +141,28 @@
                 }
 
                 <div class="course-footer">
-                  <div class="course-footer-actions">
-                    @if (!isTeacher()) {
+                  @if (!isStaff()) {
+                    <div class="course-footer-actions">
                       @if (course.isEnrolled) {
                         <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
                       } @else {
                         <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
+                        <button
+                          type="button"
+                          class="enrolled-button wishlist-button"
+                          [class.wishlisted]="course.isWishlisted"
+                          [class.is-toggling]="wishlistToggleId() === course.id"
+                          [disabled]="wishlistToggleId() === course.id"
+                          (click)="toggleWishlist(course)">
+                          @if (course.isWishlisted) {
+                            {{ wishlistToggleId() === course.id ? 'Updating...' : '✓ In Wishlist' }}
+                          } @else {
+                            {{ wishlistToggleId() === course.id ? 'Adding...' : '♡ Wishlist' }}
+                          }
+                        </button>
                       }
-                    }
-                    <button
-                      type="button"
-                      class="enrolled-button wishlist-button"
-                      [class.wishlisted]="course.isWishlisted"
-                      [class.is-toggling]="wishlistToggleId() === course.id"
-                      [disabled]="wishlistToggleId() === course.id"
-                      (click)="toggleWishlist(course)">
-                      @if (course.isWishlisted) {
-                        {{ wishlistToggleId() === course.id ? 'Updating...' : '✓ In Wishlist' }}
-                      } @else {
-                        {{ wishlistToggleId() === course.id ? 'Adding...' : '♡ Wishlist' }}
-                      }
-                    </button>
-                  </div>
+                    </div>
+                  }
                   <a [routerLink]="['/course-details', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
                 </div>
               </div>

@@ -104,7 +104,70 @@
 
     <a routerLink="/instructors">Instructor</a>
     <a routerLink="/store">Store</a>
-    <a routerLink="/free-live" class="nav-live-link">🔴 {{ lang.t().navLive }}</a>
+
+    <div class="nav-dropdown-wrap">
+      <a routerLink="/free-live" class="nav-dropdown-trigger nav-live-link" [class.is-live-active]="liveActive()">
+        <span class="live-dot" aria-hidden="true"></span>{{ lang.t().navLive }}
+        @if (liveActive()) { <span class="live-badge">LIVE</span> }
+        @if (isLoggedIn()) {
+          <svg class="nav-caret" width="10" height="6" viewBox="0 0 10 6" fill="currentColor">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" />
+          </svg>
+        }
+      </a>
+
+      @if (isLoggedIn()) {
+      <div class="nav-dropdown nav-dropdown--live">
+        <div class="nav-dropdown-inner">
+          @if (!hasLiveClasses()) {
+            <div class="nav-live-empty">
+              <span class="nav-live-empty-icon">📡</span>
+              <span>{{ lang.t().navLiveNone }}</span>
+            </div>
+          } @else {
+            @if (scheduledClasses().length) {
+              <div class="nav-dropdown-group">
+                <span class="nav-dropdown-group-label">🎓 {{ lang.t().navLiveScheduled }}</span>
+                @for (c of scheduledClasses(); track c.id) {
+                  <a [routerLink]="['/live-class', c.id]" class="nav-dropdown-item nav-live-item">
+                    <span class="nav-live-pulse" aria-hidden="true"></span>
+                    <div>
+                      <strong>{{ c.title }}</strong>
+                      <span>{{ c.courseTitle || c.hostName || 'Instructor' }}</span>
+                    </div>
+                  </a>
+                }
+              </div>
+            }
+
+            @if (scheduledClasses().length && freeClasses().length) {
+              <div class="nav-dropdown-divider"></div>
+            }
+
+            @if (freeClasses().length) {
+              <div class="nav-dropdown-group">
+                <span class="nav-dropdown-group-label">🔓 {{ lang.t().navLiveFree }}</span>
+                @for (c of freeClasses(); track c.id) {
+                  <a [routerLink]="['/free-live', c.id]" class="nav-dropdown-item nav-live-item">
+                    <span class="nav-live-pulse" aria-hidden="true"></span>
+                    <div>
+                      <strong>{{ c.title }}</strong>
+                      <span>{{ c.courseTitle || c.hostName || 'Instructor' }}</span>
+                    </div>
+                  </a>
+                }
+              </div>
+            }
+          }
+
+          <div class="nav-dropdown-footer">
+            <a routerLink="/free-live" class="nav-dropdown-all">{{ lang.t().navLiveViewAll }}</a>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
     <a href="#aboutUs" (click)="goToVision($event)">{{ lang.t().navVision }}</a>
 
     <div class="nav-dropdown-wrap">
@@ -150,7 +213,16 @@
   <div class="mobile-nav-section" [class.mobile-nav-section--visible]="mobileMenuOpen()">
     <a routerLink="/instructors" class="mobile-nav-item" (click)="toggleMobileMenu()">👨‍🏫 Instructors</a>
     <a routerLink="/store" class="mobile-nav-item" (click)="toggleMobileMenu()">🛒 Store</a>
-    <a routerLink="/free-live" class="mobile-nav-item" (click)="toggleMobileMenu()">🔴 {{ lang.t().navLive }}</a>
+    <a routerLink="/free-live" class="mobile-nav-item nav-live-link" [class.is-live-active]="liveActive()" (click)="toggleMobileMenu()">
+      <span class="live-dot" aria-hidden="true"></span>{{ lang.t().navLive }}
+      @if (liveActive()) { <span class="live-badge">LIVE</span> }
+    </a>
+    @for (c of scheduledClasses(); track c.id) {
+      <a [routerLink]="['/live-class', c.id]" class="mobile-nav-item mobile-nav-sub" (click)="toggleMobileMenu()">🎓 {{ c.title }}</a>
+    }
+    @for (c of freeClasses(); track c.id) {
+      <a [routerLink]="['/free-live', c.id]" class="mobile-nav-item mobile-nav-sub" (click)="toggleMobileMenu()">🔓 {{ c.title }}</a>
+    }
     @if(isStudent()) {
       <a routerLink="/leaderboard" class="mobile-nav-item" (click)="toggleMobileMenu()">🏆 Leaderboard</a>
     }

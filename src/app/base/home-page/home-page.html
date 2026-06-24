@@ -188,6 +188,14 @@
                 <path d="M12 28V14l8-4 8 4v14l-8 4-8-4z" stroke="white" stroke-width="2" stroke-linejoin="round" />
               </svg>
             </div>
+            @if (course.isCompleted) {
+              <span class="cc-completed">✓ {{ lang.t().courseCompleted }}</span>
+            }
+            @if (course.isEnrolled) {
+              <span class="cc-enrolled-tag">✓ {{ lang.t().courseEnrolled }}</span>
+            } @else {
+              <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
+            }
           </div>
           <div class="cat-body">
             <span class="cat-badge">
@@ -197,13 +205,16 @@
             </span>
             <h3>{{ course.title }}</h3>
             <p class="cat-desc">{{ course.description }}</p>
-            <ul class="cat-meta">
-              <li>👥 {{ course.enrollmentCount }} {{ lang.t().cdStudents }}</li>
-              <li>🎬 {{ course.videoCount }} {{ lang.t().cdTotalVideos }}</li>
-              <li>📝 {{ course.practiceCount }} {{ lang.t().cdTotalPractice }}</li>
-              <li>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</li>
-              <li>💰 {{ formatPrice(course.price) }}</li>
-            </ul>
+            <div class="cc-meta-row">
+              <span>👨‍🏫 <b>{{ course.instructorName }}</b></span>
+              <span>🗂 <b>{{ course.category }}</b></span>
+              <span>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</span>
+            </div>
+            <div class="cc-stats">
+              <div class="cc-stat"><b>{{ course.enrollmentCount }}</b><small>{{ lang.t().cdStudents }}</small></div>
+              <div class="cc-stat"><b>{{ course.videoCount }}</b><small>{{ lang.t().cdTotalVideos }}</small></div>
+              <div class="cc-stat"><b>{{ course.practiceCount }}</b><small>{{ lang.t().cdTotalPractice }}</small></div>
+            </div>
             @if (course.totalRatings && course.totalRatings > 0) {
             <div class="cat-rating">
               <span class="cat-rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>

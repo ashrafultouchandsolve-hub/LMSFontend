@@ -52,6 +52,12 @@ export class MyClasses {
     ).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
   );
 
+  // "By course" breakdown এ শুধু enrolled course দেখাবে। followed (un-enrolled) course এর
+  // জন্য আলাদা card দরকার নেই — তারা শুধু লাইভ চললে উপরের "Live now" banner থেকে join করবে।
+  protected readonly breakdownCourses = computed(() =>
+    this.courses().filter(c => !c.isFollowed)
+  );
+
   constructor() {
     void this.load();
   }

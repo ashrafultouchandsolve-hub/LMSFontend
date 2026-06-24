@@ -296,3 +296,130 @@ input::-moz-selection, textarea::-moz-selection {
 	background: rgba(124, 58, 237, 0.22);
 	color: #0f172a;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   Shared professional course-card pieces — ONE source of truth used
+   by both the home page (.cat-card) and the courses page (.course-card)
+   so the two stay visually consistent. Pure additive class names
+   (cc-*) → no specificity clash with the component-scoped styles.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Price tag — overlaid on the top-right of the thumbnail so it's the
+   first thing the eye lands on. Hidden once the student is enrolled. */
+.cc-price {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 6px 13px;
+	border-radius: 999px;
+	font-size: 0.92rem;
+	font-weight: 800;
+	letter-spacing: 0.2px;
+	color: #fff;
+	background: linear-gradient(135deg, #1f2937, #0f172a);
+	box-shadow: 0 6px 16px rgba(15, 23, 42, 0.30);
+}
+.cc-price--free {
+	background: linear-gradient(135deg, #16a34a, #15803d);
+	box-shadow: 0 6px 16px rgba(22, 163, 74, 0.32);
+}
+
+/* Course finished — admin-set "Completed" ribbon, top-left so it never
+   collides with the price / enrolled tag on the top-right. */
+.cc-completed {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 5px 11px;
+	border-radius: 999px;
+	font-size: 0.74rem;
+	font-weight: 800;
+	letter-spacing: 0.2px;
+	color: #fff;
+	background: linear-gradient(135deg, #4f46e5, #4338ca);
+	box-shadow: 0 6px 16px rgba(67, 56, 202, 0.30);
+}
+
+/* Replaces the price once enrolled — clear "you already own this" cue. */
+.cc-enrolled-tag {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 6px 12px;
+	border-radius: 999px;
+	font-size: 0.76rem;
+	font-weight: 800;
+	letter-spacing: 0.2px;
+	color: #fff;
+	background: linear-gradient(135deg, #16a34a, #22c55e);
+	box-shadow: 0 6px 16px rgba(22, 163, 74, 0.30);
+}
+
+/* Single-line instructor / category / duration row (replaces the old
+   stacked "title-niche-akta-tar-niche-akta" bullet lists). */
+.cc-meta-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 5px 12px;
+	font-size: 0.78rem;
+	color: #64748b;
+}
+.cc-meta-row span {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+.cc-meta-row span b {
+	font-weight: 600;
+	color: #475569;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 150px;
+}
+
+/* Compact 3-up stat strip — students / videos / practice at a glance. */
+.cc-stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+	margin-top: 2px;
+}
+.cc-stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 8px 4px;
+	border-radius: 10px;
+	background: rgba(37, 99, 235, 0.06);
+	border: 1px solid rgba(37, 99, 235, 0.10);
+	text-align: center;
+}
+.cc-stat b {
+	font-size: 0.88rem;
+	font-weight: 800;
+	color: #1d4ed8;
+	line-height: 1.1;
+}
+.cc-stat small {
+	font-size: 0.6rem;
+	font-weight: 600;
+	color: #64748b;
+	line-height: 1.15;
+	letter-spacing: 0.01em;
+}

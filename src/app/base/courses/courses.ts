@@ -24,6 +24,7 @@ type CoursesViewItem = {
   durationMinutes: number;
   price: number;
   isEnrolled: boolean;
+  isCompleted: boolean;
   isWishlisted: boolean;
   thumbnailUrl: string;
   averageRating?: number;
@@ -98,6 +99,13 @@ export class Courses {
   protected readonly isTeacher = computed(() => {
     const currentUser = this.authService.getCurrentUser();
     return currentUser?.role === 1;
+  });
+
+  // ✅ Staff = teacher (role 1) or admin (role 2). Staff manage courses — they
+  //    don't enroll or wishlist, so those buttons are hidden for them.
+  protected readonly isStaff = computed(() => {
+    const role = this.authService.getCurrentUser()?.role;
+    return role === 1 || role === 2;
   });
 
   // ✅ Sidebar dropdown: All + admin-managed categories that actually HAVE courses
@@ -240,6 +248,7 @@ export class Courses {
       practiceCount: dto.practiceCount ?? 0,
       durationMinutes: dto.durationMinutes, price: dto.price,
       isEnrolled: false, isWishlisted: false,
+      isCompleted: dto.isCompleted ?? false,
       thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
     };
   }

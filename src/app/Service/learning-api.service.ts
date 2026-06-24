@@ -20,6 +20,7 @@ export type CourseDto = {
   durationMinutes: number;
   thumbnailPath: string | null;
   isPublished: boolean;
+  isCompleted?: boolean;
   lessonCount?: number;
   enrollmentCount?: number;
   videoCount?: number;
@@ -266,6 +267,13 @@ export class LearningApiService {
     );
   }
 
+  /** Admin: mark a course completed (finished) or back to ongoing. */
+  setCourseCompleted(courseId: string, isCompleted: boolean): Observable<ApiResponse<unknown>> {
+    return this.withFallback((baseUrl) =>
+      this.http.put<ApiResponse<unknown>>(`${baseUrl}/course/complete/${courseId}`, { isCompleted }),
+    );
+  }
+
   uploadCourseThumbnail(courseId: string, file: File): Observable<ApiResponse<unknown>> {
     const formData = new FormData();
     formData.append('file', file);
@@ -479,6 +487,18 @@ export class LearningApiService {
 
     const params = new HttpParams().set('path', path);
     return `${this.activeBaseUrl}/files/stream?${params.toString()}`;
+  }
+
+  /**
+   * Ask the backend for a short-lived signed token for a protected video path.
+   * Needed to open uploaded videos — the /files/stream endpoint rejects video
+   * requests that don't carry a valid token + exp.
+   */
+  getVideoToken(path: string): Observable<{ token: string; exp: number; path: string }> {
+    const params = new HttpParams().set('path', path);
+    return this.withFallback((base) =>
+      this.http.get<{ token: string; exp: number; path: string }>(`${base}/files/video-token?${params.toString()}`),
+    );
   }
 
   saveVideoProgress(lessonId: string, dto: { userId: string; watchedSeconds: number; totalSeconds: number }): Observable<any> {

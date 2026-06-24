@@ -66,6 +66,8 @@ export class CourseRecordings implements OnInit, OnDestroy {
   protected play(rec: LiveClass): void {
     if (!rec.recordingPath) return;
     this.watching.set(rec);
+    // .m3u8 → HLS (legacy, ffmpeg hosts); anything else (mp4/webm) → direct token-stream.
+    const isHls = rec.recordingPath.toLowerCase().endsWith('.m3u8');
     const authToken = this.jwt.getToken();
     const headers = new HttpHeaders(authToken ? { Authorization: `Bearer ${authToken}` } : {});
     const params = new HttpParams().set('path', rec.recordingPath);
@@ -76,21 +78,31 @@ export class CourseRecordings implements OnInit, OnDestroy {
             .set('path', rec.recordingPath!)
             .set('token', res.token)
             .set('exp', String(res.exp));
-          const url = `${this.learningApi.getBaseUrl()}/files/hls/playlist?${streamParams.toString()}`;
-          this.attach(url);
+          const endpoint = isHls ? 'files/hls/playlist' : 'files/stream';
+          const url = `${this.learningApi.getBaseUrl()}/${endpoint}?${streamParams.toString()}`;
+          this.attach(url, isHls);
         },
         error: () => {},
       });
   }
 
-  private attach(url: string, attempt = 0): void {
+  private attach(url: string, isHls: boolean, attempt = 0): void {
     const videoEl = this.recPlayer?.nativeElement;
     if (!videoEl) {
       if (attempt > 20) return;
-      requestAnimationFrame(() => this.attach(url, attempt + 1));
+      requestAnimationFrame(() => this.attach(url, isHls, attempt + 1));
       return;
     }
     if (this.hls) { try { this.hls.destroy(); } catch { } this.hls = null; }
+
+    // Raw MP4/WEBM — play straight from the token-stream endpoint.
+    if (!isHls) {
+      videoEl.src = url;
+      videoEl.play().catch(() => {});
+      return;
+    }
+
+    // HLS playlist.
     if (Hls.isSupported()) {
       const hls = new Hls();
       this.hls = hls;

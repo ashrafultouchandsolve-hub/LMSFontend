@@ -10,12 +10,13 @@ import { Announcement, AnnouncementService } from '../../Service/announcement-se
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { LearningApiService } from '../../Service/learning-api.service';
+import { Teacher } from '../../base/teacher/teacher';
 
 type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule, AdminItem],
+  imports: [CommonModule, FormsModule, AdminItem, Teacher],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -75,7 +76,6 @@ annSubmitting  = signal(false);
   searchQuery = signal('');
   teacherSearch = signal('');
   studentSearch = signal('');
-  courseSearch = signal('');
 
   // Sorted comments with flagged on top
   sortedComments = computed(() => {
@@ -121,38 +121,9 @@ annSubmitting  = signal(false);
     );
   });
 
-  // Filtered courses
-  filteredCourses = computed(() => {
-    const query = this.courseSearch().toLowerCase().trim();
-    if (!query) return this.courses();
-
-    return this.courses().filter(course =>
-      course.title.toLowerCase().includes(query) ||
-      course.teacherName.toLowerCase().includes(query)
-    );
-  });
-
-  // Which category dropdowns are expanded in the Courses tab
-  expandedCats = signal<string[]>([]);
-  toggleCat(category: string): void {
-    this.expandedCats.update((a) => a.includes(category) ? a.filter((x) => x !== category) : [...a, category]);
-  }
-  /** A group is open if explicitly expanded, or while searching (auto-expand matches). */
-  isCatOpen(category: string): boolean {
-    return this.expandedCats().includes(category) || !!this.courseSearch().trim();
-  }
-
-  /** Courses grouped by category (sorted), so the admin list is organized, not one flat serial list. */
-  coursesByCategory = computed(() => {
-    const groups = new Map<string, AdminCourse[]>();
-    for (const c of this.filteredCourses()) {
-      const key = (c.category && c.category.trim()) || 'Uncategorized';
-      (groups.get(key) ?? groups.set(key, []).get(key)!).push(c);
-    }
-    return [...groups.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([category, courses]) => ({ category, courses }));
-  });
+  // The Courses tab now embeds the full course-manager (<app-teacher [embedded]>),
+  // so the old per-category grouping/search/expand state lives there, not here.
+  // `courses` + `categoryCourseCount` are still used by the Categories tab.
 
   // Comment edit state
   editingCommentId = signal<string | null>(null);

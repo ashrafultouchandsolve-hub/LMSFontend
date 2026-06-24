@@ -7,6 +7,40 @@
   background: #eef0f6;
   color: #171b2f;
 }
+
+/* Prominent "back to admin" button at the top of the course-manager page
+   (only when opened as a full page from a category's Manage Courses). */
+.cm-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 9px 16px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 999px;
+  background: #fff;
+  color: #1d4ed8;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -10px rgba(37, 99, 235, 0.5);
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.cm-back-btn:hover { background: #eff4ff; border-color: rgba(37, 99, 235, 0.45); transform: translateX(-2px); }
+.cm-back-btn:active { transform: translateX(0); }
+
+/* ─── EMBEDDED MODE (inside admin "Manage Courses" tab) ───────────────
+   No own navbar/sidebar: collapse to a single column and let the host
+   shell provide the chrome, background and outer padding. */
+.teacher-root.embedded { min-height: auto; }
+.teacher-root.embedded .teacher-page {
+  min-height: auto;
+  background: transparent;
+  grid-template-columns: minmax(0, 1fr);
+}
+.teacher-root.embedded .dashboard-area {
+  padding: 0;
+}
 /* ─── TOP NAVBAR ─────────────────────────────────── */
 .top-navbar {
   display: flex;
@@ -447,6 +481,25 @@ tr:last-child td {
   color: #d22f2f;
 }
 
+/* Admin "mark completed" toggle */
+.btn-complete {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #047857;
+}
+.btn-ongoing {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+/* "Completed" pill next to the publish status */
+.status.status-completed {
+  background: #eef2ff;
+  color: #4338ca;
+  margin-left: 6px;
+}
+
 .lesson-list {
   display: grid;
   gap: 10px;
@@ -518,6 +571,51 @@ tr:last-child td {
   border: 1px solid #dbe3ef;
   color: #63708d;
 }
+
+/* ── Class recordings (in-course, teacher-managed) ── */
+.rec-list { display: grid; gap: 10px; }
+.rec-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #e3e7f4;
+  border-radius: 12px;
+  background: #ffffff;
+}
+.rec-item-info { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.rec-ico {
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  width: 42px; height: 42px;
+  border-radius: 11px; font-size: 20px;
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
+  border: 1px solid #fecaca;
+}
+.rec-item-text { display: grid; gap: 3px; min-width: 0; }
+.rec-item-text strong { font-size: 0.98rem; color: #171b2f; }
+.rec-meta {
+  display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 0.84rem; color: rgba(23, 27, 47, 0.6);
+}
+.rec-desc { margin: 2px 0 0; font-size: 0.85rem; color: rgba(23, 27, 47, 0.66); }
+.rec-status {
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.3px;
+  padding: 2px 9px; border-radius: 999px;
+}
+.rec-status--ready { background: #dcfce7; color: #15803d; }
+.rec-status--processing { background: #fef9c3; color: #a16207; }
+.rec-status--failed { background: #fee2e2; color: #b91c1c; }
+.rec-item-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rec-edit { display: grid; gap: 8px; width: 100%; }
+.rec-edit input {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid #d7dcf0; border-radius: 9px;
+  font: inherit; color: #171b2f; background: #fff; outline: none;
+}
+.rec-edit input:focus { border-color: #6d28d9; box-shadow: 0 0 0 3px rgba(109,40,217,0.12); }
+.rec-edit-actions { display: flex; gap: 8px; }
 
 .lesson-item {
   display: grid;
