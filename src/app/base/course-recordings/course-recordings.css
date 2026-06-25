@@ -41,4 +41,11 @@
 .cr-modal-x:hover { color: #fff; }
 .cr-video { width: 100%; max-height: 70vh; display: block; background: #000; }
 
+/* Plyr (runtime-generated DOM → needs ::ng-deep) — same brand accent as the lesson player */
+::ng-deep .cr-modal .plyr { width: 100%; max-height: 78vh; }
+::ng-deep .cr-modal .plyr--video .plyr__control--overlaid,
+::ng-deep .cr-modal .plyr__control:hover,
+::ng-deep .cr-modal .plyr__control[aria-expanded='true'] { background: #6366f1; }
+::ng-deep .cr-modal .plyr--full-ui input[type='range'] { color: #6366f1; }
+
 @media (max-width: 600px) { .cr-grid { grid-template-columns: 1fr; } }

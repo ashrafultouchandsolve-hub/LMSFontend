@@ -29,6 +29,7 @@ export class CourseRecordings implements OnInit, OnDestroy {
   protected readonly recordings = signal<LiveClass[]>([]);
   protected readonly watching = signal<LiveClass | null>(null);
   private hls: any = null;
+  private plyr: any = null;   // normal lesson player এর মতো same Plyr instance
 
   @ViewChild('recPlayer') recPlayer?: ElementRef<HTMLVideoElement>;
 
@@ -93,26 +94,45 @@ export class CourseRecordings implements OnInit, OnDestroy {
       requestAnimationFrame(() => this.attach(url, isHls, attempt + 1));
       return;
     }
-    if (this.hls) { try { this.hls.destroy(); } catch { } this.hls = null; }
+    // আগের player সম্পূর্ণ teardown (Plyr আগে, তারপর HLS — blob restore error এড়াতে)
+    this.teardown();
 
-    // Raw MP4/WEBM — play straight from the token-stream endpoint.
-    if (!isHls) {
-      videoEl.src = url;
-      videoEl.play().catch(() => {});
+    const PlyrLib = (window as any).Plyr;
+
+    // HLS playlist — hls.js + Plyr (normal lesson player এর মতোই)
+    if (isHls && Hls.isSupported()) {
+      // Plyr official pattern: আগে Plyr তৈরি করো, তারপর hls.attachMedia()
+      if (PlyrLib) this.plyr = new PlyrLib(videoEl, this.getPlyrConfig());
+      const hls = new Hls();
+      this.hls = hls;
+      hls.attachMedia(videoEl);
+      hls.loadSource(url);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => videoEl.play().catch(() => {}));
       return;
     }
 
-    // HLS playlist.
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      this.hls = hls;
-      hls.loadSource(url);
-      hls.attachMedia(videoEl);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => videoEl.play().catch(() => {}));
-    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-      videoEl.src = url;
-      videoEl.play().catch(() => {});
-    }
+    // Raw MP4/WEBM (এখনকার default) বা Safari native HLS — সরাসরি src, Plyr দিয়ে wrap
+    if (PlyrLib) this.plyr = new PlyrLib(videoEl, this.getPlyrConfig());
+    videoEl.src = url;
+    try { videoEl.load(); } catch { }
+    videoEl.play().catch(() => {});
+  }
+
+  // normal lesson player (enrolled-course) এর হুবহু একই config — same look, same controls,
+  // download বাটন নেই, right-click context menu বন্ধ।
+  private getPlyrConfig() {
+    return {
+      controls: [
+        'play-large', 'play', 'progress',
+        'current-time', 'duration',
+        'mute', 'volume', 'fullscreen',
+      ],
+      settings: ['speed'],
+      speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+      keyboard: { focused: true, global: false },
+      tooltips: { controls: true, seek: true },
+      disableContextMenu: true,
+    };
   }
 
   protected close(): void {
@@ -121,6 +141,8 @@ export class CourseRecordings implements OnInit, OnDestroy {
   }
 
   private teardown(): void {
+    // ⚠️ order: Plyr আগে destroy, তারপর HLS — নাহলে Plyr dead blob restore করে error দেয়
+    if (this.plyr) { try { this.plyr.destroy(); } catch { } this.plyr = null; }
     if (this.hls) { try { this.hls.destroy(); } catch { } this.hls = null; }
     const v = this.recPlayer?.nativeElement;
     if (v) { try { v.pause(); } catch { } v.removeAttribute('src'); try { v.load(); } catch { } }
