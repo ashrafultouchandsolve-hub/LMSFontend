@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
+import { RecommendationService } from '../../Service/recommendation.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 type LeaderboardEntry = {
@@ -45,6 +46,7 @@ type SortKey = 'score' | 'correct';
 export class Leaderboard implements OnInit {
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
+  private readonly reco = inject(RecommendationService);
   readonly lang = inject(LanguageService);
 
   // ── high-level view state ──
@@ -174,35 +176,20 @@ export class Leaderboard implements OnInit {
       courses = [];
     }
 
-    const enrolledIds = new Set(this.enrolledCourses().map(c => c.id));
-    const candidates = (Array.isArray(courses) ? courses : [])
-      .filter((c: any) => !enrolledIds.has(String(c.id)));
+    const candidates = Array.isArray(courses) ? courses : [];
+    const excludeIds = this.enrolledCourses().map(c => c.id);
 
-    const interests = (prefs?.interests ?? []).map(s => (s ?? '').toLowerCase()).filter(Boolean);
-    const skill = (prefs?.skillLevel ?? '').toLowerCase();
-    const hasPrefs = interests.length > 0 || !!skill;
-
-    const scored = candidates.map((c: any) => {
-      const cat = (c.category ?? '').toLowerCase();
-      const lvl = (c.level ?? '').toLowerCase();
-      let score = 0;
-      // category ↔ interest: label drift সামলাতে দুদিকেই contains দেখি
-      if (cat && interests.some(it => it === cat || it.includes(cat) || cat.includes(it))) score += 2;
-      if (skill && lvl === skill) score += 1;
-      return { c, score };
-    });
-
-    // preference থাকলে শুধু ম্যাচ করা course; ম্যাচ না থাকলে / preference না থাকলে fallback = সব
-    let chosen = hasPrefs ? scored.filter(s => s.score > 0) : [];
-    this.usedPreferences.set(chosen.length > 0);
-    if (chosen.length === 0) chosen = scored; // fallback — section যেন খালি না থাকে
-
-    const top = chosen
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
-      .map(s => this.mapRecommended(s.c));
-
-    this.recommended.set(top);
+    // shared engine: interest→keyword matching across category/title/description (+ skill level)
+    const ranked = this.reco.rankCourses(candidates, prefs, { limit: 6, excludeIds });
+    if (ranked.length > 0) {
+      this.usedPreferences.set(true);
+      this.recommended.set(ranked.map(c => this.mapRecommended(c)));
+    } else {
+      // preference নেই / কোনো ম্যাচ নেই → popular fallback (section খালি না থাকে)
+      this.usedPreferences.set(false);
+      const popular = this.reco.popularFallback(candidates, 6, { excludeIds });
+      this.recommended.set(popular.map(c => this.mapRecommended(c)));
+    }
   }
 
   private mapRecommended(c: any): RecommendedCourse {

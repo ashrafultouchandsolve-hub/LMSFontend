@@ -18,6 +18,8 @@ export interface Translations {
   showcaseChip1: string; showcaseChip2: string; showcaseChip3: string; showcaseChip4: string;
   // Section
   sectionPrograms: string; sectionH2Line1: string; sectionH2Line2: string; sectionDesc: string;
+  // Recommended for you
+  recoTitle: string; recoSubPrefs: string; recoSubPopular: string;
   // Courses
   coursesLoading: string; coursesLoadingDesc: string; coursesNone: string; coursesNoneDesc: string;
   coursesNoMatch: string; coursesNoMatchDesc: string; coursesAllTitle: string;
@@ -243,6 +245,36 @@ export interface Translations {
   aiNoItems: string; aiAvailable: string; aiUnavailable: string; aiEditItem: string; aiAddItem: string;
   aiTitlePlaceholder: string; aiPrice: string; aiDescPlaceholder: string; aiFileUrl: string; aiUploadPdf: string;
   aiItemImage: string; aiSaveItem: string;
+  // Home — hero slider (3 slides)
+  hs1Badge: string; hs1Title: string; hs1Accent: string; hs1Desc: string; hs1Btn1: string; hs1Btn2: string;
+  hs1F1Strong: string; hs1F1Sub: string; hs1F2Strong: string; hs1F2Sub: string;
+  hs2Badge: string; hs2Title: string; hs2Accent: string; hs2Desc: string; hs2Btn1: string; hs2Btn2: string;
+  hs2F1Strong: string; hs2F1Sub: string; hs2F2Strong: string; hs2F2Sub: string;
+  hs3Badge: string; hs3Title: string; hs3Accent: string; hs3Desc: string; hs3Btn1: string; hs3Btn2: string;
+  hs3F1Strong: string; hs3F1Sub: string; hs3F2Strong: string; hs3F2Sub: string;
+  // Home — category + reviews headers + browse all
+  homeCatTitle: string; homeCatSubtitle: string;
+  homeRevTag: string; homeRevTitle: string; homeRevAccent: string; homeRevDesc: string;
+  homeBrowseAll: string;
+  // Home — about section
+  aboutTag: string; aboutTitle: string; aboutAccent: string; aboutDesc: string;
+  aboutC1Label: string; aboutC1Title: string; aboutC1Desc: string; aboutC1Stat: string;
+  aboutC2Label: string; aboutC2Title: string; aboutC2Desc: string; aboutC2Stat: string;
+  aboutC3Label: string; aboutC3Title: string; aboutC3Desc: string; aboutC3Stat: string;
+  aboutC4Label: string; aboutC4Title: string; aboutC4Desc: string; aboutC4Stat: string;
+  aboutC5Label: string; aboutC5Title: string; aboutC5Desc: string; aboutC5Stat: string;
+  aboutQuote: string; aboutQuoteStat: string;
+  // Home — community ("Join Our Community")
+  commTag: string; commTitle: string; commAccent: string; commDesc: string;
+  commFbTitle: string; commFbDesc: string; commFbStat1: string; commFbStat2: string;
+  commYtTitle: string; commYtDesc: string; commYtStat1: string; commYtStat2: string;
+  commFreeTitle: string; commFreeDesc: string; commFreeStat1: string; commFreeStat2: string;
+  // Footer
+  footBrandDesc: string; footExplore: string; footCompany: string; footAppTitle: string;
+  footLinkCourses: string; footLinkInstructors: string; footLinkStore: string; footLinkFree: string;
+  footLinkAbout: string; footLinkSuccess: string; footLinkPrivacy: string; footLinkTerms: string;
+  footAppDesc: string; footAppGetOn: string; footAppDownloadOn: string;
+  footCopyright: string; footBotHome: string; footBotAbout: string; footBotContact: string; footBotPrivacy: string;
 }
 
 const EN: Translations = {
@@ -259,6 +291,7 @@ const EN: Translations = {
   showcaseChip1: 'Live classes', showcaseChip2: 'Mentor support', showcaseChip3: 'Project labs', showcaseChip4: 'Career paths',
   sectionPrograms: 'Programs', sectionH2Line1: 'Career-focused learning paths', sectionH2Line2: 'for every stage',
   sectionDesc: 'Choose a pathway based on your current level and progress with curated lessons, challenges, and project-based milestones.',
+  recoTitle: 'Recommended for you', recoSubPrefs: 'Hand-picked from the topics you chose at signup', recoSubPopular: 'Popular courses learners love right now',
   coursesLoading: 'Courses loading...', coursesLoadingDesc: 'Please wait, courses are loading.',
   coursesNone: 'No course available', coursesNoneDesc: 'No courses have been published yet. Check back later.',
   coursesNoMatch: 'No matching course found', coursesNoMatchDesc: 'No course matched your search term.',
@@ -275,13 +308,13 @@ const EN: Translations = {
   wfTag: '⚙️ How It Works',
   wfTitle: 'Everything you get,', wfTitleAccent: 'in one flow',
   wfSubtitle: 'From live classes to smart notes — a complete learning flow built to keep you consistent, exam-ready, and a step ahead.',
-  wfF1Label: 'Live & Recorded Classes', wfF1Desc: 'Attend live, or replay any class anytime — never miss a lesson again.',
-  wfF2Label: 'Animated Video Lessons', wfF2Desc: 'Tough topics made simple with crisp, animated explanations.',
-  wfF3Label: 'Practice MCQ Tests', wfF3Desc: 'Sharpen every concept with unlimited topic-wise practice quizzes.',
-  wfF4Label: 'Live MCQ Contests', wfF4Desc: 'Compete in real time and see exactly where you rank.',
-  wfF5Label: 'Class Notes', wfF5Desc: 'Clean, structured notes for every class — ready to download.',
-  wfF6Label: 'Smart Notes', wfF6Desc: 'Auto-organized revision notes that save you hours before exams.',
-  wfF7Label: 'Report Card', wfF7Desc: 'Track progress, scores, and growth in one clear dashboard.',
+  wfF1Label: 'Recorded Video Lessons', wfF1Desc: 'Watch every course lesson anytime and resume right where you left off.',
+  wfF2Label: 'Live Classes & Recordings', wfF2Desc: 'Join scheduled live classes, or replay the recording whenever you want.',
+  wfF3Label: 'Practice Quizzes (MCQ)', wfF3Desc: 'Lesson-wise MCQ quizzes to test and lock in every concept.',
+  wfF4Label: 'Exams & Results', wfF4Desc: '1st, 2nd & final exams with PDF submission and teacher grading.',
+  wfF5Label: 'Practice Materials', wfF5Desc: 'Board questions, model tests & notes shared by your teacher — ready to download.',
+  wfF6Label: 'Leaderboard & Ranking', wfF6Desc: 'See exactly where you rank among classmates by quiz performance.',
+  wfF7Label: 'Certificates', wfF7Desc: 'Earn a certificate of completion once you finish a course.',
   wfLiveBadge: 'Live Class', wfLiveTime: 'Today · 8:30 PM', wfJoinBtn: 'Join Now', wfJoined: '554 Joined',
   wfChatName: 'Enamul Islam Rahan', wfChatMsg: 'Tonight we crack the toughest grammar shortcuts — be ready!',
   wfScreenHint: 'Tap a feature to preview',
@@ -533,6 +566,61 @@ const EN: Translations = {
   aiAvailable: 'Available', aiUnavailable: 'Unavailable', aiEditItem: 'Edit Item', aiAddItem: 'Add New Item',
   aiTitlePlaceholder: 'Enter item title', aiPrice: 'Price (৳)', aiDescPlaceholder: 'Enter item description',
   aiFileUrl: 'Download File URL', aiUploadPdf: 'Upload PDF File', aiItemImage: 'Item Image', aiSaveItem: 'Save Item',
+  // Home — hero slider
+  hs1Badge: '🎯 Final Preparation', hs1Title: 'SSC 2027', hs1Accent: 'Complete Course',
+  hs1Desc: 'Get complete preparation — all subjects in one place. Bengali, English, Math and everything.',
+  hs1Btn1: 'Explore Courses', hs1Btn2: 'All Categories',
+  hs1F1Strong: 'SSC 2027', hs1F1Sub: 'Full Syllabus', hs1F2Strong: 'Live MCQ', hs1F2Sub: 'Practice Daily',
+  hs2Badge: '🏆 Top Rated', hs2Title: 'HSC 2027', hs2Accent: 'Master Class',
+  hs2Desc: 'Complete HSC preparation with Admission English & Skills Development — with expert teachers.',
+  hs2Btn1: 'Enroll Now', hs2Btn2: 'All Courses',
+  hs2F1Strong: 'HSC 2027', hs2F1Sub: 'Expert Teachers', hs2F2Strong: 'Admission', hs2F2Sub: 'English Special',
+  hs3Badge: '⚡ New Course', hs3Title: 'Skills', hs3Accent: 'Development',
+  hs3Desc: 'Prepare yourself for the future — communication, critical thinking and more.',
+  hs3Btn1: 'Get Started', hs3Btn2: 'View Details',
+  hs3F1Strong: 'Skills', hs3F1Sub: 'Development', hs3F2Strong: 'Career', hs3F2Sub: 'Ready',
+  // Home — category + reviews headers + browse all
+  homeCatTitle: 'Learn by Category', homeCatSubtitle: 'Choose the right course based on your goals',
+  homeRevTag: '💬 Reviews', homeRevTitle: 'Student', homeRevAccent: 'Feedback',
+  homeRevDesc: 'Real stories from learners who study with us.',
+  homeBrowseAll: 'Browse All',
+  // Home — about section
+  aboutTag: '💡 About Us', aboutTitle: 'About', aboutAccent: '"Nirvor Nije Sikhi"',
+  aboutDesc: 'Not the biggest. The bravest. Built for SSC & HSC students who want to conquer English.',
+  aboutC1Label: 'Mission', aboutC1Title: 'Focused Learning',
+  aboutC1Desc: 'Clear guidance, structured content, and consistent practice — so every student can progress fast.',
+  aboutC1Stat: 'Daily Smart Tasks',
+  aboutC2Label: 'Vision', aboutC2Title: 'Future Ready',
+  aboutC2Desc: 'We build confidence, skills, and mindset for exams and real-life communication.',
+  aboutC2Stat: 'Exam + Career Ready',
+  aboutC3Label: 'Community', aboutC3Title: 'Learn Together',
+  aboutC3Desc: 'Thousands of learners, mentors, and teachers — all helping each other grow.',
+  aboutC3Stat: 'Supportive Network',
+  aboutC4Label: 'Mentors', aboutC4Title: 'Top Teachers',
+  aboutC4Desc: 'Learn from experienced teachers with proven methods and exam-friendly guidance.',
+  aboutC4Stat: 'Verified Experts',
+  aboutC5Label: 'Growth', aboutC5Title: 'Track Progress',
+  aboutC5Desc: 'Clear milestones and feedback help you measure improvement every week.',
+  aboutC5Stat: 'Progress Dashboard',
+  aboutQuote: 'We believe every student can master English with the right system and consistent guidance.',
+  aboutQuoteStat: 'Touch & Solve',
+  // Home — community
+  commTag: '🌐 Our Family', commTitle: 'Join Our', commAccent: 'Community',
+  commDesc: 'Connect with thousands of students — Learn together, Grow together.',
+  commFbTitle: 'Facebook Group', commFbDesc: 'Join our Facebook group. Ask questions, get answers.',
+  commFbStat1: '👥 10,000+ Members', commFbStat2: '🔥 Daily Posts',
+  commYtTitle: 'YouTube Channel', commYtDesc: 'Get free video lessons, tips and tricks on our YouTube channel.',
+  commYtStat1: '▶ Free Videos', commYtStat2: '📺 Weekly Upload',
+  commFreeTitle: 'Free Classes', commFreeDesc: 'Learn for free — access our curated free classes here.',
+  commFreeStat1: '✅ Completely Free', commFreeStat2: '🚀 Start Now',
+  // Footer
+  footBrandDesc: 'We solve just in touch. A learning platform built with a clean structure, stronger outcomes, and a smooth student journey.',
+  footExplore: 'Explore', footCompany: 'Company', footAppTitle: 'Mobile App',
+  footLinkCourses: 'Courses', footLinkInstructors: 'Instructors', footLinkStore: 'Store', footLinkFree: 'Free Classes',
+  footLinkAbout: 'About Us', footLinkSuccess: 'Success Story', footLinkPrivacy: 'Privacy Policy', footLinkTerms: 'Terms of Use',
+  footAppDesc: 'Learn anywhere, anytime with our mobile app.', footAppGetOn: 'Get it on', footAppDownloadOn: 'Download on the',
+  footCopyright: '© 2026 Touch & Solve. All rights reserved.',
+  footBotHome: 'Home', footBotAbout: 'About', footBotContact: 'Contact', footBotPrivacy: 'Privacy',
 };
 
 const BN: Translations = {
@@ -549,6 +637,7 @@ const BN: Translations = {
   showcaseChip1: 'লাইভ ক্লাস', showcaseChip2: 'মেন্টর সাপোর্ট', showcaseChip3: 'প্রজেক্ট ল্যাব', showcaseChip4: 'ক্যারিয়ার পথ',
   sectionPrograms: 'প্রোগ্রামসমূহ', sectionH2Line1: 'ক্যারিয়ার-কেন্দ্রিক শিক্ষার পথ', sectionH2Line2: 'প্রতিটি স্তরের জন্য',
   sectionDesc: 'আপনার বর্তমান স্তর অনুযায়ী পথ বেছে নিন এবং কিউরেটেড পাঠ ও প্রজেক্ট-ভিত্তিক মাইলস্টোন দিয়ে এগিয়ে যান।',
+  recoTitle: 'আপনার জন্য প্রস্তাবিত', recoSubPrefs: 'সাইনআপে বেছে নেওয়া বিষয় থেকে বাছাই করা', recoSubPopular: 'এই মুহূর্তে জনপ্রিয় কোর্সসমূহ',
   coursesLoading: 'কোর্স লোড হচ্ছে...', coursesLoadingDesc: 'দয়া করে একটু অপেক্ষা করুন।',
   coursesNone: 'কোনো কোর্স পাওয়া যায়নি', coursesNoneDesc: 'এখনও কোনো কোর্স publish করা হয়নি। পরে আবার চেক করুন।',
   coursesNoMatch: 'কোনো মিলে যাওয়া কোর্স পাওয়া যায়নি', coursesNoMatchDesc: 'আপনার সার্চের সাথে মিলে এমন কোনো কোর্স নেই।',
@@ -565,13 +654,13 @@ const BN: Translations = {
   wfTag: '⚙️ যেভাবে কাজ করে',
   wfTitle: 'যা যা পাচ্ছেন,', wfTitleAccent: 'সব এক ফ্লো-তে',
   wfSubtitle: 'লাইভ ক্লাস থেকে স্মার্ট নোট — একটি পূর্ণাঙ্গ শেখার ফ্লো, যা আপনাকে ধারাবাহিক, পরীক্ষা-প্রস্তুত আর সবসময় এক ধাপ এগিয়ে রাখে।',
-  wfF1Label: 'লাইভ ও রেকর্ডেড ক্লাস', wfF1Desc: 'লাইভে যোগ দিন, অথবা যেকোনো সময় রিপ্লে দেখুন — কোনো ক্লাস আর মিস নয়।',
-  wfF2Label: 'অ্যানিমেটেড ভিডিও', wfF2Desc: 'কঠিন টপিকও সহজ হয়ে যায় ঝকঝকে অ্যানিমেশনের মাধ্যমে।',
-  wfF3Label: 'প্র্যাকটিস MCQ টেস্ট', wfF3Desc: 'টপিক-ভিত্তিক আনলিমিটেড কুইজ দিয়ে প্রতিটি কনসেপ্ট পাকা করুন।',
-  wfF4Label: 'লাইভ MCQ টেস্ট', wfF4Desc: 'রিয়েল-টাইমে প্রতিযোগিতা করুন আর ঠিক কোথায় আছেন দেখে নিন।',
-  wfF5Label: 'ক্লাস নোট', wfF5Desc: 'প্রতিটি ক্লাসের গোছানো নোট — ডাউনলোডের জন্য প্রস্তুত।',
-  wfF6Label: 'স্মার্ট নোট', wfF6Desc: 'অটো-সাজানো রিভিশন নোট, যা পরীক্ষার আগে অনেক সময় বাঁচায়।',
-  wfF7Label: 'রিপোর্ট কার্ড', wfF7Desc: 'অগ্রগতি, স্কোর আর উন্নতি — সব এক পরিষ্কার ড্যাশবোর্ডে।',
+  wfF1Label: 'রেকর্ডেড ভিডিও লেসন', wfF1Desc: 'যেকোনো সময় কোর্সের প্রতিটি লেসন দেখুন, যেখানে থেমেছিলেন সেখান থেকেই শুরু করুন।',
+  wfF2Label: 'লাইভ ক্লাস ও রেকর্ডিং', wfF2Desc: 'শিডিউল করা লাইভ ক্লাসে যোগ দিন, অথবা যেকোনো সময় রেকর্ডিং রিপ্লে দেখুন।',
+  wfF3Label: 'প্র্যাকটিস কুইজ (MCQ)', wfF3Desc: 'লেসন-ভিত্তিক MCQ কুইজ দিয়ে প্রতিটি কনসেপ্ট পাকা করুন।',
+  wfF4Label: 'পরীক্ষা ও ফলাফল', wfF4Desc: '১ম, ২য় ও ফাইনাল পরীক্ষা — PDF জমা ও শিক্ষকের গ্রেডিংসহ।',
+  wfF5Label: 'প্র্যাকটিস ম্যাটেরিয়াল', wfF5Desc: 'বোর্ড প্রশ্ন, মডেল টেস্ট আর নোট — শিক্ষকের শেয়ার করা, ডাউনলোডের জন্য প্রস্তুত।',
+  wfF6Label: 'লিডারবোর্ড ও র‍্যাংকিং', wfF6Desc: 'কুইজের ফলাফলে সহপাঠীদের মধ্যে আপনি ঠিক কোথায় আছেন দেখে নিন।',
+  wfF7Label: 'সার্টিফিকেট', wfF7Desc: 'কোর্স শেষ করলেই পেয়ে যান সম্পন্নের সার্টিফিকেট।',
   wfLiveBadge: 'লাইভ ক্লাস', wfLiveTime: 'আজ · ৮:৩০ PM', wfJoinBtn: 'জয়েন করুন', wfJoined: '৫৫৪ জন যুক্ত',
   wfChatName: 'এনামুল ইসলাম রেহান', wfChatMsg: 'আজ রাতে সবচেয়ে কঠিন গ্রামার শর্টকাটগুলো সলভ করব — রেডি থেকো!',
   wfScreenHint: 'প্রিভিউ দেখতে ফিচারে ট্যাপ করুন',
@@ -823,6 +912,61 @@ const BN: Translations = {
   aiAvailable: 'উপলব্ধ', aiUnavailable: 'অনুপলব্ধ', aiEditItem: 'আইটেম এডিট', aiAddItem: 'নতুন আইটেম যোগ করুন',
   aiTitlePlaceholder: 'আইটেমের শিরোনাম লিখুন', aiPrice: 'মূল্য (৳)', aiDescPlaceholder: 'আইটেমের বিবরণ লিখুন',
   aiFileUrl: 'ডাউনলোড ফাইল URL', aiUploadPdf: 'PDF ফাইল আপলোড', aiItemImage: 'আইটেম ছবি', aiSaveItem: 'আইটেম সংরক্ষণ',
+  // Home — hero slider
+  hs1Badge: '🎯 চূড়ান্ত প্রস্তুতি', hs1Title: 'SSC 2027', hs1Accent: 'কমপ্লিট কোর্স',
+  hs1Desc: 'সম্পূর্ণ প্রস্তুতি — সব বিষয় এক জায়গায়। বাংলা, ইংরেজি, গণিত সবকিছু।',
+  hs1Btn1: 'কোর্স দেখুন', hs1Btn2: 'সব ক্যাটাগরি',
+  hs1F1Strong: 'SSC 2027', hs1F1Sub: 'ফুল সিলেবাস', hs1F2Strong: 'লাইভ MCQ', hs1F2Sub: 'প্রতিদিন প্র্যাকটিস',
+  hs2Badge: '🏆 টপ রেটেড', hs2Title: 'HSC 2027', hs2Accent: 'মাস্টার ক্লাস',
+  hs2Desc: 'অ্যাডমিশন ইংরেজি ও স্কিল ডেভেলপমেন্টসহ সম্পূর্ণ HSC প্রস্তুতি — অভিজ্ঞ শিক্ষকদের সাথে।',
+  hs2Btn1: 'এখনই ভর্তি হন', hs2Btn2: 'সব কোর্স',
+  hs2F1Strong: 'HSC 2027', hs2F1Sub: 'অভিজ্ঞ শিক্ষক', hs2F2Strong: 'অ্যাডমিশন', hs2F2Sub: 'ইংরেজি স্পেশাল',
+  hs3Badge: '⚡ নতুন কোর্স', hs3Title: 'স্কিল', hs3Accent: 'ডেভেলপমেন্ট',
+  hs3Desc: 'ভবিষ্যতের জন্য নিজেকে প্রস্তুত করুন — কমিউনিকেশন, ক্রিটিক্যাল থিংকিং আরও অনেক কিছু।',
+  hs3Btn1: 'শুরু করুন', hs3Btn2: 'বিস্তারিত দেখুন',
+  hs3F1Strong: 'স্কিল', hs3F1Sub: 'ডেভেলপমেন্ট', hs3F2Strong: 'ক্যারিয়ার', hs3F2Sub: 'রেডি',
+  // Home — category + reviews headers + browse all
+  homeCatTitle: 'বিষয় অনুযায়ী শিখুন', homeCatSubtitle: 'আপনার লক্ষ্য অনুযায়ী সঠিক কোর্স বেছে নিন',
+  homeRevTag: '💬 রিভিউ', homeRevTitle: 'শিক্ষার্থীদের', homeRevAccent: 'মতামত',
+  homeRevDesc: 'আমাদের সাথে যারা পড়ছে তাদের বাস্তব গল্প।',
+  homeBrowseAll: 'সব দেখুন',
+  // Home — about section
+  aboutTag: '💡 আমাদের সম্পর্কে', aboutTitle: 'সম্পর্কে', aboutAccent: '"নির্ভর নিজে শিখি"',
+  aboutDesc: 'সবচেয়ে বড় নয়, সবচেয়ে সাহসী। SSC ও HSC শিক্ষার্থীদের জন্য, যারা ইংরেজিতে জয় করতে চায়।',
+  aboutC1Label: 'লক্ষ্য', aboutC1Title: 'ফোকাসড লার্নিং',
+  aboutC1Desc: 'স্পষ্ট দিকনির্দেশনা, গোছানো কন্টেন্ট আর ধারাবাহিক প্র্যাকটিস — যাতে প্রতিটি শিক্ষার্থী দ্রুত এগোতে পারে।',
+  aboutC1Stat: 'প্রতিদিন স্মার্ট টাস্ক',
+  aboutC2Label: 'ভিশন', aboutC2Title: 'ফিউচার রেডি',
+  aboutC2Desc: 'পরীক্ষা ও বাস্তব জীবনের যোগাযোগের জন্য আত্মবিশ্বাস, দক্ষতা ও মানসিকতা গড়ে তুলি।',
+  aboutC2Stat: 'পরীক্ষা + ক্যারিয়ার রেডি',
+  aboutC3Label: 'কমিউনিটি', aboutC3Title: 'একসাথে শিখুন',
+  aboutC3Desc: 'হাজারো শিক্ষার্থী, মেন্টর আর শিক্ষক — সবাই একে অপরকে এগিয়ে নিতে সাহায্য করে।',
+  aboutC3Stat: 'সহায়ক নেটওয়ার্ক',
+  aboutC4Label: 'মেন্টর', aboutC4Title: 'সেরা শিক্ষক',
+  aboutC4Desc: 'প্রমাণিত পদ্ধতি ও পরীক্ষা-উপযোগী গাইডেন্সসহ অভিজ্ঞ শিক্ষকদের কাছ থেকে শিখুন।',
+  aboutC4Stat: 'ভেরিফায়েড এক্সপার্ট',
+  aboutC5Label: 'গ্রোথ', aboutC5Title: 'অগ্রগতি ট্র্যাক করুন',
+  aboutC5Desc: 'স্পষ্ট মাইলস্টোন ও ফিডব্যাক প্রতি সপ্তাহে উন্নতি মাপতে সাহায্য করে।',
+  aboutC5Stat: 'প্রোগ্রেস ড্যাশবোর্ড',
+  aboutQuote: 'আমরা বিশ্বাস করি, সঠিক সিস্টেম ও ধারাবাহিক গাইডেন্সে প্রতিটি শিক্ষার্থী ইংরেজিতে দক্ষ হতে পারে।',
+  aboutQuoteStat: 'Touch & Solve',
+  // Home — community
+  commTag: '🌐 আমাদের পরিবার', commTitle: 'আমাদের', commAccent: 'কমিউনিটিতে যোগ দিন',
+  commDesc: 'হাজারো শিক্ষার্থীর সাথে যুক্ত হন — একসাথে শিখুন, একসাথে এগিয়ে যান।',
+  commFbTitle: 'ফেসবুক গ্রুপ', commFbDesc: 'আমাদের ফেসবুক গ্রুপে যোগ দিন। প্রশ্ন করুন, উত্তর পান।',
+  commFbStat1: '👥 ১০,০০০+ সদস্য', commFbStat2: '🔥 প্রতিদিন পোস্ট',
+  commYtTitle: 'ইউটিউব চ্যানেল', commYtDesc: 'আমাদের ইউটিউব চ্যানেলে ফ্রি ভিডিও লেসন, টিপস ও ট্রিকস পান।',
+  commYtStat1: '▶ ফ্রি ভিডিও', commYtStat2: '📺 সাপ্তাহিক আপলোড',
+  commFreeTitle: 'ফ্রি ক্লাস', commFreeDesc: 'ফ্রিতে শিখুন — আমাদের বাছাই করা ফ্রি ক্লাস এখানে।',
+  commFreeStat1: '✅ সম্পূর্ণ ফ্রি', commFreeStat2: '🚀 এখনই শুরু',
+  // Footer
+  footBrandDesc: 'এক ছোঁয়ায় সমাধান। পরিষ্কার কাঠামো, শক্তিশালী ফলাফল আর মসৃণ শিক্ষার্থী অভিজ্ঞতা নিয়ে গড়া একটি লার্নিং প্ল্যাটফর্ম।',
+  footExplore: 'এক্সপ্লোর', footCompany: 'কোম্পানি', footAppTitle: 'মোবাইল অ্যাপ',
+  footLinkCourses: 'কোর্সসমূহ', footLinkInstructors: 'প্রশিক্ষক', footLinkStore: 'স্টোর', footLinkFree: 'ফ্রি ক্লাস',
+  footLinkAbout: 'আমাদের সম্পর্কে', footLinkSuccess: 'সাফল্যের গল্প', footLinkPrivacy: 'প্রাইভেসি পলিসি', footLinkTerms: 'ব্যবহারের শর্তাবলী',
+  footAppDesc: 'আমাদের মোবাইল অ্যাপে যেকোনো জায়গায়, যেকোনো সময় শিখুন।', footAppGetOn: 'ডাউনলোড করুন', footAppDownloadOn: 'ডাউনলোড করুন',
+  footCopyright: '© ২০২৬ Touch & Solve. সর্বস্বত্ব সংরক্ষিত।',
+  footBotHome: 'হোম', footBotAbout: 'সম্পর্কে', footBotContact: 'যোগাযোগ', footBotPrivacy: 'প্রাইভেসি',
 };
 
 const STORAGE_KEY = 'app_lang';

@@ -656,6 +656,39 @@ p {
   color: var(--c-text);
 }
 
+/* ── "Recommended for you" — personalized row (reuses .cat-card carousel) ── */
+.reco-section {
+  background:
+    radial-gradient(1200px 380px at 0% 0%, rgba(124, 58, 237, 0.08), transparent 55%),
+    radial-gradient(900px 320px at 100% 0%, rgba(236, 72, 153, 0.06), transparent 58%),
+    #fbf9ff;
+  border: 1px solid rgba(124, 58, 237, 0.10);
+}
+.reco-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.reco-eyebrow {
+  align-self: flex-start;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.10);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  padding: 5px 14px;
+  border-radius: 999px;
+}
+.reco-title {
+  margin-bottom: 0;
+  background: linear-gradient(90deg, #7c3aed, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .cats-carousel-shell {
   display: flex;
   align-items: stretch;

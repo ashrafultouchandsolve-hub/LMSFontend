@@ -26,15 +26,20 @@ export class OnboardingPreferences {
   protected readonly skillLevelOptions = ['Beginner', 'Intermediate', 'Advanced'];
   protected readonly goalOptions = ['Get a Job', 'Freelancing', 'Skill Upgrade', 'Personal Interest'];
   protected readonly languageOptions = ['English', 'Bangla', 'Both'];
+  // Keep these labels in sync with INTEREST_TAXONOMY keys in recommendation.service.ts
+  // so each selection "catches" all matching courses (academic + skill tracks).
   protected readonly interestOptions = [
+    'SSC',
+    'HSC',
+    'University Admission',
+    'Skills & Communication',
     'Programming',
     'Web Development',
     'Mobile App Development',
-    'Data Science',
-    'AI / Machine Learning',
+    'Data Science & AI',
     'UI/UX Design',
     'Cyber Security',
-    'Business / Marketing',
+    'Business & Marketing',
   ];
 
   protected skipStep(): void {

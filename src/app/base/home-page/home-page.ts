@@ -17,6 +17,7 @@ import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
+import { RecommendationService } from '../../Service/recommendation.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 type LearningHighlight = { title: string; description: string; };
@@ -42,6 +43,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private readonly authService  = inject(AuthService);
   private readonly learningApi  = inject(LearningApiService);
   private readonly categoryService = inject(CategoryService);
+  private readonly reco          = inject(RecommendationService);
   readonly lang                 = inject(LanguageService);
   private readonly zone        = inject(NgZone);
   private readonly hostRef     = inject(ElementRef<HTMLElement>);
@@ -54,10 +56,18 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('courseTrackViewport')
   private courseTrackViewport?: ElementRef<HTMLDivElement>;
 
+  @ViewChild('recoTrackViewport')
+  private recoTrackViewport?: ElementRef<HTMLDivElement>;
+
   protected readonly userRole         = signal<number | null>(null);
   protected readonly isLoadingCourses = signal(false);
   protected readonly courses          = signal<HomeCourse[]>([]);
   protected readonly categories       = signal<Category[]>([]);
+
+  // ── "Recommended for you" (logged-in students only) ──
+  protected readonly recommendedCourses = signal<HomeCourse[]>([]);
+  protected readonly recoUsedPrefs      = signal(false);
+  protected readonly isStudent          = computed(() => this.userRole() === 0);
 
   /** Emoji for a category pill (shared with admin & courses pages). */
   protected catIcon(name: string): string { return categoryIcon(name); }
@@ -104,12 +114,29 @@ private reviewInterval: any;
     const t = this.lang.t();
     return [
       { icon: '🎥', label: t.wfF1Label, desc: t.wfF1Desc },
-      { icon: '🎬', label: t.wfF2Label, desc: t.wfF2Desc },
+      { icon: '🔴', label: t.wfF2Label, desc: t.wfF2Desc },
       { icon: '📝', label: t.wfF3Label, desc: t.wfF3Desc },
-      { icon: '⚡', label: t.wfF4Label, desc: t.wfF4Desc },
-      { icon: '📒', label: t.wfF5Label, desc: t.wfF5Desc },
-      { icon: '🧠', label: t.wfF6Label, desc: t.wfF6Desc },
-      { icon: '📊', label: t.wfF7Label, desc: t.wfF7Desc },
+      { icon: '🧪', label: t.wfF4Label, desc: t.wfF4Desc },
+      { icon: '📚', label: t.wfF5Label, desc: t.wfF5Desc },
+      { icon: '🏆', label: t.wfF6Label, desc: t.wfF6Desc },
+      { icon: '🎓', label: t.wfF7Label, desc: t.wfF7Desc },
+    ];
+  });
+
+  // ✅ Hero slider content — language-driven so it re-translates on toggle (OnPush + signal).
+  //    Structure/CSS unchanged: each slide keeps its slide-1/2/3 class; only the copy is i18n.
+  protected readonly heroSlides = computed(() => {
+    const t = this.lang.t();
+    return [
+      { cls: 'slide-1', category: 'SSC 2027',
+        badge: t.hs1Badge, title: t.hs1Title, accent: t.hs1Accent, desc: t.hs1Desc, btn1: t.hs1Btn1, btn2: t.hs1Btn2,
+        f1Icon: '📚', f1Strong: t.hs1F1Strong, f1Sub: t.hs1F1Sub, f2Icon: '✅', f2Strong: t.hs1F2Strong, f2Sub: t.hs1F2Sub },
+      { cls: 'slide-2', category: 'HSC 2027',
+        badge: t.hs2Badge, title: t.hs2Title, accent: t.hs2Accent, desc: t.hs2Desc, btn1: t.hs2Btn1, btn2: t.hs2Btn2,
+        f1Icon: '🎓', f1Strong: t.hs2F1Strong, f1Sub: t.hs2F1Sub, f2Icon: '🔥', f2Strong: t.hs2F2Strong, f2Sub: t.hs2F2Sub },
+      { cls: 'slide-3', category: 'Skills Development',
+        badge: t.hs3Badge, title: t.hs3Title, accent: t.hs3Accent, desc: t.hs3Desc, btn1: t.hs3Btn1, btn2: t.hs3Btn2,
+        f1Icon: '💡', f1Strong: t.hs3F1Strong, f1Sub: t.hs3F1Sub, f2Icon: '🚀', f2Strong: t.hs3F2Strong, f2Sub: t.hs3F2Sub },
     ];
   });
 
@@ -393,6 +420,40 @@ private reviewInterval: any;
     });
   }
 
+  /** Scroll the "Recommended for you" carousel by roughly one card. */
+  protected scrollReco(direction: 'previous' | 'next'): void {
+    const viewport = this.recoTrackViewport?.nativeElement;
+    if (!viewport) return;
+    const cardWidth = viewport.querySelector<HTMLElement>('.cat-card')?.getBoundingClientRect().width ?? 290;
+    viewport.scrollBy({ left: direction === 'next' ? (cardWidth + 18) * 1.05 : -(cardWidth + 18) * 1.05, behavior: 'smooth' });
+  }
+
+  /**
+   * Build the personalized course row. Students only. Uses the shared RecommendationService
+   * so it matches the leaderboard's logic exactly; excludes already-enrolled courses and
+   * falls back to popular courses when there are no preference matches.
+   */
+  private async loadRecommended(allCourses: HomeCourse[]): Promise<void> {
+    if (this.userRole() !== 0) { this.recommendedCourses.set([]); return; }
+
+    const candidates = allCourses.filter((c) => !c.isEnrolled);
+    if (candidates.length === 0) { this.recommendedCourses.set([]); return; }
+
+    let prefs: { skillLevel?: string; interests?: string[] } | null = null;
+    try { prefs = await firstValueFrom(this.learningApi.getUserPreferences()); }
+    catch { prefs = null; } // 404 = no preferences saved yet
+
+    const ranked = this.reco.rankCourses(candidates, prefs, { limit: 8 });
+    if (ranked.length > 0) {
+      this.recoUsedPrefs.set(true);
+      this.recommendedCourses.set(ranked);
+    } else {
+      this.recoUsedPrefs.set(false);
+      this.recommendedCourses.set(this.reco.popularFallback(candidates, 8));
+    }
+    queueMicrotask(() => this.observeReveals());
+  }
+
   private async loadAllCourses(): Promise<void> {
     this.isLoadingCourses.set(true);
     try {
@@ -405,6 +466,7 @@ private reviewInterval: any;
     } catch { this.courses.set([]); }
     finally {
       this.isLoadingCourses.set(false);
+      void this.loadRecommended(this.courses()); // self-contained; never disturbs courses()
       queueMicrotask(() => {
         this.syncCourseCarouselState();
         this.observeReveals(); // async-loaded course card-গুলোও reveal observer-এ ঢোকাও
