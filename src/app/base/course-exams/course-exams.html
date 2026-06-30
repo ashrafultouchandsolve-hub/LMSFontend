@@ -9,7 +9,7 @@
       <article class="cx-card cx-card--{{ examState(exam) }}" [class.cx-clickable]="!!exam && exam.isPublished"
         (click)="exam && exam.isPublished && openDetails(exam)">
         <div class="cx-card-head">
-          <h3>{{ i === 0 ? lang.t().exFirst : i === 1 ? lang.t().exSecond : lang.t().exFinal }}</h3>
+          <h3>{{ i === 0 ? lang.t().exFirst : i === 1 ? lang.t().exSecond : i === 2 ? lang.t().exThird : lang.t().exFinal }}</h3>
           @switch (examState(exam)) {
             @case ('locked') { <span class="cx-badge cx-badge--locked">🔒 {{ lang.t().exLocked }}</span> }
             @case ('open') {

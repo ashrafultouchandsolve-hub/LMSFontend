@@ -5,7 +5,7 @@ import { environment } from '../../environments/environments';
 
 export interface ExamView {
   id: string;
-  slot: number;                 // 1 = 1st, 2 = 2nd, 3 = Final
+  slot: number;                 // 1 = 1st, 2 = 2nd, 3 = 3rd, 4 = Final
   title: string;
   instruction: string;
   estimatedDate?: string | null;   // display-only estimate (student-card countdown)

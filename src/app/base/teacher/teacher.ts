@@ -13,7 +13,7 @@ import {
   SaveLessonPayload,
 } from '../../Service/learning-api.service';
 import { FreeLiveClass, LiveClass, LiveClassService } from '../../Service/live-class-service';
-import { ExamService, ExamView, ExamSubmissionView } from '../../Service/exam.service';
+import { ExamService, ExamView } from '../../Service/exam.service';
 import { PracticeService, PracticeMaterial, PracticeType } from '../../Service/practice.service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
@@ -576,7 +576,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected readonly exams = signal<ExamView[]>([]);
   protected readonly examSlots = computed<(ExamView | null)[]>(() => {
     const list = this.exams();
-    return [1, 2, 3].map((slot) => list.find((e) => e.slot === slot) ?? null);
+    return [1, 2, 3, 4].map((slot) => list.find((e) => e.slot === slot) ?? null);
   });
 
   protected readonly showExamModal = signal(false);
@@ -594,12 +594,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   ];
   protected readonly isSavingExam = signal(false);
   protected readonly uploadingQuestionSlot = signal<number | null>(null);
-
-  protected readonly showExamSubsModal = signal(false);
-  protected readonly examSubs = signal<ExamSubmissionView[]>([]);
-  protected readonly examSubsTotalMarks = signal(0);
-  private examSubsExamId: string | null = null;
-  protected gradeInputs: Record<string, { marks: string; feedback: string }> = {};
+  // Submission listing + grading now lives on its own page (ExamSubmissions / route /exam-submissions/:examId).
 
   private mapExam = (e: any): ExamView => ({
     id: e.id ?? e.Id,
@@ -700,46 +695,6 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       this.uploadingQuestionSlot.set(null);
       input.value = '';
     }
-  }
-
-  protected async openExamSubs(examId: string): Promise<void> {
-    this.examSubsExamId = examId;
-    this.showExamSubsModal.set(true);
-    try {
-      const r: any = await firstValueFrom(this.examService.getSubmissions(examId));
-      const a = Array.isArray(r?.data) ? r.data : Array.isArray(r?.Data) ? r.Data : [];
-      this.examSubsTotalMarks.set(r?.totalMarks ?? r?.TotalMarks ?? 0);
-      const subs: ExamSubmissionView[] = a.map((s: any) => ({
-        submissionId: s.submissionId ?? s.SubmissionId,
-        userId: s.userId ?? s.UserId,
-        studentName: s.studentName ?? s.StudentName ?? 'Student',
-        studentEmail: s.studentEmail ?? s.StudentEmail ?? '',
-        submittedAt: s.submittedAt ?? s.SubmittedAt,
-        marks: s.marks ?? s.Marks ?? null,
-        feedback: s.feedback ?? s.Feedback ?? null,
-        graded: s.graded ?? s.Graded ?? false,
-        gradedByAdmin: s.gradedByAdmin ?? s.GradedByAdmin ?? false,
-      }));
-      this.examSubs.set(subs);
-      this.gradeInputs = {};
-      subs.forEach((s) => this.gradeInputs[s.submissionId] = {
-        marks: s.marks != null ? String(s.marks) : '',
-        feedback: s.feedback ?? '',
-      });
-    } catch {
-      this.examSubs.set([]);
-    }
-  }
-
-  protected closeExamSubs(): void {
-    this.showExamSubsModal.set(false);
-  }
-
-  protected downloadSubmission(sub: ExamSubmissionView): void {
-    this.examService.submissionFile(sub.submissionId).subscribe({
-      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
-      error: () => {},
-    });
   }
 
   /** Admin / teacher: preview the uploaded question PDF. */
@@ -849,18 +804,6 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
       error: () => {},
     });
-  }
-
-  protected async gradeSubmission(sub: ExamSubmissionView): Promise<void> {
-    const g = this.gradeInputs[sub.submissionId];
-    if (!g) return;
-    try {
-      await firstValueFrom(this.examService.grade(sub.submissionId, Number(g.marks || 0), g.feedback || ''));
-      if (this.examSubsExamId) await this.openExamSubs(this.examSubsExamId);
-      this.setNotice('Marks saved.', 'success');
-    } catch (error) {
-      this.setNotice(this.extractApiErrorMessage(error, 'Marks সেভ করা যায়নি।'), 'error');
-    }
   }
 
   protected closeLessonsView(): void {

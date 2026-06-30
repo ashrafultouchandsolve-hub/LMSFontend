@@ -186,7 +186,8 @@
 /* ─── GRID WRAPPER ───────────────────────────────────────────── */
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Match the home page card size (~290px) instead of stretching to 3 wide columns. */
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
   gap: 20px;
   padding: 28px 28px 0;
 }

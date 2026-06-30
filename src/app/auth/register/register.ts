@@ -29,6 +29,9 @@ export class Register {
     if (url.includes('register/teacher')) {
       this.registerForm.controls.role.setValue('1');
       this.preselectedRole.set('teacher');
+      // Parent email is a student/guardian field — not required for teachers.
+      this.registerForm.controls.parentEmail.clearValidators();
+      this.registerForm.controls.parentEmail.updateValueAndValidity();
     } else if (url.includes('register/student')) {
       this.registerForm.controls.role.setValue('0');
       this.preselectedRole.set('student');
@@ -43,6 +46,14 @@ export class Register {
       nonNullable: true,
     }),
     email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    mobileNumber: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern(/^[+]?[0-9][0-9\s\-]{6,14}$/)],
+    }),
+    parentEmail: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email],
     }),
@@ -75,7 +86,7 @@ export class Register {
     this.isSubmitting.set(true);
 
     this.authService
-      .register(value.fullname, value.email, value.password, Number(value.role))
+      .register(value.fullname, value.email, value.password, Number(value.role), value.mobileNumber, value.parentEmail || undefined)
       .subscribe({
         next: (response: any) => {
           this.isSubmitting.set(false);

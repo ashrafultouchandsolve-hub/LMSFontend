@@ -1,0 +1,57 @@
+<app-navbar></app-navbar>
+
+<section class="es-page">
+  <div class="es-container">
+    <button type="button" class="es-back" (click)="back()">← {{ lang.t().commonBack }}</button>
+
+    <header class="es-head">
+      <div class="es-head-icon">📥</div>
+      <div>
+        <h1>{{ lang.t().exViewSubmissions }}</h1>
+        @if (examTitle()) { <p class="es-sub">{{ examTitle() }}</p> }
+      </div>
+      @if (!isLoading()) {
+        <span class="es-count">{{ subs().length }}</span>
+      }
+    </header>
+
+    @if (notice(); as n) {
+      <div class="es-notice" [class.es-notice--err]="n.kind === 'error'">{{ n.text }}</div>
+    }
+
+    @if (isLoading()) {
+      <div class="es-state"><div class="es-spinner"></div></div>
+    } @else if (subs().length === 0) {
+      <div class="es-state es-empty">
+        <span>📭</span>
+        <p>{{ lang.t().exNoSubmissions }}</p>
+      </div>
+    } @else {
+      <div class="es-list">
+        @for (s of subs(); track s.submissionId) {
+          <article class="es-row">
+            <div class="es-info">
+              <strong>{{ s.studentName }}</strong>
+              @if (s.studentEmail) { <span class="es-email">{{ s.studentEmail }}</span> }
+              <span class="es-time">{{ lang.t().exSubmittedAt }}: {{ s.submittedAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+              @if (s.graded) {
+                <span class="es-graded">✓ {{ lang.t().exGraded }} · {{ s.marks }}/{{ totalMarks() }}</span>
+              }
+            </div>
+
+            <div class="es-actions">
+              <button type="button" class="es-btn es-btn--outline" (click)="download(s)">⬇ {{ lang.t().exDownload }}</button>
+              <input class="es-mark" type="number" min="0" [(ngModel)]="gradeInputs[s.submissionId].marks"
+                [placeholder]="lang.t().exMarks + ' /' + totalMarks()" />
+              <input class="es-fb" type="text" [(ngModel)]="gradeInputs[s.submissionId].feedback"
+                [placeholder]="lang.t().exFeedback" />
+              <button type="button" class="es-btn es-btn--primary" [disabled]="savingId() === s.submissionId" (click)="grade(s)">
+                {{ savingId() === s.submissionId ? '…' : lang.t().exSaveGrade }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>

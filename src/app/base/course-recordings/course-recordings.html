@@ -5,13 +5,23 @@
     </div>
     <div class="cr-grid">
       @for (rec of recordings(); track rec.id) {
-        <article class="cr-card">
-          <div class="cr-thumb">🎬</div>
+        <article class="cr-card" role="button" tabindex="0"
+          (click)="play(rec)" (keydown.enter)="play(rec)" (keydown.space)="play(rec)">
+          <div class="cr-thumb">
+            <span class="cr-thumb-deco"></span>
+            <span class="cr-badge">● REC</span>
+            <span class="cr-play"><span class="cr-play-ico">▶</span></span>
+          </div>
           <div class="cr-info">
             <p class="cr-title">{{ rec.title }}</p>
-            <p class="cr-time">🕐 {{ rec.scheduledAt | date:'dd MMM, hh:mm a' }}</p>
+            @if (rec.description) {
+              <p class="cr-desc">{{ rec.description }}</p>
+            }
+            <div class="cr-meta">
+              <span class="cr-time">🕐 {{ rec.scheduledAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+              <span class="cr-watch">▶ {{ lang.t().recWatch }}</span>
+            </div>
           </div>
-          <button type="button" class="cr-watch" (click)="play(rec)">▶ {{ lang.t().recWatch }}</button>
         </article>
       }
     </div>

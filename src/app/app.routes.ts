@@ -6,6 +6,7 @@ import { HomePage } from './base/home-page/home-page';
 import { authGuard } from './guards/auth.guard';
 import { teacherGuard } from './guards/teacher.guard';
 import { adminGuard } from './guards/admin-guard' // ✅ নতুন
+import { staffGuard } from './guards/staff.guard';
 import { studentGuard } from './guards/student.guard';
 import { Profile } from './base/profile/profile';
 import { CourseDetails } from './base/course-details/course-details';
@@ -50,6 +51,12 @@ export const routes: Routes = [
         path: 'admin',
         loadComponent: () => import('./admin/admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard),
         canActivate: [adminGuard],
+    },
+    // ✅ Exam grading page — opened from the Exams panel; teacher + admin can both grade
+    {
+        path: 'exam-submissions/:examId',
+        loadComponent: () => import('./base/exam-submissions/exam-submissions').then((m) => m.ExamSubmissions),
+        canActivate: [authGuard, staffGuard],
     },
     { path: 'courses', component: Courses },
     { path: 'course-details/:id', component: CourseDetails },

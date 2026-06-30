@@ -124,7 +124,6 @@ export class Profile implements OnInit {
 
   protected readonly wishlist = signal<WishlistItem[]>([]);
   protected readonly isLoadingWishlist = signal(false);
-  protected readonly activeTab = signal<'profile' | 'wishlist'>('profile');
 
   readonly lessonNotifCount = signal(0);
 readonly quizNotifCount   = signal(0);
@@ -306,11 +305,15 @@ readonly certNotifCount   = signal(0);
       const res: any = await firstValueFrom(this.examService.myPerformance());
       const d = res?.data ?? res?.Data ?? null;
       if (d) {
+        const max = Number(d.max ?? d.Max ?? 0);
+        // A student can never score above the exam's total, so cap obtained at max and percentage at 100%.
+        const obtained = Math.min(Math.max(Number(d.obtained ?? d.Obtained ?? 0), 0), max || Infinity);
+        const percentage = max > 0 ? Math.min(100, Math.round((obtained / max) * 100)) : 0;
         this.examPerf.set({
           examCount: d.examCount ?? d.ExamCount ?? 0,
-          obtained: d.obtained ?? d.Obtained ?? 0,
-          max: d.max ?? d.Max ?? 0,
-          percentage: d.percentage ?? d.Percentage ?? 0,
+          obtained,
+          max,
+          percentage,
         });
       }
     } catch { /* no exam performance yet */ }
@@ -398,13 +401,6 @@ private loadNotifCounts(): void {
       this.wishlist.set([]);
     } finally {
       this.isLoadingWishlist.set(false);
-    }
-  }
-
-  switchTab(tab: 'profile' | 'wishlist') {
-    this.activeTab.set(tab);
-    if (tab === 'wishlist') {
-      void this.loadWishlist();
     }
   }
 

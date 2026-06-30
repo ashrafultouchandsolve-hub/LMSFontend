@@ -109,132 +109,137 @@
 				</div>
 			</section>
 
-			<div class="profile-tabs">
-				<button type="button" class="profile-tab" [class.active]="activeTab() === 'profile'" (click)="switchTab('profile')">👤 Profile</button>
-				<button type="button" class="profile-tab" [class.active]="activeTab() === 'wishlist'" (click)="switchTab('wishlist')">
-					♥ Wishlist
-					@if (wishlist().length > 0) { <span class="tab-badge">{{ wishlist().length }}</span> }
-				</button>
-			</div>
+			<!-- ── Profile details (always visible) ─────────── -->
+			<section class="details-card" id="profile-details" aria-label="Profile details">
+				<div class="details-head">
+					<h3>{{ lang.t().profileDetails }}</h3>
+					<button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+				</div>
 
-			@if (activeTab() === 'profile') {
-				<section class="details-card" aria-label="Profile details">
-					<div class="details-head">
-						<h3>{{ lang.t().profileDetails }}</h3>
-						<button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+				@if (profile()?.bio) {
+					<div class="about-block">
+						<span class="about-label">{{ lang.t().profileAboutSection }}</span>
+						<p class="about-text">{{ profile()?.bio }}</p>
 					</div>
+				}
 
-					@if (profile()?.bio) {
-						<div class="about-block">
-							<span class="about-label">{{ lang.t().profileAboutSection }}</span>
-							<p class="about-text">{{ profile()?.bio }}</p>
+				<div class="details-grid">
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileFullName }}</span>
+						<span class="detail-value">{{ profile()?.fullName || userName() }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
+						<span class="detail-value">{{ profile()?.email || userEmail() }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profilePhone }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileDob }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileGender }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileClass }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileInstitution }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item detail-item--wide">
+						<span class="detail-label">{{ lang.t().profileAddress }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileGuardianName }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
+						<span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
+					</div>
+					@if (profile()?.facebookLink) {
+						<div class="detail-item">
+							<span class="detail-label">{{ lang.t().profileFacebook }}</span>
+							<a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
 						</div>
 					}
-
-					<div class="details-grid">
+					@if (profile()?.linkedInLink) {
 						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileFullName }}</span>
-							<span class="detail-value">{{ profile()?.fullName || userName() }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
-							<span class="detail-value">{{ profile()?.email || userEmail() }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profilePhone }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileDob }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileGender }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileClass }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileInstitution }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item detail-item--wide">
-							<span class="detail-label">{{ lang.t().profileAddress }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileGuardianName }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
-							<span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
-						</div>
-						@if (profile()?.facebookLink) {
-							<div class="detail-item">
-								<span class="detail-label">{{ lang.t().profileFacebook }}</span>
-								<a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
-							</div>
-						}
-						@if (profile()?.linkedInLink) {
-							<div class="detail-item">
-								<span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
-								<a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
-							</div>
-						}
-					</div>
-
-					@if (!hasDetails()) {
-						<div class="details-empty">
-							<p>{{ lang.t().profileAddInfo }}</p>
-							<button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
+							<span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
+							<a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
 						</div>
 					}
-				</section>
-			}
+				</div>
 
-			@if (activeTab() === 'wishlist') {
-				<section class="wishlist-section">
-					@if (isLoadingWishlist()) {
-						<div class="wishlist-loading">Loading...</div>
-					} @else if (wishlist().length === 0) {
-						<div class="wishlist-empty">
-							<div class="wishlist-empty-icon">💔</div>
-							<h3>Wishlist খালি</h3>
-							<p>কোনো course wishlist এ নেই।</p>
-							<a routerLink="/courses" class="browse-btn">Browse Courses</a>
-						</div>
-					} @else {
-						<div class="wishlist-grid">
-							@for (item of wishlist(); track item.courseId) {
-								<div class="wishlist-card">
-									<div class="wishlist-thumb">
-										<img [src]="getImageUrl(item.thumbnailPath)" [alt]="item.title" (error)="$any($event.target).style.display='none'" />
+				@if (!hasDetails()) {
+					<div class="details-empty">
+						<p>{{ lang.t().profileAddInfo }}</p>
+						<button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
+					</div>
+				}
+			</section>
+
+			<!-- ── Wishlist (always visible — never hides the details above) ─ -->
+			<section class="wishlist-section" id="wishlist" aria-label="My wishlist">
+				<div class="wishlist-head">
+					<div class="wishlist-head-title">
+						<span class="wishlist-head-icon" aria-hidden="true">♥</span>
+						<h3>My Wishlist</h3>
+						@if (wishlist().length > 0) { <span class="wishlist-count">{{ wishlist().length }}</span> }
+					</div>
+					<a routerLink="/courses" class="wishlist-browse-link">Browse courses →</a>
+				</div>
+
+				@if (isLoadingWishlist()) {
+					<div class="wishlist-loading">
+						<span class="wishlist-spinner" aria-hidden="true"></span>
+						Loading your wishlist…
+					</div>
+				} @else if (wishlist().length === 0) {
+					<div class="wishlist-empty">
+						<div class="wishlist-empty-icon">🤍</div>
+						<h3>Your wishlist is empty</h3>
+						<p>Save the courses you love — they'll show up here so you can enroll anytime.</p>
+						<a routerLink="/courses" class="browse-btn">Browse Courses</a>
+					</div>
+				} @else {
+					<div class="wishlist-grid">
+						@for (item of wishlist(); track item.courseId) {
+							<article class="wishlist-card">
+								<a class="wishlist-thumb" [routerLink]="['/course-details', item.courseId]" [attr.aria-label]="item.title">
+									<img [src]="getImageUrl(item.thumbnailPath)" [alt]="item.title" loading="lazy"
+										(error)="$any($event.target).style.display='none'" />
+									@if (item.level) { <span class="wishlist-level">{{ item.level }}</span> }
+								</a>
+								<div class="wishlist-card-body">
+									<h3 class="wishlist-title">{{ item.title }}</h3>
+									<p class="wishlist-instructor">
+										<span class="wishlist-instructor-ic" aria-hidden="true">👤</span>{{ item.instructorName }}
+									</p>
+									<div class="wishlist-card-footer">
+										<strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
 									</div>
-									<div class="wishlist-card-body">
-										<span class="wishlist-level">{{ item.level }}</span>
-										<h3>{{ item.title }}</h3>
-										<p>{{ item.instructorName }}</p>
-										<div class="wishlist-card-footer">
-											<strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
-											<div class="wishlist-actions">
-												<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View Course</a>
-												@if (item.isEnrolled) {
-													<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled</a>
-												} @else {
-													<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enrolled-btn wishlist-enroll-btn">Enroll Now</a>
-												}
-											</div>
-										</div>
+									<div class="wishlist-actions">
+										<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View</a>
+										@if (item.isEnrolled) {
+											<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled ✓</a>
+										} @else {
+											<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enroll-btn">Enroll Now</a>
+										}
 									</div>
 								</div>
-							}
-						</div>
-					}
-				</section>
-			}
+							</article>
+						}
+					</div>
+				}
+			</section>
 		}
 
 		<!-- ══════════════ TEACHER ══════════════ -->

@@ -25,10 +25,10 @@ export class CourseExams implements OnInit, OnDestroy {
   private examFiles: Record<string, File> = {};
   private timer: any;
 
-  /** Always 3 slots (1st/2nd/Final); null = not created yet. */
+  /** Always 4 slots (1st/2nd/3rd/Final); null = not created yet. */
   protected readonly examSlots = computed<(ExamView | null)[]>(() => {
     const list = this.exams();
-    return [1, 2, 3].map((slot) => list.find((e) => e.slot === slot) ?? null);
+    return [1, 2, 3, 4].map((slot) => list.find((e) => e.slot === slot) ?? null);
   });
 
   ngOnInit(): void {

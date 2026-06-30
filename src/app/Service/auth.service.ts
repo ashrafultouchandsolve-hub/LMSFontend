@@ -54,12 +54,14 @@ export class AuthService {
   }
 
   // Register করুন
-  register(fullName: string, email: string, password: string, role: number = 1): Observable<LoginResponse> {
+  register(fullName: string, email: string, password: string, role: number = 1, mobileNumber?: string, parentEmail?: string): Observable<LoginResponse> {
     return this.service.register({
       FullName: fullName,
       Email: email,
       Password: password,
-      Role: role
+      Role: role,
+      MobileNumber: mobileNumber,
+      ParentEmail: parentEmail
     }).pipe(
       tap((response) => {
         if (response.token) {

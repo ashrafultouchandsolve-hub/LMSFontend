@@ -103,9 +103,15 @@
       } @else {
         <section class="courses-grid" aria-label="All courses list">
           @for (course of filteredCourses(); track course.id; let i = $index) {
-            <article class="course-card" [style]="'--card-color:' + getCardColor(i)">
-              <div class="track-img" [class]="'track-img ' + getImageClass(course.level)">
-                <img class="track-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+            <article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
+              <div class="cat-img-wrap">
+                <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+                <div class="cat-icon-fallback" aria-hidden="true">
+                  <svg viewBox="0 0 40 40" fill="none" width="36" height="36">
+                    <rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.2)" />
+                    <path d="M12 28V14l8-4 8 4v14l-8 4-8-4z" stroke="white" stroke-width="2" stroke-linejoin="round" />
+                  </svg>
+                </div>
                 @if (course.isCompleted) {
                   <span class="cc-completed">✓ {{ lang.t().courseCompleted }}</span>
                 }
@@ -115,12 +121,12 @@
                   <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
                 }
               </div>
-              <div class="course-card-inner">
-                <span [class]="'course-badge ' + getLevelClass(course.level)">
+              <div class="cat-body">
+                <span class="cat-badge">
                   {{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
                 </span>
                 <h3>{{ course.title }}</h3>
-                <p class="course-description">{{ course.description }}</p>
+                <p class="cat-desc">{{ course.description }}</p>
                 <div class="cc-meta-row">
                   <span>👨‍🏫 <b>{{ course.instructorName }}</b></span>
                   <span>🗂 <b>{{ course.category }}</b></span>
@@ -134,36 +140,30 @@
                 </div>
 
                 @if (course.totalRatings && course.totalRatings > 0) {
-                  <div class="course-rating">
-                    <span class="rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
-                    <span class="rating-count">({{ course.totalRatings }} ratings)</span>
+                  <div class="cat-rating">
+                    <span class="cat-rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+                    <span class="cat-rating-count">({{ course.totalRatings }} ratings)</span>
                   </div>
                 }
 
-                <div class="course-footer">
+                <div class="cat-footer">
                   @if (!isStaff()) {
-                    <div class="course-footer-actions">
-                      @if (course.isEnrolled) {
-                        <a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
-                      } @else {
-                        <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="enrolled-button enrolled-button-primary">{{ lang.t().courseEnrollNow }}</a>
-                        <button
-                          type="button"
-                          class="enrolled-button wishlist-button"
-                          [class.wishlisted]="course.isWishlisted"
-                          [class.is-toggling]="wishlistToggleId() === course.id"
-                          [disabled]="wishlistToggleId() === course.id"
-                          (click)="toggleWishlist(course)">
-                          @if (course.isWishlisted) {
-                            {{ wishlistToggleId() === course.id ? 'Updating...' : '✓ In Wishlist' }}
-                          } @else {
-                            {{ wishlistToggleId() === course.id ? 'Adding...' : '♡ Wishlist' }}
-                          }
-                        </button>
-                      }
-                    </div>
+                    @if (course.isEnrolled) {
+                      <a [routerLink]="['/course-details', course.id]" class="cat-btn cat-btn--enrolled">{{ lang.t().courseEnrolled }}</a>
+                    } @else {
+                      <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
+                      <button
+                        type="button"
+                        class="cat-wish"
+                        [class.wishlisted]="course.isWishlisted"
+                        [disabled]="wishlistToggleId() === course.id"
+                        [title]="course.isWishlisted ? '✓ In Wishlist' : '♡ Add to Wishlist'"
+                        (click)="toggleWishlist(course)">
+                        {{ course.isWishlisted ? '♥' : '♡' }}
+                      </button>
+                    }
                   }
-                  <a [routerLink]="['/course-details', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
+                  <a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().courseStartLearning }} →</a>
                 </div>
               </div>
             </article>

@@ -53,6 +53,30 @@
 					}
 				</div>
 
+				<div class="field animate-field" style="--delay: 3">
+					<label for="mobileNumber">{{ lang.t().registerMobile }}</label>
+					<div class="input-wrapper">
+						<input id="mobileNumber" type="tel" formControlName="mobileNumber"
+							[placeholder]="lang.t().registerMobilePlaceholder" />
+					</div>
+					@if (registerForm.controls.mobileNumber.touched && registerForm.controls.mobileNumber.invalid) {
+					<p class="field-error">{{ lang.t().registerMobileError }}</p>
+					}
+				</div>
+
+				@if (preselectedRole() !== 'teacher') {
+				<div class="field animate-field" style="--delay: 3">
+					<label for="parentEmail">{{ lang.t().registerParentEmail }}</label>
+					<div class="input-wrapper">
+						<input id="parentEmail" type="email" formControlName="parentEmail"
+							[placeholder]="lang.t().registerParentEmailPlaceholder" />
+					</div>
+					@if (registerForm.controls.parentEmail.touched && registerForm.controls.parentEmail.invalid) {
+					<p class="field-error">{{ lang.t().registerParentEmailError }}</p>
+					}
+				</div>
+				}
+
 				<div class="field-grid animate-field" style="--delay: 4">
 					<div class="field">
 						<label for="password">{{ lang.t().loginPassword }}</label>

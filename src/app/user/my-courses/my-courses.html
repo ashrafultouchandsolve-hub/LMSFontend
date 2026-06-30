@@ -68,43 +68,45 @@
 	} @else {
 		<section class="course-grid" aria-label="Enrolled courses list">
 			@for (course of filteredCourses(); track course.id; let i = $index) {
-				<article class="course-card" [style]="'--card-color:' + getCardColor(i)">
-					<div class="track-img" [class]="'track-img ' + getImageClass(course.level)" aria-hidden="true">
-						<img class="track-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+				<article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
+					<div class="cat-img-wrap">
+						<img class="cat-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+						<div class="cat-icon-fallback" aria-hidden="true">
+							<svg viewBox="0 0 40 40" fill="none" width="36" height="36">
+								<rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.2)" />
+								<path d="M12 28V14l8-4 8 4v14l-8 4-8-4z" stroke="white" stroke-width="2" stroke-linejoin="round" />
+							</svg>
+						</div>
+						<span class="cc-enrolled-tag">✓ {{ lang.t().courseEnrolled }}</span>
 					</div>
-					<div class="course-card-inner">
-						<span [class]="'course-badge ' + getLevelClass(course.level)">
-							{{ course.level === 'Beginner' ? 'Beginner' : course.level === 'Intermediate' ? 'Intermediate' : 'Advanced' }}
+					<div class="cat-body">
+						<span class="cat-badge">
+							{{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
 						</span>
 						<h3>{{ course.title }}</h3>
-						<p class="course-description">{{ course.description }}</p>
-						<a [routerLink]="['/course-details', course.id]" class="see-more-button">See More</a>
-						<ul class="course-points">
-							<li><strong>{{ lang.t().courseCategory }}</strong> {{ course.category }}</li>
-							<li><strong>{{ lang.t().courseInstructor }}</strong> {{ course.instructorName }}</li>
-							<li><strong>{{ lang.t().courseDuration }}</strong> {{ formatDuration(course.durationMinutes) }}</li>
+						<p class="cat-desc">{{ course.description }}</p>
+						<div class="cc-meta-row">
+							<span>👨‍🏫 <b>{{ course.instructorName }}</b></span>
+							<span>🗂 <b>{{ course.category }}</b></span>
+							<span>⏱ {{ formatDuration(course.durationMinutes) }}</span>
+						</div>
 
-						</ul>
-
-						<div class="course-stats" aria-label="Course statistics">
-							<span class="cstat"><span class="cstat-num">👥 {{ course.enrollmentCount }}</span><small>{{ lang.t().cdStudents }}</small></span>
-							<span class="cstat"><span class="cstat-num">🎬 {{ course.videoCount }}</span><small>{{ lang.t().cdTotalVideos }}</small></span>
-							<span class="cstat"><span class="cstat-num">📝 {{ course.practiceCount }}</span><small>{{ lang.t().cdTotalPractice }}</small></span>
+						<div class="cc-stats" aria-label="Course statistics">
+							<div class="cc-stat"><b>{{ course.enrollmentCount }}</b><small>{{ lang.t().cdStudents }}</small></div>
+							<div class="cc-stat"><b>{{ course.videoCount }}</b><small>{{ lang.t().cdTotalVideos }}</small></div>
+							<div class="cc-stat"><b>{{ course.practiceCount }}</b><small>{{ lang.t().cdTotalPractice }}</small></div>
 						</div>
 
 						@if (course.totalRatings && course.totalRatings > 0) {
-							<div class="course-rating">
-								<span class="rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
-								<span class="rating-count">({{ course.totalRatings }} ratings)</span>
+							<div class="cat-rating">
+								<span class="cat-rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
+								<span class="cat-rating-count">({{ course.totalRatings }} ratings)</span>
 							</div>
 						}
 
-						<div class="course-footer">
-							<div class="course-footer-actions">
-								<a [routerLink]="['/enrolled-course', course.id]" class="enrolled-button enrolled-button-success">{{ lang.t().courseEnrolled }}</a>
-								<a [routerLink]="['/course-details', course.id]" class="enrolled-button enrolled-button-primary">View Details</a>
-							</div>
-							<a [routerLink]="['/enrolled-course', course.id]" class="track-cta">{{ lang.t().courseStartLearning }}</a>
+						<div class="cat-footer">
+							<a [routerLink]="['/enrolled-course', course.id]" class="cat-btn cat-btn--enroll">{{ lang.t().courseStartLearning }}</a>
+							<a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().exDetails }} →</a>
 						</div>
 					</div>
 				</article>

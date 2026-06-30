@@ -427,14 +427,14 @@
         <div class="live-panel-head">
           <div>
             <h2>📝 {{ lang.t().exManageExams }}</h2>
-            <p>{{ lang.t().exManageSub }}</p>
+            <p>{{ isAdminMode() ? lang.t().exManageSub : lang.t().exTeacherSub }}</p>
           </div>
         </div>
         <div class="exam-author-grid">
           @for (ex of examSlots(); track $index; let i = $index) {
             <div class="exam-author-card">
               <div class="exam-author-head">
-                <h3>{{ i === 0 ? lang.t().exFirst : i === 1 ? lang.t().exSecond : lang.t().exFinal }}</h3>
+                <h3>{{ i === 0 ? lang.t().exFirst : i === 1 ? lang.t().exSecond : i === 2 ? lang.t().exThird : lang.t().exFinal }}</h3>
                 @if (ex?.isPublished) {
                   <span class="exam-badge exam-badge--ok">{{ lang.t().exPublished }}</span>
                 } @else {
@@ -454,16 +454,23 @@
                 <p class="exam-author-line muted">—</p>
               }
               <div class="exam-author-actions">
-                <button type="button" class="btn btn-outline" (click)="openExamModal(i + 1)">{{ ex ? lang.t().commonEdit : lang.t().exSaveExam }}</button>
+                <!-- Authoring (create / edit / set question) is admin-only. Teachers can only view the question and grade. -->
+                @if (isAdminMode()) {
+                  <button type="button" class="btn btn-outline" (click)="openExamModal(i + 1)">{{ ex ? lang.t().commonEdit : lang.t().exSaveExam }}</button>
+                }
                 @if (ex) {
-                  <label class="btn btn-outline exam-q-upload">
-                    {{ uploadingQuestionSlot() === (i + 1) ? '⏳' : (ex.hasQuestion ? lang.t().exReplaceQuestion : lang.t().exUploadQuestion) }}
-                    <input type="file" accept="application/pdf,.pdf" hidden (change)="onExamQuestionSelected(i + 1, $event)" />
-                  </label>
+                  @if (isAdminMode()) {
+                    <label class="btn btn-outline exam-q-upload">
+                      {{ uploadingQuestionSlot() === (i + 1) ? '⏳' : (ex.hasQuestion ? lang.t().exReplaceQuestion : lang.t().exUploadQuestion) }}
+                      <input type="file" accept="application/pdf,.pdf" hidden (change)="onExamQuestionSelected(i + 1, $event)" />
+                    </label>
+                  }
                   @if (ex.hasQuestion) {
                     <button type="button" class="btn btn-outline" (click)="viewExamQuestion(ex.id)">📄 {{ lang.t().exViewPdf }}</button>
                   }
-                  <button type="button" class="btn btn-primary" (click)="openExamSubs(ex.id)">{{ lang.t().exViewSubmissions }}</button>
+                  <button type="button" class="btn btn-primary" [routerLink]="['/exam-submissions', ex.id]" [queryParams]="{ title: ex.title }">{{ lang.t().exViewSubmissions }}</button>
+                } @else if (!isAdminMode()) {
+                  <p class="exam-author-line muted">🔒 {{ lang.t().exAdminCreatesNote }}</p>
                 }
               </div>
             </div>
@@ -552,42 +559,7 @@
     </div>
   }
 
-  <!-- Exam submissions + grading modal -->
-  @if (showExamSubsModal()) {
-    <div class="modal-backdrop" role="dialog" aria-modal="true" (click)="closeExamSubs()">
-      <div class="modal-card modal-wide" (click)="$event.stopPropagation()">
-        <div class="modal-head">
-          <h2>📥 {{ lang.t().exViewSubmissions }}</h2>
-          <button type="button" class="icon-btn" (click)="closeExamSubs()">✕</button>
-        </div>
-        @if (examSubs().length === 0) {
-          <p class="empty-state">{{ lang.t().exNoSubmissions }}</p>
-        } @else {
-          <div class="exam-subs-list">
-            @for (s of examSubs(); track s.submissionId) {
-              <div class="exam-sub-row">
-                <div class="exam-sub-info">
-                  <strong>{{ s.studentName }}</strong>
-                  <span>{{ lang.t().exSubmittedAt }}: {{ s.submittedAt | date:'dd MMM, hh:mm a' }}</span>
-                  @if (s.gradedByAdmin && !isAdminMode()) {
-                    <span class="exam-lock-note">🔒 {{ lang.t().exGradedByAdmin }}</span>
-                  }
-                </div>
-                <button type="button" class="btn btn-outline" (click)="downloadSubmission(s)">⬇ {{ lang.t().exDownload }}</button>
-                <input class="exam-mark-input" type="number" min="0" [(ngModel)]="gradeInputs[s.submissionId].marks"
-                  [disabled]="s.gradedByAdmin && !isAdminMode()"
-                  [placeholder]="lang.t().exMarks + ' /' + examSubsTotalMarks()" />
-                <input class="exam-fb-input" type="text" [(ngModel)]="gradeInputs[s.submissionId].feedback"
-                  [disabled]="s.gradedByAdmin && !isAdminMode()"
-                  [placeholder]="lang.t().exFeedback" />
-                <button type="button" class="btn btn-primary" [disabled]="s.gradedByAdmin && !isAdminMode()" (click)="gradeSubmission(s)">{{ lang.t().exSaveGrade }}</button>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-  }
+  <!-- Exam grading moved to its own page: /exam-submissions/:examId (opened from the Submissions button). -->
 
   @if (isCourseEditorOpen()) {
     <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Course editor dialog">
