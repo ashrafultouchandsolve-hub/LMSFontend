@@ -21,6 +21,8 @@ export type CourseDto = {
   thumbnailPath: string | null;
   isPublished: boolean;
   isCompleted?: boolean;
+  startDate?: string | null;
+  endDate?: string | null;
   lessonCount?: number;
   enrollmentCount?: number;
   videoCount?: number;
@@ -55,6 +57,10 @@ export type SaveCoursePayload = {
   price: number;
   durationMinutes: number;
   isPublished: boolean;
+  /** Course start date = enrollment cutoff (ISO date or null). */
+  startDate?: string | null;
+  /** Course end date (ISO date or null). */
+  endDate?: string | null;
   /** UserId of the teacher the admin appoints to this course (primary). */
   teacherUserId?: string;
   /** UserIds of all teachers assigned to this course (first = primary). */

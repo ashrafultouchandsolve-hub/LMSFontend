@@ -17,6 +17,7 @@ import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
+import { enrollmentWindow } from '../../Service/enrollment-window';
 import { RecommendationService } from '../../Service/recommendation.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
@@ -30,6 +31,7 @@ type HomeCourse = {
   enrollmentCount: number; videoCount: number; practiceCount: number;
   price: number; thumbnailUrl: string; isEnrolled: boolean; isCompleted: boolean;
   averageRating?: number; totalRatings?: number;
+  startDate?: string | null; endDate?: string | null;
 };
 
 @Component({
@@ -71,6 +73,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   /** Emoji for a category pill (shared with admin & courses pages). */
   protected catIcon(name: string): string { return categoryIcon(name); }
+
+  /** Enrollment window (countdown / closed) for a course's start date. Shared helper. */
+  protected readonly enrollWindow = enrollmentWindow;
 
   /** Cycle the 4 pill colour variants so dynamic categories keep visual variety. */
   private readonly pillVariants = ['cat-pill--ssc', 'cat-pill--hsc', 'cat-pill--admission', 'cat-pill--skills'];
@@ -503,6 +508,8 @@ private reviewInterval: any;
       thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
       isEnrolled: false,
       isCompleted: dto.isCompleted ?? false,
+      startDate: dto.startDate ?? null,
+      endDate: dto.endDate ?? null,
     };
   }
 

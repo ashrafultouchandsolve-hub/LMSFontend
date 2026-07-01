@@ -30,6 +30,87 @@
 
 		<!-- ══════════════ STUDENT ══════════════ -->
 		@if (isStudent()) {
+
+			<!-- ── Greeting + motivational quote ─────────────── -->
+			<section class="sd-greet" aria-label="Welcome">
+				<div class="sd-greet-text">
+					<h2>{{ greeting() }}, {{ userName() }} 👋</h2>
+					<p class="sd-quote">“{{ motivationalQuote() }}”</p>
+				</div>
+				<div class="sd-greet-badges">
+					<div class="sd-badge"><strong>{{ enrolledCount() }}</strong><span>{{ lang.isBangla() ? 'কোর্স' : 'Courses' }}</span></div>
+					<div class="sd-badge"><strong>{{ completedCourseCount() }}</strong><span>{{ lang.isBangla() ? 'সম্পন্ন' : 'Completed' }}</span></div>
+					<div class="sd-badge"><strong>{{ completedLessonCount() }}</strong><span>{{ lang.isBangla() ? 'লেসন' : 'Lessons' }}</span></div>
+				</div>
+			</section>
+
+			<!-- ── Overall progress + Weekly goal ────────────── -->
+			<div class="sd-metric-row">
+				<section class="sd-card sd-progress" aria-label="Overall progress">
+					<div class="sd-card-head">
+						<span class="sd-card-ic">📚</span>
+						<div class="sd-card-title">
+							<h3>{{ lang.isBangla() ? 'সার্বিক অগ্রগতি' : 'Overall Progress' }}</h3>
+							<p>{{ lang.isBangla() ? 'সব কোর্স মিলিয়ে' : 'Across all your courses' }}</p>
+						</div>
+						<strong class="sd-big-pct">{{ overallProgress() }}%</strong>
+					</div>
+					<div class="sd-bar"><span [style.width.%]="overallProgress()"></span></div>
+					<div class="sd-card-foot">
+						<span>✅ {{ completedLessonCount() }} / {{ totalEnrolledLessons() }} {{ lang.isBangla() ? 'লেসন সম্পন্ন' : 'lessons done' }}</span>
+						<a routerLink="/my-courses" class="sd-link">{{ lang.isBangla() ? 'আমার কোর্স' : 'My Courses' }} →</a>
+					</div>
+				</section>
+
+				<section class="sd-card sd-weekly" [class.is-met]="weeklyGoalMet()" aria-label="Weekly goal">
+					<div class="sd-card-head">
+						<span class="sd-card-ic">🎯</span>
+						<div class="sd-card-title">
+							<h3>{{ lang.isBangla() ? 'সাপ্তাহিক লক্ষ্য' : 'Weekly Goal' }}</h3>
+							<p>{{ lang.isBangla() ? 'এই সপ্তাহে ' + weeklyGoalTarget + ' টি লেসন দেখো' : 'Watch ' + weeklyGoalTarget + ' lessons this week' }}</p>
+						</div>
+						<strong class="sd-big-pct sd-weekly-count">{{ weeklyLessonsWatched() }}<small>/{{ weeklyGoalTarget }}</small></strong>
+					</div>
+					<div class="sd-bar sd-bar--green"><span [style.width.%]="weeklyGoalPercent()"></span></div>
+					<div class="sd-card-foot">
+						@if (weeklyGoalMet()) {
+							<span class="sd-goal-done">🎉 {{ lang.isBangla() ? 'দারুণ! লক্ষ্য পূরণ' : 'Goal reached — great job!' }}</span>
+						} @else {
+							<span>{{ lang.isBangla() ? 'আর ' + (weeklyGoalTarget - weeklyLessonsWatched()) + ' টি বাকি' : (weeklyGoalTarget - weeklyLessonsWatched()) + ' more to go' }}</span>
+						}
+						<a routerLink="/history" class="sd-link">{{ lang.isBangla() ? 'হিস্টোরি' : 'History' }} →</a>
+					</div>
+				</section>
+			</div>
+
+			<!-- ── Continue learning ─────────────────────────── -->
+			@if (hasContinue()) {
+				<section class="sd-continue" aria-label="Continue learning">
+					<div class="sd-continue-head">
+						<h3>▶ {{ lang.isBangla() ? 'যেখানে ছিলে, সেখান থেকে শুরু করো' : 'Continue Learning' }}</h3>
+						<a routerLink="/history" class="sd-link">{{ lang.isBangla() ? 'সব দেখো' : 'View all' }} →</a>
+					</div>
+					<div class="sd-continue-row">
+						@for (item of continueLearning(); track item.lessonId) {
+							<a class="sd-cl-card"
+								[routerLink]="['/enrolled-course', item.courseId]"
+								[queryParams]="{ lessonId: item.lessonId, resumeAt: item.watchedSeconds }">
+								<div class="sd-cl-top">
+									<span class="sd-cl-course">{{ item.courseTitle }}</span>
+									@if (item.isCompleted) { <span class="sd-cl-tag">✓</span> }
+								</div>
+								<h4 class="sd-cl-lesson">{{ item.lessonTitle }}</h4>
+								<div class="sd-bar sd-bar--sm"><span [style.width.%]="item.progressPercent"></span></div>
+								<div class="sd-cl-foot">
+									<span>{{ item.progressPercent }}%</span>
+									<span class="sd-cl-resume">{{ item.isCompleted ? (lang.isBangla() ? 'আবার দেখো' : 'Rewatch') : (lang.isBangla() ? 'চালিয়ে যাও' : 'Resume') }} →</span>
+								</div>
+							</a>
+						}
+					</div>
+				</section>
+			}
+
 			<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
 				<div class="panel-header">
 					<div>

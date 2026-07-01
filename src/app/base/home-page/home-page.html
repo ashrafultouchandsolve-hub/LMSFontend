@@ -124,6 +124,7 @@
         aria-label="Scroll left">‹</button>
       <div #courseTrackViewport class="cats-viewport">
         @for (course of courses(); track course.id; let i = $index) {
+        @let w = enrollWindow(course.startDate);
         <article class="cat-card" [style]="'--card-color:' + getCardColor(i) + ';--i:' + i" data-tilt
           [attr.data-index]="(i + 1).toString().padStart(2, '0')">
           <div class="cat-img-wrap">
@@ -142,6 +143,11 @@
               <span class="cc-enrolled-tag">✓ {{ lang.t().courseEnrolled }}</span>
             } @else {
               <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
+            }
+            @if (!course.isEnrolled && w.state === 'closing') {
+              <span class="cc-enroll-count">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
+            } @else if (!course.isEnrolled && w.state === 'closed') {
+              <span class="cc-enroll-closed">🔒 {{ lang.t().enrollClosed }}</span>
             }
           </div>
           <div class="cat-body">
@@ -175,6 +181,8 @@
               @if (course.isEnrolled) {
               <a [routerLink]="['/course-details', course.id]" class="cat-btn cat-btn--enrolled">{{
                 lang.t().courseEnrolled }}</a>
+              } @else if (w.state === 'closed') {
+              <span class="cat-btn cat-btn--closed" aria-disabled="true">🔒 {{ lang.t().enrollClosed }}</span>
               } @else {
               <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)"
                 class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
@@ -216,6 +224,7 @@
         aria-label="Scroll left">‹</button>
       <div #recoTrackViewport class="cats-viewport">
         @for (course of recommendedCourses(); track course.id; let i = $index) {
+        @let w = enrollWindow(course.startDate);
         <article class="cat-card" [style]="'--card-color:' + getCardColor(i) + ';--i:' + i" data-tilt
           [attr.data-index]="(i + 1).toString().padStart(2, '0')">
           <div class="cat-img-wrap">
@@ -231,6 +240,11 @@
               <span class="cc-completed">✓ {{ lang.t().courseCompleted }}</span>
             }
             <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
+            @if (w.state === 'closing') {
+              <span class="cc-enroll-count">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
+            } @else if (w.state === 'closed') {
+              <span class="cc-enroll-closed">🔒 {{ lang.t().enrollClosed }}</span>
+            }
           </div>
           <div class="cat-body">
             <span class="cat-badge">
@@ -257,8 +271,12 @@
             </div>
             }
             <div class="cat-footer">
+              @if (w.state === 'closed') {
+              <span class="cat-btn cat-btn--closed" aria-disabled="true">🔒 {{ lang.t().enrollClosed }}</span>
+              } @else {
               <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)"
                 class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
+              }
               <a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().courseStartLearning }} →</a>
             </div>
           </div>

@@ -48,6 +48,17 @@ type WishlistItem = {
   isEnrolled?: boolean;
 };
 
+type ContinueItem = {
+  courseId: string;
+  lessonId: string;
+  lessonTitle: string;
+  courseTitle: string;
+  progressPercent: number;
+  watchedSeconds: number;
+  isCompleted: boolean;
+  lastWatchedAt: string;
+};
+
 @Component({
   selector: 'app-profile',
   imports: [RouterLink, DecimalPipe, DatePipe, Navbar, FormsModule],
@@ -122,6 +133,107 @@ export class Profile implements OnInit {
   protected readonly examPercentage = computed(() => this.examPerf()?.percentage ?? 0);
   protected readonly hasExamPerf = computed(() => (this.examPerf()?.examCount ?? 0) > 0);
 
+  // ══════════════ Learning dashboard (Continue learning · Overall progress · Weekly goal) ══════════════
+  private readonly WEEKLY_GOAL = 3;
+  protected readonly weeklyGoalTarget = this.WEEKLY_GOAL;
+
+  protected readonly videoHistory = signal<any[]>([]);
+  protected readonly enrolledCourses = signal<{ id: string; title: string; lessonCount: number }[]>([]);
+
+  /** A course counts as "completed" once every lesson in it is marked done in the watch history. */
+  protected readonly completedCourseCount = computed(() => {
+    const hist = this.videoHistory();
+    return this.enrolledCourses().filter((c) => {
+      if (!c.lessonCount) return false;
+      const done = hist.filter((h) => h?.courseId === c.id && h?.isCompleted).length;
+      return done >= c.lessonCount;
+    }).length;
+  });
+
+  /** Time-of-day greeting, bilingual (reacts to language toggle). */
+  protected readonly greeting = computed(() => {
+    const h = new Date().getHours();
+    const bn = this.lang.isBangla();
+    if (h < 12) return bn ? 'শুভ সকাল' : 'Good morning';
+    if (h < 17) return bn ? 'শুভ দুপুর' : 'Good afternoon';
+    if (h < 20) return bn ? 'শুভ সন্ধ্যা' : 'Good evening';
+    return bn ? 'শুভ রাত্রি' : 'Good evening';
+  });
+
+  /** Motivational lines — rotates once per day. */
+  private readonly quotes = [
+    { en: 'Small steps every day lead to big results.', bn: 'প্রতিদিনের ছোট ছোট চেষ্টাই বড় সাফল্য আনে।' },
+    { en: 'Success is the sum of small efforts, repeated daily.', bn: 'প্রতিদিন অল্প অল্প চেষ্টাই সাফল্যের চাবিকাঠি।' },
+    { en: "Don't watch the clock; keep going.", bn: 'থেমো না — এগিয়ে চলো।' },
+    { en: 'Learning today, leading tomorrow.', bn: 'আজ শিখছো, কাল নেতৃত্ব দেবে।' },
+    { en: 'Every expert was once a beginner.', bn: 'প্রত্যেক দক্ষ মানুষ একদিন শিক্ষানবিশ ছিল।' },
+    { en: 'Push yourself — no one else will do it for you.', bn: 'নিজেকে এগিয়ে নাও — কেউ তোমার হয়ে করবে না।' },
+    { en: 'Every finished lesson is a step closer to your dream.', bn: 'প্রতিটি শেষ করা লেসন স্বপ্নের এক ধাপ কাছে।' },
+  ];
+  protected readonly motivationalQuote = computed(() => {
+    const dayIndex = Math.floor(Date.now() / 86_400_000);
+    const q = this.quotes[dayIndex % this.quotes.length];
+    return this.lang.isBangla() ? q.bn : q.en;
+  });
+
+  /** "Pick up where you left off" — most recent lesson per course, newest first. */
+  protected readonly continueLearning = computed<ContinueItem[]>(() => {
+    const courseTitle = new Map(this.enrolledCourses().map((c) => [c.id, c.title]));
+    const sorted = [...this.videoHistory()].sort(
+      (a, b) => new Date(b?.lastWatchedAt ?? 0).getTime() - new Date(a?.lastWatchedAt ?? 0).getTime(),
+    );
+    const seen = new Set<string>();
+    const out: ContinueItem[] = [];
+    for (const h of sorted) {
+      const cid = h?.courseId;
+      if (!cid || seen.has(cid)) continue;
+      seen.add(cid);
+      out.push({
+        courseId: cid,
+        lessonId: h.lessonId,
+        lessonTitle: h.lessonTitle ?? 'Lesson',
+        courseTitle: courseTitle.get(cid) ?? h.courseTitle ?? 'Course',
+        progressPercent: Math.round(h.progressPercent ?? 0),
+        watchedSeconds: h.watchedSeconds ?? 0,
+        isCompleted: !!h.isCompleted,
+        lastWatchedAt: h.lastWatchedAt,
+      });
+      if (out.length >= 4) break;
+    }
+    return out;
+  });
+  protected readonly hasContinue = computed(() => this.continueLearning().length > 0);
+
+  /** Overall progress across ALL enrolled courses = completed lessons / total lessons. */
+  protected readonly totalEnrolledLessons = computed(() =>
+    this.enrolledCourses().reduce((sum, c) => sum + (c.lessonCount || 0), 0),
+  );
+  protected readonly completedLessonCount = computed(() => {
+    const enrolledIds = new Set(this.enrolledCourses().map((c) => c.id));
+    return this.videoHistory().filter((h) => h?.isCompleted && enrolledIds.has(h.courseId)).length;
+  });
+  protected readonly overallProgress = computed(() => {
+    const total = this.totalEnrolledLessons();
+    if (total <= 0) return 0;
+    return Math.min(100, Math.round((this.completedLessonCount() / total) * 100));
+  });
+  protected readonly enrolledCount = computed(() => this.enrolledCourses().length);
+
+  /** Weekly goal — distinct lessons touched in the last 7 days vs the target. */
+  protected readonly weeklyLessonsWatched = computed(() => {
+    const weekAgo = Date.now() - 7 * 86_400_000;
+    const ids = new Set<string>();
+    for (const h of this.videoHistory()) {
+      const t = new Date(h?.lastWatchedAt ?? 0).getTime();
+      if (!isNaN(t) && t >= weekAgo && h?.lessonId) ids.add(h.lessonId);
+    }
+    return ids.size;
+  });
+  protected readonly weeklyGoalPercent = computed(() =>
+    Math.min(100, Math.round((this.weeklyLessonsWatched() / this.WEEKLY_GOAL) * 100)),
+  );
+  protected readonly weeklyGoalMet = computed(() => this.weeklyLessonsWatched() >= this.WEEKLY_GOAL);
+
   protected readonly wishlist = signal<WishlistItem[]>([]);
   protected readonly isLoadingWishlist = signal(false);
 
@@ -150,6 +262,7 @@ readonly certNotifCount   = signal(0);
       void this.loadQuizProgress();
       void this.loadExamPerformance();
       void this.loadProfile();
+      void this.loadLearningDashboard();
     } else if (this.isTeacher()) {
       void this.loadTeacherProfile();
     }
@@ -350,6 +463,58 @@ private loadNotifCounts(): void {
     }
   });
 }
+
+  /**
+   * Best-effort load for the student learning dashboard (Continue learning / Overall progress / Weekly goal).
+   * Pulls video watch-history + the student's enrollments and cross-references course lesson counts.
+   * Everything degrades gracefully to empty state if any call fails.
+   */
+  private async loadLearningDashboard(): Promise<void> {
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    if (!userId) return;
+    try {
+      const [histRes, coursesRes, enrollRes] = await Promise.all([
+        firstValueFrom(this.learningApi.getVideoHistory(String(userId))),
+        firstValueFrom(this.learningApi.getAllCourses()),
+        firstValueFrom(this.learningApi.getMyEnrollments()),
+      ]);
+
+      const hist = (histRes as any)?.Data ?? (histRes as any)?.data ?? [];
+      this.videoHistory.set(Array.isArray(hist) ? hist : []);
+
+      // getAllCourses → reliable lessonCount per course id.
+      const allCoursesRaw = (coursesRes as any)?.data ?? (coursesRes as any)?.Data ?? [];
+      const allCourses = Array.isArray(allCoursesRaw) ? allCoursesRaw : [];
+      const lessonCountById = new Map<string, number>(allCourses.map((c: any) => [c.id, c.lessonCount ?? 0]));
+
+      // /enrollment/my-enrollments returns the enrolled COURSE objects (id, title, …), not enrollment rows.
+      const enrolledRaw = (enrollRes as any)?.Data ?? (enrollRes as any)?.data ?? enrollRes ?? [];
+      let enrolled = (Array.isArray(enrolledRaw) ? enrolledRaw : [])
+        .map((c: any) => {
+          const id = c?.id ?? c?.Id;
+          return {
+            id,
+            title: c?.title ?? c?.Title ?? 'Course',
+            lessonCount: lessonCountById.get(id) ?? c?.lessonCount ?? c?.LessonCount ?? 0,
+          };
+        })
+        .filter((c: { id?: string }) => !!c.id);
+
+      // Fallback: if the enrollments call gave nothing usable, derive courses from watch history.
+      if (enrolled.length === 0) {
+        const seen = new Set<string>();
+        for (const h of this.videoHistory()) {
+          const id = h?.courseId;
+          if (!id || seen.has(id)) continue;
+          seen.add(id);
+          enrolled.push({ id, title: h?.courseTitle ?? 'Course', lessonCount: lessonCountById.get(id) ?? 0 });
+        }
+      }
+      this.enrolledCourses.set(enrolled);
+    } catch {
+      /* dashboard is best-effort — leave empty state */
+    }
+  }
 
   private async loadQuizProgress(): Promise<void> {
     try {

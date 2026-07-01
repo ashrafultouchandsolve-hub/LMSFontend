@@ -103,6 +103,7 @@
       } @else {
         <section class="courses-grid" aria-label="All courses list">
           @for (course of filteredCourses(); track course.id; let i = $index) {
+            @let w = enrollWindow(course.startDate);
             <article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
               <div class="cat-img-wrap">
                 <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
@@ -119,6 +120,11 @@
                   <span class="cc-enrolled-tag">✓ {{ lang.t().courseEnrolled }}</span>
                 } @else {
                   <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
+                }
+                @if (!course.isEnrolled && w.state === 'closing') {
+                  <span class="cc-enroll-count">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
+                } @else if (!course.isEnrolled && w.state === 'closed') {
+                  <span class="cc-enroll-closed">🔒 {{ lang.t().enrollClosed }}</span>
                 }
               </div>
               <div class="cat-body">
@@ -150,6 +156,8 @@
                   @if (!isStaff()) {
                     @if (course.isEnrolled) {
                       <a [routerLink]="['/course-details', course.id]" class="cat-btn cat-btn--enrolled">{{ lang.t().courseEnrolled }}</a>
+                    } @else if (w.state === 'closed') {
+                      <span class="cat-btn cat-btn--closed" aria-disabled="true">🔒 {{ lang.t().enrollClosed }}</span>
                     } @else {
                       <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)" class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
                       <button

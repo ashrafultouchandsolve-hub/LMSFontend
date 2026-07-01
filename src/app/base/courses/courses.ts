@@ -5,6 +5,7 @@ import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
+import { enrollmentWindow } from '../../Service/enrollment-window';
 import { Navbar } from '../../shared/navbar/navbar';
 
 /** A selectable option in the sidebar dropdown. */
@@ -29,6 +30,8 @@ type CoursesViewItem = {
   thumbnailUrl: string;
   averageRating?: number;
   totalRatings?: number;
+  startDate?: string | null;
+  endDate?: string | null;
 };
 
 @Component({
@@ -167,6 +170,9 @@ export class Courses {
     return price <= 0 ? 'Free' : `৳${price}`;
   }
 
+  /** Enrollment window (countdown / closed) for a course's start date. Shared helper. */
+  protected readonly enrollWindow = enrollmentWindow;
+
   protected buildPaymentQueryParams(course: CoursesViewItem): Record<string, string | number> {
     return { courseId: course.id, courseTitle: course.title, amount: course.price };
   }
@@ -250,6 +256,8 @@ export class Courses {
       isEnrolled: false, isWishlisted: false,
       isCompleted: dto.isCompleted ?? false,
       thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
+      startDate: dto.startDate ?? null,
+      endDate: dto.endDate ?? null,
     };
   }
 

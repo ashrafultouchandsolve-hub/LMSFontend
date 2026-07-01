@@ -177,13 +177,30 @@
                   </td>
                   <td class="actions-cell">
                     @if (isAdminMode()) {
-                      <button type="button" class="btn btn-students" (click)="goToStudents(course.id)">👥 {{ lang.t().tcBtnStudents }} ({{ course.students }})</button>
-                      <button type="button" class="btn btn-outline" (click)="openLessons(course.id)">{{ lang.t().tcBtnLessons }}</button>
-                      <button type="button" class="btn btn-ghost" (click)="openEditCourseModal(course.id)">{{ lang.t().commonEdit }}</button>
-                      <button type="button" class="btn" [class.btn-complete]="!course.completed" [class.btn-ongoing]="course.completed" (click)="toggleComplete(course)">
-                        {{ course.completed ? lang.t().tcMarkOngoing : lang.t().tcMarkCompleted }}
-                      </button>
-                      <button type="button" class="btn btn-danger" (click)="deleteCourse(course.id)">{{ lang.t().commonDelete }}</button>
+                      <div class="row-actions">
+                        <button type="button" class="icon-btn ib-students" (click)="goToStudents(course.id)"
+                                [title]="lang.t().tcBtnStudents" [attr.aria-label]="lang.t().tcBtnStudents">
+                          <span class="ib-emoji">👥</span><span class="ib-count">{{ course.students }}</span>
+                        </button>
+                        <button type="button" class="icon-btn ib-lessons" (click)="openLessons(course.id)"
+                                [title]="lang.t().tcBtnLessons" [attr.aria-label]="lang.t().tcBtnLessons">
+                          <span class="ib-emoji">📖</span>
+                        </button>
+                        <button type="button" class="icon-btn ib-edit" (click)="openEditCourseModal(course.id)"
+                                [title]="lang.t().commonEdit" [attr.aria-label]="lang.t().commonEdit">
+                          <span class="ib-emoji">✏️</span>
+                        </button>
+                        <button type="button" class="icon-btn" [class.ib-complete]="!course.completed" [class.ib-ongoing]="course.completed"
+                                (click)="toggleComplete(course)"
+                                [title]="course.completed ? lang.t().tcMarkOngoing : lang.t().tcMarkCompleted"
+                                [attr.aria-label]="course.completed ? lang.t().tcMarkOngoing : lang.t().tcMarkCompleted">
+                          <span class="ib-emoji">{{ course.completed ? '↺' : '✓' }}</span>
+                        </button>
+                        <button type="button" class="icon-btn ib-delete" (click)="deleteCourse(course.id)"
+                                [title]="lang.t().commonDelete" [attr.aria-label]="lang.t().commonDelete">
+                          <span class="ib-emoji">🗑️</span>
+                        </button>
+                      </div>
                     } @else {
                       <button type="button" class="btn btn-primary" (click)="openLessons(course.id)">🔴 {{ lang.t().tcManageLive }}</button>
                     }
@@ -654,6 +671,18 @@
             <span>{{ lang.t().tcDurationLabel }}</span>
             <input type="number" formControlName="durationMinutes" />
           </label>
+
+          <label>
+            <span>{{ lang.t().courseStartDate }}</span>
+            <input type="date" formControlName="startDate" />
+          </label>
+
+          <label>
+            <span>{{ lang.t().courseEndDate }}</span>
+            <input type="date" formControlName="endDate" />
+          </label>
+
+          <small class="full course-date-hint">🗓️ {{ lang.t().courseDateHint }}</small>
 
           <label class="full">
             <span>{{ lang.t().tcThumbnailUrl }}</span>

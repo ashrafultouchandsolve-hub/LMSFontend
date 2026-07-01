@@ -367,6 +367,48 @@ input::-moz-selection, textarea::-moz-selection {
 	box-shadow: 0 6px 16px rgba(22, 163, 74, 0.30);
 }
 
+/* ── Enrollment window badges (bottom of the card image, so they never
+      collide with the top-corner price / completed / enrolled tags). ── */
+.cc-enroll-count,
+.cc-enroll-closed {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 6px 12px;
+	border-radius: 999px;
+	font-size: 0.76rem;
+	font-weight: 800;
+	letter-spacing: 0.2px;
+	color: #fff;
+	backdrop-filter: blur(4px);
+}
+.cc-enroll-count {
+	background: linear-gradient(135deg, #f59e0b, #d97706);
+	box-shadow: 0 6px 16px rgba(217, 119, 6, 0.34);
+	animation: ccPulse 1.8s ease-in-out infinite;
+}
+@keyframes ccPulse {
+	0%, 100% { transform: scale(1); }
+	50%      { transform: scale(1.04); }
+}
+.cc-enroll-closed {
+	background: linear-gradient(135deg, #64748b, #475569);
+	box-shadow: 0 6px 16px rgba(71, 85, 105, 0.32);
+}
+
+/* Disabled "Enrollment closed" button (replaces the enroll CTA once closed). */
+.cat-btn--closed {
+	background: #f1f5f9;
+	color: #64748b;
+	border: 1px solid #e2e8f0;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
 /* Single-line instructor / category / duration row (replaces the old
    stacked "title-niche-akta-tar-niche-akta" bullet lists). */
 .cc-meta-row {

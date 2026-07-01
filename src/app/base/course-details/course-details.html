@@ -132,8 +132,13 @@
 							@if (selectedCourse.isCompleted) {
 								<a [routerLink]="['/teacher-evaluation', selectedCourse.id]" class="enroll-button enroll-link cd-eval-btn">📝 {{ lang.t().teEvalButton }}</a>
 							}
+						} @else if (enrollWin().state === 'closed') {
+							<button type="button" class="enroll-button enroll-button-muted" disabled>🔒 {{ lang.t().enrollClosed }}</button>
 						} @else {
 							<a [routerLink]="['/payment']" [queryParams]="{ courseId: selectedCourse.id, courseTitle: selectedCourse.title, amount: selectedCourse.price }" class="enroll-button enroll-link">🎓 {{ lang.t().cdEnrollNow }}</a>
+							@if (enrollWin().state === 'closing') {
+								<p class="cd-enroll-countdown">⏳ {{ enrollWin().daysLeft === 0 ? lang.t().enrollLastDay : enrollWin().daysLeft + ' ' + lang.t().enrollDaysLeft }}</p>
+							}
 						}
 					}
 				} @else {

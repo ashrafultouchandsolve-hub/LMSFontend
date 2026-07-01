@@ -54,6 +54,8 @@ type Course = {
   thumbnailUrl: string;
   published: boolean;
   completed: boolean;
+  startDate: string | null;
+  endDate: string | null;
   students: number;
   averageRating: number;
   totalRatings: number;
@@ -218,6 +220,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     level: this.fb.control<CourseLevel>('Beginner'),
     price: [0, [Validators.min(0)]],
     durationMinutes: [0, [Validators.min(0)]],
+    startDate: [''],
+    endDate: [''],
     thumbnailUrl: [''],
     published: [true],
     teacherUserId: [''],
@@ -403,6 +407,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       level: 'Beginner',
       price: 0,
       durationMinutes: 0,
+      startDate: '',
+      endDate: '',
       thumbnailUrl: '',
       published: true,
       teacherUserId: '',
@@ -427,6 +433,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       level: course.level,
       price: course.price,
       durationMinutes: course.durationMinutes,
+      startDate: this.toDateInput(course.startDate),
+      endDate: this.toDateInput(course.endDate),
       thumbnailUrl: course.thumbnailUrl,
       published: course.published,
       teacherUserId: '',
@@ -484,6 +492,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         level: formValue.level,
         price: Number(formValue.price || 0),
         durationMinutes: Number(formValue.durationMinutes || 0),
+        startDate: formValue.startDate ? formValue.startDate : null,
+        endDate: formValue.endDate ? formValue.endDate : null,
         isPublished: true,   // courses are published/active by default (publish toggle removed)
         teacherUserId: teacherIds[0],
         teacherUserIds: teacherIds,
@@ -1455,6 +1465,8 @@ private mapCourse(
     thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
     published: dto.isPublished,
     completed: dto.isCompleted ?? false,
+    startDate: dto.startDate ?? null,
+    endDate: dto.endDate ?? null,
     students: studentCount,
     averageRating,
     totalRatings,
@@ -1480,6 +1492,16 @@ private mapCourse(
       resourceUrl: dto.resourceUrl ?? '',
       thumbnailUrl: this.learningApi.buildDownloadUrl(dto.thumbnailPath),
     };
+  }
+
+  /** ISO date/datetime → 'YYYY-MM-DD' for <input type="date">; '' when empty/invalid. */
+  private toDateInput(value: string | null | undefined): string {
+    if (!value) return '';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '';
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${m}-${day}`;
   }
 
   private normalizeLevel(level: string): CourseLevel {

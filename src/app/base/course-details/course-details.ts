@@ -12,6 +12,7 @@ import { CourseDto, CourseTeacher, LearningApiService } from '../../Service/lear
 import { LanguageService } from '../../Service/language.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { LiveClassService } from '../../Service/live-class-service';
+import { enrollmentWindow } from '../../Service/enrollment-window';
 
 type CourseDetailsView = {
   id: string;
@@ -27,6 +28,8 @@ type CourseDetailsView = {
   isCompleted: boolean;
   lessonCount: number;
   createdAt: string | null;
+  startDate: string | null;
+  endDate: string | null;
 };
 
 @Component({
@@ -52,6 +55,8 @@ export class CourseDetails {
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
   protected readonly course = signal<CourseDetailsView | null>(null);
+  /** Enrollment window (countdown / closed) derived from the course start date. */
+  protected readonly enrollWin = computed(() => enrollmentWindow(this.course()?.startDate));
   protected readonly isDescriptionExpanded = signal(false);
   protected readonly isImageBroken = signal(false);
   protected readonly isLoggedIn = signal(false);
@@ -282,6 +287,8 @@ readonly lang = inject(LanguageService);
       isCompleted: course.isCompleted ?? false,
       lessonCount: course.lessonCount ?? 0,
       createdAt: course.createdAt ?? null,
+      startDate: course.startDate ?? null,
+      endDate: course.endDate ?? null,
     };
   }
 
