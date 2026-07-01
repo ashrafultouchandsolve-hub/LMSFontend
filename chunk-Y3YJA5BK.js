@@ -1,0 +1,1 @@
+import{b as a}from"./chunk-BORUH2WJ.js";import"./chunk-DV23QRR6.js";import"./chunk-GQHLNOQ3.js";import"./chunk-J6ACZI7X.js";import"./chunk-A4AWSUMF.js";import"./chunk-DYKDB5PS.js";import"./chunk-C6Q5SG76.js";export{a as Teacher};
