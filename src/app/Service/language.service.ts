@@ -182,6 +182,7 @@ export interface Translations {
   tcUploadThumb: string; tcPublishCourse: string; tcSaveCourse: string;
   courseStartDate: string; courseEndDate: string; courseDateHint: string;
   enrollDaysLeft: string; enrollLastDay: string; enrollClosed: string; courseStartsOn: string;
+  agTitle: string; agJoin: string;
   tcLessonTitle: string; tcVideoType: string; tcOrderIndex: string; tcVideoUrl: string; tcUploadVideo: string;
   tcUploadingVideo: string; tcLessonThumb: string; tcResourceUrl: string; tcFreePreview: string; tcSaveLesson: string;
   tcEnrolled: string; tcIssue: string; tcEditCourse: string; tcEditLesson: string;
@@ -497,6 +498,7 @@ const EN: Translations = {
   courseStartDate: 'Start date', courseEndDate: 'End date',
   courseDateHint: 'Students can enroll until the start date. Leave blank to keep enrollment always open.',
   enrollDaysLeft: 'days left to enroll', enrollLastDay: 'Last day to enroll!', enrollClosed: 'Enrollment closed', courseStartsOn: 'Course starts',
+  agTitle: "Today's Agenda", agJoin: 'Join',
   tcLessonTitle: 'Lesson Title', tcVideoType: 'Video Type', tcOrderIndex: 'Order Index', tcVideoUrl: 'Video URL',
   tcUploadVideo: 'Or Upload Video File', tcUploadingVideo: 'Uploading video...', tcLessonThumb: 'Lesson Thumbnail (optional)',
   tcResourceUrl: 'Resource URL (optional)', tcFreePreview: 'Free preview lesson', tcSaveLesson: 'Save Lesson',
@@ -850,6 +852,7 @@ const BN: Translations = {
   courseStartDate: 'শুরুর তারিখ', courseEndDate: 'শেষের তারিখ',
   courseDateHint: 'শুরুর তারিখ পর্যন্ত শিক্ষার্থীরা ভর্তি হতে পারবে। খালি রাখলে ভর্তি সবসময় খোলা থাকবে।',
   enrollDaysLeft: 'দিন বাকি', enrollLastDay: 'আজই ভর্তির শেষ দিন!', enrollClosed: 'ভর্তি বন্ধ', courseStartsOn: 'কোর্স শুরু',
+  agTitle: 'আজকের অ্যাজেন্ডা', agJoin: 'যোগ দিন',
   tcLessonTitle: 'পাঠের শিরোনাম', tcVideoType: 'ভিডিও টাইপ', tcOrderIndex: 'ক্রম সূচক', tcVideoUrl: 'ভিডিও URL',
   tcUploadVideo: 'অথবা ভিডিও ফাইল আপলোড করুন', tcUploadingVideo: 'ভিডিও আপলোড হচ্ছে...', tcLessonThumb: 'পাঠের থাম্বনেইল (ঐচ্ছিক)',
   tcResourceUrl: 'রিসোর্স URL (ঐচ্ছিক)', tcFreePreview: 'ফ্রি প্রিভিউ পাঠ', tcSaveLesson: 'পাঠ সংরক্ষণ',
