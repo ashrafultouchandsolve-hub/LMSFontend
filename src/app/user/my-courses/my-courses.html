@@ -1,5 +1,7 @@
-<main class="my-courses-page">
-	<app-navbar></app-navbar>
+<main class="my-courses-page" [class.embedded]="embedded()">
+	@if (!embedded()) {
+		<app-navbar></app-navbar>
+	}
 
 	<header class="hero">
 		<div>
@@ -10,7 +12,9 @@
 
 		<div class="hero-actions">
 			<a class="btn ghost" [routerLink]="['/courses']">Browse Courses</a>
-			<a class="btn solid" [routerLink]="['/profile']">Back</a>
+			@if (!embedded()) {
+				<a class="btn solid" [routerLink]="['/profile']">Back</a>
+			}
 		</div>
 	</header>
 

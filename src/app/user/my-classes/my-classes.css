@@ -342,3 +342,10 @@
   .mc-join-btn { width: 100%; text-align: center; }
   .mc-upcoming-card { flex-direction: column; }
 }
+/* Rendered inside the student dashboard shell — the shell owns bg/padding */
+.my-classes-page.embedded {
+	min-height: auto;
+	padding: 0;
+	background: none;
+	max-width: none;
+}

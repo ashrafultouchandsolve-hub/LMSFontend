@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
@@ -10,8 +10,18 @@ import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { NotificationService } from '../../Service/notification-service';
 import { ExamService } from '../../Service/exam.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { NotificationBell } from '../../shared/notification-bell/notification-bell';
+import { AgendaMenu } from '../../shared/agenda-menu/agenda-menu';
+import { MyCourses } from '../../user/my-courses/my-courses';
+import { MyClasses } from '../../user/my-classes/my-classes';
+import { Assignment } from '../../user/assignment/assignment';
+import { Certificates } from '../../user/certificates/certificates';
 
 type ProfileUser = { id?: number; fullName?: string; email?: string; role?: number; };
+
+/** Sections of the student dashboard shell — every sidebar option opens in-place, the sidebar never goes away. */
+type StudentTab = 'dashboard' | 'profile' | 'courses' | 'classes' | 'assignments' | 'certificates' | 'wishlist';
+const STUDENT_TABS: readonly StudentTab[] = ['dashboard', 'profile', 'courses', 'classes', 'assignments', 'certificates', 'wishlist'];
 
 type EditForm = {
   fullName: string;
@@ -61,7 +71,7 @@ type ContinueItem = {
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, DecimalPipe, DatePipe, Navbar, FormsModule],
+  imports: [RouterLink, DecimalPipe, DatePipe, Navbar, NotificationBell, AgendaMenu, MyCourses, MyClasses, Assignment, Certificates, FormsModule],
   templateUrl: './profile.html',
   styleUrls: ['./profile.css'],
 })
@@ -69,8 +79,12 @@ export class Profile implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly notifsvc = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly learningApi = inject(LearningApiService);
   readonly lang = inject(LanguageService);
+
+  // ── Student dashboard shell — sidebar tab state (deep-linkable via ?tab=) ──
+  protected readonly activeTab = signal<StudentTab>('dashboard');
 
   protected readonly user = signal<ProfileUser | null>(null);
   protected readonly userName = computed(() => this.user()?.fullName || 'Student');
@@ -251,6 +265,16 @@ readonly certNotifCount   = signal(0);
     const currentUser = this.authService.getCurrentUser() as ProfileUser | null;
     if (currentUser) this.user.set(currentUser);
     this.loadForRole();
+
+    // Restore the requested dashboard section on refresh / deep link (e.g. /profile?tab=courses).
+    const tab = this.route.snapshot.queryParamMap.get('tab') as StudentTab | null;
+    if (tab && STUDENT_TABS.includes(tab)) this.activeTab.set(tab);
+  }
+
+  /** Switch dashboard section and mirror it in the URL so refresh/back keeps the view. */
+  protected setTab(tab: StudentTab): void {
+    this.activeTab.set(tab);
+    this.router.navigate([], { queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
   /** Load only the data relevant to the logged-in role (students get progress/wishlist; teachers get their instructor profile; admins need nothing). */

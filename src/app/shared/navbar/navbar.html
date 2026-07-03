@@ -242,6 +242,9 @@
     </button>
 
     @if (isLoggedIn()) {
+      @if (isStudent()) {
+        <app-agenda-menu></app-agenda-menu>
+      }
       <app-notification-bell></app-notification-bell>
       <details class="user-menu">
         <summary class="user-chip" aria-label="User menu">

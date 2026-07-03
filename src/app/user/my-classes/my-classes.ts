@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
@@ -25,6 +25,9 @@ type CourseWithLive = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyClasses {
+  /** True when rendered inside the student dashboard shell — hides navbar/page chrome. */
+  readonly embedded = input(false);
+
   private readonly learningApi = inject(LearningApiService);
   private readonly liveClassService = inject(LiveClassService);
   private readonly authService = inject(AuthService);

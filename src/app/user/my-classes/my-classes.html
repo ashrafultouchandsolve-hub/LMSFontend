@@ -1,6 +1,8 @@
-<main class="my-classes-page">
+<main class="my-classes-page" [class.embedded]="embedded()">
 
-  <app-navbar></app-navbar>
+  @if (!embedded()) {
+    <app-navbar></app-navbar>
+  }
   <header class="mc-header">
     <h1>📺 {{ lang.t().mcTitle }}</h1>
     <p>{{ lang.t().mcSub }}</p>

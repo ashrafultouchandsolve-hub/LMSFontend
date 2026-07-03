@@ -1,0 +1,59 @@
+<div class="agenda-wrap">
+	<button
+		type="button"
+		class="agenda-pill"
+		(click)="toggle()"
+		[class.open]="isOpen()"
+		[class.is-live]="agenda.liveNowCount() > 0"
+		[attr.aria-expanded]="isOpen()"
+		[attr.aria-label]="lang.t().agTitle">
+		<!-- Two-line carousel: keyed by animKey so each rotation re-creates both lines —
+		     the previous one slides up & out while the new one slides in from below. -->
+		<span class="agenda-ticker">
+			@for (k of [animKey()]; track k) {
+				@if (prevText(); as p) {
+					<span class="agenda-line agenda-line--out" aria-hidden="true">{{ p }}</span>
+				}
+				<span class="agenda-line agenda-line--in">{{ tickerText() }}</span>
+			}
+		</span>
+		@if (agenda.items().length > 0) {
+			<span class="agenda-pill-count">{{ agenda.items().length }}</span>
+		}
+		@if (agenda.liveNowCount() > 0) {
+			<span class="agenda-live-dot" aria-hidden="true"></span>
+		}
+	</button>
+
+	@if (isOpen()) {
+		<div class="agenda-dd">
+			<div class="agenda-dd-head">
+				<span class="agenda-dd-head-title">🗓️ {{ lang.t().agTitle }}</span>
+				@if (agenda.items().length > 0) {
+					<span class="agenda-dd-head-count">{{ agenda.items().length }}</span>
+				}
+			</div>
+			<div class="agenda-dd-list">
+				@for (it of agenda.items(); track $index) {
+					<a [routerLink]="it.link" class="agenda-dd-item" [attr.data-kind]="it.kind" (click)="close()">
+						<span class="agenda-dd-ico">{{ it.icon }}</span>
+						<span class="agenda-dd-body">
+							<span class="agenda-dd-course">{{ it.courseTitle }}</span>
+							<span class="agenda-dd-meta">{{ agenda.meta(it) }}@if (it.detail) {<span class="agenda-dd-detail"> · {{ it.detail }}</span>}</span>
+						</span>
+						@if (it.kind === 'live') {
+							<span class="agenda-dd-join">{{ lang.t().agJoin }} →</span>
+						} @else {
+							<span class="agenda-dd-go" aria-hidden="true">→</span>
+						}
+					</a>
+				} @empty {
+					<div class="agenda-dd-empty">
+						<span class="agenda-dd-empty-ico" aria-hidden="true">🎉</span>
+						<p>{{ lang.t().agEmpty }}</p>
+					</div>
+				}
+			</div>
+		</div>
+	}
+</div>

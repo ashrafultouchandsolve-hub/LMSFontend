@@ -101,3 +101,10 @@
 		max-width: 100%;
 	}
 }
+
+/* Rendered inside the student dashboard shell — the shell owns bg/padding */
+.assignment-page.embedded {
+	min-height: auto;
+	padding: 0;
+	background: none;
+}

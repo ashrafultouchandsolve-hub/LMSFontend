@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../Service/auth.service';
@@ -24,6 +24,9 @@ interface CertificateItem {
   styleUrl: './certificates.css',
 })
 export class Certificates implements OnInit {
+  /** True when rendered inside the student dashboard shell — hides navbar/page chrome. */
+  readonly embedded = input(false);
+
   private auth = inject(AuthService);
   private api = inject(LearningApiService);
   private router = inject(Router);

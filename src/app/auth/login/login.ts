@@ -1,8 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
+import { LearningApiService } from '../../Service/learning-api.service';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +16,7 @@ export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly learningApi = inject(LearningApiService);
 
   protected readonly isSubmitting = signal(false);
   protected readonly isRedirecting = signal(false);
@@ -48,20 +51,40 @@ export class Login {
         this.isSubmitting.set(false);
         this.apiMessage.set(response.message ?? 'Login successful. Preparing your dashboard...');
         this.isRedirecting.set(true);
-        await this.delay(1500);
 
         // ✅ Role check করে redirect করো
         const user = this.authService.getCurrentUser() as { role?: number } | null;
 
-        // Admin = 2
+        // Student: enrollment check-টা cosmetic delay-এর সাথে parallel-এ চালাই — বাড়তি wait হয় না।
+        const enrolledPromise = user?.role === 0 ? this.hasEnrollments() : Promise.resolve(false);
+        await this.delay(1500);
+
+        // Admin = 2 → সবসময় admin dashboard
         if (user?.role === 2) {
           await this.router.navigateByUrl('/admin');
           return;
         }
 
-        // অন্যদের জন্য returnUrl বা homepage
+        // Deep link (guard-এ আটকে login-এ এলে) — returnUrl আগে
         const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-        await this.router.navigateByUrl(returnUrl || '/homepage');
+        if (returnUrl) {
+          await this.router.navigateByUrl(returnUrl);
+          return;
+        }
+
+        // Teacher = 1 → নিজের dashboard (course manager)
+        if (user?.role === 1) {
+          await this.router.navigateByUrl('/teacher');
+          return;
+        }
+
+        // Student = 0 → enrolled হলে dashboard, নতুন হলে homepage (course discovery)
+        if (user?.role === 0) {
+          await this.router.navigateByUrl((await enrolledPromise) ? '/profile' : '/homepage');
+          return;
+        }
+
+        await this.router.navigateByUrl('/homepage');
       },
       error: (error) => {
         this.isSubmitting.set(false);
@@ -69,6 +92,17 @@ export class Login {
         this.apiMessage.set(errorMessage);
       },
     });
+  }
+
+  /** Student-এর অন্তত একটা enrollment আছে কিনা — smart redirect-এর জন্য (error হলে false → homepage)। */
+  private async hasEnrollments(): Promise<boolean> {
+    try {
+      const res: any = await firstValueFrom(this.learningApi.getMyEnrollments());
+      const list = res?.data ?? res?.Data ?? [];
+      return Array.isArray(list) && list.length > 0;
+    } catch {
+      return false;
+    }
   }
 
   private delay(ms: number): Promise<void> {

@@ -1,6 +1,8 @@
-<app-navbar></app-navbar>
+@if (!embedded()) {
+	<app-navbar></app-navbar>
+}
 
-<main class="cert-page">
+<main class="cert-page" [class.embedded]="embedded()">
   <h1>🎓 {{ lang.t().certTitle }}</h1>
 
   @if (isLoading()) {

@@ -19,8 +19,6 @@ import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { enrollmentWindow } from '../../Service/enrollment-window';
 import { RecommendationService } from '../../Service/recommendation.service';
-import { LiveClassService } from '../../Service/live-class-service';
-import { ExamService } from '../../Service/exam.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 type LearningHighlight = { title: string; description: string; };
@@ -36,18 +34,6 @@ type HomeCourse = {
   startDate?: string | null; endDate?: string | null;
 };
 
-/** One row in the enrolled-student "Today's Agenda" strip (home page, under the hero). */
-type AgendaItem = {
-  kind: 'live' | 'upcoming' | 'exam' | 'ending';
-  icon: string;
-  courseId: string;
-  courseTitle: string;
-  detail: string;   // lesson / exam title (may be '')
-  days: number;     // calendar days until it happens (0 = today / live now)
-  sortKey: number;  // ms timestamp for ordering; live-now uses -1 so it pins first
-  link: (string)[];
-};
-
 @Component({
   selector: 'app-home-page',
   imports: [RouterLink, Navbar],
@@ -60,8 +46,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private readonly learningApi  = inject(LearningApiService);
   private readonly categoryService = inject(CategoryService);
   private readonly reco          = inject(RecommendationService);
-  private readonly liveClass    = inject(LiveClassService);
-  private readonly examService  = inject(ExamService);
   readonly lang                 = inject(LanguageService);
   private readonly zone        = inject(NgZone);
   private readonly hostRef     = inject(ElementRef<HTMLElement>);
@@ -86,10 +70,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   protected readonly recommendedCourses = signal<HomeCourse[]>([]);
   protected readonly recoUsedPrefs      = signal(false);
   protected readonly isStudent          = computed(() => this.userRole() === 0);
-
-  // ── "Today's Agenda" (enrolled students only) — live/upcoming classes, due exams, ending courses ──
-  private readonly AGENDA_WINDOW_DAYS = 7;
-  protected readonly agendaItems = signal<AgendaItem[]>([]);
 
   /** Emoji for a category pill (shared with admin & courses pages). */
   protected catIcon(name: string): string { return categoryIcon(name); }
@@ -497,14 +477,14 @@ private reviewInterval: any;
         this.ensureCoursesRevealed(); // safety net: observer miss করলেও card যেন অদৃশ্য না থাকে
       });
     }
-    // 🔵 enrollment + rating background-এ এনে signal-এ merge করি; শেষে recommended/agenda follow-up চালাই।
+    // 🔵 enrollment + rating background-এ এনে signal-এ merge করি; শেষে recommended follow-up চালাই।
     void this.enrichCourses(mapped);
   }
 
   /**
    * Course-এর enrolled state + rating background-এ এনে বিদ্যমান signal-এ id দিয়ে merge করে।
    * first paint আটকায় না; card আগে দেখা যায়, badge/star একটু পরে fill-in হয়।
-   * enrolled state-নির্ভর follow-up (recommended, agenda) enrichment-এর পরে চলে — আগের behavior অক্ষুণ্ন।
+   * enrolled state-নির্ভর follow-up (recommended) enrichment-এর পরে চলে — আগের behavior অক্ষুণ্ন।
    */
   private async enrichCourses(base: HomeCourse[]): Promise<void> {
     if (base.length === 0) { return; }
@@ -516,7 +496,6 @@ private reviewInterval: any;
     } catch { /* enrichment best-effort — base card গুলো তো দেখাই যাচ্ছে */ }
     finally {
       void this.loadRecommended(this.courses()); // self-contained; never disturbs courses()
-      void this.loadAgenda();                     // enrolled-student "Today's Agenda" strip
       queueMicrotask(() => this.observeReveals());
     }
   }
@@ -525,90 +504,6 @@ private reviewInterval: any;
   private mergeCourses(enriched: HomeCourse[]): void {
     const byId = new Map(enriched.map((c) => [c.id, c]));
     this.courses.update((list) => list.map((c) => byId.get(c.id) ?? c));
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  //  TODAY'S AGENDA (enrolled students only) — best-effort, frontend-only
-  //  Pulls live/upcoming classes + due exams for each enrolled course and
-  //  merges in courses that are ending soon (course.endDate). Hidden entirely
-  //  for guests, teachers, admins, and students with no enrollment.
-  // ══════════════════════════════════════════════════════════════
-  private async loadAgenda(): Promise<void> {
-    if (!this.isStudent()) { this.agendaItems.set([]); return; }
-    const enrolled = this.courses().filter((c) => c.isEnrolled);
-    if (enrolled.length === 0) { this.agendaItems.set([]); return; }
-
-    const now = Date.now();
-    const horizon = now + this.AGENDA_WINDOW_DAYS * 86_400_000;
-    const items: AgendaItem[] = [];
-
-    // Courses ending within the window (uses the endDate we already have on each card).
-    for (const c of enrolled) {
-      if (!c.endDate) continue;
-      const end = new Date(c.endDate).getTime();
-      if (isNaN(end)) continue;
-      const days = this.dayDiff(end);
-      if (days >= 0 && end <= horizon) {
-        items.push({ kind: 'ending', icon: '⏳', courseId: c.id, courseTitle: c.title, detail: '', days, sortKey: end, link: ['/enrolled-course', c.id] });
-      }
-    }
-
-    // Live/upcoming classes + due exams, per enrolled course, in parallel.
-    await Promise.all(enrolled.map(async (c) => {
-      try {
-        const res: any = await firstValueFrom(this.liveClass.getByCourse(c.id));
-        const list = res?.data ?? res?.Data ?? [];
-        for (const lc of (Array.isArray(list) ? list : [])) {
-          if (lc?.isEnded) continue;
-          if (lc?.isActive) {
-            items.push({ kind: 'live', icon: '🔴', courseId: c.id, courseTitle: c.title, detail: lc.title ?? '', days: 0, sortKey: -1, link: ['/live-class', lc.id] });
-          } else if (lc?.scheduledAt) {
-            const t = new Date(lc.scheduledAt).getTime();
-            if (!isNaN(t) && t >= now && t <= horizon) {
-              items.push({ kind: 'upcoming', icon: '📺', courseId: c.id, courseTitle: c.title, detail: lc.title ?? '', days: this.dayDiff(t), sortKey: t, link: ['/live-class', lc.id] });
-            }
-          }
-        }
-      } catch { /* ignore this course's live classes */ }
-
-      try {
-        const res: any = await firstValueFrom(this.examService.getCourseExams(c.id));
-        const list = res?.data ?? res?.Data ?? [];
-        for (const ex of (Array.isArray(list) ? list : [])) {
-          if (!ex?.isPublished || ex?.submitted || ex?.isClosed) continue;
-          const dl = new Date(ex.deadline).getTime();
-          if (isNaN(dl) || dl < now || dl > horizon) continue;
-          items.push({ kind: 'exam', icon: '📝', courseId: c.id, courseTitle: c.title, detail: ex.title ?? '', days: this.dayDiff(dl), sortKey: dl, link: ['/enrolled-course', c.id] });
-        }
-      } catch { /* ignore this course's exams */ }
-    }));
-
-    items.sort((a, b) => a.sortKey - b.sortKey);
-    this.agendaItems.set(items.slice(0, 6));
-    queueMicrotask(() => this.observeReveals());
-  }
-
-  /** Whole calendar days from today until the given timestamp (0 = today, negative = past). */
-  private dayDiff(ts: number): number {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const d = new Date(ts);
-    const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-    return Math.round((day - today) / 86_400_000);
-  }
-
-  /** Bilingual "when" phrase for an agenda item (re-evaluated on language toggle). */
-  protected agendaMeta(it: AgendaItem): string {
-    const bn = this.lang.isBangla();
-    const when = it.days <= 0 ? (bn ? 'আজ' : 'Today')
-      : it.days === 1 ? (bn ? 'আগামীকাল' : 'Tomorrow')
-      : (bn ? `${it.days} দিন পরে` : `in ${it.days} days`);
-    switch (it.kind) {
-      case 'live':     return bn ? 'এখন লাইভ' : 'LIVE NOW';
-      case 'upcoming': return (bn ? 'লাইভ ক্লাস · ' : 'Live · ') + when;
-      case 'exam':     return (bn ? 'পরীক্ষা · ' : 'Exam · ') + when;
-      case 'ending':   return it.days <= 0 ? (bn ? 'আজ কোর্স শেষ' : 'Ends today') : (bn ? `${it.days} দিন পরে শেষ` : `Ends in ${it.days} days`);
-    }
   }
 
   /**

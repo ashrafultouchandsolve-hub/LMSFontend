@@ -1,391 +1,428 @@
-<main class="profile-page">
-	<app-navbar></app-navbar>
+<!-- ══════════════ STUDENT — dashboard shell (admin-style sidebar) ══════════════ -->
+@if (isStudent()) {
+	<div class="sd-shell">
 
-	<section class="profile-shell">
-		@if (saveSuccess()) {
-			<div class="save-toast" role="status">✅ {{ lang.t().profileUpdated }}</div>
-		}
+		<!-- ── Sidebar ── -->
+		<aside class="sd-sidebar">
+			<div class="sd-brand">
+				<span class="sd-brand-ic">🎓</span>
+				<span class="sd-brand-text">{{ lang.isBangla() ? 'শিক্ষার্থী প্যানেল' : 'Student Panel' }}</span>
+			</div>
 
-		<!-- ── Common header ─────────────────────────────── -->
-		<section class="info-card" [class.info-card--staff]="!isStudent()" aria-label="User profile details">
-			<div class="avatar-wrap">
+			<div class="sd-user">
 				@if (headerAvatar()) {
-					<img class="avatar-img" [src]="headerAvatar()" [alt]="userName()"
+					<img class="sd-user-avatar" [src]="headerAvatar()" [alt]="userName()"
 						(error)="$any($event.target).style.display='none'" />
 				} @else {
-					<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
+					<span class="sd-user-initial" aria-hidden="true">{{ userInitial() }}</span>
 				}
+				<div class="sd-user-meta">
+					<strong>{{ userName() }}</strong>
+					<span>{{ userEmail() }}</span>
+				</div>
 			</div>
-			<div class="user-info">
-				<h2>{{ userName() }}</h2>
-				<p>{{ userEmail() }}</p>
-				<span class="role-badge" [class.role-badge--teacher]="isTeacher()" [class.role-badge--admin]="isAdmin()">{{ userRole() }}</span>
-			</div>
-			@if (isStudent()) {
-				<button type="button" class="edit-profile-btn" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
-			} @else if (isTeacher()) {
-				<button type="button" class="edit-profile-btn" (click)="openTeacherEdit()">✎ {{ lang.t().profileEdit }}</button>
+
+			<nav class="sd-nav">
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'dashboard'" (click)="setTab('dashboard')">
+					<span class="sd-nav-ic">📊</span> {{ lang.t().tcSideDashboard }}
+				</button>
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
+					<span class="sd-nav-ic">👤</span> {{ lang.isBangla() ? 'আমার প্রোফাইল' : 'My Profile' }}
+				</button>
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'courses'" (click)="setTab('courses')">
+					<span class="sd-nav-ic">📚</span> {{ lang.t().profileMyCourses }}
+					@if (lessonNotifCount() > 0) { <span class="sd-nav-badge">{{ lessonNotifCount() }}</span> }
+				</button>
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'classes'" (click)="setTab('classes')">
+					<span class="sd-nav-ic">🎥</span> {{ lang.t().profileMyClasses }}
+				</button>
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'assignments'" (click)="setTab('assignments')">
+					<span class="sd-nav-ic">📝</span> {{ lang.t().profileAssignments }}
+					@if (quizNotifCount() > 0) { <span class="sd-nav-badge">{{ quizNotifCount() }}</span> }
+				</button>
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'certificates'" (click)="setTab('certificates')">
+					<span class="sd-nav-ic">🏅</span> {{ lang.t().profileCertificates }}
+					@if (certNotifCount() > 0) { <span class="sd-nav-badge">{{ certNotifCount() }}</span> }
+				</button>
+				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'wishlist'" (click)="setTab('wishlist')">
+					<span class="sd-nav-ic">❤️</span> {{ lang.isBangla() ? 'উইশলিস্ট' : 'Wishlist' }}
+					@if (wishlist().length > 0) { <span class="sd-nav-badge sd-nav-badge--soft">{{ wishlist().length }}</span> }
+				</button>
+				<a class="sd-nav-item" routerLink="/homepage">
+					<span class="sd-nav-ic">🏠</span> {{ lang.t().profileHome }}
+				</a>
+			</nav>
+
+			<button type="button" class="sd-logout" (click)="logout()">
+				<span>🚪</span> {{ lang.t().navLogout }}
+			</button>
+		</aside>
+
+		<!-- ── Main content ── -->
+		<main class="sd-main">
+			@if (saveSuccess()) {
+				<div class="save-toast" role="status">✅ {{ lang.t().profileUpdated }}</div>
 			}
-		</section>
 
-		<!-- ══════════════ STUDENT ══════════════ -->
-		@if (isStudent()) {
-
-			<!-- ── Greeting + motivational quote ─────────────── -->
-			<section class="sd-greet" aria-label="Welcome">
-				<div class="sd-greet-text">
-					<h2>{{ greeting() }}, {{ userName() }} 👋</h2>
-					<p class="sd-quote">“{{ motivationalQuote() }}”</p>
+			<header class="sd-topbar">
+				<div class="sd-topbar-title">
+					@switch (activeTab()) {
+						@case ('dashboard') {
+							<h1>📊 {{ lang.t().tcSideDashboard }}</h1>
+							<p>{{ greeting() }}, {{ userName() }} 👋</p>
+						}
+						@case ('profile') {
+							<h1>👤 {{ lang.isBangla() ? 'আমার প্রোফাইল' : 'My Profile' }}</h1>
+							<p>{{ lang.isBangla() ? 'নিজের তথ্য দেখো ও আপডেট করো' : 'View and update your information' }}</p>
+						}
+						@case ('wishlist') {
+							<h1>❤️ {{ lang.isBangla() ? 'উইশলিস্ট' : 'My Wishlist' }}</h1>
+							<p>{{ lang.isBangla() ? 'পছন্দের কোর্সগুলো এখানে জমা থাকে' : 'Courses you saved for later' }}</p>
+						}
+					}
 				</div>
-				<div class="sd-greet-badges">
-					<div class="sd-badge"><strong>{{ enrolledCount() }}</strong><span>{{ lang.isBangla() ? 'কোর্স' : 'Courses' }}</span></div>
-					<div class="sd-badge"><strong>{{ completedCourseCount() }}</strong><span>{{ lang.isBangla() ? 'সম্পন্ন' : 'Completed' }}</span></div>
-					<div class="sd-badge"><strong>{{ completedLessonCount() }}</strong><span>{{ lang.isBangla() ? 'লেসন' : 'Lessons' }}</span></div>
+				<div class="sd-topbar-actions">
+					<button type="button" class="sd-lang-btn" (click)="lang.toggle()">
+						{{ lang.isBangla() ? 'English' : 'বাংলা' }}
+					</button>
+					<app-agenda-menu></app-agenda-menu>
+					<app-notification-bell></app-notification-bell>
 				</div>
-			</section>
+			</header>
 
-			<!-- ── Overall progress + Weekly goal ────────────── -->
-			<div class="sd-metric-row">
-				<section class="sd-card sd-progress" aria-label="Overall progress">
-					<div class="sd-card-head">
-						<span class="sd-card-ic">📚</span>
-						<div class="sd-card-title">
-							<h3>{{ lang.isBangla() ? 'সার্বিক অগ্রগতি' : 'Overall Progress' }}</h3>
-							<p>{{ lang.isBangla() ? 'সব কোর্স মিলিয়ে' : 'Across all your courses' }}</p>
-						</div>
-						<strong class="sd-big-pct">{{ overallProgress() }}%</strong>
-					</div>
-					<div class="sd-bar"><span [style.width.%]="overallProgress()"></span></div>
-					<div class="sd-card-foot">
-						<span>✅ {{ completedLessonCount() }} / {{ totalEnrolledLessons() }} {{ lang.isBangla() ? 'লেসন সম্পন্ন' : 'lessons done' }}</span>
-						<a routerLink="/my-courses" class="sd-link">{{ lang.isBangla() ? 'আমার কোর্স' : 'My Courses' }} →</a>
-					</div>
-				</section>
+			<!-- ═════ TAB: DASHBOARD ═════ -->
+			@if (activeTab() === 'dashboard') {
+				<div class="sd-tab">
 
-				<section class="sd-card sd-weekly" [class.is-met]="weeklyGoalMet()" aria-label="Weekly goal">
-					<div class="sd-card-head">
-						<span class="sd-card-ic">🎯</span>
-						<div class="sd-card-title">
-							<h3>{{ lang.isBangla() ? 'সাপ্তাহিক লক্ষ্য' : 'Weekly Goal' }}</h3>
-							<p>{{ lang.isBangla() ? 'এই সপ্তাহে ' + weeklyGoalTarget + ' টি লেসন দেখো' : 'Watch ' + weeklyGoalTarget + ' lessons this week' }}</p>
+					<!-- Greeting + motivational quote -->
+					<section class="sd-greet" aria-label="Welcome">
+						<div class="sd-greet-text">
+							<h2>{{ greeting() }}, {{ userName() }} 👋</h2>
+							<p class="sd-quote">“{{ motivationalQuote() }}”</p>
 						</div>
-						<strong class="sd-big-pct sd-weekly-count">{{ weeklyLessonsWatched() }}<small>/{{ weeklyGoalTarget }}</small></strong>
+						<div class="sd-greet-badges">
+							<div class="sd-badge"><strong>{{ enrolledCount() }}</strong><span>{{ lang.isBangla() ? 'কোর্স' : 'Courses' }}</span></div>
+							<div class="sd-badge"><strong>{{ completedCourseCount() }}</strong><span>{{ lang.isBangla() ? 'সম্পন্ন' : 'Completed' }}</span></div>
+							<div class="sd-badge"><strong>{{ completedLessonCount() }}</strong><span>{{ lang.isBangla() ? 'লেসন' : 'Lessons' }}</span></div>
+						</div>
+					</section>
+
+					<!-- Overall progress + Weekly goal -->
+					<div class="sd-metric-row">
+						<section class="sd-card sd-progress" aria-label="Overall progress">
+							<div class="sd-card-head">
+								<span class="sd-card-ic">📚</span>
+								<div class="sd-card-title">
+									<h3>{{ lang.isBangla() ? 'সার্বিক অগ্রগতি' : 'Overall Progress' }}</h3>
+									<p>{{ lang.isBangla() ? 'সব কোর্স মিলিয়ে' : 'Across all your courses' }}</p>
+								</div>
+								<strong class="sd-big-pct">{{ overallProgress() }}%</strong>
+							</div>
+							<div class="sd-bar"><span [style.width.%]="overallProgress()"></span></div>
+							<div class="sd-card-foot">
+								<span>✅ {{ completedLessonCount() }} / {{ totalEnrolledLessons() }} {{ lang.isBangla() ? 'লেসন সম্পন্ন' : 'lessons done' }}</span>
+								<button type="button" class="sd-link sd-link--btn" (click)="setTab('courses')">{{ lang.isBangla() ? 'আমার কোর্স' : 'My Courses' }} →</button>
+							</div>
+						</section>
+
+						<section class="sd-card sd-weekly" [class.is-met]="weeklyGoalMet()" aria-label="Weekly goal">
+							<div class="sd-card-head">
+								<span class="sd-card-ic">🎯</span>
+								<div class="sd-card-title">
+									<h3>{{ lang.isBangla() ? 'সাপ্তাহিক লক্ষ্য' : 'Weekly Goal' }}</h3>
+									<p>{{ lang.isBangla() ? 'এই সপ্তাহে ' + weeklyGoalTarget + ' টি লেসন দেখো' : 'Watch ' + weeklyGoalTarget + ' lessons this week' }}</p>
+								</div>
+								<strong class="sd-big-pct sd-weekly-count">{{ weeklyLessonsWatched() }}<small>/{{ weeklyGoalTarget }}</small></strong>
+							</div>
+							<div class="sd-bar sd-bar--green"><span [style.width.%]="weeklyGoalPercent()"></span></div>
+							<div class="sd-card-foot">
+								@if (weeklyGoalMet()) {
+									<span class="sd-goal-done">🎉 {{ lang.isBangla() ? 'দারুণ! লক্ষ্য পূরণ' : 'Goal reached — great job!' }}</span>
+								} @else {
+									<span>{{ lang.isBangla() ? 'আর ' + (weeklyGoalTarget - weeklyLessonsWatched()) + ' টি বাকি' : (weeklyGoalTarget - weeklyLessonsWatched()) + ' more to go' }}</span>
+								}
+							</div>
+						</section>
 					</div>
-					<div class="sd-bar sd-bar--green"><span [style.width.%]="weeklyGoalPercent()"></span></div>
-					<div class="sd-card-foot">
-						@if (weeklyGoalMet()) {
-							<span class="sd-goal-done">🎉 {{ lang.isBangla() ? 'দারুণ! লক্ষ্য পূরণ' : 'Goal reached — great job!' }}</span>
+
+					<!-- Continue learning -->
+					@if (hasContinue()) {
+						<section class="sd-continue" aria-label="Continue learning">
+							<div class="sd-continue-head">
+								<h3>▶ {{ lang.isBangla() ? 'যেখানে ছিলে, সেখান থেকে শুরু করো' : 'Continue Learning' }}</h3>
+							</div>
+							<div class="sd-continue-row">
+								@for (item of continueLearning(); track item.lessonId) {
+									<a class="sd-cl-card"
+										[routerLink]="['/enrolled-course', item.courseId]"
+										[queryParams]="{ lessonId: item.lessonId, resumeAt: item.watchedSeconds }">
+										<div class="sd-cl-top">
+											<span class="sd-cl-course">{{ item.courseTitle }}</span>
+											@if (item.isCompleted) { <span class="sd-cl-tag">✓</span> }
+										</div>
+										<h4 class="sd-cl-lesson">{{ item.lessonTitle }}</h4>
+										<div class="sd-bar sd-bar--sm"><span [style.width.%]="item.progressPercent"></span></div>
+										<div class="sd-cl-foot">
+											<span>{{ item.progressPercent }}%</span>
+											<span class="sd-cl-resume">{{ item.isCompleted ? (lang.isBangla() ? 'আবার দেখো' : 'Rewatch') : (lang.isBangla() ? 'চালিয়ে যাও' : 'Resume') }} →</span>
+										</div>
+									</a>
+								}
+							</div>
+						</section>
+					}
+
+					<!-- Performance (quiz + exam) -->
+					<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
+						<div class="panel-header">
+							<div>
+								<p class="panel-label">{{ lang.t().profileDashboard }}</p>
+								<h2>Performance</h2>
+							</div>
+							<span class="live-badge">
+								<span class="live-dot" aria-hidden="true"></span>
+								{{ lang.t().profileLive }}
+							</span>
+						</div>
+						<div class="ring-wrap">
+							<div class="progress-ring" [attr.role]="'img'" [attr.aria-label]="percentageScore() + '% quiz completion'">
+								<svg class="ring-svg" viewBox="0 0 120 120">
+									<circle cx="60" cy="60" r="50" class="ring-track" />
+									<circle cx="60" cy="60" r="50" class="ring-fill" [style.--percentage]="percentageScore() + '%'" />
+								</svg>
+								<div class="ring-core">
+									<strong>{{ percentageScore() | number: '1.0-0' }}%</strong>
+									<span>{{ lang.t().profileCompletion }}</span>
+								</div>
+							</div>
+							<div class="ring-legend">
+								<div class="legend-item">
+									<span class="legend-dot legend-done" aria-hidden="true"></span>
+									<span>Correct ({{ correctAnswers() }})</span>
+								</div>
+								<div class="legend-item">
+									<span class="legend-dot legend-remain" aria-hidden="true"></span>
+									<span>Wrong ({{ wrongAnswers() }})</span>
+								</div>
+							</div>
+						</div>
+						<div class="dashboard-list">
+							<div class="dashboard-row">
+								<span class="row-icon" aria-hidden="true">✅</span>
+								<span>Correct Answers</span>
+								<strong class="row-value row-ok">{{ correctAnswers() }}</strong>
+							</div>
+							<div class="dashboard-row">
+								<span class="row-icon" aria-hidden="true">❌</span>
+								<span>Wrong Answers</span>
+								<strong class="row-value row-err">{{ wrongAnswers() }}</strong>
+							</div>
+							<div class="dashboard-row">
+								<span class="row-icon" aria-hidden="true">📊</span>
+								<span>MCQ Score</span>
+								<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
+							</div>
+							@if (hasExamPerf()) {
+								<div class="dashboard-row">
+									<span class="row-icon" aria-hidden="true">📝</span>
+									<span>Exam Score ({{ examPerf()?.obtained }}/{{ examPerf()?.max }})</span>
+									<strong class="row-value row-ok">{{ examPercentage() | number: '1.0-0' }}%</strong>
+								</div>
+							}
+						</div>
+					</aside>
+				</div>
+			}
+
+			<!-- ═════ TAB: MY PROFILE ═════ -->
+			@if (activeTab() === 'profile') {
+				<div class="sd-tab">
+					<section class="info-card" aria-label="User profile details">
+						<div class="avatar-wrap">
+							@if (headerAvatar()) {
+								<img class="avatar-img" [src]="headerAvatar()" [alt]="userName()"
+									(error)="$any($event.target).style.display='none'" />
+							} @else {
+								<div class="avatar" aria-hidden="true">{{ userInitial() }}</div>
+							}
+						</div>
+						<div class="user-info">
+							<h2>{{ userName() }}</h2>
+							<p>{{ userEmail() }}</p>
+							<span class="role-badge">{{ userRole() }}</span>
+						</div>
+						<button type="button" class="edit-profile-btn" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+					</section>
+
+					<section class="details-card" id="profile-details" aria-label="Profile details">
+						<div class="details-head">
+							<h3>{{ lang.t().profileDetails }}</h3>
+							<button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
+						</div>
+
+						@if (profile()?.bio) {
+							<div class="about-block">
+								<span class="about-label">{{ lang.t().profileAboutSection }}</span>
+								<p class="about-text">{{ profile()?.bio }}</p>
+							</div>
+						}
+
+						<div class="details-grid">
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileFullName }}</span>
+								<span class="detail-value">{{ profile()?.fullName || userName() }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
+								<span class="detail-value">{{ profile()?.email || userEmail() }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profilePhone }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileDob }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileGender }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileClass }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileInstitution }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item detail-item--wide">
+								<span class="detail-label">{{ lang.t().profileAddress }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileGuardianName }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
+							</div>
+							@if (profile()?.facebookLink) {
+								<div class="detail-item">
+									<span class="detail-label">{{ lang.t().profileFacebook }}</span>
+									<a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
+								</div>
+							}
+							@if (profile()?.linkedInLink) {
+								<div class="detail-item">
+									<span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
+									<a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
+								</div>
+							}
+						</div>
+
+						@if (!hasDetails()) {
+							<div class="details-empty">
+								<p>{{ lang.t().profileAddInfo }}</p>
+								<button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
+							</div>
+						}
+					</section>
+				</div>
+			}
+
+			<!-- ═════ TAB: WISHLIST ═════ -->
+			@if (activeTab() === 'wishlist') {
+				<div class="sd-tab">
+					<section class="wishlist-section" id="wishlist" aria-label="My wishlist">
+						<div class="wishlist-head">
+							<div class="wishlist-head-title">
+								<span class="wishlist-head-icon" aria-hidden="true">♥</span>
+								<h3>My Wishlist</h3>
+								@if (wishlist().length > 0) { <span class="wishlist-count">{{ wishlist().length }}</span> }
+							</div>
+							<a routerLink="/courses" class="wishlist-browse-link">Browse courses →</a>
+						</div>
+
+						@if (isLoadingWishlist()) {
+							<div class="wishlist-loading">
+								<span class="wishlist-spinner" aria-hidden="true"></span>
+								Loading your wishlist…
+							</div>
+						} @else if (wishlist().length === 0) {
+							<div class="wishlist-empty">
+								<div class="wishlist-empty-icon">🤍</div>
+								<h3>Your wishlist is empty</h3>
+								<p>Save the courses you love — they'll show up here so you can enroll anytime.</p>
+								<a routerLink="/courses" class="browse-btn">Browse Courses</a>
+							</div>
 						} @else {
-							<span>{{ lang.isBangla() ? 'আর ' + (weeklyGoalTarget - weeklyLessonsWatched()) + ' টি বাকি' : (weeklyGoalTarget - weeklyLessonsWatched()) + ' more to go' }}</span>
+							<div class="wishlist-grid">
+								@for (item of wishlist(); track item.courseId) {
+									<article class="wishlist-card">
+										<a class="wishlist-thumb" [routerLink]="['/course-details', item.courseId]" [attr.aria-label]="item.title">
+											<img [src]="getImageUrl(item.thumbnailPath)" [alt]="item.title" loading="lazy"
+												(error)="$any($event.target).style.display='none'" />
+											@if (item.level) { <span class="wishlist-level">{{ item.level }}</span> }
+										</a>
+										<div class="wishlist-card-body">
+											<h3 class="wishlist-title">{{ item.title }}</h3>
+											<p class="wishlist-instructor">
+												<span class="wishlist-instructor-ic" aria-hidden="true">👤</span>{{ item.instructorName }}
+											</p>
+											<div class="wishlist-card-footer">
+												<strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
+											</div>
+											<div class="wishlist-actions">
+												<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View</a>
+												@if (item.isEnrolled) {
+													<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled ✓</a>
+												} @else {
+													<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enroll-btn">Enroll Now</a>
+												}
+											</div>
+										</div>
+									</article>
+								}
+							</div>
 						}
-						<a routerLink="/history" class="sd-link">{{ lang.isBangla() ? 'হিস্টোরি' : 'History' }} →</a>
-					</div>
-				</section>
-			</div>
-
-			<!-- ── Continue learning ─────────────────────────── -->
-			@if (hasContinue()) {
-				<section class="sd-continue" aria-label="Continue learning">
-					<div class="sd-continue-head">
-						<h3>▶ {{ lang.isBangla() ? 'যেখানে ছিলে, সেখান থেকে শুরু করো' : 'Continue Learning' }}</h3>
-						<a routerLink="/history" class="sd-link">{{ lang.isBangla() ? 'সব দেখো' : 'View all' }} →</a>
-					</div>
-					<div class="sd-continue-row">
-						@for (item of continueLearning(); track item.lessonId) {
-							<a class="sd-cl-card"
-								[routerLink]="['/enrolled-course', item.courseId]"
-								[queryParams]="{ lessonId: item.lessonId, resumeAt: item.watchedSeconds }">
-								<div class="sd-cl-top">
-									<span class="sd-cl-course">{{ item.courseTitle }}</span>
-									@if (item.isCompleted) { <span class="sd-cl-tag">✓</span> }
-								</div>
-								<h4 class="sd-cl-lesson">{{ item.lessonTitle }}</h4>
-								<div class="sd-bar sd-bar--sm"><span [style.width.%]="item.progressPercent"></span></div>
-								<div class="sd-cl-foot">
-									<span>{{ item.progressPercent }}%</span>
-									<span class="sd-cl-resume">{{ item.isCompleted ? (lang.isBangla() ? 'আবার দেখো' : 'Rewatch') : (lang.isBangla() ? 'চালিয়ে যাও' : 'Resume') }} →</span>
-								</div>
-							</a>
-						}
-					</div>
-				</section>
+					</section>
+				</div>
 			}
 
-			<aside class="hero-panel profile-panel reveal-up" aria-label="Learning dashboard preview">
-				<div class="panel-header">
-					<div>
-						<p class="panel-label">{{ lang.t().profileDashboard }}</p>
-						<h2>Performance</h2>
-					</div>
-					<span class="live-badge">
-						<span class="live-dot" aria-hidden="true"></span>
-						{{ lang.t().profileLive }}
-					</span>
+			<!-- ═════ TAB: MY COURSES (embedded page) ═════ -->
+			@if (activeTab() === 'courses') {
+				<div class="sd-tab">
+					<app-my-courses [embedded]="true"></app-my-courses>
 				</div>
-				<div class="ring-wrap">
-					<div class="progress-ring" [attr.role]="'img'" [attr.aria-label]="percentageScore() + '% quiz completion'">
-						<svg class="ring-svg" viewBox="0 0 120 120">
-							<circle cx="60" cy="60" r="50" class="ring-track" />
-							<circle cx="60" cy="60" r="50" class="ring-fill" [style.--percentage]="percentageScore() + '%'" />
-						</svg>
-						<div class="ring-core">
-							<strong>{{ percentageScore() | number: '1.0-0' }}%</strong>
-							<span>{{ lang.t().profileCompletion }}</span>
-						</div>
-					</div>
-					<div class="ring-legend">
-						<div class="legend-item">
-							<span class="legend-dot legend-done" aria-hidden="true"></span>
-							<span>Correct ({{ correctAnswers() }})</span>
-						</div>
-						<div class="legend-item">
-							<span class="legend-dot legend-remain" aria-hidden="true"></span>
-							<span>Wrong ({{ wrongAnswers() }})</span>
-						</div>
-					</div>
+			}
+
+			<!-- ═════ TAB: MY CLASSES (embedded page) ═════ -->
+			@if (activeTab() === 'classes') {
+				<div class="sd-tab">
+					<app-my-classes [embedded]="true"></app-my-classes>
 				</div>
-				<div class="dashboard-list">
-					<div class="dashboard-row">
-						<span class="row-icon" aria-hidden="true">✅</span>
-						<span>Correct Answers</span>
-						<strong class="row-value row-ok">{{ correctAnswers() }}</strong>
-					</div>
-					<div class="dashboard-row">
-						<span class="row-icon" aria-hidden="true">❌</span>
-						<span>Wrong Answers</span>
-						<strong class="row-value row-err">{{ wrongAnswers() }}</strong>
-					</div>
-					<div class="dashboard-row">
-						<span class="row-icon" aria-hidden="true">📊</span>
-						<span>MCQ Score</span>
-						<strong class="row-value row-ok">{{ percentageScore() | number: '1.0-0' }}%</strong>
-					</div>
-					@if (hasExamPerf()) {
-						<div class="dashboard-row">
-							<span class="row-icon" aria-hidden="true">📝</span>
-							<span>Exam Score ({{ examPerf()?.obtained }}/{{ examPerf()?.max }})</span>
-							<strong class="row-value row-ok">{{ examPercentage() | number: '1.0-0' }}%</strong>
-						</div>
-					}
+			}
+
+			<!-- ═════ TAB: ASSIGNMENTS (embedded page) ═════ -->
+			@if (activeTab() === 'assignments') {
+				<div class="sd-tab">
+					<app-assignment [embedded]="true"></app-assignment>
 				</div>
-			</aside>
+			}
 
-			<section class="future-card" aria-label="Future learning features">
-				<h3>{{ lang.t().profileActivity }}</h3>
-				<p>{{ lang.t().profileActivityDesc }}</p>
-				<div class="action-grid">
-					<button type="button" routerLink="/myClasses" class="future-btn">{{ lang.t().profileMyClasses }}</button>
-					<button type="button" routerLink="/my-courses" class="future-btn future-btn--notif">
-						{{ lang.t().profileMyCourses }}
-						@if (lessonNotifCount() > 0) { <span class="future-btn-badge">{{ lessonNotifCount() }}</span> }
-					</button>
-					<button type="button" routerLink="/assignments" class="future-btn future-btn--notif">
-						{{ lang.t().profileAssignments }}
-						@if (quizNotifCount() > 0) { <span class="future-btn-badge">{{ quizNotifCount() }}</span> }
-					</button>
-					<button type="button" routerLink="/certificates" class="future-btn future-btn--notif">
-						{{ lang.t().profileCertificates }}
-						@if (certNotifCount() > 0) { <span class="future-btn-badge">{{ certNotifCount() }}</span> }
-					</button>
+			<!-- ═════ TAB: CERTIFICATES (embedded page) ═════ -->
+			@if (activeTab() === 'certificates') {
+				<div class="sd-tab">
+					<app-certificates [embedded]="true"></app-certificates>
 				</div>
-			</section>
-
-			<!-- ── Profile details (always visible) ─────────── -->
-			<section class="details-card" id="profile-details" aria-label="Profile details">
-				<div class="details-head">
-					<h3>{{ lang.t().profileDetails }}</h3>
-					<button type="button" class="details-edit-link" (click)="openEdit()">✎ {{ lang.t().profileEdit }}</button>
-				</div>
-
-				@if (profile()?.bio) {
-					<div class="about-block">
-						<span class="about-label">{{ lang.t().profileAboutSection }}</span>
-						<p class="about-text">{{ profile()?.bio }}</p>
-					</div>
-				}
-
-				<div class="details-grid">
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileFullName }}</span>
-						<span class="detail-value">{{ profile()?.fullName || userName() }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileEmailLabel }}</span>
-						<span class="detail-value">{{ profile()?.email || userEmail() }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profilePhone }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.phone">{{ profile()?.phone || lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileDob }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.dateOfBirth">{{ profile()?.dateOfBirth ? (profile()?.dateOfBirth | date:'longDate') : lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileGender }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.gender">{{ profile()?.gender || lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileClass }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.classOrGrade">{{ profile()?.classOrGrade || lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileInstitution }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.institution">{{ profile()?.institution || lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item detail-item--wide">
-						<span class="detail-label">{{ lang.t().profileAddress }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileGuardianName }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
-						<span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
-					</div>
-					@if (profile()?.facebookLink) {
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileFacebook }}</span>
-							<a class="detail-value detail-link" [href]="profile()?.facebookLink" target="_blank" rel="noopener">{{ profile()?.facebookLink }}</a>
-						</div>
-					}
-					@if (profile()?.linkedInLink) {
-						<div class="detail-item">
-							<span class="detail-label">{{ lang.t().profileLinkedIn }}</span>
-							<a class="detail-value detail-link" [href]="profile()?.linkedInLink" target="_blank" rel="noopener">{{ profile()?.linkedInLink }}</a>
-						</div>
-					}
-				</div>
-
-				@if (!hasDetails()) {
-					<div class="details-empty">
-						<p>{{ lang.t().profileAddInfo }}</p>
-						<button type="button" class="details-empty-btn" (click)="openEdit()">+ {{ lang.t().profileEdit }}</button>
-					</div>
-				}
-			</section>
-
-			<!-- ── Wishlist (always visible — never hides the details above) ─ -->
-			<section class="wishlist-section" id="wishlist" aria-label="My wishlist">
-				<div class="wishlist-head">
-					<div class="wishlist-head-title">
-						<span class="wishlist-head-icon" aria-hidden="true">♥</span>
-						<h3>My Wishlist</h3>
-						@if (wishlist().length > 0) { <span class="wishlist-count">{{ wishlist().length }}</span> }
-					</div>
-					<a routerLink="/courses" class="wishlist-browse-link">Browse courses →</a>
-				</div>
-
-				@if (isLoadingWishlist()) {
-					<div class="wishlist-loading">
-						<span class="wishlist-spinner" aria-hidden="true"></span>
-						Loading your wishlist…
-					</div>
-				} @else if (wishlist().length === 0) {
-					<div class="wishlist-empty">
-						<div class="wishlist-empty-icon">🤍</div>
-						<h3>Your wishlist is empty</h3>
-						<p>Save the courses you love — they'll show up here so you can enroll anytime.</p>
-						<a routerLink="/courses" class="browse-btn">Browse Courses</a>
-					</div>
-				} @else {
-					<div class="wishlist-grid">
-						@for (item of wishlist(); track item.courseId) {
-							<article class="wishlist-card">
-								<a class="wishlist-thumb" [routerLink]="['/course-details', item.courseId]" [attr.aria-label]="item.title">
-									<img [src]="getImageUrl(item.thumbnailPath)" [alt]="item.title" loading="lazy"
-										(error)="$any($event.target).style.display='none'" />
-									@if (item.level) { <span class="wishlist-level">{{ item.level }}</span> }
-								</a>
-								<div class="wishlist-card-body">
-									<h3 class="wishlist-title">{{ item.title }}</h3>
-									<p class="wishlist-instructor">
-										<span class="wishlist-instructor-ic" aria-hidden="true">👤</span>{{ item.instructorName }}
-									</p>
-									<div class="wishlist-card-footer">
-										<strong class="wishlist-price">{{ formatPrice(item.price) }}</strong>
-									</div>
-									<div class="wishlist-actions">
-										<a [routerLink]="['/course-details', item.courseId]" class="wishlist-view-btn">View</a>
-										@if (item.isEnrolled) {
-											<a [routerLink]="['/enrolled-course', item.courseId]" class="wishlist-enrolled-btn">Enrolled ✓</a>
-										} @else {
-											<a [routerLink]="['/payment']" [queryParams]="{ courseId: item.courseId, courseTitle: item.title, amount: item.price }" class="wishlist-enroll-btn">Enroll Now</a>
-										}
-									</div>
-								</div>
-							</article>
-						}
-					</div>
-				}
-			</section>
-		}
-
-		<!-- ══════════════ TEACHER ══════════════ -->
-		@if (isTeacher()) {
-			<section class="role-panel reveal-up" aria-label="Instructor area">
-				<div class="role-head">
-					<div>
-						<p class="panel-label">{{ lang.t().profileRole }}</p>
-						<h2>{{ lang.t().profileInstructorArea }}</h2>
-					</div>
-					<div class="role-stat-badge">
-						<strong>{{ teacherCourseCount() }}</strong>
-						<span>{{ lang.t().profileCourses }}</span>
-					</div>
-				</div>
-
-				<div class="about-block">
-					<span class="about-label">{{ lang.t().profileAboutSection }}</span>
-					@if (teacherProfile()?.bio) {
-						<p class="about-text">{{ teacherProfile()?.bio }}</p>
-					} @else {
-						<p class="about-text muted">{{ lang.t().profileTeacherNoBio }}</p>
-					}
-				</div>
-
-				@if (teacherProfile()?.facebookLink || teacherProfile()?.youtubeLink) {
-					<div class="role-social">
-						@if (teacherProfile()?.facebookLink) {
-							<a class="role-social-link role-social-link--fb" [href]="teacherProfile()?.facebookLink" target="_blank" rel="noopener">f &nbsp;{{ lang.t().profileFacebook }}</a>
-						}
-						@if (teacherProfile()?.youtubeLink) {
-							<a class="role-social-link role-social-link--yt" [href]="teacherProfile()?.youtubeLink" target="_blank" rel="noopener">▶ &nbsp;{{ lang.t().profileYoutube }}</a>
-						}
-					</div>
-				}
-
-				<div class="role-links">
-					<a routerLink="/course-manager" class="role-link role-link--primary"><span class="role-link-ic">📚</span>{{ lang.t().profileManageCourses }}</a>
-					<a routerLink="/courses" class="role-link"><span class="role-link-ic">🎓</span>{{ lang.t().profileBrowseCourses }}</a>
-					<a routerLink="/homepage" class="role-link"><span class="role-link-ic">🏠</span>{{ lang.t().profileHome }}</a>
-				</div>
-			</section>
-		}
-
-		<!-- ══════════════ ADMIN ══════════════ -->
-		@if (isAdmin()) {
-			<section class="role-panel reveal-up" aria-label="Admin area">
-				<div class="role-head">
-					<div>
-						<p class="panel-label">{{ lang.t().profileRole }}</p>
-						<h2>{{ lang.t().profileAdminArea }}</h2>
-					</div>
-				</div>
-				<div class="admin-hub-grid">
-					<a routerLink="/admin" class="hub-link hub-link--primary"><span class="hub-ic">📊</span><span>{{ lang.t().profileAdminPanel }}</span></a>
-					<a routerLink="/course-manager" class="hub-link"><span class="hub-ic">📚</span><span>{{ lang.t().profileCourseManager }}</span></a>
-					<a routerLink="/courses" class="hub-link"><span class="hub-ic">🎓</span><span>{{ lang.t().profileBrowseCourses }}</span></a>
-					<a routerLink="/instructors" class="hub-link"><span class="hub-ic">👨‍🏫</span><span>{{ lang.t().profileInstructors }}</span></a>
-				</div>
-			</section>
-		}
-	</section>
+			}
+		</main>
+	</div>
 
 	<!-- ── Student edit modal ───────────────────────────── -->
-	@if (isEditing() && isStudent()) {
+	@if (isEditing()) {
 		<div class="edit-overlay" (click)="closeEdit()">
 			<div class="edit-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
 				<div class="edit-modal-head">
@@ -493,6 +530,98 @@
 			</div>
 		</div>
 	}
+}
+
+<!-- ══════════════ TEACHER / ADMIN — classic profile page ══════════════ -->
+@if (!isStudent()) {
+<main class="profile-page">
+	<app-navbar></app-navbar>
+
+	<section class="profile-shell">
+		@if (saveSuccess()) {
+			<div class="save-toast" role="status">✅ {{ lang.t().profileUpdated }}</div>
+		}
+
+		<!-- ── Common header ─────────────────────────────── -->
+		<section class="info-card info-card--staff" aria-label="User profile details">
+			<div class="avatar-wrap">
+				@if (headerAvatar()) {
+					<img class="avatar-img" [src]="headerAvatar()" [alt]="userName()"
+						(error)="$any($event.target).style.display='none'" />
+				} @else {
+					<div class="avatar" aria-hidden="true">{{ userName().charAt(0).toUpperCase() }}</div>
+				}
+			</div>
+			<div class="user-info">
+				<h2>{{ userName() }}</h2>
+				<p>{{ userEmail() }}</p>
+				<span class="role-badge" [class.role-badge--teacher]="isTeacher()" [class.role-badge--admin]="isAdmin()">{{ userRole() }}</span>
+			</div>
+			@if (isTeacher()) {
+				<button type="button" class="edit-profile-btn" (click)="openTeacherEdit()">✎ {{ lang.t().profileEdit }}</button>
+			}
+		</section>
+
+		<!-- ══════════════ TEACHER ══════════════ -->
+		@if (isTeacher()) {
+			<section class="role-panel reveal-up" aria-label="Instructor area">
+				<div class="role-head">
+					<div>
+						<p class="panel-label">{{ lang.t().profileRole }}</p>
+						<h2>{{ lang.t().profileInstructorArea }}</h2>
+					</div>
+					<div class="role-stat-badge">
+						<strong>{{ teacherCourseCount() }}</strong>
+						<span>{{ lang.t().profileCourses }}</span>
+					</div>
+				</div>
+
+				<div class="about-block">
+					<span class="about-label">{{ lang.t().profileAboutSection }}</span>
+					@if (teacherProfile()?.bio) {
+						<p class="about-text">{{ teacherProfile()?.bio }}</p>
+					} @else {
+						<p class="about-text muted">{{ lang.t().profileTeacherNoBio }}</p>
+					}
+				</div>
+
+				@if (teacherProfile()?.facebookLink || teacherProfile()?.youtubeLink) {
+					<div class="role-social">
+						@if (teacherProfile()?.facebookLink) {
+							<a class="role-social-link role-social-link--fb" [href]="teacherProfile()?.facebookLink" target="_blank" rel="noopener">f &nbsp;{{ lang.t().profileFacebook }}</a>
+						}
+						@if (teacherProfile()?.youtubeLink) {
+							<a class="role-social-link role-social-link--yt" [href]="teacherProfile()?.youtubeLink" target="_blank" rel="noopener">▶ &nbsp;{{ lang.t().profileYoutube }}</a>
+						}
+					</div>
+				}
+
+				<div class="role-links">
+					<a routerLink="/course-manager" class="role-link role-link--primary"><span class="role-link-ic">📚</span>{{ lang.t().profileManageCourses }}</a>
+					<a routerLink="/courses" class="role-link"><span class="role-link-ic">🎓</span>{{ lang.t().profileBrowseCourses }}</a>
+					<a routerLink="/homepage" class="role-link"><span class="role-link-ic">🏠</span>{{ lang.t().profileHome }}</a>
+				</div>
+			</section>
+		}
+
+		<!-- ══════════════ ADMIN ══════════════ -->
+		@if (isAdmin()) {
+			<section class="role-panel reveal-up" aria-label="Admin area">
+				<div class="role-head">
+					<div>
+						<p class="panel-label">{{ lang.t().profileRole }}</p>
+						<h2>{{ lang.t().profileAdminArea }}</h2>
+					</div>
+				</div>
+				<div class="admin-hub-grid">
+					<a routerLink="/admin" class="hub-link hub-link--primary"><span class="hub-ic">📊</span><span>{{ lang.t().profileAdminPanel }}</span></a>
+					<a routerLink="/course-manager" class="hub-link"><span class="hub-ic">📚</span><span>{{ lang.t().profileCourseManager }}</span></a>
+					<a routerLink="/courses" class="hub-link"><span class="hub-ic">🎓</span><span>{{ lang.t().profileBrowseCourses }}</span></a>
+					<a routerLink="/instructors" class="hub-link"><span class="hub-ic">👨‍🏫</span><span>{{ lang.t().profileInstructors }}</span></a>
+				</div>
+			</section>
+		}
+	</section>
 
 	<!-- ── Teacher edit modal ───────────────────────────── -->
 	@if (isEditing() && isTeacher()) {
@@ -551,3 +680,4 @@
 		</div>
 	}
 </main>
+}

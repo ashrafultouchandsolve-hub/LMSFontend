@@ -536,3 +536,10 @@
 		gap: 10px;
 	}
 }
+
+/* Rendered inside the student dashboard shell — the shell owns bg/padding */
+.cert-page.embedded {
+	min-height: auto;
+	padding: 0;
+	background: none;
+}

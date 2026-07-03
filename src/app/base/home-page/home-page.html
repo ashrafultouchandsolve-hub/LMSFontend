@@ -69,32 +69,6 @@
   <br>
   <br>
 
-
-  <!-- ─── TODAY'S AGENDA (enrolled students only) ───────── -->
-  @if (isStudent() && agendaItems().length > 0) {
-  <section class="agenda-strip">
-    <div class="agenda-head">
-      <span class="agenda-title">🗓️ {{ lang.t().agTitle }}</span>
-    </div>
-    <div class="agenda-row">
-      @for (it of agendaItems(); track $index) {
-      <a [routerLink]="it.link" class="agenda-item" [attr.data-kind]="it.kind">
-        <span class="agenda-ico">{{ it.icon }}</span>
-        <span class="agenda-body">
-          <span class="agenda-course">{{ it.courseTitle }}</span>
-          <span class="agenda-meta">{{ agendaMeta(it) }}@if (it.detail) {<span class="agenda-detail"> · {{ it.detail }}</span>}</span>
-        </span>
-        @if (it.kind === 'live') {
-          <span class="agenda-join">{{ lang.t().agJoin }} →</span>
-        } @else {
-          <span class="agenda-go" aria-hidden="true">→</span>
-        }
-      </a>
-      }
-    </div>
-  </section>
-  }
-
   <!-- ─── CATEGORY SECTION ───────────────────────────── -->
   <section class="category-section" id="tracks">
     <div class="category-header" data-reveal>

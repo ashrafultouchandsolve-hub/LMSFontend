@@ -1297,3 +1297,294 @@
 	.sd-greet-badges { width: 100%; }
 	.sd-badge { flex: 1; }
 }
+/* ═══════════ Student dashboard shell — admin-style sidebar, light theme ═══════════ */
+.sd-shell {
+	display: flex;
+	width: 100vw;
+	margin-left: calc(50% - 50vw);
+	min-height: 100vh;
+	background:
+		radial-gradient(circle at 5% 10%, rgba(59, 130, 246, 0.10), transparent 30%),
+		radial-gradient(circle at 92% 12%, rgba(14, 165, 233, 0.10), transparent 28%),
+		#f7f8fc;
+	color: #111827;
+}
+
+/* ── Sidebar ── */
+.sd-sidebar {
+	width: 248px;
+	min-width: 248px;
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	background: rgba(255, 255, 255, 0.94);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	border-right: 1px solid rgba(37, 99, 235, 0.12);
+	padding: 20px 0 14px;
+}
+
+.sd-brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 18px 16px;
+	border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.sd-brand-ic { font-size: 22px; }
+
+.sd-brand-text {
+	font-size: 15px;
+	font-weight: 800;
+	letter-spacing: -0.3px;
+	color: #111827;
+}
+
+.sd-user {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 14px 12px;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: rgba(37, 99, 235, 0.06);
+	border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.sd-user-avatar {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.sd-user-initial {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: linear-gradient(135deg, #2563eb, #0ea5e9);
+	color: #fff;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.sd-user-meta { min-width: 0; display: grid; }
+
+.sd-user-meta strong {
+	font-size: 0.85rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sd-user-meta span {
+	font-size: 0.7rem;
+	color: #6b7280;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sd-nav {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 0 12px;
+}
+
+.sd-nav-sep {
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	color: #9ca3af;
+	padding: 12px 12px 4px;
+}
+
+.sd-nav-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 9px 12px;
+	border-radius: 8px;
+	background: transparent;
+	border: none;
+	color: #4b5563;
+	font-size: 0.88rem;
+	font-weight: 600;
+	cursor: pointer;
+	text-align: left;
+	text-decoration: none;
+	font-family: inherit;
+	transition: background 0.15s, color 0.15s;
+}
+
+.sd-nav-item:hover {
+	background: rgba(37, 99, 235, 0.07);
+	color: #111827;
+}
+
+.sd-nav-item.active {
+	background: rgba(37, 99, 235, 0.12);
+	color: #2563eb;
+}
+
+.sd-nav-ic {
+	font-size: 15px;
+	width: 20px;
+	text-align: center;
+	flex-shrink: 0;
+}
+
+.sd-nav-badge {
+	margin-left: auto;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	border-radius: 9px;
+	background: #ef4444;
+	color: #fff;
+	font-size: 0.66rem;
+	font-weight: 700;
+	display: grid;
+	place-items: center;
+}
+
+.sd-nav-badge--soft {
+	background: rgba(37, 99, 235, 0.14);
+	color: #2563eb;
+}
+
+.sd-logout {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 12px 12px 0;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: rgba(239, 68, 68, 0.07);
+	border: 1px solid rgba(239, 68, 68, 0.2);
+	color: #dc2626;
+	font-size: 0.88rem;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	transition: background 0.15s;
+}
+
+.sd-logout:hover { background: rgba(239, 68, 68, 0.14); }
+
+/* ── Main area ── */
+.sd-main {
+	flex: 1;
+	min-width: 0;
+	padding: 26px 32px 40px;
+}
+
+.sd-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.sd-topbar-title h1 {
+	font-size: 1.5rem;
+	font-weight: 800;
+	letter-spacing: -0.4px;
+	margin: 0;
+}
+
+.sd-topbar-title p {
+	margin: 3px 0 0;
+	font-size: 0.85rem;
+	color: #6b7280;
+}
+
+.sd-topbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.sd-lang-btn {
+	padding: 7px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(37, 99, 235, 0.35);
+	background: #fff;
+	color: #2563eb;
+	font-size: 0.8rem;
+	font-weight: 700;
+	cursor: pointer;
+	font-family: inherit;
+	transition: background 0.15s, color 0.15s;
+}
+
+.sd-lang-btn:hover {
+	background: #2563eb;
+	color: #fff;
+}
+
+.sd-tab {
+	display: grid;
+	gap: 18px;
+}
+
+/* ── Responsive: sidebar collapses to a top panel with a scrollable menu ── */
+@media (max-width: 920px) {
+	.sd-shell { flex-direction: column; }
+
+	.sd-sidebar {
+		position: static;
+		width: 100%;
+		min-width: 0;
+		height: auto;
+		padding: 12px 0 10px;
+		border-right: none;
+		border-bottom: 1px solid rgba(37, 99, 235, 0.12);
+	}
+
+	.sd-brand { padding-bottom: 10px; }
+	.sd-user { margin: 10px 12px; }
+
+	.sd-nav {
+		flex-direction: row;
+		overflow-x: auto;
+		padding: 6px 12px;
+		gap: 6px;
+	}
+
+	.sd-nav-sep { display: none; }
+
+	.sd-nav-item {
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
+	.sd-logout {
+		margin: 8px 12px 4px;
+		width: fit-content;
+	}
+
+	.sd-main { padding: 18px 14px 32px; }
+	.sd-topbar { flex-wrap: wrap; }
+}
+
+/* .sd-link rendered as a <button> (switches tab in-shell instead of navigating away) */
+.sd-link--btn {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: inherit;
+	font-size: inherit;
+	cursor: pointer;
+}

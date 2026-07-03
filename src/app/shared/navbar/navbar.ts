@@ -6,6 +6,7 @@ import { LanguageService } from '../../Service/language.service';
 import { LiveClassService } from '../../Service/live-class-service';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { NotificationBell } from '../notification-bell/notification-bell';
+import { AgendaMenu } from '../agenda-menu/agenda-menu';
 
 /** Compact live-class row shown in the navbar "Live" dropdown. */
 type NavLiveItem = {
@@ -18,7 +19,7 @@ type NavLiveItem = {
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, NotificationBell],
+  imports: [RouterLink, NotificationBell, AgendaMenu],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })

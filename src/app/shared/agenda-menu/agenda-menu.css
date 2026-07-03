@@ -1,0 +1,410 @@
+/* ═══ "Todo" ticker pill — vibrant, deliberately NOT bell-like ═══ */
+
+.agenda-wrap {
+	position: relative;
+}
+
+/* ── Trigger: animated-gradient pill with shine sweep ── */
+.agenda-pill {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 38px;
+	padding: 0 13px;
+	border: none;
+	border-radius: 999px;
+	background: linear-gradient(120deg, #ff7a18, #f43f5e 45%, #8b5cf6 90%);
+	background-size: 220% 220%;
+	color: #fff;
+	font-family: inherit;
+	font-size: 0.8rem;
+	font-weight: 700;
+	cursor: pointer;
+	box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+	transition: box-shadow 0.2s, transform 0.15s;
+	overflow: visible;
+	animation: agendaFlow 7s ease-in-out infinite;
+}
+
+.agenda-pill:hover,
+.agenda-pill.open {
+	transform: translateY(-1px) scale(1.02);
+	box-shadow: 0 8px 22px rgba(244, 63, 94, 0.5);
+}
+
+@keyframes agendaFlow {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+}
+
+/* Glossy shine sweeping across every few seconds */
+.agenda-pill::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.4) 48%, transparent 62%);
+	transform: translateX(-130%);
+	animation: agendaShine 5.5s ease-in-out infinite;
+	pointer-events: none;
+}
+
+@keyframes agendaShine {
+	0%, 55% { transform: translateX(-130%); }
+	85%, 100% { transform: translateX(130%); }
+}
+
+/* ── Ticker viewport: old line slides up & out, new line slides in from below ── */
+.agenda-ticker {
+	position: relative;
+	overflow: hidden;
+	max-width: 176px;
+	min-width: 0;
+}
+
+.agenda-line {
+	display: block;
+	line-height: 19px;
+	height: 19px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.agenda-line--in {
+	position: relative;
+	animation: agendaTickIn 0.55s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.agenda-line--out {
+	position: absolute;
+	inset: 0;
+	animation: agendaTickOut 0.45s cubic-bezier(0.5, 0, 0.75, 0.4) forwards;
+}
+
+@keyframes agendaTickIn {
+	from {
+		transform: translateY(135%);
+		opacity: 0;
+	}
+
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+
+@keyframes agendaTickOut {
+	from {
+		transform: none;
+		opacity: 1;
+	}
+
+	to {
+		transform: translateY(-135%);
+		opacity: 0;
+	}
+}
+
+/* Count chip — translucent white, NOT the bell's floating red bubble */
+.agenda-pill-count {
+	flex-shrink: 0;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 6px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.3);
+	backdrop-filter: blur(2px);
+	color: #fff;
+	font-size: 0.68rem;
+	font-weight: 800;
+	display: grid;
+	place-items: center;
+}
+
+/* Red rippling dot — ONLY when a class is live right now */
+.agenda-live-dot {
+	position: absolute;
+	top: -3px;
+	right: -3px;
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: #ef4444;
+	border: 2px solid #fff;
+	box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+	animation: agendaDotRipple 1.6s ease-out infinite;
+}
+
+@keyframes agendaDotRipple {
+	0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+	100% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+/* ── Dropdown ── */
+.agenda-dd {
+	position: absolute;
+	top: calc(100% + 12px);
+	right: 0;
+	width: 344px;
+	max-width: calc(100vw - 40px);
+	background: #fff;
+	border-radius: 18px;
+	box-shadow: 0 20px 50px rgba(2, 6, 23, 0.18), 0 2px 8px rgba(2, 6, 23, 0.06);
+	overflow: hidden;
+	z-index: 500;
+	animation: agendaDdIn 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes agendaDdIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scale(0.98);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* Gradient header — instantly reads different from the bell's white panel */
+.agenda-dd-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 13px 16px;
+	background: linear-gradient(120deg, #ff7a18, #f43f5e 55%, #8b5cf6);
+	color: #fff;
+}
+
+.agenda-dd-head-title {
+	font-size: 0.95rem;
+	font-weight: 800;
+	letter-spacing: -0.2px;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.agenda-dd-head-count {
+	min-width: 22px;
+	height: 22px;
+	padding: 0 7px;
+	border-radius: 11px;
+	background: rgba(255, 255, 255, 0.3);
+	font-size: 0.72rem;
+	font-weight: 800;
+	display: grid;
+	place-items: center;
+}
+
+.agenda-dd-list {
+	max-height: 380px;
+	overflow-y: auto;
+	padding: 10px;
+	display: grid;
+	gap: 7px;
+	background: linear-gradient(180deg, #fafafa, #fff);
+}
+
+.agenda-dd-list::-webkit-scrollbar { width: 5px; }
+.agenda-dd-list::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 4px; }
+
+/* Rows — staggered entrance */
+.agenda-dd-item {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 10px 12px;
+	border-radius: 14px;
+	background: #fff;
+	border: 1px solid #f1f5f9;
+	text-decoration: none;
+	color: #111827;
+	transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+	animation: agendaRowIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.agenda-dd-item:nth-child(1) { animation-delay: 0.03s; }
+.agenda-dd-item:nth-child(2) { animation-delay: 0.07s; }
+.agenda-dd-item:nth-child(3) { animation-delay: 0.11s; }
+.agenda-dd-item:nth-child(4) { animation-delay: 0.15s; }
+.agenda-dd-item:nth-child(5) { animation-delay: 0.19s; }
+.agenda-dd-item:nth-child(6) { animation-delay: 0.23s; }
+
+@keyframes agendaRowIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.agenda-dd-item:hover {
+	transform: translateX(3px);
+	box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08);
+	border-color: #e2e8f0;
+}
+
+/* Soft colored icon badge per kind (replaces the old left border) */
+.agenda-dd-ico {
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	display: grid;
+	place-items: center;
+	font-size: 1.1rem;
+	border-radius: 13px;
+	background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+}
+
+.agenda-dd-body {
+	min-width: 0;
+	display: grid;
+	gap: 2px;
+	flex: 1;
+}
+
+.agenda-dd-course {
+	font-size: 0.84rem;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.agenda-dd-meta {
+	font-size: 0.73rem;
+	font-weight: 700;
+	color: #64748b;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.agenda-dd-detail {
+	font-weight: 500;
+	color: #94a3b8;
+}
+
+.agenda-dd-go {
+	color: #cbd5e1;
+	font-weight: 800;
+	flex-shrink: 0;
+	transition: color 0.15s, transform 0.15s;
+}
+
+.agenda-dd-item:hover .agenda-dd-go {
+	color: #8b5cf6;
+	transform: translateX(2px);
+}
+
+.agenda-dd-join {
+	flex-shrink: 0;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: linear-gradient(120deg, #ef4444, #f97316);
+	color: #fff;
+	font-size: 0.7rem;
+	font-weight: 800;
+	white-space: nowrap;
+	box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+}
+
+/* Per-kind colours */
+.agenda-dd-item[data-kind='live'] {
+	background: linear-gradient(180deg, #fff, #fff1f2);
+	border-color: #fecdd3;
+}
+
+.agenda-dd-item[data-kind='live'] .agenda-dd-ico {
+	background: linear-gradient(135deg, #fee2e2, #fecaca);
+	animation: agendaIcoPulse 1.6s ease-in-out infinite;
+}
+
+.agenda-dd-item[data-kind='live'] .agenda-dd-meta { color: #e11d48; }
+
+@keyframes agendaIcoPulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.09); }
+}
+
+.agenda-dd-item[data-kind='upcoming'] .agenda-dd-ico { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+.agenda-dd-item[data-kind='upcoming'] .agenda-dd-meta { color: #2563eb; }
+
+.agenda-dd-item[data-kind='exam'] .agenda-dd-ico { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+.agenda-dd-item[data-kind='exam'] .agenda-dd-meta { color: #b45309; }
+
+.agenda-dd-item[data-kind='ending'] .agenda-dd-ico { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+.agenda-dd-item[data-kind='ending'] .agenda-dd-meta { color: #7c3aed; }
+
+/* Empty state */
+.agenda-dd-empty {
+	display: grid;
+	place-items: center;
+	gap: 8px;
+	padding: 32px 16px;
+	text-align: center;
+}
+
+.agenda-dd-empty-ico {
+	font-size: 2rem;
+	animation: agendaEmptyBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes agendaEmptyBounce {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-5px); }
+}
+
+.agenda-dd-empty p {
+	margin: 0;
+	font-size: 0.84rem;
+	font-weight: 600;
+	color: #64748b;
+}
+
+/* ── Mobile — ONLY inside the navbar's stacked hamburger panel (.topbar-actions);
+      the profile dashboard topbar keeps the compact pill ── */
+@media (max-width: 768px) {
+	:host-context(.topbar-actions) .agenda-wrap {
+		width: 100%;
+	}
+
+	:host-context(.topbar-actions) .agenda-pill {
+		width: 100%;
+		justify-content: center;
+		height: 44px;
+	}
+
+	:host-context(.topbar-actions) .agenda-ticker {
+		max-width: none;
+	}
+
+	:host-context(.topbar-actions) .agenda-dd {
+		position: static;
+		width: 100%;
+		max-width: none;
+		margin-top: 8px;
+		box-shadow: 0 8px 24px rgba(2, 6, 23, 0.1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.agenda-pill,
+	.agenda-pill::after,
+	.agenda-line--in,
+	.agenda-line--out,
+	.agenda-live-dot,
+	.agenda-dd,
+	.agenda-dd-item,
+	.agenda-dd-item[data-kind='live'] .agenda-dd-ico,
+	.agenda-dd-empty-ico {
+		animation: none;
+	}
+}
