@@ -111,7 +111,8 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
         SHOW_BRAND_WATERMARK:  false,
         TOOLBAR_BUTTONS: [
           'microphone', 'camera', 'desktop', 'chat',
-          'raisehand', 'tileview', 'fullscreen', 'hangup'
+          'raisehand', 'tileview', 'fullscreen', 'hangup',
+          'select-background'  // 🎥 Background blur / virtual background (Jitsi built-in)
         ],
       }
     });

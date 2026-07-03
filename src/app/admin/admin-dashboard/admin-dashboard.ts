@@ -11,12 +11,13 @@ import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { Teacher } from '../../base/teacher/teacher';
+import { AdminSettings } from '../admin-settings/admin-settings';
 
-type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements';
+type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements'|'settings';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule, AdminItem, Teacher],
+  imports: [CommonModule, FormsModule, AdminItem, Teacher, AdminSettings],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -161,6 +162,7 @@ annSubmitting  = signal(false);
       case 'comments': this.loadComments(); break;
       case 'store-items': break;
       case 'announcements': this.loadAnnouncements(); break;
+      case 'settings': break; // self-contained child component; no data preload needed
     }
   }
 
@@ -181,7 +183,8 @@ annSubmitting  = signal(false);
       || value === 'categories'
       || value === 'comments'
       || value === 'store-items'
-      || value === 'announcements';
+      || value === 'announcements'
+      || value === 'settings';
   }
 
   loadDashboard() {

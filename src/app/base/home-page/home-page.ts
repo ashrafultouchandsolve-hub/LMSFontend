@@ -481,24 +481,50 @@ private reviewInterval: any;
 
   private async loadAllCourses(): Promise<void> {
     this.isLoadingCourses.set(true);
+    let mapped: HomeCourse[] = [];
     try {
       const response = await firstValueFrom(this.learningApi.getAllCourses());
       const raw = Array.isArray(response.data) ? response.data : ((response as any).Data ?? []);
-      let mapped = raw.map((c: CourseDto) => this.mapCourseForHome(c));
-      mapped = await this.attachEnrollmentState(mapped);
-      mapped = await this.attachRatings(mapped);
+      mapped = raw.map((c: CourseDto) => this.mapCourseForHome(c));
+      // ⚡ Course card-গুলো সাথে সাথে দেখাও — enrollment/rating-এর জন্য অপেক্ষা করে first paint আটকে রেখো না।
       this.courses.set(mapped);
-    } catch { this.courses.set([]); }
+    } catch { this.courses.set([]); mapped = []; }
     finally {
       this.isLoadingCourses.set(false);
-      void this.loadRecommended(this.courses()); // self-contained; never disturbs courses()
-      void this.loadAgenda();                     // enrolled-student "Today's Agenda" strip
       queueMicrotask(() => {
         this.syncCourseCarouselState();
         this.observeReveals(); // async-loaded course card-গুলোও reveal observer-এ ঢোকাও
         this.ensureCoursesRevealed(); // safety net: observer miss করলেও card যেন অদৃশ্য না থাকে
       });
     }
+    // 🔵 enrollment + rating background-এ এনে signal-এ merge করি; শেষে recommended/agenda follow-up চালাই।
+    void this.enrichCourses(mapped);
+  }
+
+  /**
+   * Course-এর enrolled state + rating background-এ এনে বিদ্যমান signal-এ id দিয়ে merge করে।
+   * first paint আটকায় না; card আগে দেখা যায়, badge/star একটু পরে fill-in হয়।
+   * enrolled state-নির্ভর follow-up (recommended, agenda) enrichment-এর পরে চলে — আগের behavior অক্ষুণ্ন।
+   */
+  private async enrichCourses(base: HomeCourse[]): Promise<void> {
+    if (base.length === 0) { return; }
+    try {
+      const withEnrollment = await this.attachEnrollmentState(base);
+      this.mergeCourses(withEnrollment);
+      const withRatings = await this.attachRatings(withEnrollment);
+      this.mergeCourses(withRatings);
+    } catch { /* enrichment best-effort — base card গুলো তো দেখাই যাচ্ছে */ }
+    finally {
+      void this.loadRecommended(this.courses()); // self-contained; never disturbs courses()
+      void this.loadAgenda();                     // enrolled-student "Today's Agenda" strip
+      queueMicrotask(() => this.observeReveals());
+    }
+  }
+
+  /** id দিয়ে match করে enriched course গুলো বর্তমান signal-এ merge করে (index নয়, order-safe)। */
+  private mergeCourses(enriched: HomeCourse[]): void {
+    const byId = new Map(enriched.map((c) => [c.id, c]));
+    this.courses.update((list) => list.map((c) => byId.get(c.id) ?? c));
   }
 
   // ══════════════════════════════════════════════════════════════

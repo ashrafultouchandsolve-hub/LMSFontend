@@ -31,6 +31,9 @@
       <button class="nav-item" [class.active]="activeTab() === 'store-items'" (click)="setTab('store-items')">
         <span class="nav-icon">🛍️</span> {{ lang.t().adStoreItems }}
       </button>
+      <button class="nav-item" [class.active]="activeTab() === 'settings'" (click)="setTab('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </button>
     </nav>
     <button class="logout-btn" (click)="logout()">
       <span>🚪</span> {{ lang.t().navLogout }}
@@ -426,6 +429,10 @@
     <!-- ========== STORE ITEMS ========== -->
     @if (activeTab() === 'store-items') {
     <app-admin-item></app-admin-item>
+    }
+
+    @if (activeTab() === 'settings') {
+    <app-admin-settings></app-admin-settings>
     }
 
   </main>

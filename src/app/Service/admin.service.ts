@@ -101,4 +101,12 @@ export class AdminService {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  // ── Admin account (Settings) ──
+  changeAdminPassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/change-password`, { currentPassword, newPassword });
+  }
+  changeAdminEmail(currentPassword: string, newEmail: string): Observable<{ message: string; token: string; email: string }> {
+    return this.http.put<{ message: string; token: string; email: string }>(`${this.baseUrl}/change-email`, { currentPassword, newEmail });
+  }
 }

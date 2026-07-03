@@ -1,0 +1,75 @@
+<div class="settings-wrap">
+  <h2 class="settings-title">⚙️ Account Settings</h2>
+  <p class="settings-sub">Signed in as <strong>{{ currentEmail() || 'admin' }}</strong></p>
+
+  <div class="settings-grid">
+
+    <!-- Change Email -->
+    <section class="settings-card">
+      <h3 class="card-title">✉️ Change Email</h3>
+      <p class="card-hint">Set a new login email. For security you must confirm with your <strong>current password</strong>.</p>
+      <form [formGroup]="emailForm" (ngSubmit)="submitEmail()">
+        <label class="field">
+          <span>New email</span>
+          <input type="email" formControlName="newEmail" placeholder="new@email.com" autocomplete="off" />
+          @if (emailForm.controls.newEmail.touched && emailForm.controls.newEmail.invalid) {
+            <small class="err">Enter a valid email.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Current password <em class="hint-em">(to confirm it's you)</em></span>
+          <input type="password" formControlName="currentPassword" placeholder="Type your existing password" autocomplete="new-password" />
+          @if (emailForm.controls.currentPassword.touched && emailForm.controls.currentPassword.invalid) {
+            <small class="err">Current password is required.</small>
+          }
+        </label>
+
+        @if (emailMsg(); as m) {
+          <p class="msg" [class.ok]="m.ok" [class.bad]="!m.ok">{{ m.text }}</p>
+        }
+
+        <button type="submit" class="save-btn" [disabled]="emailSubmitting()">
+          {{ emailSubmitting() ? 'Saving…' : 'Update Email' }}
+        </button>
+      </form>
+    </section>
+
+    <!-- Change Password -->
+    <section class="settings-card">
+      <h3 class="card-title">🔒 Change Password</h3>
+      <p class="card-hint">Enter your <strong>current</strong> password, then the <strong>new</strong> one you want to use.</p>
+      <form [formGroup]="passwordForm" (ngSubmit)="submitPassword()">
+        <label class="field">
+          <span>Current password <em class="hint-em">(the one you use now)</em></span>
+          <input type="password" formControlName="currentPassword" placeholder="Type your existing password" autocomplete="new-password" />
+          @if (passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid) {
+            <small class="err">Current password is required.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>New password <em class="hint-em">(what you want from now on)</em></span>
+          <input type="password" formControlName="newPassword" placeholder="At least 6 characters" autocomplete="new-password" />
+          @if (passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid) {
+            <small class="err">Minimum 6 characters.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Confirm new password</span>
+          <input type="password" formControlName="confirmPassword" placeholder="Re-type new password" autocomplete="new-password" />
+        </label>
+
+        @if (passwordMsg(); as m) {
+          <p class="msg" [class.ok]="m.ok" [class.bad]="!m.ok">{{ m.text }}</p>
+        }
+
+        <button type="submit" class="save-btn" [disabled]="passwordSubmitting()">
+          {{ passwordSubmitting() ? 'Saving…' : 'Change Password' }}
+        </button>
+      </form>
+    </section>
+
+  </div>
+</div>

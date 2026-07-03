@@ -222,6 +222,7 @@ export class Courses {
 
   private async loadAllCourses(): Promise<void> {
     this.isLoadingCourses.set(true);
+    let mapped: CoursesViewItem[] = [];
     try {
       // ✅ Homepage থেকে category queryParam আসলে set করো
       const catParam = this.route.snapshot.queryParams['category'];
@@ -232,16 +233,39 @@ export class Courses {
         ? response.data
         : ((response as any).Data ?? []);
 
-      let mapped = raw.map((c: CourseDto) => this.mapCourseForView(c));
-      mapped = await this.attachEnrollmentState(mapped);
-      mapped = await this.attachWishlistState(mapped);
-      mapped = await this.attachRatings(mapped);
+      mapped = raw.map((c: CourseDto) => this.mapCourseForView(c));
+      // ⚡ Course card-গুলো সাথে সাথে দেখাও — enrollment/wishlist/rating-এর জন্য first paint আটকে রেখো না।
       this.courses.set(mapped);
     } catch {
       this.courses.set([]);
+      mapped = [];
     } finally {
       this.isLoadingCourses.set(false);
     }
+    // 🔵 enrollment + wishlist + rating background-এ এনে signal-এ id দিয়ে merge করি।
+    void this.enrichCourses(mapped);
+  }
+
+  /**
+   * Course-এর enrolled/wishlist state + rating background-এ এনে বিদ্যমান signal-এ id দিয়ে merge করে।
+   * first paint আটকায় না; card আগে দেখা যায়, badge/star একটু পরে fill-in হয়।
+   */
+  private async enrichCourses(base: CoursesViewItem[]): Promise<void> {
+    if (base.length === 0) { return; }
+    try {
+      let cur = await this.attachEnrollmentState(base);
+      this.mergeCourses(cur);
+      cur = await this.attachWishlistState(cur);
+      this.mergeCourses(cur);
+      cur = await this.attachRatings(cur);
+      this.mergeCourses(cur);
+    } catch { /* enrichment best-effort — base card গুলো তো দেখাই যাচ্ছে */ }
+  }
+
+  /** id দিয়ে match করে enriched course গুলো বর্তমান signal-এ merge করে (index নয়, order-safe)। */
+  private mergeCourses(enriched: CoursesViewItem[]): void {
+    const byId = new Map(enriched.map((c) => [c.id, c]));
+    this.courses.update((list) => list.map((c) => byId.get(c.id) ?? c));
   }
 
   private mapCourseForView(dto: CourseDto): CoursesViewItem {

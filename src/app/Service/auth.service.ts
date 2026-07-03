@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Service, LoginRequest, RegisterRequest, LoginResponse } from './service';
 import { JwtService } from './jwt.service';
+import { environment } from '../../environments/environments';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +12,12 @@ import { JwtService } from './jwt.service';
 export class AuthService {
   private readonly service = inject(Service);
   private readonly jwtService = inject(JwtService);
+  private readonly http = inject(HttpClient);
+
+  // sliding-session keep-alive: token expire হওয়ার একটু আগে নিজে থেকে refresh করে,
+  // যাতে active user কাজ করতে করতে হঠাৎ log out না হয়।
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly REFRESH_LEAD_MS = 2 * 60 * 1000; // expiry-র ২ মিনিট আগে
   private readonly legacyAuthKeys: readonly string[] = [
     'auth_logged_in',
     'auth_user_email',
@@ -28,6 +36,10 @@ export class AuthService {
 
   constructor() {
     this.cleanupLegacyAuthStorage();
+    // page reload-এ token থাকলে refresh schedule আবার চালু করো।
+    if (this.jwtService.hasToken() && !this.jwtService.isTokenExpired()) {
+      this.scheduleTokenRefresh();
+    }
   }
 
   // Login করুন
@@ -48,6 +60,7 @@ export class AuthService {
           this.cleanupLegacyAuthStorage();
           this.currentUserSubject.next(user);
           this.isLoggedInSubject.next(true);
+          this.scheduleTokenRefresh();
         }
       })
     );
@@ -78,6 +91,7 @@ export class AuthService {
           this.cleanupLegacyAuthStorage();
           this.currentUserSubject.next(user);
           this.isLoggedInSubject.next(true);
+          this.scheduleTokenRefresh();
         }
       })
     );
@@ -85,11 +99,49 @@ export class AuthService {
 
   // Logout করুন
   logout(): void {
+    this.clearRefreshTimer();
     this.jwtService.clear();
     this.cleanupLegacyAuthStorage();
     this.clearLocalEnrollmentCache();
     this.isLoggedInSubject.next(false);
     this.currentUserSubject.next(null);
+  }
+
+  // ── Sliding-session token refresh ──
+  private scheduleTokenRefresh(): void {
+    this.clearRefreshTimer();
+    const decoded = this.jwtService.decodeToken();
+    if (!decoded?.exp) return;
+
+    const expiresAtMs = decoded.exp * 1000;
+    // expiry-র REFRESH_LEAD_MS আগে; কিন্তু অন্তত ১০ সেকেন্ড পরে (edge case guard)।
+    const delay = Math.max(expiresAtMs - Date.now() - this.REFRESH_LEAD_MS, 10_000);
+    this.refreshTimer = setTimeout(() => this.performTokenRefresh(), delay);
+  }
+
+  private performTokenRefresh(): void {
+    // token না থাকলে (logout হয়ে গেছে) কিছু করো না।
+    if (!this.jwtService.hasToken()) return;
+
+    // JwtInterceptor স্বয়ংক্রিয়ভাবে Bearer header যোগ করবে।
+    this.http.post<any>(`${environment.baseUrl}/Register/Refresh`, {}).subscribe({
+      next: (res) => {
+        const token = res?.token ?? res?.Token;
+        if (token) {
+          this.jwtService.setToken(token);
+          this.scheduleTokenRefresh(); // নতুন exp অনুযায়ী আবার schedule
+        }
+      },
+      // ব্যর্থ হলে চুপচাপ — পরে 401 এলে ErrorInterceptor logout + /login handle করবে।
+      error: () => { /* silent */ },
+    });
+  }
+
+  private clearRefreshTimer(): void {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   }
 
   // Current user get করুন
