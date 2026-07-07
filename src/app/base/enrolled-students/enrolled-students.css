@@ -17,6 +17,9 @@
 .back-btn {
   display: inline-flex;
   align-items: center;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
   padding: 8px 16px;
   border: 1.5px solid #e5e7eb;
   border-radius: 8px;

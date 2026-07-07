@@ -182,7 +182,12 @@ export interface Translations {
   tcUploadThumb: string; tcPublishCourse: string; tcSaveCourse: string;
   courseStartDate: string; courseEndDate: string; courseDateHint: string;
   enrollDaysLeft: string; enrollLastDay: string; enrollClosed: string; courseStartsOn: string;
+  discountOff: string; discountPercentLabel: string; discountStartLabel: string; discountEndLabel: string;
+  discountHint: string; discountInvalid: string; courseDatesInvalid: string; exMarksRange: string;
   agTitle: string; agJoin: string; agNavLabel: string; agEmpty: string;
+  agViewAll: string; agAllCaught: string; agOverdue: string; agToday: string; agUpcoming: string;
+  agPillOverdue: string; agPillToday: string; agPillUpcoming: string; agPillLive: string;
+  agKindLive: string; agKindExam: string; agKindEnding: string;
   tcLessonTitle: string; tcVideoType: string; tcOrderIndex: string; tcVideoUrl: string; tcUploadVideo: string;
   tcUploadingVideo: string; tcLessonThumb: string; tcResourceUrl: string; tcFreePreview: string; tcSaveLesson: string;
   tcEnrolled: string; tcIssue: string; tcEditCourse: string; tcEditLesson: string;
@@ -217,6 +222,7 @@ export interface Translations {
   exViewSubmissions: string; exNoSubmissions: string; exDownload: string; exSaveGrade: string; exSubmittedAt: string;
   exUpcoming: string; exStartsIn: string; exStartDate: string; exDetails: string; exDay: string; exDays: string; exGradedByAdmin: string;
   exTeacherSub: string; exAdminCreatesNote: string; exMarksSaved: string; exMarksSaveFailed: string;
+  exAdminViewOnly: string; exNotGraded: string;
   exStarted: string; exDurationDays: string; exDurationHint: string;
   exEstimatedDate: string; exEstimatedHint: string; exEstimatedStart: string; exStartingSoon: string;
   // Course live component
@@ -238,6 +244,7 @@ export interface Translations {
   adNavTeachers: string; adNavStudents: string; adNavCategories: string; adNavCourses: string; adNavComments: string; adCreateCategory: string;
   adOverview: string; adTotalStudents: string; adActiveTeachers: string; adPendingApprovals: string;
   adTotalCourses: string; adTotalEnrollments: string; adWaitingApproval: string; adReviewNow: string;
+  adManage: string; adTopCourses: string; adByCategory: string; adNoChartData: string;
   adTeachersSub: string; adSearchNameEmail: string; adThCourses: string; adApprove: string; adBlock: string;
   adUnblock: string; adNoTeachers: string; adStudentsSub: string; adNoStudents: string;
   adCoursesSub: string; adSearchCourseTeacher: string; adThTeacher: string; adThEnrollments: string; adNoCourses: string;
@@ -498,7 +505,15 @@ const EN: Translations = {
   courseStartDate: 'Start date', courseEndDate: 'End date',
   courseDateHint: 'Students can enroll until the start date. Leave blank to keep enrollment always open.',
   enrollDaysLeft: 'days left to enroll', enrollLastDay: 'Last day to enroll!', enrollClosed: 'Enrollment closed', courseStartsOn: 'Course starts',
-  agTitle: 'Todo', agJoin: 'Join', agNavLabel: 'Todo', agEmpty: 'All clear — nothing due today!',
+  discountOff: 'OFF', discountPercentLabel: 'Discount (%)', discountStartLabel: 'Discount start', discountEndLabel: 'Discount end',
+  discountHint: 'During the discount window the course price is reduced by this percent. Leave blank for no discount.',
+  discountInvalid: 'Discount needs a percent between 1–100 and a valid start–end date range.',
+  courseDatesInvalid: 'Course end date cannot be before the start date.',
+  exMarksRange: 'Invalid marks — must be between 0 and {max}.',
+  agTitle: 'My Tasks', agJoin: 'Join', agNavLabel: 'Todo', agEmpty: 'Nothing due right now. Explore a new course!',
+  agViewAll: 'View all', agAllCaught: 'All caught up! 🎉', agOverdue: 'Overdue', agToday: 'Today', agUpcoming: 'Upcoming',
+  agPillOverdue: 'task(s) overdue', agPillToday: 'task(s) today', agPillUpcoming: 'upcoming', agPillLive: 'LIVE NOW',
+  agKindLive: 'Live class', agKindExam: 'Exam', agKindEnding: 'Course ending',
   tcLessonTitle: 'Lesson Title', tcVideoType: 'Video Type', tcOrderIndex: 'Order Index', tcVideoUrl: 'Video URL',
   tcUploadVideo: 'Or Upload Video File', tcUploadingVideo: 'Uploading video...', tcLessonThumb: 'Lesson Thumbnail (optional)',
   tcResourceUrl: 'Resource URL (optional)', tcFreePreview: 'Free preview lesson', tcSaveLesson: 'Save Lesson',
@@ -540,6 +555,7 @@ const EN: Translations = {
   exUpcoming: 'Upcoming', exStartsIn: 'Starts in', exStartDate: 'Started', exDetails: 'View details', exDay: 'day', exDays: 'days', exGradedByAdmin: 'Graded by admin',
   exTeacherSub: 'View questions and grade student submissions.', exAdminCreatesNote: 'Exam is set by admin',
   exMarksSaved: 'Marks saved.', exMarksSaveFailed: 'Could not save marks.',
+  exAdminViewOnly: 'View only — the course teacher gives the marks & feedback.', exNotGraded: 'Not graded yet',
   exStarted: 'Exam Started', exDurationDays: 'Exam duration', exDurationHint: 'The exam timer starts the moment you upload the question. Students get this long to submit answers.',
   exEstimatedDate: 'Estimated start date', exEstimatedHint: 'Shown to students as a countdown — it does NOT start the exam.', exEstimatedStart: 'Estimated start', exStartingSoon: 'Starting soon',
   ecLiveClasses: 'Live Classes', ecScheduled: 'scheduled', ecLiveNow: 'Live now', ecJoinNow: 'Join Now', ecNoLive: 'No live class scheduled for this course yet.', ecUpcoming: 'Upcoming',
@@ -564,6 +580,8 @@ const EN: Translations = {
   adOverview: 'Overview of your platform', adTotalStudents: 'Total Students', adActiveTeachers: 'Active Teachers',
   adPendingApprovals: 'Pending Approvals', adTotalCourses: 'Total Courses', adTotalEnrollments: 'Total Enrollments',
   adWaitingApproval: 'teacher(s) waiting for approval.', adReviewNow: 'Review Now →',
+  adManage: 'Manage', adTopCourses: 'Top courses by enrollment', adByCategory: 'Courses by category',
+  adNoChartData: 'No data to show yet.',
   adTeachersSub: 'Manage teacher accounts and approvals', adSearchNameEmail: 'Search by name or email...',
   adThCourses: 'Courses', adApprove: 'Approve', adBlock: 'Block', adUnblock: 'Unblock', adNoTeachers: 'No teachers found.',
   adStudentsSub: 'Manage student accounts', adNoStudents: 'No students found.',
@@ -852,7 +870,15 @@ const BN: Translations = {
   courseStartDate: 'শুরুর তারিখ', courseEndDate: 'শেষের তারিখ',
   courseDateHint: 'শুরুর তারিখ পর্যন্ত শিক্ষার্থীরা ভর্তি হতে পারবে। খালি রাখলে ভর্তি সবসময় খোলা থাকবে।',
   enrollDaysLeft: 'দিন বাকি', enrollLastDay: 'আজই ভর্তির শেষ দিন!', enrollClosed: 'ভর্তি বন্ধ', courseStartsOn: 'কোর্স শুরু',
-  agTitle: 'টুডু', agJoin: 'যোগ দিন', agNavLabel: 'টুডু', agEmpty: 'সব ক্লিয়ার — আজ কিছু নেই!',
+  discountOff: 'ছাড়', discountPercentLabel: 'ডিসকাউন্ট (%)', discountStartLabel: 'ডিসকাউন্ট শুরু', discountEndLabel: 'ডিসকাউন্ট শেষ',
+  discountHint: 'ডিসকাউন্ট চলাকালীন কোর্সের দাম এই শতাংশ কমে যাবে। ডিসকাউন্ট না দিলে খালি রাখুন।',
+  discountInvalid: 'ডিসকাউন্টের জন্য ১–১০০ এর মধ্যে শতাংশ এবং সঠিক শুরু–শেষ তারিখ দিন।',
+  courseDatesInvalid: 'কোর্সের শেষ তারিখ শুরুর তারিখের আগে হতে পারে না।',
+  exMarksRange: 'ভুল মার্ক — ০ থেকে {max} এর মধ্যে দিতে হবে।',
+  agTitle: 'আমার করণীয়', agJoin: 'যোগ দিন', agNavLabel: 'টুডু', agEmpty: 'এখন কোনো করণীয় নেই। নতুন কোর্স explore করুন।',
+  agViewAll: 'সব দেখুন', agAllCaught: 'সব কাজ শেষ! 🎉', agOverdue: 'মেয়াদ পার', agToday: 'আজ', agUpcoming: 'আসন্ন',
+  agPillOverdue: 'টা কাজ দেরি', agPillToday: 'টা কাজ আজ', agPillUpcoming: 'টা আসন্ন', agPillLive: 'এখন লাইভ',
+  agKindLive: 'লাইভ ক্লাস', agKindExam: 'পরীক্ষা', agKindEnding: 'কোর্স শেষ হচ্ছে',
   tcLessonTitle: 'পাঠের শিরোনাম', tcVideoType: 'ভিডিও টাইপ', tcOrderIndex: 'ক্রম সূচক', tcVideoUrl: 'ভিডিও URL',
   tcUploadVideo: 'অথবা ভিডিও ফাইল আপলোড করুন', tcUploadingVideo: 'ভিডিও আপলোড হচ্ছে...', tcLessonThumb: 'পাঠের থাম্বনেইল (ঐচ্ছিক)',
   tcResourceUrl: 'রিসোর্স URL (ঐচ্ছিক)', tcFreePreview: 'ফ্রি প্রিভিউ পাঠ', tcSaveLesson: 'পাঠ সংরক্ষণ',
@@ -894,6 +920,7 @@ const BN: Translations = {
   exUpcoming: 'আসছে', exStartsIn: 'শুরু হবে', exStartDate: 'শুরু হয়েছে', exDetails: 'বিস্তারিত দেখুন', exDay: 'দিনে', exDays: 'দিনে', exGradedByAdmin: 'অ্যাডমিন মূল্যায়ন করেছে',
   exTeacherSub: 'প্রশ্ন দেখুন ও শিক্ষার্থীদের খাতা মূল্যায়ন করুন।', exAdminCreatesNote: 'পরীক্ষা অ্যাডমিন তৈরি করবে',
   exMarksSaved: 'মার্ক সেভ হয়েছে।', exMarksSaveFailed: 'মার্ক সেভ করা যায়নি।',
+  exAdminViewOnly: 'শুধু দেখা যাবে — মার্ক ও ফিডব্যাক কোর্সের শিক্ষক দেবেন।', exNotGraded: 'এখনো মূল্যায়ন হয়নি',
   exStarted: 'পরীক্ষা শুরু', exDurationDays: 'পরীক্ষার সময়সীমা', exDurationHint: 'প্রশ্ন আপলোড করার সাথে সাথেই পরীক্ষার টাইমার শুরু হয়। এই সময়ের মধ্যে শিক্ষার্থীরা উত্তর জমা দিতে পারবে।',
   exEstimatedDate: 'আনুমানিক শুরুর তারিখ', exEstimatedHint: 'শিক্ষার্থীদের কাছে কাউন্টডাউন হিসেবে দেখাবে — এটা পরীক্ষা শুরু করে না।', exEstimatedStart: 'আনুমানিক শুরু', exStartingSoon: 'খুব শিগগিরই শুরু',
   ecLiveClasses: 'লাইভ ক্লাস', ecScheduled: 'নির্ধারিত', ecLiveNow: 'এখন লাইভ', ecJoinNow: 'জয়েন করুন', ecNoLive: 'এই কোর্সে এখনো কোনো লাইভ ক্লাস নেই।', ecUpcoming: 'আসছে',
@@ -918,6 +945,8 @@ const BN: Translations = {
   adOverview: 'আপনার প্ল্যাটফর্মের সংক্ষিপ্ত চিত্র', adTotalStudents: 'মোট শিক্ষার্থী', adActiveTeachers: 'সক্রিয় শিক্ষক',
   adPendingApprovals: 'অনুমোদনের অপেক্ষায়', adTotalCourses: 'মোট কোর্স', adTotalEnrollments: 'মোট এনরোলমেন্ট',
   adWaitingApproval: 'জন শিক্ষক অনুমোদনের অপেক্ষায়।', adReviewNow: 'এখন পর্যালোচনা →',
+  adManage: 'ম্যানেজ', adTopCourses: 'এনরোলমেন্ট অনুযায়ী সেরা কোর্স', adByCategory: 'ক্যাটাগরি অনুযায়ী কোর্স',
+  adNoChartData: 'এখনো দেখানোর মতো ডেটা নেই।',
   adTeachersSub: 'শিক্ষক অ্যাকাউন্ট ও অনুমোদন পরিচালনা করুন', adSearchNameEmail: 'নাম বা ইমেইল দিয়ে খুঁজুন...',
   adThCourses: 'কোর্স', adApprove: 'অনুমোদন', adBlock: 'ব্লক', adUnblock: 'আনব্লক', adNoTeachers: 'কোনো শিক্ষক পাওয়া যায়নি।',
   adStudentsSub: 'শিক্ষার্থী অ্যাকাউন্ট পরিচালনা করুন', adNoStudents: 'কোনো শিক্ষার্থী পাওয়া যায়নি।',

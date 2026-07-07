@@ -18,6 +18,7 @@ import { CourseDto, LearningApiService } from '../../Service/learning-api.servic
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { enrollmentWindow } from '../../Service/enrollment-window';
+import { DiscountInfo, discountInfo, discountPeriodLabel } from '../../Service/discount';
 import { RecommendationService } from '../../Service/recommendation.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
@@ -32,6 +33,9 @@ type HomeCourse = {
   price: number; thumbnailUrl: string; isEnrolled: boolean; isCompleted: boolean;
   averageRating?: number; totalRatings?: number;
   startDate?: string | null; endDate?: string | null;
+  discountPercent?: number | null;
+  discountStartDate?: string | null;
+  discountEndDate?: string | null;
 };
 
 @Component({
@@ -76,6 +80,16 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   /** Enrollment window (countdown / closed) for a course's start date. Shared helper. */
   protected readonly enrollWindow = enrollmentWindow;
+
+  /** Discount window (strikethrough price + badge) for a course. Shared helper. */
+  protected discountFor(course: HomeCourse): DiscountInfo {
+    return discountInfo(course.price, course.discountPercent, course.discountStartDate, course.discountEndDate);
+  }
+
+  /** "1 Jul – 10 Jul" label for the discount badge. */
+  protected discountPeriod(course: HomeCourse): string {
+    return discountPeriodLabel(course.discountStartDate, course.discountEndDate);
+  }
 
   /** Cycle the 4 pill colour variants so dynamic categories keep visual variety. */
   private readonly pillVariants = ['cat-pill--ssc', 'cat-pill--hsc', 'cat-pill--admission', 'cat-pill--skills'];
@@ -395,7 +409,7 @@ private reviewInterval: any;
   }
 
   protected buildPaymentQueryParams(course: HomeCourse): Record<string, string | number> {
-    return { courseId: course.id, courseTitle: course.title, amount: course.price };
+    return { courseId: course.id, courseTitle: course.title, amount: this.discountFor(course).effectivePrice };
   }
 
   protected formatPrice(price: number): string {
@@ -465,7 +479,11 @@ private reviewInterval: any;
     try {
       const response = await firstValueFrom(this.learningApi.getAllCourses());
       const raw = Array.isArray(response.data) ? response.data : ((response as any).Data ?? []);
-      mapped = raw.map((c: CourseDto) => this.mapCourseForHome(c));
+      mapped = raw
+        .map((c: CourseDto) => this.mapCourseForHome(c))
+        // Course start হয়ে গেলে (start day passed) সেটা public listing থেকে লুকাও —
+        // enrolled student-রা My Courses/profile থেকে ঢুকবে।
+        .filter((c: HomeCourse) => enrollmentWindow(c.startDate).state !== 'closed');
       // ⚡ Course card-গুলো সাথে সাথে দেখাও — enrollment/rating-এর জন্য অপেক্ষা করে first paint আটকে রেখো না।
       this.courses.set(mapped);
     } catch { this.courses.set([]); mapped = []; }
@@ -536,6 +554,9 @@ private reviewInterval: any;
       isCompleted: dto.isCompleted ?? false,
       startDate: dto.startDate ?? null,
       endDate: dto.endDate ?? null,
+      discountPercent: dto.discountPercent ?? null,
+      discountStartDate: dto.discountStartDate ?? null,
+      discountEndDate: dto.discountEndDate ?? null,
     };
   }
 

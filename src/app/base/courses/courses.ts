@@ -6,6 +6,7 @@ import { CourseDto, LearningApiService } from '../../Service/learning-api.servic
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { enrollmentWindow } from '../../Service/enrollment-window';
+import { DiscountInfo, discountInfo, discountPeriodLabel } from '../../Service/discount';
 import { Navbar } from '../../shared/navbar/navbar';
 
 /** A selectable option in the sidebar dropdown. */
@@ -32,6 +33,9 @@ type CoursesViewItem = {
   totalRatings?: number;
   startDate?: string | null;
   endDate?: string | null;
+  discountPercent?: number | null;
+  discountStartDate?: string | null;
+  discountEndDate?: string | null;
 };
 
 @Component({
@@ -82,6 +86,9 @@ export class Courses {
     const cat  = this.activeCategory();
 
     return this.courses().filter((course) => {
+      // Course start হয়ে গেলে (start day passed) public listing থেকে লুকাও।
+      if (enrollmentWindow(course.startDate).state === 'closed') return false;
+
       const matchesCat  = cat === 'All'
         ? true
         : cat === 'Other'
@@ -173,8 +180,18 @@ export class Courses {
   /** Enrollment window (countdown / closed) for a course's start date. Shared helper. */
   protected readonly enrollWindow = enrollmentWindow;
 
+  /** Discount window (strikethrough price + badge) for a course. Shared helper. */
+  protected discountFor(course: CoursesViewItem): DiscountInfo {
+    return discountInfo(course.price, course.discountPercent, course.discountStartDate, course.discountEndDate);
+  }
+
+  /** "1 Jul – 10 Jul" label for the discount badge. */
+  protected discountPeriod(course: CoursesViewItem): string {
+    return discountPeriodLabel(course.discountStartDate, course.discountEndDate);
+  }
+
   protected buildPaymentQueryParams(course: CoursesViewItem): Record<string, string | number> {
-    return { courseId: course.id, courseTitle: course.title, amount: course.price };
+    return { courseId: course.id, courseTitle: course.title, amount: this.discountFor(course).effectivePrice };
   }
 
   protected async toggleWishlist(course: CoursesViewItem): Promise<void> {
@@ -282,6 +299,9 @@ export class Courses {
       thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
       startDate: dto.startDate ?? null,
       endDate: dto.endDate ?? null,
+      discountPercent: dto.discountPercent ?? null,
+      discountStartDate: dto.discountStartDate ?? null,
+      discountEndDate: dto.discountEndDate ?? null,
     };
   }
 

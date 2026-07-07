@@ -56,6 +56,9 @@ type Course = {
   completed: boolean;
   startDate: string | null;
   endDate: string | null;
+  discountPercent: number | null;
+  discountStartDate: string | null;
+  discountEndDate: string | null;
   students: number;
   averageRating: number;
   totalRatings: number;
@@ -222,6 +225,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     durationMinutes: [0, [Validators.min(0)]],
     startDate: [''],
     endDate: [''],
+    discountPercent: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(100)]),
+    discountStartDate: [''],
+    discountEndDate: [''],
     thumbnailUrl: [''],
     published: [true],
     teacherUserId: [''],
@@ -409,6 +415,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       durationMinutes: 0,
       startDate: '',
       endDate: '',
+      discountPercent: null,
+      discountStartDate: '',
+      discountEndDate: '',
       thumbnailUrl: '',
       published: true,
       teacherUserId: '',
@@ -435,6 +444,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       durationMinutes: course.durationMinutes,
       startDate: this.toDateInput(course.startDate),
       endDate: this.toDateInput(course.endDate),
+      discountPercent: course.discountPercent,
+      discountStartDate: this.toDateInput(course.discountStartDate),
+      discountEndDate: this.toDateInput(course.discountEndDate),
       thumbnailUrl: course.thumbnailUrl,
       published: course.published,
       teacherUserId: '',
@@ -460,6 +472,10 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected async saveCourse(): Promise<void> {
     if (this.courseForm.invalid) {
       this.courseForm.markAllAsTouched();
+      // Discount percent out of range (0–100) is the only silent validator here — say it out loud.
+      if (this.courseForm.get('discountPercent')?.invalid) {
+        this.setNotice(this.lang.t().discountInvalid, 'error');
+      }
       return;
     }
 
@@ -475,6 +491,23 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     if (teacherIds.length === 0) {
       this.setNotice('Please appoint at least one teacher for this course.', 'error');
       return;
+    }
+
+    // Date guards — mirror the backend validation (YYYY-MM-DD strings compare correctly).
+    const rawDiscount = this.courseForm.getRawValue();
+    if (rawDiscount.startDate && rawDiscount.endDate && rawDiscount.endDate < rawDiscount.startDate) {
+      this.setNotice(this.lang.t().courseDatesInvalid, 'error');
+      return;
+    }
+    const discountPercent = rawDiscount.discountPercent != null && `${rawDiscount.discountPercent}` !== ''
+      ? Number(rawDiscount.discountPercent) : null;
+    if (discountPercent != null && discountPercent > 0) {
+      const dStart = rawDiscount.discountStartDate;
+      const dEnd = rawDiscount.discountEndDate;
+      if (discountPercent > 100 || !dStart || !dEnd || dEnd < dStart) {
+        this.setNotice(this.lang.t().discountInvalid, 'error');
+        return;
+      }
     }
 
     this.isSavingCourse.set(true);
@@ -494,6 +527,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
         durationMinutes: Number(formValue.durationMinutes || 0),
         startDate: formValue.startDate ? formValue.startDate : null,
         endDate: formValue.endDate ? formValue.endDate : null,
+        discountPercent: discountPercent && discountPercent > 0 ? discountPercent : null,
+        discountStartDate: discountPercent && discountPercent > 0 && formValue.discountStartDate ? formValue.discountStartDate : null,
+        discountEndDate: discountPercent && discountPercent > 0 && formValue.discountEndDate ? formValue.discountEndDate : null,
         isPublished: true,   // courses are published/active by default (publish toggle removed)
         teacherUserId: teacherIds[0],
         teacherUserIds: teacherIds,
@@ -1467,6 +1503,9 @@ private mapCourse(
     completed: dto.isCompleted ?? false,
     startDate: dto.startDate ?? null,
     endDate: dto.endDate ?? null,
+    discountPercent: dto.discountPercent ?? null,
+    discountStartDate: dto.discountStartDate ?? null,
+    discountEndDate: dto.discountEndDate ?? null,
     students: studentCount,
     averageRating,
     totalRatings,

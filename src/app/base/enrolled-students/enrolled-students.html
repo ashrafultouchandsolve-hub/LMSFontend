@@ -1,7 +1,7 @@
 <main class="es-page">
 
   <div class="es-header">
-    <a routerLink="/teacher" class="back-btn">← {{ lang.t().esBack }}</a>
+    <button type="button" class="back-btn" (click)="goBack()">← {{ lang.t().esBack }}</button>
     <div>
       <h1>👥 {{ lang.t().esTitle }}</h1>
       <p>{{ lang.t().esSub }}</p>

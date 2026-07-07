@@ -2,56 +2,77 @@
 	<button
 		type="button"
 		class="agenda-pill"
+		[attr.data-state]="pill().state"
 		(click)="toggle()"
 		[class.open]="isOpen()"
-		[class.is-live]="agenda.liveNowCount() > 0"
 		[attr.aria-expanded]="isOpen()"
 		[attr.aria-label]="lang.t().agTitle">
-		<!-- Two-line carousel: keyed by animKey so each rotation re-creates both lines —
-		     the previous one slides up & out while the new one slides in from below. -->
-		<span class="agenda-ticker">
-			@for (k of [animKey()]; track k) {
-				@if (prevText(); as p) {
-					<span class="agenda-line agenda-line--out" aria-hidden="true">{{ p }}</span>
-				}
-				<span class="agenda-line agenda-line--in">{{ tickerText() }}</span>
-			}
-		</span>
+		<span class="agenda-dot" aria-hidden="true"></span>
+		<span class="agenda-pill-text">{{ pill().text }}</span>
 		@if (agenda.items().length > 0) {
 			<span class="agenda-pill-count">{{ agenda.items().length }}</span>
-		}
-		@if (agenda.liveNowCount() > 0) {
-			<span class="agenda-live-dot" aria-hidden="true"></span>
 		}
 	</button>
 
 	@if (isOpen()) {
 		<div class="agenda-dd">
 			<div class="agenda-dd-head">
-				<span class="agenda-dd-head-title">🗓️ {{ lang.t().agTitle }}</span>
-				@if (agenda.items().length > 0) {
-					<span class="agenda-dd-head-count">{{ agenda.items().length }}</span>
-				}
+				<span class="agenda-dd-title">{{ lang.t().agTitle }}</span>
+				<a routerLink="/profile" class="agenda-dd-viewall" (click)="close()">{{ lang.t().agViewAll }} →</a>
 			</div>
+
 			<div class="agenda-dd-list">
-				@for (it of agenda.items(); track $index) {
-					<a [routerLink]="it.link" class="agenda-dd-item" [attr.data-kind]="it.kind" (click)="close()">
-						<span class="agenda-dd-ico">{{ it.icon }}</span>
-						<span class="agenda-dd-body">
-							<span class="agenda-dd-course">{{ it.courseTitle }}</span>
-							<span class="agenda-dd-meta">{{ agenda.meta(it) }}@if (it.detail) {<span class="agenda-dd-detail"> · {{ it.detail }}</span>}</span>
+				@if (agenda.items().length === 0) {
+					<div class="agenda-empty">
+						<span class="agenda-empty-ico" aria-hidden="true">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>
 						</span>
-						@if (it.kind === 'live') {
-							<span class="agenda-dd-join">{{ lang.t().agJoin }} →</span>
-						} @else {
-							<span class="agenda-dd-go" aria-hidden="true">→</span>
-						}
-					</a>
-				} @empty {
-					<div class="agenda-dd-empty">
-						<span class="agenda-dd-empty-ico" aria-hidden="true">🎉</span>
-						<p>{{ lang.t().agEmpty }}</p>
+						<div class="agenda-empty-title">{{ lang.t().agAllCaught }}</div>
+						<p class="agenda-empty-sub">{{ lang.t().agEmpty }}</p>
 					</div>
+				} @else {
+					<!-- One card template, reused by every group -->
+					<ng-template #card let-it="it" let-group="group">
+						<a [routerLink]="it.link" class="agenda-card" [attr.data-group]="group" [attr.data-kind]="it.kind" (click)="close()">
+							<span class="agenda-card-top">
+								<span class="agenda-card-title">{{ title(it) }}</span>
+								<span class="agenda-card-chip">{{ chip(it) }}</span>
+							</span>
+							<span class="agenda-card-sub">
+								{{ sub(it) }}
+								@if (it.kind === 'live') {
+									<b class="agenda-card-join">{{ lang.t().agJoin }} →</b>
+								}
+							</span>
+						</a>
+					</ng-template>
+
+					@if (overdue().length > 0) {
+						<div class="agenda-group" data-group="overdue">
+							<span class="agenda-group-dot" aria-hidden="true"></span>{{ lang.t().agOverdue }}
+						</div>
+						@for (it of overdue(); track $index) {
+							<ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ it, group: 'overdue' }" />
+						}
+					}
+
+					@if (today().length > 0) {
+						<div class="agenda-group" data-group="today">
+							<span class="agenda-group-dot" aria-hidden="true"></span>{{ lang.t().agToday }}
+						</div>
+						@for (it of today(); track $index) {
+							<ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ it, group: 'today' }" />
+						}
+					}
+
+					@if (upcoming().length > 0) {
+						<div class="agenda-group" data-group="upcoming">
+							<span class="agenda-group-dot" aria-hidden="true"></span>{{ lang.t().agUpcoming }}
+						</div>
+						@for (it of upcoming(); track $index) {
+							<ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ it, group: 'upcoming' }" />
+						}
+					}
 				}
 			</div>
 		</div>

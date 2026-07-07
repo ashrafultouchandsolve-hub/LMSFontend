@@ -13,6 +13,7 @@ import { LanguageService } from '../../Service/language.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { LiveClassService } from '../../Service/live-class-service';
 import { enrollmentWindow } from '../../Service/enrollment-window';
+import { discountInfo, discountPeriodLabel } from '../../Service/discount';
 
 type CourseDetailsView = {
   id: string;
@@ -30,6 +31,9 @@ type CourseDetailsView = {
   createdAt: string | null;
   startDate: string | null;
   endDate: string | null;
+  discountPercent: number | null;
+  discountStartDate: string | null;
+  discountEndDate: string | null;
 };
 
 @Component({
@@ -57,6 +61,16 @@ export class CourseDetails {
   protected readonly course = signal<CourseDetailsView | null>(null);
   /** Enrollment window (countdown / closed) derived from the course start date. */
   protected readonly enrollWin = computed(() => enrollmentWindow(this.course()?.startDate));
+  /** Discount window (strikethrough price) derived from the course discount fields. */
+  protected readonly discount = computed(() => {
+    const c = this.course();
+    return discountInfo(c?.price ?? 0, c?.discountPercent, c?.discountStartDate, c?.discountEndDate);
+  });
+  /** "1 Jul – 10 Jul" label for the discount period. */
+  protected readonly discountPeriod = computed(() => {
+    const c = this.course();
+    return discountPeriodLabel(c?.discountStartDate, c?.discountEndDate);
+  });
   protected readonly isDescriptionExpanded = signal(false);
   protected readonly isImageBroken = signal(false);
   protected readonly isLoggedIn = signal(false);
@@ -289,6 +303,9 @@ readonly lang = inject(LanguageService);
       createdAt: course.createdAt ?? null,
       startDate: course.startDate ?? null,
       endDate: course.endDate ?? null,
+      discountPercent: course.discountPercent ?? null,
+      discountStartDate: course.discountStartDate ?? null,
+      discountEndDate: course.discountEndDate ?? null,
     };
   }
 

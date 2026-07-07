@@ -218,11 +218,33 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 22px 20px;
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
+  /* stat cards are buttons now — they open their tab */
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+.stat-go {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.stat-card:hover .stat-go {
+  opacity: 1;
 }
 
 .stat-icon {
@@ -264,6 +286,142 @@
 
 .stat-teal {
   border-top: 3px solid var(--teal);
+}
+
+/* ── Overview charts ───────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.chart-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.chart-title {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chart-empty {
+  margin: 24px 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Horizontal bars — single hue (magnitude), thin marks, direct value labels */
+.hbar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hbar-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 150px) 1fr 34px;
+  align-items: center;
+  gap: 10px;
+}
+
+.hbar-label {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hbar-track {
+  height: 12px;
+  border-radius: 4px;
+  background: rgba(137, 135, 129, 0.12);
+  overflow: hidden;
+}
+
+.hbar-fill {
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: #2a78d6;
+  transition: width 0.5s ease;
+}
+
+.hbar-row:hover .hbar-fill {
+  background: #1c5cab;
+}
+
+.hbar-value {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Category composition — 100% stacked bar (2px gaps) + legend with counts */
+.comp-bar {
+  display: flex;
+  gap: 2px;
+  height: 16px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.comp-seg {
+  min-width: 6px;
+  transition: filter 0.15s;
+}
+
+.comp-seg:hover {
+  filter: brightness(0.85);
+}
+
+.comp-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comp-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.comp-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.comp-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comp-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.comp-pct {
+  width: 44px;
+  text-align: right;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Alert ── */

@@ -58,31 +58,36 @@
     </div>
     @if (stats()) {
     <div class="stats-grid">
-      <div class="stat-card stat-blue">
-
+      <button type="button" class="stat-card stat-blue" (click)="setTab('students')">
+        <span class="stat-icon">👨‍🎓</span>
         <div class="stat-value">{{ stats()!.totalStudents }}</div>
         <div class="stat-label">{{ lang.t().adTotalStudents }}</div>
-      </div>
-      <div class="stat-card stat-green">
-
+        <span class="stat-go">{{ lang.t().adManage }} →</span>
+      </button>
+      <button type="button" class="stat-card stat-green" (click)="setTab('teachers')">
+        <span class="stat-icon">🎓</span>
         <div class="stat-value">{{ stats()!.totalTeachers }}</div>
         <div class="stat-label">{{ lang.t().adActiveTeachers }}</div>
-      </div>
-      <div class="stat-card stat-orange">
-
+        <span class="stat-go">{{ lang.t().adManage }} →</span>
+      </button>
+      <button type="button" class="stat-card stat-orange" (click)="setTab('teachers')">
+        <span class="stat-icon">⏳</span>
         <div class="stat-value">{{ stats()!.pendingTeachers }}</div>
         <div class="stat-label">{{ lang.t().adPendingApprovals }}</div>
-      </div>
-      <div class="stat-card stat-purple">
-
+        <span class="stat-go">{{ lang.t().adReviewNow }}</span>
+      </button>
+      <button type="button" class="stat-card stat-purple" (click)="setTab('courses')">
+        <span class="stat-icon">📚</span>
         <div class="stat-value">{{ stats()!.totalCourses }}</div>
         <div class="stat-label">{{ lang.t().adTotalCourses }}</div>
-      </div>
-      <div class="stat-card stat-teal">
-
+        <span class="stat-go">{{ lang.t().adManage }} →</span>
+      </button>
+      <button type="button" class="stat-card stat-teal" (click)="setTab('courses')">
+        <span class="stat-icon">🧾</span>
         <div class="stat-value">{{ stats()!.totalEnrollments }}</div>
         <div class="stat-label">{{ lang.t().adTotalEnrollments }}</div>
-      </div>
+        <span class="stat-go">{{ lang.t().adManage }} →</span>
+      </button>
     </div>
     @if (stats()!.pendingTeachers > 0) {
     <div class="alert-banner">
@@ -91,6 +96,52 @@
       <button class="alert-action" (click)="setTab('teachers')">{{ lang.t().adReviewNow }}</button>
     </div>
     }
+
+    <!-- ── Overview charts ─────────────────────────────── -->
+    <div class="charts-grid">
+      <section class="chart-panel" aria-label="Top courses by enrollment">
+        <h3 class="chart-title">📈 {{ lang.t().adTopCourses }}</h3>
+        @if (topCourses().length === 0) {
+          <p class="chart-empty">{{ lang.t().adNoChartData }}</p>
+        } @else {
+          <div class="hbar-list">
+            @for (row of topCourses(); track row.title) {
+              <div class="hbar-row" [title]="row.title + ' — ' + row.count">
+                <span class="hbar-label">{{ row.title }}</span>
+                <div class="hbar-track">
+                  <div class="hbar-fill" [style.width.%]="row.pct"></div>
+                </div>
+                <span class="hbar-value">{{ row.count }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="chart-panel" aria-label="Courses by category">
+        <h3 class="chart-title">🗂️ {{ lang.t().adByCategory }}</h3>
+        @if (categoryShare().length === 0) {
+          <p class="chart-empty">{{ lang.t().adNoChartData }}</p>
+        } @else {
+          <div class="comp-bar">
+            @for (seg of categoryShare(); track seg.name) {
+              <div class="comp-seg" [style.flex-grow]="seg.count" [style.background]="seg.color"
+                [title]="seg.name + ' — ' + seg.count + ' (' + seg.pct + '%)'"></div>
+            }
+          </div>
+          <ul class="comp-legend">
+            @for (seg of categoryShare(); track seg.name) {
+              <li>
+                <span class="comp-dot" [style.background]="seg.color"></span>
+                <span class="comp-name">{{ seg.name }}</span>
+                <b class="comp-count">{{ seg.count }}</b>
+                <small class="comp-pct">{{ seg.pct }}%</small>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
     }
     }
 

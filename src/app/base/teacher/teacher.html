@@ -679,10 +679,27 @@
 
           <label>
             <span>{{ lang.t().courseEndDate }}</span>
-            <input type="date" formControlName="endDate" />
+            <input type="date" formControlName="endDate" [attr.min]="courseForm.get('startDate')?.value || null" />
           </label>
 
           <small class="full course-date-hint">🗓️ {{ lang.t().courseDateHint }}</small>
+
+          <label>
+            <span>{{ lang.t().discountPercentLabel }}</span>
+            <input type="number" formControlName="discountPercent" min="0" max="100" step="1" placeholder="0" />
+          </label>
+
+          <label>
+            <span>{{ lang.t().discountStartLabel }}</span>
+            <input type="date" formControlName="discountStartDate" />
+          </label>
+
+          <label>
+            <span>{{ lang.t().discountEndLabel }}</span>
+            <input type="date" formControlName="discountEndDate" [attr.min]="courseForm.get('discountStartDate')?.value || null" />
+          </label>
+
+          <small class="full course-date-hint">🏷️ {{ lang.t().discountHint }}</small>
 
           <label class="full">
             <span>{{ lang.t().tcThumbnailUrl }}</span>

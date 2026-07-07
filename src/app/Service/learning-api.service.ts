@@ -23,6 +23,13 @@ export type CourseDto = {
   isCompleted?: boolean;
   startDate?: string | null;
   endDate?: string | null;
+  discountPercent?: number | null;
+  discountStartDate?: string | null;
+  discountEndDate?: string | null;
+  /** Server-computed payable price (discount applied when the window is active). */
+  effectivePrice?: number;
+  /** Server-computed: discount window active right now (BD time). */
+  discountActive?: boolean;
   lessonCount?: number;
   enrollmentCount?: number;
   videoCount?: number;
@@ -61,6 +68,12 @@ export type SaveCoursePayload = {
   startDate?: string | null;
   /** Course end date (ISO date or null). */
   endDate?: string | null;
+  /** Discount percent 0–100 (null = no discount). */
+  discountPercent?: number | null;
+  /** Discount window start (ISO date or null). Required when discountPercent is set. */
+  discountStartDate?: string | null;
+  /** Discount window end (ISO date or null). Required when discountPercent is set. */
+  discountEndDate?: string | null;
   /** UserId of the teacher the admin appoints to this course (primary). */
   teacherUserId?: string;
   /** UserIds of all teachers assigned to this course (first = primary). */

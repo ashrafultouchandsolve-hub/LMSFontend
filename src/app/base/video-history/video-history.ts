@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
@@ -17,6 +17,7 @@ export class VideoHistoryComponent implements OnInit {
   private api = inject(LearningApiService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private location = inject(Location);
   protected readonly lang = inject(LanguageService);
 
   history = signal<any[]>([]);
@@ -58,6 +59,11 @@ export class VideoHistoryComponent implements OnInit {
   }
 
   goBack() {
+    // যেখান থেকে এসেছে (profile/enrolled-course) সেখানেই ফেরত; history না থাকলে homepage।
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
     this.router.navigate(['/homepage']);
   }
 }

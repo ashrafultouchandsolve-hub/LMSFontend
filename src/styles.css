@@ -400,6 +400,65 @@ input::-moz-selection, textarea::-moz-selection {
 	box-shadow: 0 6px 16px rgba(71, 85, 105, 0.32);
 }
 
+/* Discounted price pill — original struck through, payable price bold. */
+.cc-price--discounted s {
+	font-size: 0.72rem;
+	font-weight: 600;
+	opacity: 0.75;
+	text-decoration-thickness: 2px;
+	text-decoration-color: #f87171;
+}
+
+/* Discount campaign badge — bottom-right so it never collides with the
+   price (top-right), completed ribbon (top-left) or countdown (bottom-left). */
+.cc-discount {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 6px 12px;
+	border-radius: 999px;
+	font-size: 0.74rem;
+	font-weight: 800;
+	letter-spacing: 0.2px;
+	color: #fff;
+	max-width: calc(100% - 20px);
+	white-space: nowrap;
+	background: linear-gradient(135deg, #e11d48, #f43f5e);
+	box-shadow: 0 6px 16px rgba(225, 29, 72, 0.34);
+	backdrop-filter: blur(4px);
+	animation: ccPulse 1.8s ease-in-out infinite;
+}
+
+/* Footer badge-গুলো জায়গা না পেলে নতুন লাইনে নামবে — কিছুই card-এর বাইরে যাবে না। */
+.cat-footer {
+	flex-wrap: wrap;
+}
+
+/* Enrollment countdown — buttons-এর ঠিক উপরে slim "limited-time ticket" strip।
+   Dashed border + soft amber gradient: urgency বোঝায়, কিন্তু CTA-র সাথে প্রতিযোগিতা করে না।
+   নিজের আলাদা লাইনে থাকে বলে Enroll button আর "Start Learning" link সবসময় এক লাইনে ফিট থাকে। */
+.cat-countdown {
+	flex-basis: 100%;
+	order: -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: 0.3px;
+	white-space: nowrap;
+	color: #92400e;
+	background: linear-gradient(90deg, #fffbeb, #fef3c7 50%, #fffbeb);
+	border: 1px dashed #fcd34d;
+}
+
 /* Disabled "Enrollment closed" button (replaces the enroll CTA once closed). */
 .cat-btn--closed {
 	background: #f1f5f9;

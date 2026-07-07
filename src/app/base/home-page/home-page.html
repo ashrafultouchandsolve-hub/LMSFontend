@@ -124,6 +124,7 @@
       <div #courseTrackViewport class="cats-viewport">
         @for (course of courses(); track course.id; let i = $index) {
         @let w = enrollWindow(course.startDate);
+        @let d = discountFor(course);
         <article class="cat-card" [style]="'--card-color:' + getCardColor(i) + ';--i:' + i" data-tilt
           [attr.data-index]="(i + 1).toString().padStart(2, '0')">
           <div class="cat-img-wrap">
@@ -140,13 +141,15 @@
             }
             @if (course.isEnrolled) {
               <span class="cc-enrolled-tag">✓ {{ lang.t().courseEnrolled }}</span>
+            } @else if (d.active) {
+              <span class="cc-price cc-price--discounted" [class.cc-price--free]="d.effectivePrice <= 0">
+                <s>{{ formatPrice(course.price) }}</s>&nbsp;{{ formatPrice(d.effectivePrice) }}
+              </span>
             } @else {
               <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
             }
-            @if (!course.isEnrolled && w.state === 'closing') {
-              <span class="cc-enroll-count">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
-            } @else if (!course.isEnrolled && w.state === 'closed') {
-              <span class="cc-enroll-closed">🔒 {{ lang.t().enrollClosed }}</span>
+            @if (!course.isEnrolled && d.active) {
+              <span class="cc-discount">🏷️ {{ d.percent }}% {{ lang.t().discountOff }} · {{ discountPeriod(course) }}</span>
             }
           </div>
           <div class="cat-body">
@@ -185,6 +188,9 @@
               } @else {
               <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)"
                 class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
+              @if (w.state === 'closing') {
+              <span class="cat-countdown">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
+              }
               }
               }
               <a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().courseStartLearning }} →</a>
@@ -224,6 +230,7 @@
       <div #recoTrackViewport class="cats-viewport">
         @for (course of recommendedCourses(); track course.id; let i = $index) {
         @let w = enrollWindow(course.startDate);
+        @let d = discountFor(course);
         <article class="cat-card" [style]="'--card-color:' + getCardColor(i) + ';--i:' + i" data-tilt
           [attr.data-index]="(i + 1).toString().padStart(2, '0')">
           <div class="cat-img-wrap">
@@ -238,11 +245,13 @@
             @if (course.isCompleted) {
               <span class="cc-completed">✓ {{ lang.t().courseCompleted }}</span>
             }
-            <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
-            @if (w.state === 'closing') {
-              <span class="cc-enroll-count">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
-            } @else if (w.state === 'closed') {
-              <span class="cc-enroll-closed">🔒 {{ lang.t().enrollClosed }}</span>
+            @if (d.active) {
+              <span class="cc-price cc-price--discounted" [class.cc-price--free]="d.effectivePrice <= 0">
+                <s>{{ formatPrice(course.price) }}</s>&nbsp;{{ formatPrice(d.effectivePrice) }}
+              </span>
+              <span class="cc-discount">🏷️ {{ d.percent }}% {{ lang.t().discountOff }} · {{ discountPeriod(course) }}</span>
+            } @else {
+              <span class="cc-price" [class.cc-price--free]="course.price <= 0">{{ formatPrice(course.price) }}</span>
             }
           </div>
           <div class="cat-body">
@@ -275,6 +284,9 @@
               } @else {
               <a [routerLink]="['/payment']" [queryParams]="buildPaymentQueryParams(course)"
                 class="cat-btn cat-btn--enroll">{{ lang.t().courseEnrollNow }}</a>
+              @if (w.state === 'closing') {
+              <span class="cat-countdown">⏳ {{ w.daysLeft === 0 ? lang.t().enrollLastDay : w.daysLeft + ' ' + lang.t().enrollDaysLeft }}</span>
+              }
               }
               <a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().courseStartLearning }} →</a>
             </div>

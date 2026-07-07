@@ -15,6 +15,10 @@
       }
     </header>
 
+    @if (isAdmin()) {
+      <div class="es-viewonly">👁️ {{ lang.t().exAdminViewOnly }}</div>
+    }
+
     @if (notice(); as n) {
       <div class="es-notice" [class.es-notice--err]="n.kind === 'error'">{{ n.text }}</div>
     }
@@ -36,18 +40,26 @@
               <span class="es-time">{{ lang.t().exSubmittedAt }}: {{ s.submittedAt | date:'dd MMM yyyy, hh:mm a' }}</span>
               @if (s.graded) {
                 <span class="es-graded">✓ {{ lang.t().exGraded }} · {{ s.marks }}/{{ totalMarks() }}</span>
+                @if (s.feedback) {
+                  <span class="es-feedback">💬 {{ s.feedback }}</span>
+                }
+              } @else if (isAdmin()) {
+                <span class="es-pending">⏳ {{ lang.t().exNotGraded }}</span>
               }
             </div>
 
             <div class="es-actions">
               <button type="button" class="es-btn es-btn--outline" (click)="download(s)">⬇ {{ lang.t().exDownload }}</button>
-              <input class="es-mark" type="number" min="0" [(ngModel)]="gradeInputs[s.submissionId].marks"
-                [placeholder]="lang.t().exMarks + ' /' + totalMarks()" />
-              <input class="es-fb" type="text" [(ngModel)]="gradeInputs[s.submissionId].feedback"
-                [placeholder]="lang.t().exFeedback" />
-              <button type="button" class="es-btn es-btn--primary" [disabled]="savingId() === s.submissionId" (click)="grade(s)">
-                {{ savingId() === s.submissionId ? '…' : lang.t().exSaveGrade }}
-              </button>
+              @if (!isAdmin()) {
+                <input class="es-mark" type="number" min="0" [max]="totalMarks()" step="0.5"
+                  [(ngModel)]="gradeInputs[s.submissionId].marks"
+                  [placeholder]="lang.t().exMarks + ' /' + totalMarks()" />
+                <input class="es-fb" type="text" [(ngModel)]="gradeInputs[s.submissionId].feedback"
+                  [placeholder]="lang.t().exFeedback" />
+                <button type="button" class="es-btn es-btn--primary" [disabled]="savingId() === s.submissionId" (click)="grade(s)">
+                  {{ savingId() === s.submissionId ? '…' : lang.t().exSaveGrade }}
+                </button>
+              }
             </div>
           </article>
         }

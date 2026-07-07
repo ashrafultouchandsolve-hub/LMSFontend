@@ -1,15 +1,17 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../Service/auth.service';
 import { ExamService, ExamSubmissionView } from '../../Service/exam.service';
 import { LanguageService } from '../../Service/language.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 /**
  * Dedicated grading page (its own route) — opened from the Exams panel's "Submissions" button.
- * Admin and the appointed teacher can both review answer papers and (re)grade marks here.
+ * The appointed teacher reviews answer papers and gives marks + feedback;
+ * Admin opens the same page read-only (sees marks/feedback, cannot grade).
  */
 @Component({
   selector: 'app-exam-submissions',
@@ -22,7 +24,11 @@ export class ExamSubmissions implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly examService = inject(ExamService);
+  private readonly authService = inject(AuthService);
   protected readonly lang = inject(LanguageService);
+
+  /** Admin (role 2) sees marks read-only — only the appointed teacher can grade. */
+  protected readonly isAdmin = computed(() => this.authService.getCurrentUser()?.role === 2);
 
   protected readonly examId = signal('');
   protected readonly examTitle = signal('');
@@ -84,9 +90,15 @@ export class ExamSubmissions implements OnInit {
   protected async grade(sub: ExamSubmissionView): Promise<void> {
     const g = this.gradeInputs[sub.submissionId];
     if (!g) return;
+    // Marks must be a number within 0..TotalMarks — mirrors the backend guard.
+    const marks = Number(g.marks);
+    if (g.marks.trim() === '' || isNaN(marks) || marks < 0 || marks > this.totalMarks()) {
+      this.setNotice(this.lang.t().exMarksRange.replace('{max}', String(this.totalMarks())), 'error');
+      return;
+    }
     this.savingId.set(sub.submissionId);
     try {
-      await firstValueFrom(this.examService.grade(sub.submissionId, Number(g.marks || 0), g.feedback || ''));
+      await firstValueFrom(this.examService.grade(sub.submissionId, marks, g.feedback || ''));
       this.setNotice(this.lang.t().exMarksSaved, 'success');
       await this.load();
     } catch {

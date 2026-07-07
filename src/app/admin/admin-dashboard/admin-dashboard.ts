@@ -126,6 +126,39 @@ annSubmitting  = signal(false);
   // so the old per-category grouping/search/expand state lives there, not here.
   // `courses` + `categoryCourseCount` are still used by the Categories tab.
 
+  // ── Dashboard charts (derived from the courses list — no extra endpoint) ──
+  /** Validated categorical palette (fixed slot order — CVD-safe). */
+  private readonly chartPalette = ['#2a78d6', '#1baf7a', '#eda100', '#008300', '#4a3aa7', '#e34948'];
+
+  /** Top courses ranked by enrollments — single-hue horizontal bars. */
+  topCourses = computed(() => {
+    const ranked = [...this.courses()]
+      .filter(c => c.enrollmentCount > 0)
+      .sort((a, b) => b.enrollmentCount - a.enrollmentCount)
+      .slice(0, 6);
+    const max = Math.max(1, ...ranked.map(c => c.enrollmentCount));
+    return ranked.map(c => ({
+      title: c.title,
+      count: c.enrollmentCount,
+      pct: Math.max(3, Math.round((c.enrollmentCount / max) * 100)),
+    }));
+  });
+
+  /** Course share per category — top 5 + "Other", stable palette slots. */
+  categoryShare = computed(() => {
+    const counts = new Map<string, number>();
+    for (const c of this.courses()) {
+      const key = (c.category || '').trim() || 'Other';
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const rows = sorted.slice(0, 5).map(([name, count], i) => ({ name, count, color: this.chartPalette[i] }));
+    const tail = sorted.slice(5).reduce((sum, [, n]) => sum + n, 0);
+    if (tail > 0) rows.push({ name: 'Other', count: tail, color: '#898781' });
+    const total = rows.reduce((sum, r) => sum + r.count, 0) || 1;
+    return rows.map(r => ({ ...r, pct: Math.round((r.count / total) * 1000) / 10 }));
+  });
+
   // Comment edit state
   editingCommentId = signal<string | null>(null);
   editingContent   = signal('');
@@ -154,7 +187,7 @@ annSubmitting  = signal(false);
 
   private loadTabData(tab: Tab) {
     switch (tab) {
-      case 'dashboard': this.loadDashboard(); break;
+      case 'dashboard': this.loadDashboard(); this.loadCourses(); break;   // courses feed the overview charts
       case 'teachers': this.loadTeachers(); break;
       case 'students': this.loadStudents(); break;
       case 'courses': this.loadCourses(); break;

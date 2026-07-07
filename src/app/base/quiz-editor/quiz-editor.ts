@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
@@ -27,6 +27,8 @@ interface QuizForm {
 export class QuizEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
+  private authService = inject(AuthService);
   private api = inject(LearningApiService);
   protected readonly lang = inject(LanguageService);
 
@@ -133,7 +135,14 @@ export class QuizEditorComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/teacher']);
+    // যেখান থেকে এসেছে সেখানেই ফেরত (admin → course-manager, teacher → teacher panel)।
+    // Fresh tab-এ history না থাকলে role অনুযায়ী fallback।
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+    const role = this.authService.getCurrentUser()?.role;
+    this.router.navigateByUrl(role === 2 ? '/course-manager' : '/teacher');
   }
 
   get quizCountOptions() {

@@ -32,6 +32,8 @@ export class AgendaService {
   private readonly lang = inject(LanguageService);
 
   private readonly WINDOW_DAYS = 7;
+  /** Missed (unsubmitted) exams stay visible as "overdue" for this many days after the deadline. */
+  private readonly OVERDUE_GRACE_DAYS = 3;
   private readonly MIN_REFRESH_MS = 20_000;
 
   private readonly _items = signal<AgendaItem[]>([]);
@@ -121,10 +123,12 @@ export class AgendaService {
         try {
           const exRes: any = await firstValueFrom(this.examService.getCourseExams(c.id));
           const list = exRes?.data ?? exRes?.Data ?? [];
+          const overdueFloor = now - this.OVERDUE_GRACE_DAYS * 86_400_000;
           for (const ex of (Array.isArray(list) ? list : [])) {
-            if (!ex?.isPublished || ex?.submitted || ex?.isClosed) continue;
+            if (!ex?.isPublished || ex?.submitted) continue;
             const dl = new Date(ex.deadline).getTime();
-            if (isNaN(dl) || dl < now || dl > horizon) continue;
+            // Past-deadline (missed) exams stay listed for a few days as "overdue" — days goes negative.
+            if (isNaN(dl) || dl < overdueFloor || dl > horizon) continue;
             items.push({ kind: 'exam', icon: '📝', courseId: c.id, courseTitle: c.title, detail: ex.title ?? '', days: this.dayDiff(dl), sortKey: dl, link: ['/enrolled-course', c.id] });
           }
         } catch { /* ignore this course's exams */ }
@@ -152,7 +156,8 @@ export class AgendaService {
   /** Bilingual "when" phrase for an agenda item (re-evaluated on language toggle). */
   meta(it: AgendaItem): string {
     const bn = this.lang.isBangla();
-    const when = it.days <= 0 ? (bn ? 'আজ' : 'Today')
+    const when = it.days < 0 ? (bn ? `${-it.days} দিন দেরি` : `${-it.days} day(s) late`)
+      : it.days === 0 ? (bn ? 'আজ' : 'Today')
       : it.days === 1 ? (bn ? 'আগামীকাল' : 'Tomorrow')
       : (bn ? `${it.days} দিন পরে` : `in ${it.days} days`);
     switch (it.kind) {

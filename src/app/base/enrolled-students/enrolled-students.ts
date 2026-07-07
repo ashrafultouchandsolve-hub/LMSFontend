@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../Service/auth.service';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 
@@ -14,14 +15,27 @@ type Student = {
 
 @Component({
   selector: 'app-enrolled-students',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './enrolled-students.html',
   styleUrl: './enrolled-students.css',
 })
 export class EnrolledStudents implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly authService = inject(AuthService);
   private readonly api = inject(LearningApiService);
   protected readonly lang = inject(LanguageService);
+
+  /** যেখান থেকে এসেছে (admin → course-manager, teacher → teacher panel) সেখানেই ফেরত। */
+  protected goBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+    const role = this.authService.getCurrentUser()?.role;
+    this.router.navigateByUrl(role === 2 ? '/course-manager' : '/teacher');
+  }
 
   protected readonly students = signal<Student[]>([]);
   protected readonly issuedUserIds = signal<string[]>([]);

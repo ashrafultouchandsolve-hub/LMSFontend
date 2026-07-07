@@ -52,7 +52,7 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard),
         canActivate: [adminGuard],
     },
-    // ✅ Exam grading page — opened from the Exams panel; teacher + admin can both grade
+    // ✅ Exam grading page — opened from the Exams panel; teacher grades, admin views read-only
     {
         path: 'exam-submissions/:examId',
         loadComponent: () => import('./base/exam-submissions/exam-submissions').then((m) => m.ExamSubmissions),

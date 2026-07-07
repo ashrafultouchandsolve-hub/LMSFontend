@@ -293,6 +293,31 @@
 	font-weight: 800;
 }
 
+/* Discount: original price struck through next to the payable price. */
+.original-price {
+	margin-right: 0.45rem;
+	color: #94a3b8;
+	font-size: 1.15rem;
+	font-weight: 600;
+	text-decoration-thickness: 2px;
+	text-decoration-color: #f87171;
+}
+
+/* "🏷️ 20% OFF · 1 Jul – 10 Jul" pill under the price. */
+.cd-discount-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 0.45rem;
+	padding: 5px 12px;
+	border-radius: 999px;
+	font-size: 0.8rem;
+	font-weight: 800;
+	color: #fff;
+	background: linear-gradient(135deg, #e11d48, #f43f5e);
+	box-shadow: 0 6px 16px rgba(225, 29, 72, 0.3);
+}
+
 .coupon-button {
 	width: 100%;
 	margin-top: 0.9rem;
