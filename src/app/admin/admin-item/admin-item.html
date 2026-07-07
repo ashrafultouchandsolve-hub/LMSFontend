@@ -110,6 +110,12 @@
             <input type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
           </label>
 
+          <!-- Discount % -->
+          <label>
+            <span>Discount % <small style="color:#94a3b8;font-weight:500">(optional, 0–100)</small></span>
+            <input type="number" formControlName="discountPercent" placeholder="0" step="1" min="0" max="100" />
+          </label>
+
           <!-- Description -->
           <label class="full">
             <span>{{ lang.t().commonDescription }} *</span>

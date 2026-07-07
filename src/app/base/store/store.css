@@ -434,6 +434,64 @@
   box-shadow: 0 4px 12px rgba(34,197,94,0.3);
 }
 .store-card-btn--download:hover { transform: translateY(-1px); }
+.store-card-btn--owned {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+}
+.store-card-btn--owned:hover { transform: translateY(-1px); }
+.store-card-btn--buy:disabled { opacity: 0.65; cursor: wait; transform: none; box-shadow: none; }
+.store-card-btn--soon {
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: default;
+}
+
+/* Discount-aware price */
+.store-card-price-old {
+  font-size: 14px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+.store-card-price-now { color: #1d4ed8; }
+
+/* Corner badges on the card image */
+.store-card-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.store-card-badge--disc { background: linear-gradient(135deg, #f97316, #ea580c); }
+.store-card-badge--owned {
+  top: 40px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* Purchase-result toast */
+.store-toast {
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+  max-width: 640px;
+  margin: 12px auto 0;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 10px 30px -10px rgba(15,23,42,0.5);
+  animation: storeToastIn 0.2s ease;
+}
+@keyframes storeToastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
 /* Skeleton */
 .skeleton-card {

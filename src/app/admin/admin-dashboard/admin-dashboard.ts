@@ -72,6 +72,10 @@ annSubmitting  = signal(false);
   newCategoryName = signal('');
   editingCategoryId = signal<string | null>(null);
   editingCategoryName = signal('');
+  // Add-category modal state
+  showCategoryModal = signal(false);
+  categoryModalError = signal('');
+  isSavingCategory = signal(false);
 
   // Search filters for all sections
   searchQuery = signal('');
@@ -269,17 +273,42 @@ annSubmitting  = signal(false);
     });
   }
 
+  openCategoryModal() {
+    this.newCategoryName.set('');
+    this.categoryModalError.set('');
+    this.showCategoryModal.set(true);
+  }
+
+  closeCategoryModal() {
+    if (this.isSavingCategory()) return;   // don't close mid-save
+    this.showCategoryModal.set(false);
+    this.newCategoryName.set('');
+    this.categoryModalError.set('');
+  }
+
   createCategory() {
     const name = this.newCategoryName().trim();
-    if (!name) { this.showMessage('Type a category name first.', 'error'); return; }
-    // Block duplicates up-front (case-insensitive) so the admin gets instant, clear feedback.
+    if (!name) { this.categoryModalError.set('Please type a category name.'); return; }
+    // Block duplicates up-front (case-insensitive) so the admin gets instant, clear feedback
+    // right inside the modal — the backend also rejects duplicates as a safety net.
     if (this.categories().some(c => c.name.toLowerCase() === name.toLowerCase())) {
-      this.showMessage(`A category named "${name}" already exists.`, 'error');
+      this.categoryModalError.set(`A category named "${name}" already exists.`);
       return;
     }
+    this.isSavingCategory.set(true);
+    this.categoryModalError.set('');
     this.categoryService.create(name).subscribe({
-      next: () => { this.showMessage('Category created.', 'success'); this.newCategoryName.set(''); this.loadCategories(); },
-      error: (e) => this.showMessage(this.categoryError(e, 'Failed to create category.'), 'error')
+      next: () => {
+        this.isSavingCategory.set(false);
+        this.showCategoryModal.set(false);
+        this.newCategoryName.set('');
+        this.showMessage('Category created.', 'success');
+        this.loadCategories();
+      },
+      error: (e) => {
+        this.isSavingCategory.set(false);
+        this.categoryModalError.set(this.categoryError(e, 'Failed to create category.'));
+      }
     });
   }
 

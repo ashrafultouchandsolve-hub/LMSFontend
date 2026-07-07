@@ -671,7 +671,7 @@ export class LearningApiService {
     return this.withFallback((base) => this.http.get<any>(`${base}/store/items`, { params }));
   }
 
-  addStoreItem(dto: { title: string; description: string; category: string; price: number; fileUrl?: string }): Observable<any> {
+  addStoreItem(dto: { title: string; description: string; category: string; price: number; discountPercent?: number | null; fileUrl?: string }): Observable<any> {
     return this.withFallback((base) =>
       this.http.post<any>(`${base}/store/add`, dto),
     );
@@ -693,7 +693,7 @@ export class LearningApiService {
     );
   }
 
-  updateStoreItem(itemId: string, dto: { title: string; description: string; category: string; price: number; fileUrl?: string }): Observable<any> {
+  updateStoreItem(itemId: string, dto: { title: string; description: string; category: string; price: number; discountPercent?: number | null; fileUrl?: string }): Observable<any> {
     return this.withFallback((base) =>
       this.http.put<any>(`${base}/store/update/${itemId}`, dto),
     );
@@ -705,9 +705,32 @@ export class LearningApiService {
     );
   }
 
+  /** Public download URL for a FREE store item (paid items use the authorized blob download). */
   downloadStoreItemPdf(itemId: string): string {
     const base = this.activeBaseUrl;
     return `${base}/store/download-pdf/${itemId}`;
+  }
+
+  // ─── STORE PURCHASE (student checkout, SSLCommerz sandbox) ────────────────
+  /** Start a store-item purchase. Free items return { isFree:true }; paid return { gatewayUrl }. */
+  initiateStorePurchase(body: { storeItemId: string }): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.post<any>(`${base}/store/purchase/initiate`, body),
+    );
+  }
+
+  /** Store-item ids the logged-in user already owns (Success purchases). */
+  getMyStorePurchases(): Observable<any> {
+    return this.withFallback((base) =>
+      this.http.get<any>(`${base}/store/purchase/my`),
+    );
+  }
+
+  /** Authenticated blob download of a purchased (or free) item's PDF. */
+  downloadOwnedStoreItemPdf(itemId: string): Observable<Blob> {
+    return this.withFallback((base) =>
+      this.http.get(`${base}/store/my-download/${itemId}`, { responseType: 'blob' }),
+    );
   }
 getMyEnrollments(): Observable<any> {
   return this.withFallback((base) =>

@@ -11,6 +11,7 @@ type StoreItem = {
   description: string;
   category: string;
   price: number;
+  discountPercent?: number | null;
   imagePath: string | null;
   fileUrl: string | null;
   isAvailable: boolean;
@@ -53,6 +54,7 @@ export class AdminItem implements OnInit {
     description: ['', [Validators.required, Validators.minLength(8)]],
     category: ['Books', Validators.required],
     price: [0, [Validators.required, Validators.min(0)]],
+    discountPercent: [0, [Validators.min(0), Validators.max(100)]],
     fileUrl: [''],
   });
 
@@ -104,6 +106,7 @@ export class AdminItem implements OnInit {
       description: '',
       category: 'Books',
       price: 0,
+      discountPercent: 0,
       fileUrl: '',
     });
     this.selectedImageFile.set(null);
@@ -120,6 +123,7 @@ export class AdminItem implements OnInit {
       description: item.description,
       category: item.category,
       price: item.price,
+      discountPercent: item.discountPercent ?? 0,
       fileUrl: item.fileUrl || '',
     });
     if (item.imagePath) {
@@ -253,6 +257,7 @@ export class AdminItem implements OnInit {
         description: this.itemForm.value.description || '',
         category: this.itemForm.value.category || 'Books',
         price: this.itemForm.value.price || 0,
+        discountPercent: this.itemForm.value.discountPercent || 0,
         fileUrl: this.itemForm.value.fileUrl || '',
       };
 
@@ -278,9 +283,10 @@ export class AdminItem implements OnInit {
         this.items.set(updatedItems);
         this.setNotice('Item updated successfully.', 'success');
       } else {
-        // Add new item
+        // Add new item. The backend returns the id at the top level
+        // (`{ message, itemId }`) — not under `data` — so read it defensively.
         const response = await this.learningApi.addStoreItem(dto).toPromise();
-        const itemId = response?.data?.itemId;
+        const itemId = response?.itemId ?? response?.ItemId ?? response?.data?.itemId ?? response?.data?.id;
 
         if (itemId) {
           // If there's an image, upload it

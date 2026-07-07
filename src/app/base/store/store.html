@@ -2,6 +2,11 @@
 
   <app-navbar></app-navbar>
 
+  <!-- Toast (purchase result / feedback) -->
+  @if (toast()) {
+    <div class="store-toast">{{ toast() }}</div>
+  }
+
   <!-- Hero -->
   <div class="store-hero">
     <div class="store-hero-content">
@@ -64,6 +69,12 @@
                 </div>
               }
               <span class="store-card-cat">{{ item.category }}</span>
+              @if (item.hasDiscount) {
+                <span class="store-card-badge store-card-badge--disc">-{{ item.discountPercent }}%</span>
+              }
+              @if (isOwned(item)) {
+                <span class="store-card-badge store-card-badge--owned">✓ Owned</span>
+              }
             </div>
 
             <!-- Body -->
@@ -72,14 +83,32 @@
               <p class="store-card-desc">{{ item.description }}</p>
 
               <div class="store-card-footer">
-                <span class="store-card-price">{{ formatPrice(item.price) }}</span>
-                @if (item.fileUrl) {
-                  <a [href]="learningApi.downloadStoreItemPdf(item.id)" target="_blank" class="store-card-btn store-card-btn--download">
+                <!-- Price (discount-aware) -->
+                <span class="store-card-price">
+                  @if (item.hasDiscount) {
+                    <span class="store-card-price-old">৳{{ item.price }}</span>
+                    <span class="store-card-price-now">{{ formatPrice(effective(item)) }}</span>
+                  } @else {
+                    {{ formatPrice(effective(item)) }}
+                  }
+                </span>
+
+                <!-- Action -->
+                @if (isOwned(item)) {
+                  <button class="store-card-btn store-card-btn--owned" (click)="downloadOwned(item)">
                     ⬇ {{ lang.t().stDownload }}
-                  </a>
+                  </button>
+                } @else if (isFree(item)) {
+                  @if (item.fileUrl) {
+                    <a [href]="learningApi.downloadStoreItemPdf(item.id)" target="_blank" class="store-card-btn store-card-btn--download">
+                      ⬇ {{ lang.t().stDownload }}
+                    </a>
+                  } @else {
+                    <span class="store-card-btn store-card-btn--soon">Coming soon</span>
+                  }
                 } @else {
-                  <button class="store-card-btn store-card-btn--buy">
-                    🛒 {{ lang.t().stBuyNow }}
+                  <button class="store-card-btn store-card-btn--buy" [disabled]="buyingId() === item.id" (click)="buyItem(item)">
+                    @if (buyingId() === item.id) { ⏳ … } @else { 🛒 {{ lang.t().stBuyNow }} }
                   </button>
                 }
               </div>
