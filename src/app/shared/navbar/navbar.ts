@@ -32,12 +32,21 @@ export class Navbar implements OnInit, OnDestroy {
 
   protected readonly isLoggedIn = signal(false);
   protected readonly userName = signal('');
+  protected readonly userEmail = signal('');
   protected readonly userRole = signal<number | null>(null);
   protected readonly isTeacher = computed(() => this.userRole() === 1);
   protected readonly isAdmin = computed(() => this.userRole() === 2);
   // Leaderboard শুধু logged-in student (Role = 0) দেখবে
   protected readonly isStudent = computed(() => this.isLoggedIn() && this.userRole() === 0);
   protected readonly userInitial = computed(() => this.userName().charAt(0).toUpperCase());
+  /** Human role label for the profile dropdown header. */
+  protected readonly roleLabel = computed(() => {
+    const r = this.userRole();
+    const bn = this.lang.isBangla();
+    if (r === 2) return bn ? 'অ্যাডমিন' : 'Admin';
+    if (r === 1) return bn ? 'ইনস্ট্রাক্টর' : 'Instructor';
+    return bn ? 'শিক্ষার্থী' : 'Student';
+  });
   protected readonly mobileMenuOpen = signal(false);
 
   /** True → the navbar "Live" button blinks because a live class relevant to THIS user is on air. */
@@ -61,6 +70,7 @@ export class Navbar implements OnInit, OnDestroy {
     this.subs.add(
       this.authService.currentUser$.subscribe((user) => {
         if (user?.fullName) this.userName.set(user.fullName);
+        this.userEmail.set(user?.email ?? '');
         this.userRole.set(typeof user?.role === 'number' ? user.role : null);
         void this.refreshLiveStatus();
       })
@@ -69,6 +79,7 @@ export class Navbar implements OnInit, OnDestroy {
     const user = this.authService.getCurrentUser();
     if (user) {
       this.userName.set(user.fullName || user.email);
+      this.userEmail.set(user.email ?? '');
       this.userRole.set(typeof user?.role === 'number' ? user.role : null);
     }
 

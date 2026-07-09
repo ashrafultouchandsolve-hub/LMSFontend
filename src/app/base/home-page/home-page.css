@@ -1857,10 +1857,24 @@ p {
   margin-bottom: 16px;
 }
 
-.footer-logo {
-  height: 44px;
+/* "Powered by" credit — the Touch & Solve mark, smaller than the navbar logo */
+.footer-powered {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
 
-  
+.footer-powered-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.footer-logo {
+  height: 26px;
+  width: auto;
 }
 
 .footer-brand-desc {

@@ -1,6 +1,6 @@
 <header class="topbar">
   <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
-    <img src="./logo-3.png" alt="Touch & Solve" class="brand-logo" />
+    <img src="./nirvoor-logo.png" alt="Nirvoor e-learning" class="brand-logo" />
   </a>
 
   <button
@@ -257,19 +257,45 @@
           </span>
         </summary>
         <div class="user-menu-list" role="menu">
+          <!-- Identity header -->
+          <div class="um-header">
+            <span class="um-avatar">{{ userInitial() }}</span>
+            <div class="um-id">
+              <strong class="um-name">{{ userName() }}</strong>
+              @if (userEmail()) { <span class="um-email">{{ userEmail() }}</span> }
+              <span class="um-role" [class.um-role--admin]="isAdmin()" [class.um-role--teacher]="isTeacher()">{{ roleLabel() }}</span>
+            </div>
+          </div>
+
+          <div class="um-divider"></div>
+
           <a routerLink="/profile" class="user-menu-link" role="menuitem">
-            <span class="menu-icon">👤</span> {{ lang.t().navProfile }}
+            <span class="menu-icon">👤</span> <span>{{ lang.t().navProfile }}</span>
           </a>
+          @if (isStudent()) {
+            <a routerLink="/profile" [queryParams]="{ tab: 'courses' }" class="user-menu-link" role="menuitem">
+              <span class="menu-icon">📚</span> <span>{{ lang.t().profileMyCourses }}</span>
+            </a>
+            <a routerLink="/profile" [queryParams]="{ tab: 'certificates' }" class="user-menu-link" role="menuitem">
+              <span class="menu-icon">🏅</span> <span>{{ lang.t().profileCertificates }}</span>
+            </a>
+          }
           @if (isTeacher()) {
             <a routerLink="/teacher" class="user-menu-link" role="menuitem">
-              <span class="menu-icon">🎓</span> {{ lang.t().navTeacher }}
+              <span class="menu-icon">🎓</span> <span>{{ lang.t().navTeacher }}</span>
             </a>
           }
           @if (isAdmin()) {
             <a routerLink="/admin" class="user-menu-link" role="menuitem">
-              <span class="menu-icon">⚙️</span> {{ lang.t().navAdmin }}
+              <span class="menu-icon">⚙️</span> <span>{{ lang.t().navAdmin }}</span>
             </a>
           }
+
+          <div class="um-divider"></div>
+
+          <button type="button" class="user-menu-link um-logout" role="menuitem" (click)="logout()">
+            <span class="menu-icon">🚪</span> <span>{{ lang.t().navLogout }}</span>
+          </button>
         </div>
       </details>
       <button type="button" class="nav-button nav-button-ghost" (click)="logout()">{{ lang.t().navLogout }}</button>
