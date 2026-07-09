@@ -642,6 +642,64 @@ tr:last-child td {
   color: #63708d;
 }
 
+/* ── Live-class exam (Google-Forms style) chips & buttons ── */
+.live-exam-chip {
+  margin-top: 6px;
+  background: #f3f0fa;
+  border: 1px solid #ddd3f0;
+  color: #5b3fa8;
+  font-size: 0.78rem;
+  width: fit-content;
+}
+.live-exam-chip.published {
+  background: #e8f7ee;
+  border-color: #bfe8cf;
+  color: #1d7a45;
+}
+.live-exam-chip.closed {
+  background: #f1f5f9;
+  border-color: #dbe3ef;
+  color: #63708d;
+}
+.live-exam-btn {
+  white-space: nowrap;
+}
+
+/* Exams & student answers sub-panel (survives ended live classes) */
+.lxa-panel {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed #ddd3f0;
+}
+.lxa-panel h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #4b3f72;
+}
+.lxa-rows { display: grid; gap: 10px; }
+.lxa-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #faf9fe;
+  border: 1px solid #eee9fb;
+}
+.lxa-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.lxa-info strong { font-size: 14px; color: #1f2937; }
+.lxa-info .live-exam-chip { margin-top: 0; }
+.lxa-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
 /* ── Class recordings (in-course, teacher-managed) ── */
 .rec-list { display: grid; gap: 10px; }
 .rec-item {

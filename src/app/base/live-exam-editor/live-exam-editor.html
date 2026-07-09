@@ -1,0 +1,265 @@
+<app-navbar></app-navbar>
+
+<div class="lee-page">
+  <div class="lee-container">
+
+    <!-- top bar -->
+    <div class="lee-topbar">
+      <button type="button" class="lee-back" (click)="goBack()">← Back</button>
+
+      <div class="lee-topbar-right">
+        @if (!isLoading()) {
+          <span
+            class="lee-chip"
+            [class.lee-chip--draft]="status() === ST.Draft"
+            [class.lee-chip--published]="status() === ST.Published"
+            [class.lee-chip--closed]="status() === ST.Closed">
+            @if (status() === ST.Published) { ● } @else if (status() === ST.Closed) { ■ } @else { ✎ }
+            {{ statusLabel() }}
+          </span>
+          @if (status() !== ST.Draft) {
+            <span class="lee-chip lee-chip--count">{{ submittedCount() }} {{ submittedCount() === 1 ? 'response' : 'responses' }}</span>
+          }
+        }
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="lee-state">
+        <div class="lee-spinner"></div>
+        <p>Loading exam…</p>
+      </div>
+    } @else {
+
+      <!-- header card (Google-Forms style, thick colored top border) -->
+      <section class="lee-card lee-header-card">
+        <p class="lee-context">📺 Exam for: <strong>{{ liveClassTitle() || 'Live class' }}</strong></p>
+
+        <input
+          type="text"
+          class="lee-title-input"
+          placeholder="Exam title"
+          [ngModel]="title()"
+          (ngModelChange)="title.set($event)" />
+
+        <textarea
+          rows="2"
+          class="lee-desc-input"
+          placeholder="Exam description (optional)"
+          [ngModel]="description()"
+          (ngModelChange)="description.set($event)"></textarea>
+
+        <div class="lee-timed-row">
+          <div class="form-check form-switch lee-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="leeTimed"
+              [ngModel]="isTimed()"
+              (ngModelChange)="onTimedToggle($event)" />
+            <label class="form-check-label" for="leeTimed">⏱ Timed exam</label>
+          </div>
+          @if (isTimed()) {
+            <div class="lee-minutes">
+              <input
+                type="number"
+                min="1"
+                [ngModel]="durationMinutes()"
+                (ngModelChange)="durationMinutes.set($event)" />
+              <span>minutes</span>
+            </div>
+          }
+        </div>
+
+        @if (status() === ST.Published) {
+          <p class="lee-lock-note">🔒 Questions are locked while the exam is published. You can still edit the title, description and duration.</p>
+        } @else if (status() === ST.Closed) {
+          <p class="lee-lock-note">🔒 This exam is closed. Questions can no longer be edited.</p>
+        }
+      </section>
+
+      <!-- question cards -->
+      @for (q of questions(); track $index; let i = $index) {
+        <section class="lee-card lee-q-card">
+          <div class="lee-q-top">
+            <span class="lee-q-num">Question {{ i + 1 }}</span>
+            <select
+              class="lee-type-select"
+              [ngModel]="q.type"
+              (ngModelChange)="onTypeChange(i, $event)"
+              [disabled]="isLocked()">
+              @for (t of typeOptions; track t.value) {
+                <option [ngValue]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+
+          <input
+            type="text"
+            class="lee-q-text"
+            placeholder="Question text"
+            [ngModel]="q.text"
+            (ngModelChange)="patchQuestion(i, { text: $event })"
+            [disabled]="isLocked()" />
+
+          <!-- answer area preview / option builder -->
+          @if (q.type === QT.ShortAnswer) {
+            <p class="lee-answer-preview">Short answer text</p>
+          } @else if (q.type === QT.Paragraph) {
+            <p class="lee-answer-preview lee-answer-preview--long">Long answer text</p>
+          } @else if (q.type === QT.FileUpload) {
+            <div class="lee-file-preview">📎 Students will upload a file as their answer.</div>
+          } @else {
+            <div class="lee-options">
+              @for (o of q.options; track $index; let j = $index) {
+                <div class="lee-opt-row">
+                  <button
+                    type="button"
+                    class="lee-correct-mark"
+                    [class.lee-correct-mark--square]="q.type === QT.Checkboxes"
+                    [class.checked]="o.isCorrect"
+                    [disabled]="isLocked()"
+                    (click)="toggleCorrect(i, j)"
+                    title="Mark as correct answer">
+                    @if (o.isCorrect) { ✓ }
+                  </button>
+                  <input
+                    type="text"
+                    class="lee-opt-input"
+                    [class.correct]="o.isCorrect"
+                    placeholder="Option {{ j + 1 }}"
+                    [ngModel]="o.text"
+                    (ngModelChange)="patchOptionText(i, j, $event)"
+                    [disabled]="isLocked()" />
+                  @if (o.isCorrect) { <span class="lee-correct-tag">Correct</span> }
+                  @if (!isLocked()) {
+                    <button type="button" class="lee-icon-btn" (click)="removeOption(i, j)" title="Remove option">✕</button>
+                  }
+                </div>
+              }
+              @if (!isLocked()) {
+                <button type="button" class="lee-add-opt" (click)="addOption(i)">+ Add option</button>
+              }
+              <p class="lee-opt-hint">
+                @if (q.type === QT.MultipleChoice) { Tick the circle next to the one correct answer. }
+                @else { Tick every correct answer. }
+              </p>
+            </div>
+          }
+
+          <!-- card footer: points / required / reorder / delete -->
+          <div class="lee-q-footer">
+            <label class="lee-points">
+              Points
+              <input
+                type="number"
+                min="0"
+                [ngModel]="q.points"
+                (ngModelChange)="patchQuestion(i, { points: $event })"
+                [disabled]="isLocked()" />
+            </label>
+
+            <div class="form-check form-switch lee-switch lee-required">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="leeReq{{ i }}"
+                [ngModel]="q.isRequired"
+                (ngModelChange)="patchQuestion(i, { isRequired: $event })"
+                [disabled]="isLocked()" />
+              <label class="form-check-label" for="leeReq{{ i }}">Required</label>
+            </div>
+
+            @if (!isLocked()) {
+              <div class="lee-q-tools">
+                <button type="button" class="lee-icon-btn" [disabled]="i === 0" (click)="moveQuestion(i, -1)" title="Move up">↑</button>
+                <button type="button" class="lee-icon-btn" [disabled]="i === questions().length - 1" (click)="moveQuestion(i, 1)" title="Move down">↓</button>
+                <button type="button" class="lee-icon-btn lee-icon-btn--danger" (click)="removeQuestion(i)" title="Delete question">🗑</button>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- add question -->
+      @if (!isLocked()) {
+        <button type="button" class="lee-add-question" (click)="addQuestion()">
+          ＋ Add question
+        </button>
+      } @else if (questions().length === 0) {
+        <div class="lee-state lee-empty">
+          <span>📭</span>
+          <p>This exam has no questions.</p>
+        </div>
+      }
+
+      <!-- sticky footer action bar -->
+      <div class="lee-footer">
+        <div class="lee-footer-meta">
+          <strong>{{ questions().length }}</strong> {{ questions().length === 1 ? 'question' : 'questions' }}
+          <span class="lee-dot">·</span>
+          <strong>{{ totalPoints() }}</strong> {{ totalPoints() === 1 ? 'point' : 'points' }}
+        </div>
+        <div class="lee-footer-actions">
+          @if (examId() && status() !== ST.Draft) {
+            <a class="lee-responses-link" [routerLink]="['/live-exam-responses', examId()]">View responses →</a>
+          }
+          @if (status() === ST.Published && examId()) {
+            <button type="button" class="lee-btn lee-btn--danger" (click)="showCloseModal.set(true)">Close exam</button>
+          }
+          @if (canPublish()) {
+            <button type="button" class="lee-btn lee-btn--outline" (click)="showPublishModal.set(true)">📢 Publish</button>
+          }
+          <button type="button" class="lee-btn lee-btn--primary" [disabled]="isSaving()" (click)="save()">
+            {{ isSaving() ? 'Saving…' : (isLocked() ? '💾 Save details' : '💾 Save draft') }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- publish confirm modal -->
+@if (showPublishModal()) {
+  <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Publish exam dialog" (click)="showPublishModal.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>📢 Publish this exam?</h2>
+        <button type="button" class="icon-btn" (click)="showPublishModal.set(false)">✕</button>
+      </div>
+      <p class="modal-body-text">
+        Students in this live class will be notified and can start answering.
+        Questions cannot be edited after publishing — make sure you saved your latest changes.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="lee-btn lee-btn--ghost" (click)="showPublishModal.set(false)">Cancel</button>
+        <button type="button" class="lee-btn lee-btn--primary" [disabled]="isPublishing()" (click)="confirmPublish()">
+          {{ isPublishing() ? 'Publishing…' : 'Publish' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- close confirm modal -->
+@if (showCloseModal()) {
+  <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Close exam dialog" (click)="showCloseModal.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>🔒 Close this exam?</h2>
+        <button type="button" class="icon-btn" (click)="showCloseModal.set(false)">✕</button>
+      </div>
+      <p class="modal-body-text">
+        Students will no longer be able to start or submit answers. This cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="lee-btn lee-btn--ghost" (click)="showCloseModal.set(false)">Cancel</button>
+        <button type="button" class="lee-btn lee-btn--danger" [disabled]="isClosing()" (click)="confirmClose()">
+          {{ isClosing() ? 'Closing…' : 'Close exam' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,84 @@
+<section class="cw-section">
+  <div class="cw-head">
+    <h2>🎓 Class work — recordings &amp; exams</h2>
+    @if (pendingExams() > 0) {
+      <span class="cw-due">{{ pendingExams() }} exam{{ pendingExams() === 1 ? '' : 's' }} due</span>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <p class="cw-muted">Loading…</p>
+  } @else if (rows().length === 0) {
+    <p class="cw-muted">No class recordings or exams yet.</p>
+  } @else {
+    <div class="cw-list">
+      @for (row of rows(); track row.liveClassId; let i = $index) {
+        <article class="cw-card"
+                 [class.cw-card--due]="row.exam && row.exam.status === 1 && (row.exam.myStatus === -1 || row.exam.myStatus === 0)">
+          <!-- class header: the single anchor that ties recording + exam together -->
+          <div class="cw-card-head">
+            <span class="cw-class-badge">Class {{ rows().length - i }}</span>
+            <div class="cw-class-title">
+              <strong>{{ row.title }}</strong>
+              @if (row.date) { <span class="cw-date">🕐 {{ row.date | date: 'dd MMM yyyy, hh:mm a' }}</span> }
+            </div>
+          </div>
+
+          <div class="cw-body">
+            <!-- recording -->
+            <div class="cw-block cw-block--rec">
+              <span class="cw-block-label">🎬 Recording</span>
+              @if (row.recording?.recordingPath) {
+                <button type="button" class="cw-rec-btn" (click)="play(row.recording)">
+                  <span class="cw-rec-thumb">▶</span>
+                  <span>Watch recording</span>
+                </button>
+              } @else {
+                <span class="cw-none">Not available yet</span>
+              }
+            </div>
+
+            <!-- exam for this same class -->
+            <div class="cw-block cw-block--exam">
+              <span class="cw-block-label">📝 Exam</span>
+              @if (row.exam; as ex) {
+                <div class="cw-exam">
+                  <span class="cw-exam-title">{{ ex.title }} · {{ ex.maxTotal }} pts@if (ex.durationMinutes) { <span> · ⏱ {{ ex.durationMinutes }}m</span> }</span>
+                  @if (ex.myStatus === 2) {
+                    <span class="cw-score">🏆 {{ ex.totalAwarded }}/{{ ex.maxTotal }}</span>
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cw-btn cw-btn--result">View result →</a>
+                  } @else if (ex.myStatus === 1) {
+                    <span class="cw-chip">📨 Submitted</span>
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cw-btn cw-btn--ghost">View →</a>
+                  } @else if (ex.myStatus === 0) {
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cw-btn">▶ Continue</a>
+                  } @else if (ex.status === 1) {
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cw-btn">📝 Take exam</a>
+                  } @else {
+                    <span class="cw-chip cw-chip--closed">🔒 Closed</span>
+                  }
+                </div>
+              } @else {
+                <span class="cw-none">No exam for this class</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<!-- recording player modal -->
+@if (watching(); as rec) {
+  <div class="cw-modal-backdrop" (click)="close()">
+    <div class="cw-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="cw-modal-head">
+        <h3>🎬 {{ rec.title }}</h3>
+        <button type="button" class="cw-modal-x" (click)="close()" aria-label="Close">✕</button>
+      </div>
+      <video #recPlayer class="cw-video" controls controlsList="nodownload" disablePictureInPicture
+             oncontextmenu="return false" playsinline></video>
+    </div>
+  </div>
+}

@@ -1,0 +1,235 @@
+<app-navbar></app-navbar>
+
+<div class="ler-page">
+  <div class="ler-container">
+
+    <!-- top bar -->
+    <div class="ler-topbar">
+      <button type="button" class="ler-back" (click)="back()">
+        {{ sheet() ? '← All responses' : '← Back' }}
+      </button>
+      @if (exam(); as e) {
+        <span class="ler-chip">{{ statusLabel() }}</span>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="ler-state">
+        <div class="ler-spinner"></div>
+        <p>Loading responses…</p>
+      </div>
+    } @else if (loadError()) {
+      <div class="ler-card ler-state-card">
+        <span class="ler-state-icon">😕</span>
+        <h2>{{ loadError() }}</h2>
+      </div>
+    } @else if (exam(); as e) {
+
+      @if (!sheet()) {
+        <!-- ── header (Google-Forms "Responses" tab feel) ─────────── -->
+        <section class="ler-card ler-header-card">
+          <h1>{{ e.title }}</h1>
+          <p class="ler-context">📺 {{ e.liveClassTitle }}</p>
+          <div class="ler-stats">
+            <div class="ler-stat">
+              <strong>{{ rows().length }}</strong>
+              <span>Responses</span>
+            </div>
+            <div class="ler-stat">
+              <strong>{{ gradedCount() }}</strong>
+              <span>Graded</span>
+            </div>
+            <div class="ler-stat">
+              <strong>{{ e.maxTotal }}</strong>
+              <span>Max points</span>
+            </div>
+            <div class="ler-stat">
+              <strong>{{ e.questionCount }}</strong>
+              <span>Questions</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── submissions list ───────────────────────────────────── -->
+        @if (rows().length === 0) {
+          <div class="ler-card ler-state-card">
+            <span class="ler-state-icon">📭</span>
+            <h2>No responses yet</h2>
+            <p class="ler-muted">Submissions will appear here as students hand in the exam.</p>
+          </div>
+        } @else {
+          <section class="ler-card ler-table-card">
+            <div class="ler-table-scroll">
+              <table class="ler-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Submitted</th>
+                    <th>Auto</th>
+                    <th>Final</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of rows(); track r.submissionId; let i = $index) {
+                    <tr>
+                      <td class="ler-td-num">{{ i + 1 }}</td>
+                      <td>
+                        <div class="ler-student">
+                          <strong>{{ r.studentName }}</strong>
+                          <span>{{ r.studentEmail }}</span>
+                        </div>
+                      </td>
+                      <td class="ler-td-date">{{ r.submittedAt | date: 'dd MMM, hh:mm a' }}</td>
+                      <td class="ler-td-score">{{ r.autoTotal }}</td>
+                      <td class="ler-td-score ler-td-final">{{ r.totalAwarded ?? '—' }}</td>
+                      <td>
+                        @if (r.status === 2) {
+                          <span class="ler-badge ler-badge--graded">Graded</span>
+                          @if (r.gradedByAdmin) { <span class="ler-badge ler-badge--admin">by admin</span> }
+                        } @else {
+                          <span class="ler-badge ler-badge--pending">Needs grading</span>
+                        }
+                      </td>
+                      <td class="ler-td-open">
+                        <button type="button" class="ler-btn ler-btn--outline ler-btn--sm"
+                                [disabled]="isSheetLoading()"
+                                (click)="openSheet(r.submissionId)">
+                          {{ r.status === 2 ? 'Review' : 'Grade' }} →
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
+      }
+
+      <!-- ── answer sheet (marking UI) ────────────────────────────── -->
+      @else if (sheet(); as s) {
+        <section class="ler-card ler-sheet-head">
+          <div class="ler-sheet-student">
+            <div class="ler-avatar">{{ (s.studentName || '?').charAt(0) | uppercase }}</div>
+            <div>
+              <h2>{{ s.studentName }}</h2>
+              <p class="ler-muted">{{ s.studentEmail }}</p>
+            </div>
+            <div class="ler-sheet-score">
+              <strong>{{ currentTotal() }}</strong>
+              <span>/ {{ s.maxTotal }}</span>
+            </div>
+          </div>
+          <div class="ler-sheet-meta">
+            <span>Started {{ s.startedAt | date: 'dd MMM, hh:mm a' }}</span>
+            <span>·</span>
+            <span>Submitted {{ s.submittedAt | date: 'dd MMM, hh:mm a' }}</span>
+            @if (s.gradedAt) {
+              <span>·</span>
+              <span class="ler-graded-by">
+                Last graded by {{ s.gradedByAdmin ? 'Admin' : 'Teacher' }} · {{ s.gradedAt | date: 'dd MMM, hh:mm a' }}
+              </span>
+            }
+          </div>
+        </section>
+
+        @for (q of s.questions; track q.questionId; let i = $index) {
+          <section class="ler-card ler-q-card">
+            <div class="ler-q-top">
+              <span class="ler-q-num">Q{{ i + 1 }} · {{ typeLabel(q.type) }}</span>
+              <div class="ler-marks-input">
+                <input type="number" min="0" [max]="q.points" step="0.5"
+                       [ngModel]="markOf(q.questionId)"
+                       (ngModelChange)="setMark(q.questionId, $event)"
+                       (blur)="normalizeMark(q.questionId, q.points)" />
+                <span>/ {{ q.points }}</span>
+              </div>
+            </div>
+            <p class="ler-q-text">{{ q.text }}</p>
+
+            @switch (q.type) {
+              @case (QType.MultipleChoice) {
+                <div class="ler-options">
+                  @for (o of q.options; track o.id) {
+                    <div class="ler-option"
+                         [class.correct]="o.isCorrect"
+                         [class.wrong]="!o.isCorrect && isSelected(q, o.id)">
+                      <span class="ler-opt-mark">
+                        @if (o.isCorrect) {✓} @else if (isSelected(q, o.id)) {✗} @else {•}
+                      </span>
+                      <span class="ler-opt-text">{{ o.text }}</span>
+                      @if (o.isCorrect) { <span class="ler-tag ler-tag--green">correct answer</span> }
+                      @if (isSelected(q, o.id)) { <span class="ler-tag">✔ selected</span> }
+                    </div>
+                  }
+                </div>
+                @if (q.autoMarks != null) {
+                  <p class="ler-auto-note">⚡ Auto-graded: {{ q.autoMarks }}/{{ q.points }}</p>
+                }
+              }
+              @case (QType.Checkboxes) {
+                <div class="ler-options">
+                  @for (o of q.options; track o.id) {
+                    <div class="ler-option"
+                         [class.correct]="o.isCorrect"
+                         [class.wrong]="!o.isCorrect && isSelected(q, o.id)">
+                      <span class="ler-opt-mark">
+                        @if (o.isCorrect) {✓} @else if (isSelected(q, o.id)) {✗} @else {•}
+                      </span>
+                      <span class="ler-opt-text">{{ o.text }}</span>
+                      @if (o.isCorrect) { <span class="ler-tag ler-tag--green">correct answer</span> }
+                      @if (isSelected(q, o.id)) { <span class="ler-tag">✔ selected</span> }
+                    </div>
+                  }
+                </div>
+                @if (q.autoMarks != null) {
+                  <p class="ler-auto-note">⚡ Auto-graded: {{ q.autoMarks }}/{{ q.points }} (exact match)</p>
+                }
+              }
+              @case (QType.FileUpload) {
+                @if (q.hasFile) {
+                  <div class="ler-file">
+                    <span class="ler-file-icon">📎</span>
+                    <strong class="ler-file-name">{{ q.fileName || 'Uploaded file' }}</strong>
+                    <button type="button" class="ler-btn ler-btn--outline ler-btn--sm"
+                            (click)="viewFile(q.answerId)">⬇ View</button>
+                  </div>
+                } @else {
+                  <p class="ler-noanswer">No file uploaded</p>
+                }
+              }
+              @default {
+                @if (q.textAnswer) {
+                  <blockquote class="ler-quote">{{ q.textAnswer }}</blockquote>
+                } @else {
+                  <p class="ler-noanswer">No answer given</p>
+                }
+              }
+            }
+          </section>
+        }
+
+        <!-- feedback + save -->
+        <section class="ler-card ler-save-card">
+          <label class="ler-feedback-label" for="lerFeedback">💬 Feedback for the student (optional)</label>
+          <textarea id="lerFeedback" rows="3" class="ler-feedback"
+                    placeholder="Great work! Revise chapter 3 for question 2…"
+                    [ngModel]="feedback()"
+                    (ngModelChange)="feedback.set($event)"></textarea>
+          <div class="ler-save-row">
+            <div class="ler-total">
+              Total: <strong>{{ currentTotal() }}</strong> / {{ s.maxTotal }}
+            </div>
+            <button type="button" class="ler-btn ler-btn--primary"
+                    [disabled]="isSaving()" (click)="saveMarks()">
+              {{ isSaving() ? 'Saving…' : '💾 Save marks' }}
+            </button>
+          </div>
+        </section>
+      }
+    }
+  </div>
+</div>

@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LearningApiService } from './learning-api.service';
 import { LiveClassService } from './live-class-service';
 import { ExamService } from './exam.service';
+import { LiveExamService } from './live-exam.service';
 import { LanguageService } from './language.service';
 
 /** One row of the student's "Today's Agenda" (navbar ticker/dropdown). */
@@ -29,6 +30,7 @@ export class AgendaService {
   private readonly learningApi = inject(LearningApiService);
   private readonly liveClass = inject(LiveClassService);
   private readonly examService = inject(ExamService);
+  private readonly liveExam = inject(LiveExamService);
   private readonly lang = inject(LanguageService);
 
   private readonly WINDOW_DAYS = 7;
@@ -132,6 +134,18 @@ export class AgendaService {
             items.push({ kind: 'exam', icon: '📝', courseId: c.id, courseTitle: c.title, detail: ex.title ?? '', days: this.dayDiff(dl), sortKey: dl, link: ['/enrolled-course', c.id] });
           }
         } catch { /* ignore this course's exams */ }
+
+        try {
+          // Live-class exams (Google-Forms style): published & not yet submitted → due now.
+          const lxRes: any = await firstValueFrom(this.liveExam.available(c.id));
+          const list = lxRes?.data ?? lxRes?.Data ?? [];
+          for (const lx of (Array.isArray(list) ? list : [])) {
+            // status 1 = Published; myStatus -1 = NotStarted, 0 = InProgress (still open for me)
+            if (lx?.status !== 1 || (lx?.myStatus !== -1 && lx?.myStatus !== 0)) continue;
+            // Open until the teacher closes it — pin right after live-now items.
+            items.push({ kind: 'exam', icon: '📝', courseId: c.id, courseTitle: c.title, detail: lx.title ?? '', days: 0, sortKey: 0, link: ['/live-exam', lx.examId] });
+          }
+        } catch { /* ignore this course's live exams */ }
       }));
 
       items.sort((a, b) => a.sortKey - b.sortKey);

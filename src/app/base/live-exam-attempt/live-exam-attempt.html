@@ -1,0 +1,348 @@
+<app-navbar></app-navbar>
+
+<div class="lea-page">
+  <div class="lea-container">
+
+    <!-- persistent back — students can always leave; an in-progress attempt is saved and resumable -->
+    <button type="button" class="lea-topback" (click)="back()">← Back to course</button>
+
+    @if (isLoading()) {
+      <div class="lea-state">
+        <div class="lea-spinner"></div>
+        <p>Loading exam…</p>
+      </div>
+    }
+
+    @else if (loadError()) {
+      <!-- 404 / 403 / load failure -->
+      <div class="lea-card lea-cover lea-state-card">
+        <div class="lea-state-icon">😕</div>
+        <h2>We couldn't open this exam</h2>
+        <p class="lea-muted">{{ loadError() }}</p>
+        <button type="button" class="lea-btn lea-btn--outline" (click)="back()">← Go back</button>
+      </div>
+    }
+
+    @else if (view(); as v) {
+
+      <!-- ✅ Success screen (right after submitting in this session) -->
+      @if (justSubmitted()) {
+        <div class="lea-card lea-cover lea-state-card">
+          <div class="lea-state-icon">✅</div>
+          <h2>Your response has been recorded</h2>
+          <p class="lea-muted">Thanks for submitting “{{ v.exam.title }}”. Your teacher will review and grade it.</p>
+          <div class="lea-state-actions">
+            <button type="button" class="lea-btn lea-btn--primary" (click)="viewStatus()">View status</button>
+            <button type="button" class="lea-btn lea-btn--outline" (click)="back()">← Back to course</button>
+          </div>
+        </div>
+      }
+
+      @else {
+        @switch (v.myState) {
+
+          <!-- ── 1 · NOT STARTED — cover / intro ─────────────────── -->
+          @case (MyState.NotStarted) {
+            @if (isClosed()) {
+              <div class="lea-card lea-cover lea-state-card">
+                <div class="lea-state-icon">🚫</div>
+                <h2>This exam is closed</h2>
+                <p class="lea-muted">“{{ v.exam.title }}” is no longer accepting responses.</p>
+                <button type="button" class="lea-btn lea-btn--outline" (click)="back()">← Back to course</button>
+              </div>
+            } @else {
+              <div class="lea-card lea-cover lea-intro">
+                <span class="lea-chip">📺 {{ v.exam.liveClassTitle }}</span>
+                <h1>{{ v.exam.title }}</h1>
+                @if (v.exam.description) {
+                  <p class="lea-desc">{{ v.exam.description }}</p>
+                }
+                <div class="lea-meta-row">
+                  <span class="lea-meta-pill">📋 {{ v.exam.questionCount }} question{{ v.exam.questionCount === 1 ? '' : 's' }}</span>
+                  <span class="lea-meta-pill">🏆 {{ v.exam.maxTotal }} points</span>
+                  @if (v.exam.durationMinutes) {
+                    <span class="lea-meta-pill">⏱ {{ v.exam.durationMinutes }} min</span>
+                  }
+                </div>
+                @if (v.exam.durationMinutes) {
+                  <div class="lea-duration-notice">
+                    ⏱ You will have <strong>{{ v.exam.durationMinutes }} minutes</strong> once you start. The exam submits automatically when time runs out.
+                  </div>
+                }
+                <p class="lea-once-note">You can submit this exam only once.</p>
+                <button type="button" class="lea-btn lea-btn--primary lea-btn--big"
+                        [disabled]="isStarting()" (click)="startExam()">
+                  {{ isStarting() ? 'Starting…' : '▶ Start exam' }}
+                </button>
+              </div>
+            }
+          }
+
+          <!-- ── 2 · IN PROGRESS — the form ──────────────────────── -->
+          @case (MyState.InProgress) {
+
+            @if (timeOver()) {
+              <div class="lea-card lea-cover lea-state-card">
+                <div class="lea-state-icon">⏰</div>
+                <h2>Time is over</h2>
+                <p class="lea-muted">The submission window for “{{ v.exam.title }}” has closed and your response could not be submitted. Please contact your teacher.</p>
+                <button type="button" class="lea-btn lea-btn--outline" (click)="back()">← Back to course</button>
+              </div>
+            } @else {
+
+            @if (remainingSeconds() !== null) {
+              <div class="lea-timerbar" [class.danger]="(remainingSeconds() ?? 0) < 60">
+                <span class="lea-timer-icon">⏱</span>
+                <span class="lea-timer-text">{{ formatTime(remainingSeconds()) }}</span>
+                <div class="lea-timer-track">
+                  <div class="lea-timer-fill" [style.width.%]="timerPercent()"></div>
+                </div>
+              </div>
+            }
+
+            <div class="lea-card lea-cover lea-formhead">
+              <h1>{{ v.exam.title }}</h1>
+              @if (v.exam.description) {
+                <p class="lea-desc">{{ v.exam.description }}</p>
+              }
+              <div class="lea-formhead-foot">
+                <span class="lea-chip">📺 {{ v.exam.liveClassTitle }}</span>
+                <span class="lea-progress-note">{{ answeredCount() }} / {{ sortedQuestions().length }} answered</span>
+              </div>
+              <p class="lea-required-legend"><span class="lea-star">*</span> Required</p>
+            </div>
+
+            @for (q of sortedQuestions(); track q.id; let i = $index) {
+              <div class="lea-card lea-question"
+                   [id]="'leq-' + q.id"
+                   [class.lea-invalid]="invalidIds().has(q.id)"
+                   [class.lea-answered]="hasAnswer(q)">
+                <div class="lea-q-top">
+                  <span class="lea-q-num">Q{{ i + 1 }}</span>
+                  <span class="lea-points-badge">{{ q.points }} pt{{ q.points === 1 ? '' : 's' }}</span>
+                </div>
+                <p class="lea-q-text">{{ q.text }}@if (q.isRequired) {<span class="lea-star"> *</span>}</p>
+
+                @switch (q.type) {
+
+                  @case (QType.ShortAnswer) {
+                    <input type="text" class="lea-input" placeholder="Your answer"
+                           [ngModel]="answers()[q.id]?.text ?? ''"
+                           (ngModelChange)="setText(q.id, $event)" />
+                  }
+
+                  @case (QType.Paragraph) {
+                    <textarea rows="4" class="lea-input lea-textarea" placeholder="Your answer"
+                              [ngModel]="answers()[q.id]?.text ?? ''"
+                              (ngModelChange)="setText(q.id, $event)"></textarea>
+                  }
+
+                  @case (QType.MultipleChoice) {
+                    <div class="lea-options">
+                      @for (o of sortedOptions(q); track o.id) {
+                        <button type="button" class="lea-option"
+                                [class.selected]="isChosen(q.id, o.id)"
+                                (click)="selectRadio(q.id, o.id)">
+                          <span class="lea-radio" [class.on]="isChosen(q.id, o.id)"></span>
+                          <span class="lea-option-text">{{ o.text }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @case (QType.Checkboxes) {
+                    <div class="lea-options">
+                      @for (o of sortedOptions(q); track o.id) {
+                        <button type="button" class="lea-option"
+                                [class.selected]="isChosen(q.id, o.id)"
+                                (click)="toggleCheckbox(q.id, o.id)">
+                          <span class="lea-checkbox" [class.on]="isChosen(q.id, o.id)">@if (isChosen(q.id, o.id)) {✓}</span>
+                          <span class="lea-option-text">{{ o.text }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @case (QType.FileUpload) {
+                    <div class="lea-file">
+                      <input type="file" hidden #fileInput
+                             [id]="'file-' + q.id"
+                             accept=".pdf,.jpg,.jpeg,.png"
+                             (change)="onFileChange(q.id, $event)" />
+                      @if (answers()[q.id]?.file; as f) {
+                        <div class="lea-file-chip">
+                          <span class="lea-file-icon">📎</span>
+                          <div class="lea-file-meta">
+                            <strong>{{ f.name }}</strong>
+                            <span>{{ fileSizeLabel(f) }}</span>
+                          </div>
+                          <button type="button" class="lea-file-clear" title="Remove file"
+                                  (click)="clearFile(q.id, fileInput)">✕</button>
+                        </div>
+                      } @else {
+                        <label class="lea-file-drop" [for]="'file-' + q.id">
+                          <span class="lea-file-plus">📤</span>
+                          <span class="lea-file-label">Choose a file</span>
+                          <small>PDF, JPG or PNG · max 50 MB</small>
+                        </label>
+                      }
+                    </div>
+                  }
+                }
+
+                @if (invalidIds().has(q.id)) {
+                  <p class="lea-required-msg">⚠ This is a required question</p>
+                }
+              </div>
+            }
+
+            <button type="button" class="lea-btn lea-btn--primary lea-btn--big lea-submit"
+                    [disabled]="isSubmitting()" (click)="requestSubmit()">
+              {{ isSubmitting() ? 'Submitting…' : '📤 Submit' }}
+            </button>
+            }
+          }
+
+          <!-- ── 3 · SUBMITTED — awaiting grading ────────────────── -->
+          @case (MyState.Submitted) {
+            <div class="lea-card lea-cover lea-state-card">
+              <div class="lea-state-icon">📨</div>
+              <h2>Response submitted — awaiting grading</h2>
+              <p class="lea-muted">
+                Your answers for “{{ v.exam.title }}” are with your teacher.
+                @if (submittedAt()) {
+                  <br />Submitted {{ submittedAt() | date:'medium' }}.
+                }
+              </p>
+              <button type="button" class="lea-btn lea-btn--outline" (click)="back()">← Back to course</button>
+            </div>
+          }
+
+          <!-- ── 4 · GRADED — view your score ────────────────────── -->
+          @case (MyState.Graded) {
+            <div class="lea-card lea-cover lea-score-card">
+              <span class="lea-chip">📺 {{ v.exam.liveClassTitle }}</span>
+              <h1>{{ v.exam.title }}</h1>
+              <div class="lea-score-badge">
+                <strong>{{ v.result?.totalAwarded ?? 0 }}</strong>
+                <span>/ {{ v.result?.maxTotal ?? v.exam.maxTotal }}</span>
+              </div>
+              <p class="lea-score-label">Your score</p>
+              @if (v.result?.feedback) {
+                <blockquote class="lea-feedback">“{{ v.result?.feedback }}”</blockquote>
+              }
+              @if (v.result?.gradedAt) {
+                <p class="lea-meta-line">Graded {{ v.result?.gradedAt | date:'medium' }}</p>
+              }
+            </div>
+
+            @for (row of gradedRows(); track row.q.id; let i = $index) {
+              <div class="lea-card lea-question lea-review">
+                <div class="lea-q-top">
+                  <span class="lea-q-num">Q{{ i + 1 }}</span>
+                  <span class="lea-marks-chip"
+                        [class.full]="marksClass(row.q) === 'full'"
+                        [class.partial]="marksClass(row.q) === 'partial'"
+                        [class.zero]="marksClass(row.q) === 'zero'">
+                    {{ awardedOf(row.q.id) }} / {{ row.q.points }}
+                  </span>
+                </div>
+                <p class="lea-q-text">{{ row.q.text }}</p>
+
+                @switch (row.q.type) {
+
+                  @case (QType.MultipleChoice) {
+                    <div class="lea-review-options">
+                      @for (o of sortedOptions(row.q); track o.id) {
+                        <div class="lea-review-option"
+                             [class.correct]="isCorrectOption(row.q.id, o.id)"
+                             [class.wrong]="!isCorrectOption(row.q.id, o.id) && isSelectedOption(row.q.id, o.id)">
+                          <span class="lea-review-mark">
+                            @if (isCorrectOption(row.q.id, o.id)) {✓}
+                            @else if (isSelectedOption(row.q.id, o.id)) {✗}
+                            @else {•}
+                          </span>
+                          <span class="lea-review-text">{{ o.text }}</span>
+                          @if (isSelectedOption(row.q.id, o.id)) {
+                            <span class="lea-selected-tag">✔ selected</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  @case (QType.Checkboxes) {
+                    <div class="lea-review-options">
+                      @for (o of sortedOptions(row.q); track o.id) {
+                        <div class="lea-review-option"
+                             [class.correct]="isCorrectOption(row.q.id, o.id)"
+                             [class.wrong]="!isCorrectOption(row.q.id, o.id) && isSelectedOption(row.q.id, o.id)">
+                          <span class="lea-review-mark">
+                            @if (isCorrectOption(row.q.id, o.id)) {✓}
+                            @else if (isSelectedOption(row.q.id, o.id)) {✗}
+                            @else {•}
+                          </span>
+                          <span class="lea-review-text">{{ o.text }}</span>
+                          @if (isSelectedOption(row.q.id, o.id)) {
+                            <span class="lea-selected-tag">✔ selected</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  @case (QType.FileUpload) {
+                    @if (row.r?.hasFile) {
+                      <div class="lea-file-chip lea-file-chip--review">
+                        <span class="lea-file-icon">📎</span>
+                        <div class="lea-file-meta">
+                          <strong>{{ row.r?.fileName || 'Uploaded file' }}</strong>
+                        </div>
+                        <button type="button" class="lea-btn lea-btn--outline lea-btn--sm"
+                                (click)="downloadMyFile(row.q.id)">⬇ Download my file</button>
+                      </div>
+                    } @else {
+                      <p class="lea-noanswer">No file uploaded</p>
+                    }
+                  }
+
+                  @default {
+                    @if (row.r?.textAnswer) {
+                      <blockquote class="lea-quote">{{ row.r?.textAnswer }}</blockquote>
+                    } @else {
+                      <p class="lea-noanswer">No answer given</p>
+                    }
+                  }
+                }
+              </div>
+            }
+
+            <button type="button" class="lea-btn lea-btn--outline lea-back-bottom" (click)="back()">← Back to course</button>
+          }
+        }
+      }
+    }
+  </div>
+</div>
+
+<!-- Confirm submit modal -->
+@if (showConfirmModal()) {
+  <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Confirm submit dialog" (click)="showConfirmModal.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>📤 Submit exam?</h2>
+        <button type="button" class="icon-btn" (click)="showConfirmModal.set(false)">✕</button>
+      </div>
+      <p class="modal-text">
+        You can submit only once — after this you won't be able to change your answers.
+      </p>
+      <p class="modal-subtext">{{ answeredCount() }} of {{ sortedQuestions().length }} questions answered.</p>
+      <div class="modal-actions">
+        <button type="button" class="lea-btn lea-btn--outline" (click)="showConfirmModal.set(false)">Cancel</button>
+        <button type="button" class="lea-btn lea-btn--primary" [disabled]="isSubmitting()" (click)="confirmSubmit()">
+          {{ isSubmitting() ? 'Submitting…' : 'Yes, submit' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

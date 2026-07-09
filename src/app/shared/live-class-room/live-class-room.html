@@ -13,6 +13,14 @@
       }
     </div>
     @if (isTeacher() && !isLoading() && !error()) {
+      <!-- Attached exam: publish near the end of class (draft → live) -->
+      @if (examStatus() === 0) {
+        <button class="lc-exam-btn" (click)="publishExam()" [disabled]="examBusy()">
+          📝 {{ examBusy() ? 'Publishing…' : 'Publish exam' }}
+        </button>
+      } @else if (examStatus() === 1) {
+        <span class="lc-exam-chip">📝 Exam live</span>
+      }
       <button class="lc-end-btn" (click)="endClass()" [disabled]="recState() === 'uploading'">
         @if (recState() === 'uploading') {
           {{ lang.t().lcRecUploading }} {{ uploadPct() }}%

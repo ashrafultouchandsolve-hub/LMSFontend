@@ -72,7 +72,8 @@
 
       @if (view() === 'live' && courseId()) {
         <app-course-live [courseId]="courseId()"></app-course-live>
-        <app-course-recordings [courseId]="courseId()"></app-course-recordings>
+        <!-- Each class grouped with its recording + its exam (take / continue / result-answer sheet) -->
+        <app-course-classwork [courseId]="courseId()"></app-course-classwork>
         <!-- Free live class recordings for this course (enrolled students see them here too) -->
         <app-course-recordings [courseId]="courseId()" [free]="true"></app-course-recordings>
       }

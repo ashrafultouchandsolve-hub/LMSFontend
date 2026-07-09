@@ -98,5 +98,21 @@ export const routes: Routes = [
       loadComponent: () => import('./base/teacher-evaluation/teacher-evaluation').then((m) => m.TeacherEvaluation),
       canActivate: [authGuard],
     },
+    // ✅ Live-class exams (Google-Forms style) — builder (staff), taker (student), responses (staff)
+    {
+      path: 'live-exam-editor/:liveClassId',
+      loadComponent: () => import('./base/live-exam-editor/live-exam-editor').then((m) => m.LiveExamEditor),
+      canActivate: [authGuard, staffGuard],
+    },
+    {
+      path: 'live-exam/:examId',
+      loadComponent: () => import('./base/live-exam-attempt/live-exam-attempt').then((m) => m.LiveExamAttempt),
+      canActivate: [authGuard],
+    },
+    {
+      path: 'live-exam-responses/:examId',
+      loadComponent: () => import('./base/live-exam-responses/live-exam-responses').then((m) => m.LiveExamResponses),
+      canActivate: [authGuard, staffGuard],
+    },
     { path: '**', redirectTo: 'homepage' },
 ];

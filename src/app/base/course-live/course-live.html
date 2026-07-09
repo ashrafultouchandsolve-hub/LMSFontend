@@ -15,6 +15,22 @@
       </div>
       <a [routerLink]="['/live-class', active.id]" class="cl-join">{{ lang.t().ecJoinNow }} →</a>
     </div>
+    @if (examFor(active.id); as ex) {
+      <div class="cl-exam-row cl-exam-row--highlight">
+        <span class="cl-exam-title">📝 {{ ex.title }}</span>
+        @if (ex.myStatus === 2) {
+          <a [routerLink]="['/live-exam', ex.examId]" class="cl-exam-btn cl-exam-btn--result">🏆 View result — {{ ex.totalAwarded }}/{{ ex.maxTotal }}</a>
+        } @else if (ex.myStatus === 1) {
+          <span class="cl-exam-chip">📨 Submitted — awaiting grading</span>
+        } @else if (ex.myStatus === 0) {
+          <a [routerLink]="['/live-exam', ex.examId]" class="cl-exam-btn">▶ Continue exam</a>
+        } @else if (ex.status === 1) {
+          <a [routerLink]="['/live-exam', ex.examId]" class="cl-exam-btn">📝 Take exam</a>
+        } @else {
+          <span class="cl-exam-chip cl-exam-chip--closed">Exam closed</span>
+        }
+      </div>
+    }
   }
 
   @if (liveClasses().length === 0) {
@@ -28,6 +44,21 @@
               <p class="cl-card-title">{{ lc.title }}</p>
               <p class="cl-card-time">🕐 {{ lc.scheduledAt | date:'dd MMM, hh:mm a' }}</p>
               @if (lc.description) { <p class="cl-card-desc">{{ lc.description }}</p> }
+              @if (examFor(lc.id); as ex) {
+                <div class="cl-exam-row">
+                  @if (ex.myStatus === 2) {
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cl-exam-btn cl-exam-btn--result">🏆 View result — {{ ex.totalAwarded }}/{{ ex.maxTotal }}</a>
+                  } @else if (ex.myStatus === 1) {
+                    <span class="cl-exam-chip">📨 Exam submitted — awaiting grading</span>
+                  } @else if (ex.myStatus === 0) {
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cl-exam-btn">▶ Continue exam</a>
+                  } @else if (ex.status === 1) {
+                    <a [routerLink]="['/live-exam', ex.examId]" class="cl-exam-btn">📝 Take exam{{ ex.durationMinutes ? ' · ' + ex.durationMinutes + ' min' : '' }}</a>
+                  } @else {
+                    <span class="cl-exam-chip cl-exam-chip--closed">Exam closed</span>
+                  }
+                </div>
+              }
             </div>
             <div class="cl-card-status">
               @if (lc.isEnded) {

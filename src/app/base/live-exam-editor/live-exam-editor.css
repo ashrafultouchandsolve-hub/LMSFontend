@@ -1,0 +1,241 @@
+:host { display: block; }
+
+/* ── page scaffold (Google-Forms tint) ─────────────────────────── */
+.lee-page {
+  min-height: 100vh;
+  background: #f3f0fa;
+  padding: 24px 16px 120px;
+}
+.lee-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ── top bar ───────────────────────────────────────────────────── */
+.lee-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 16px;
+}
+.lee-back {
+  background: #fff; border: 1px solid #e2ddf2; color: #4b3f72;
+  padding: 7px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.lee-back:hover { background: #ece7f8; }
+.lee-topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lee-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+  background: #ece7f8; color: #5b3fa8; border: 1px solid #ddd3f0;
+}
+.lee-chip--published { background: #e8f7ee; color: #1d7a45; border-color: #bfe8cf; }
+.lee-chip--closed { background: #f1f5f9; color: #63708d; border-color: #dbe3ef; }
+.lee-chip--count { background: #fff; color: #4b5563; border-color: #e5e7eb; }
+
+/* ── loading / empty states ────────────────────────────────────── */
+.lee-state {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 60px 0; color: #6b7280; font-size: 14px;
+}
+.lee-state span { font-size: 34px; }
+.lee-spinner {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid #ddd3f0; border-top-color: #7c3aed;
+  animation: leeSpin .8s linear infinite;
+}
+@keyframes leeSpin { to { transform: rotate(360deg); } }
+
+/* ── cards ─────────────────────────────────────────────────────── */
+.lee-card {
+  background: #fff; border: 1px solid #e6e1f3; border-radius: 12px;
+  padding: 20px 22px; margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(60, 40, 120, .06);
+}
+.lee-header-card { border-top: 9px solid #7c3aed; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+.lee-context { margin: 0 0 12px; font-size: 13px; color: #6b7280; }
+.lee-context strong { color: #4b3f72; }
+
+.lee-title-input {
+  width: 100%; border: none; border-bottom: 2px solid #e6e1f3;
+  font-size: 24px; font-weight: 800; color: #111827; padding: 6px 2px;
+  outline: none; background: transparent; transition: border-color .15s;
+}
+.lee-title-input:focus { border-bottom-color: #7c3aed; }
+.lee-desc-input {
+  width: 100%; border: none; border-bottom: 1px solid #eee9fb;
+  font-size: 14px; color: #4b5563; padding: 8px 2px; margin-top: 6px;
+  outline: none; background: transparent; resize: vertical;
+}
+.lee-desc-input:focus { border-bottom-color: #a78bfa; }
+
+.lee-timed-row {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  margin-top: 14px;
+}
+.lee-switch .form-check-input:checked { background-color: #7c3aed; border-color: #7c3aed; }
+.lee-switch .form-check-label { font-size: 13.5px; font-weight: 600; color: #374151; }
+.lee-minutes { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: #4b5563; }
+.lee-minutes input {
+  width: 84px; border: 1px solid #ddd3f0; border-radius: 8px;
+  padding: 6px 10px; font-size: 14px; font-weight: 700; color: #4b3f72;
+}
+.lee-lock-note {
+  margin: 14px 0 0; padding: 10px 14px; border-radius: 10px;
+  background: #fff8e6; border: 1px solid #fde68a;
+  font-size: 12.5px; color: #92400e;
+}
+
+/* ── question cards ────────────────────────────────────────────── */
+.lee-q-card { padding-top: 16px; }
+.lee-q-top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.lee-q-num { font-size: 12px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: #7c3aed; }
+.lee-type-select {
+  border: 1px solid #ddd3f0; border-radius: 10px; background: #faf9fe;
+  padding: 8px 12px; font-size: 13.5px; font-weight: 600; color: #374151;
+  cursor: pointer; outline: none;
+}
+.lee-type-select:focus { border-color: #7c3aed; }
+.lee-q-text {
+  width: 100%; border: none; border-bottom: 1.5px solid #e6e1f3;
+  font-size: 16px; font-weight: 600; color: #111827; padding: 8px 2px;
+  outline: none; background: #faf9fe; border-radius: 6px 6px 0 0;
+}
+.lee-q-text:focus { border-bottom-color: #7c3aed; }
+
+.lee-answer-preview {
+  margin: 14px 0 0; padding-bottom: 6px; max-width: 320px;
+  border-bottom: 1px dotted #cbd5e1; color: #9ca3af; font-size: 13.5px;
+}
+.lee-answer-preview--long { max-width: 560px; }
+.lee-file-preview {
+  margin-top: 14px; padding: 14px; border: 1.5px dashed #ddd3f0;
+  border-radius: 10px; color: #6b7280; font-size: 13.5px; background: #faf9fe;
+}
+
+/* options builder */
+.lee-options { margin-top: 14px; display: grid; gap: 8px; }
+.lee-opt-row { display: flex; align-items: center; gap: 10px; }
+.lee-correct-mark {
+  width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%;
+  border: 2px solid #c4b5fd; background: #fff; color: #fff;
+  font-size: 13px; font-weight: 800; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .12s;
+}
+.lee-correct-mark--square { border-radius: 6px; }
+.lee-correct-mark.checked { background: #16a34a; border-color: #16a34a; }
+.lee-correct-mark:disabled { opacity: .55; cursor: default; }
+.lee-opt-input {
+  flex: 1; border: none; border-bottom: 1px solid #eee9fb;
+  font-size: 14px; color: #374151; padding: 6px 2px; outline: none; background: transparent;
+}
+.lee-opt-input:focus { border-bottom-color: #a78bfa; }
+.lee-opt-input.correct { color: #15803d; font-weight: 600; }
+.lee-correct-tag {
+  font-size: 11px; font-weight: 700; color: #15803d;
+  background: #e8f7ee; border: 1px solid #bfe8cf;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.lee-add-opt {
+  justify-self: start; background: none; border: none; color: #7c3aed;
+  font-size: 13.5px; font-weight: 700; cursor: pointer; padding: 4px 2px;
+}
+.lee-add-opt:hover { text-decoration: underline; }
+.lee-opt-hint { margin: 2px 0 0; font-size: 12px; color: #9ca3af; }
+
+/* card footer */
+.lee-q-footer {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid #f1eefa;
+}
+.lee-points { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #4b5563; }
+.lee-points input {
+  width: 74px; border: 1px solid #ddd3f0; border-radius: 8px;
+  padding: 5px 10px; font-size: 14px; font-weight: 700; color: #4b3f72;
+}
+.lee-required { margin: 0; }
+.lee-q-tools { margin-left: auto; display: flex; gap: 6px; }
+.lee-icon-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid #e6e1f3; background: #fff; color: #6b7280;
+  font-size: 14px; cursor: pointer; transition: all .12s;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.lee-icon-btn:hover:not(:disabled) { background: #f3f0fa; color: #4b3f72; }
+.lee-icon-btn:disabled { opacity: .4; cursor: default; }
+.lee-icon-btn--danger:hover:not(:disabled) { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+
+/* add question */
+.lee-add-question {
+  width: 100%; padding: 14px; margin-bottom: 14px;
+  border: 1.5px dashed #c4b5fd; border-radius: 12px;
+  background: rgba(124, 58, 237, .04); color: #7c3aed;
+  font-size: 14.5px; font-weight: 700; cursor: pointer; transition: all .15s;
+}
+.lee-add-question:hover { background: rgba(124, 58, 237, .09); }
+.lee-empty { padding: 30px 0; }
+
+/* ── sticky footer bar ─────────────────────────────────────────── */
+.lee-footer {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px clamp(16px, 6vw, 60px);
+  background: rgba(255, 255, 255, .96); backdrop-filter: blur(6px);
+  border-top: 1px solid #e6e1f3; box-shadow: 0 -8px 24px -18px rgba(60, 40, 120, .5);
+  flex-wrap: wrap;
+}
+.lee-footer-meta { font-size: 13px; color: #6b7280; }
+.lee-footer-meta strong { color: #4b3f72; }
+.lee-dot { margin: 0 6px; }
+.lee-footer-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.lee-responses-link { font-size: 13.5px; font-weight: 700; color: #7c3aed; text-decoration: none; }
+.lee-responses-link:hover { text-decoration: underline; }
+
+.lee-btn {
+  padding: 9px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; border: 1px solid transparent; transition: all .15s;
+}
+.lee-btn:disabled { opacity: .6; cursor: default; }
+.lee-btn--primary { background: #7c3aed; color: #fff; }
+.lee-btn--primary:hover:not(:disabled) { background: #6d28d9; }
+.lee-btn--outline { background: #fff; color: #7c3aed; border-color: #c4b5fd; }
+.lee-btn--outline:hover:not(:disabled) { background: #f3f0fa; }
+.lee-btn--danger { background: #fff; color: #b91c1c; border-color: #fecaca; }
+.lee-btn--danger:hover:not(:disabled) { background: #fee2e2; }
+.lee-btn--ghost { background: #f3f4f6; color: #374151; }
+.lee-btn--ghost:hover:not(:disabled) { background: #e5e7eb; }
+
+/* ── modal (hand-rolled, app convention) ───────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(17, 24, 39, .55);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.modal-card {
+  width: min(440px, 100%); background: #fff; border-radius: 16px;
+  padding: 22px; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .45);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.modal-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: #111827; }
+.icon-btn {
+  width: 30px; height: 30px; border-radius: 8px; border: none;
+  background: #f3f4f6; color: #6b7280; cursor: pointer; font-size: 13px;
+}
+.icon-btn:hover { background: #e5e7eb; }
+.modal-body-text { margin: 14px 0 18px; font-size: 13.5px; color: #4b5563; line-height: 1.55; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ── responsive ────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .lee-page { padding: 14px 10px 140px; }
+  .lee-card { padding: 16px; }
+  .lee-title-input { font-size: 20px; }
+  .lee-q-tools { margin-left: 0; }
+  .lee-footer { flex-direction: column; align-items: stretch; }
+  .lee-footer-actions { justify-content: stretch; }
+  .lee-footer-actions .lee-btn { flex: 1; }
+}

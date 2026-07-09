@@ -1,0 +1,268 @@
+:host { display: block; }
+
+/* ── page scaffold (Google-Forms tint) ─────────────────────────── */
+.lea-page {
+  min-height: 100vh;
+  background: #f3f0fa;
+  padding: 24px 16px 80px;
+}
+.lea-container { max-width: 760px; margin: 0 auto; }
+
+.lea-topback {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 14px;
+  background: #fff; border: 1px solid #e2ddf2; color: #4b3f72;
+  padding: 8px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.lea-topback:hover { background: #ece7f8; }
+
+/* ── states ────────────────────────────────────────────────────── */
+.lea-state {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 70px 0; color: #6b7280; font-size: 14px;
+}
+.lea-spinner {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid #ddd3f0; border-top-color: #7c3aed;
+  animation: leaSpin .8s linear infinite;
+}
+@keyframes leaSpin { to { transform: rotate(360deg); } }
+
+/* ── cards ─────────────────────────────────────────────────────── */
+.lea-card {
+  background: #fff; border: 1px solid #e6e1f3; border-radius: 12px;
+  padding: 22px 24px; margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(60, 40, 120, .06);
+}
+.lea-cover { border-top: 9px solid #7c3aed; }
+.lea-cover h1 { margin: 10px 0 4px; font-size: 26px; font-weight: 800; color: #111827; }
+.lea-desc { margin: 6px 0 0; font-size: 14px; color: #4b5563; line-height: 1.55; }
+.lea-muted { color: #6b7280; font-size: 14px; line-height: 1.55; }
+.lea-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px;
+  background: #ece7f8; color: #5b3fa8; border: 1px solid #ddd3f0;
+  font-size: 12px; font-weight: 700;
+}
+
+/* state card (error / closed / submitted / success) */
+.lea-state-card { text-align: center; padding: 46px 24px; }
+.lea-state-card h2 { margin: 10px 0 8px; font-size: 21px; font-weight: 800; color: #111827; }
+.lea-state-icon { font-size: 44px; }
+.lea-state-actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.lea-state-card > .lea-btn { margin-top: 18px; }
+
+/* intro / cover */
+.lea-intro { text-align: left; }
+.lea-meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.lea-meta-pill {
+  padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+  background: #faf9fe; color: #4b3f72; border: 1px solid #e6e1f3;
+}
+.lea-duration-notice {
+  margin-top: 16px; padding: 12px 16px; border-radius: 10px;
+  background: #fff8e6; border: 1px solid #fde68a;
+  color: #92400e; font-size: 13.5px; line-height: 1.5;
+}
+.lea-once-note { margin: 14px 0 0; font-size: 12.5px; color: #9ca3af; }
+.lea-intro .lea-btn--big { margin-top: 18px; }
+
+/* ── timer bar ─────────────────────────────────────────────────── */
+.lea-timerbar {
+  position: sticky; top: 8px; z-index: 30;
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; border: 1px solid #e6e1f3; border-radius: 12px;
+  padding: 10px 16px; margin-bottom: 14px;
+  box-shadow: 0 8px 20px -12px rgba(60, 40, 120, .35);
+}
+.lea-timer-icon { font-size: 16px; }
+.lea-timer-text {
+  font-size: 17px; font-weight: 800; color: #4b3f72;
+  font-variant-numeric: tabular-nums; min-width: 52px;
+}
+.lea-timer-track { flex: 1; height: 8px; border-radius: 999px; background: #ece7f8; overflow: hidden; }
+.lea-timer-fill { height: 100%; border-radius: 999px; background: #7c3aed; transition: width 1s linear; }
+.lea-timerbar.danger { border-color: #fecaca; }
+.lea-timerbar.danger .lea-timer-text { color: #b91c1c; }
+.lea-timerbar.danger .lea-timer-fill { background: #ef4444; }
+
+/* form head */
+.lea-formhead-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 14px; flex-wrap: wrap;
+}
+.lea-progress-note { font-size: 12.5px; font-weight: 700; color: #7c3aed; }
+.lea-required-legend {
+  margin: 14px 0 0; padding-top: 12px; border-top: 1px solid #f1eefa;
+  font-size: 12.5px; color: #b91c1c;
+}
+.lea-star { color: #dc2626; font-weight: 800; }
+
+/* ── question cards ────────────────────────────────────────────── */
+.lea-question { transition: border-color .15s, box-shadow .15s; }
+.lea-question.lea-invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, .12); }
+.lea-q-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.lea-q-num { font-size: 11.5px; font-weight: 800; letter-spacing: .5px; color: #7c3aed; }
+.lea-points-badge {
+  font-size: 11.5px; font-weight: 700; color: #4b3f72;
+  background: #faf9fe; border: 1px solid #e6e1f3;
+  padding: 3px 10px; border-radius: 999px;
+}
+.lea-q-text { margin: 0 0 14px; font-size: 15.5px; font-weight: 600; color: #111827; line-height: 1.5; }
+
+/* text inputs */
+.lea-input {
+  width: 100%; max-width: 560px;
+  border: none; border-bottom: 1.5px solid #ddd3f0;
+  font-size: 14px; color: #111827; padding: 8px 2px;
+  outline: none; background: transparent; transition: border-color .15s;
+}
+.lea-input:focus { border-bottom-color: #7c3aed; }
+.lea-textarea { max-width: 100%; resize: vertical; }
+
+/* choice options */
+.lea-options { display: grid; gap: 8px; }
+.lea-option {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  width: 100%; padding: 11px 14px;
+  background: #faf9fe; border: 1.5px solid #eee9fb; border-radius: 10px;
+  cursor: pointer; transition: all .12s; font-size: 14px; color: #374151;
+}
+.lea-option:hover { border-color: #c4b5fd; }
+.lea-option.selected { background: #f3f0fa; border-color: #7c3aed; }
+.lea-radio {
+  width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%;
+  border: 2px solid #c4b5fd; background: #fff; position: relative;
+}
+.lea-radio.on { border-color: #7c3aed; }
+.lea-radio.on::after {
+  content: ''; position: absolute; inset: 3px; border-radius: 50%; background: #7c3aed;
+}
+.lea-checkbox {
+  width: 18px; height: 18px; flex-shrink: 0; border-radius: 5px;
+  border: 2px solid #c4b5fd; background: #fff; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; line-height: 1;
+}
+.lea-checkbox.on { background: #7c3aed; border-color: #7c3aed; }
+.lea-option-text { flex: 1; }
+
+/* file upload */
+.lea-file-drop {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 22px; border: 1.5px dashed #c4b5fd; border-radius: 12px;
+  background: #faf9fe; cursor: pointer; transition: all .15s; text-align: center;
+}
+.lea-file-drop:hover { background: #f3f0fa; }
+.lea-file-plus { font-size: 24px; }
+.lea-file-label { font-size: 14px; font-weight: 700; color: #7c3aed; }
+.lea-file-drop small { font-size: 11.5px; color: #9ca3af; }
+.lea-file-chip {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border: 1px solid #ddd3f0; border-radius: 12px; background: #faf9fe;
+}
+.lea-file-icon { font-size: 20px; }
+.lea-file-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lea-file-meta strong { font-size: 13.5px; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lea-file-meta span { font-size: 11.5px; color: #9ca3af; }
+.lea-file-clear {
+  width: 28px; height: 28px; border-radius: 8px; border: none;
+  background: #fee2e2; color: #b91c1c; cursor: pointer; font-size: 12px;
+}
+.lea-required-msg { margin: 10px 0 0; font-size: 12.5px; font-weight: 600; color: #dc2626; }
+
+/* submit */
+.lea-submit { width: 100%; }
+
+/* ── graded / score view ───────────────────────────────────────── */
+.lea-score-card { text-align: center; }
+.lea-score-card h1 { font-size: 23px; }
+.lea-score-badge {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  margin-top: 16px; padding: 14px 30px; border-radius: 16px;
+  background: linear-gradient(135deg, #ede9fe, #f5f3ff); border: 1px solid #ddd6fe;
+}
+.lea-score-badge strong { font-size: 38px; font-weight: 800; color: #5b21b6; }
+.lea-score-badge span { font-size: 18px; font-weight: 700; color: #7c6aa6; }
+.lea-score-label { margin: 8px 0 0; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #9ca3af; }
+.lea-feedback {
+  margin: 16px auto 0; max-width: 520px; padding: 12px 18px;
+  background: #faf9fe; border-left: 4px solid #7c3aed; border-radius: 0 10px 10px 0;
+  font-size: 14px; color: #4b5563; font-style: italic; text-align: left;
+}
+.lea-meta-line { margin: 12px 0 0; font-size: 12px; color: #9ca3af; }
+
+.lea-marks-chip {
+  font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px;
+  background: #f1f5f9; color: #63708d; border: 1px solid #dbe3ef;
+}
+.lea-marks-chip.full { background: #e8f7ee; color: #15803d; border-color: #bfe8cf; }
+.lea-marks-chip.partial { background: #fff8e6; color: #b45309; border-color: #fde68a; }
+.lea-marks-chip.zero { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+
+.lea-review-options { display: grid; gap: 8px; }
+.lea-review-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 10px;
+  background: #faf9fe; border: 1.5px solid #eee9fb; font-size: 14px; color: #374151;
+}
+.lea-review-option.correct { background: #f0fdf4; border-color: #86efac; }
+.lea-review-option.wrong { background: #fef2f2; border-color: #fca5a5; }
+.lea-review-mark { width: 18px; text-align: center; font-weight: 800; color: #9ca3af; }
+.lea-review-option.correct .lea-review-mark { color: #16a34a; }
+.lea-review-option.wrong .lea-review-mark { color: #dc2626; }
+.lea-review-text { flex: 1; }
+.lea-selected-tag { font-size: 11px; font-weight: 700; color: #5b3fa8; white-space: nowrap; }
+.lea-quote {
+  margin: 0; padding: 12px 16px;
+  background: #faf9fe; border-left: 4px solid #c4b5fd; border-radius: 0 10px 10px 0;
+  font-size: 14px; color: #374151; white-space: pre-wrap;
+}
+.lea-noanswer { margin: 0; font-size: 13.5px; color: #9ca3af; font-style: italic; }
+.lea-file-chip--review .lea-btn--sm { margin-left: auto; }
+.lea-back-bottom { margin-top: 4px; }
+
+/* ── buttons ───────────────────────────────────────────────────── */
+.lea-btn {
+  padding: 9px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; border: 1px solid transparent; transition: all .15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.lea-btn:disabled { opacity: .6; cursor: default; }
+.lea-btn--primary { background: #7c3aed; color: #fff; }
+.lea-btn--primary:hover:not(:disabled) { background: #6d28d9; }
+.lea-btn--outline { background: #fff; color: #7c3aed; border-color: #c4b5fd; }
+.lea-btn--outline:hover:not(:disabled) { background: #f3f0fa; }
+.lea-btn--big { padding: 13px 26px; font-size: 15px; border-radius: 12px; }
+.lea-btn--sm { padding: 6px 12px; font-size: 12px; }
+
+/* ── modal ─────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(17, 24, 39, .55);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.modal-card {
+  width: min(440px, 100%); background: #fff; border-radius: 16px;
+  padding: 22px; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .45);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.modal-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: #111827; }
+.icon-btn {
+  width: 30px; height: 30px; border-radius: 8px; border: none;
+  background: #f3f4f6; color: #6b7280; cursor: pointer; font-size: 13px;
+}
+.icon-btn:hover { background: #e5e7eb; }
+.modal-text { margin: 14px 0 4px; font-size: 13.5px; color: #4b5563; line-height: 1.55; }
+.modal-subtext { margin: 0 0 18px; font-size: 12.5px; color: #9ca3af; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ── responsive ────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .lea-page { padding: 14px 10px 60px; }
+  .lea-card { padding: 16px; }
+  .lea-cover h1 { font-size: 21px; }
+  .lea-score-badge strong { font-size: 30px; }
+  .lea-state-actions { flex-direction: column; }
+}

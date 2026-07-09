@@ -27,12 +27,12 @@ Right now the "panel" is spread across the profile page + separate routes. A sin
 
 | Idea | What it adds | Effort |
 |---|---|---|
-| **Continue Learning** row | "Pick up where you left off" — last watched lesson per course with a resume button | 🟡 BE (needs last-watched position) |
+| **Continue Learning** row | "Pick up where you left off" — last watched lesson per course with a resume button | 🟡 BE (needs last-watched position) |++++
 | **Today's agenda** | Upcoming live classes, due assignments/exams, expiring courses — all in one strip | 🟡 BE |
-| **Overall progress card** | Combined progress across ALL enrolled courses (not just quiz %) | 🟡 BE |
+| **Overall progress card** | Combined progress across ALL enrolled courses (not just quiz %) | 🟡 BE |++++
 | **Streak tracker** 🔥 | "5-day learning streak" — days the student watched/practiced | 🔴 BE (activity log) |
-| **Weekly goal** | "Watch 3 lessons this week" progress bar | 🟡 BE |
-| **Greeting + motivational quote** | Personalized "Good morning, Rahela 👋" header | 🟢 FE |
+| **Weekly goal** | "Watch 3 lessons this week" progress bar | 🟡 BE |++++
+| **Greeting + motivational quote** | Personalized "Good morning, Rahela 👋" header | 🟢 FE |++++
 
 ---
 

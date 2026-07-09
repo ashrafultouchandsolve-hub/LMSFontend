@@ -285,7 +285,7 @@
       </section>
       }
 
-      @if (isLiveTeacherMode()) {
+      @if (isLiveTeacherMode() || isAdminMode()) {
       <section class="panel live-panel" aria-label="Scheduled live classes">
         <div class="live-panel-head">
           <div>
@@ -306,17 +306,33 @@
                   @if (lc.description) {
                     <p>{{ lc.description }}</p>
                   }
+                  @if (liveExamFor(lc.id); as ex) {
+                    <span class="chip live-exam-chip" [class.published]="ex.status === 1" [class.closed]="ex.status === 2">
+                      {{ liveExamStatusLabel(ex) }}
+                    </span>
+                  }
                 </div>
                 <div class="live-item-actions">
-                  @if (!lc.isActive && !lc.isEnded) {
+                  @if (isLiveTeacherMode() && !lc.isActive && !lc.isEnded) {
                     <button type="button" class="btn btn-danger" (click)="startLiveClass(lc.id)">🔴 {{ lang.t().tcStart }}</button>
                   }
                   @if (lc.isActive) {
                     <a [routerLink]="['/live-class', lc.id]" class="btn btn-outline">{{ lang.t().liveJoin }} →</a>
-                    <button type="button" class="btn btn-danger" (click)="endLiveClass(lc.id)">{{ lang.t().tcEnd }}</button>
+                    @if (isLiveTeacherMode()) {
+                      <button type="button" class="btn btn-danger" (click)="endLiveClass(lc.id)">{{ lang.t().tcEnd }}</button>
+                    }
                   }
                   @if (lc.isEnded) {
                     <span class="chip live-ended">{{ lang.t().liveEnded }}</span>
+                  }
+                  <!-- Google-Forms-style exam attached to this live class (optional) -->
+                  <a [routerLink]="['/live-exam-editor', lc.id]" class="btn btn-outline live-exam-btn">
+                    📝 {{ liveExamFor(lc.id) ? 'Exam' : 'Add exam' }}
+                  </a>
+                  @if (liveExamFor(lc.id); as ex) {
+                    <a [routerLink]="['/live-exam-responses', ex.examId]" class="btn btn-ghost live-exam-btn">
+                      📊 Answers ({{ ex.submittedCount }})
+                    </a>
                   }
                 </div>
               </article>
@@ -324,6 +340,33 @@
           </div>
         } @else {
           <p class="empty-state">{{ lang.t().tcNoLiveScheduled }}</p>
+        }
+
+        <!-- Exams & student answers — stays here even after the live class has ended -->
+        @if (liveExamList().length > 0) {
+          <div class="lxa-panel">
+            <h3>📝 Exams &amp; student answers</h3>
+            <div class="lxa-rows">
+              @for (ex of liveExamList(); track ex.examId) {
+                <div class="lxa-row">
+                  <div class="lxa-info">
+                    <strong>{{ ex.title || 'Untitled exam' }}</strong>
+                    <span class="chip live-exam-chip"
+                          [class.published]="ex.status === 1"
+                          [class.closed]="ex.status === 2">
+                      {{ liveExamStatusLabel(ex) }}
+                    </span>
+                  </div>
+                  <div class="lxa-actions">
+                    <a [routerLink]="['/live-exam-editor', ex.liveClassId]" class="btn btn-outline live-exam-btn">✏️ Edit</a>
+                    <a [routerLink]="['/live-exam-responses', ex.examId]" class="btn btn-primary live-exam-btn">
+                      📊 Answers ({{ ex.submittedCount }})
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
         }
       </section>
       }

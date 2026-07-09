@@ -9,6 +9,7 @@ import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { ExamService, ExamView } from '../../Service/exam.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { CourseLive } from '../course-live/course-live';
+import { CourseClasswork } from '../course-classwork/course-classwork';
 import { CourseRecordings } from '../course-recordings/course-recordings';
 import { CourseExams } from '../course-exams/course-exams';
 import { CoursePractice } from '../course-practice/course-practice';
@@ -48,7 +49,7 @@ type CourseCommentView = {
 
 @Component({
   selector: 'app-enrolled-course',
-  imports: [RouterLink, Navbar, CourseLive, CourseRecordings, CourseExams, CoursePractice],
+  imports: [RouterLink, Navbar, CourseLive, CourseClasswork, CourseRecordings, CourseExams, CoursePractice],
   templateUrl: './enrolled-course.html',
   styleUrl: './enrolled-course.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

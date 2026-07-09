@@ -14,6 +14,7 @@ import {
 } from '../../Service/learning-api.service';
 import { FreeLiveClass, LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { ExamService, ExamView } from '../../Service/exam.service';
+import { LiveExamService, LiveExamSummary } from '../../Service/live-exam.service';
 import { PracticeService, PracticeMaterial, PracticeType } from '../../Service/practice.service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
@@ -1344,8 +1345,39 @@ private async loadTeacherCourses(): Promise<void> {
     else await this.loadTeacherCourses();
   }
 
+  // ── Live-class exams (Google-Forms style) — per-class summary chips ──
+  private readonly liveExamService = inject(LiveExamService);
+  protected readonly liveExamSummaries = signal<Map<string, LiveExamSummary>>(new Map());
+
+  /** Live-exam summary for one live class (null = no exam created yet). */
+  protected liveExamFor(liveClassId: string): LiveExamSummary | null {
+    return this.liveExamSummaries().get(liveClassId) ?? null;
+  }
+
+  /** Every exam of the selected course — survives the live class ending (ended classes drop out of the class list). */
+  protected readonly liveExamList = computed(() =>
+    Array.from(this.liveExamSummaries().values())
+      .sort((a, b) => (a.status === 1 ? 0 : 1) - (b.status === 1 ? 0 : 1)));
+
+  protected liveExamStatusLabel(s: LiveExamSummary): string {
+    return s.status === 1 ? `🟢 Exam live · ${s.submittedCount} submitted`
+         : s.status === 2 ? `⚪ Exam closed · ${s.gradedCount}/${s.submittedCount} graded`
+         : '📝 Exam draft';
+  }
+
+  private async loadLiveExamSummaries(courseId: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.liveExamService.courseSummary(courseId));
+      const rows: LiveExamSummary[] = res?.data ?? res?.Data ?? [];
+      this.liveExamSummaries.set(new Map(rows.map((r) => [r.liveClassId, r])));
+    } catch {
+      this.liveExamSummaries.set(new Map());
+    }
+  }
+
   private async loadLiveClasses(courseId: string): Promise<void> {
     this.isLoadingLiveClasses.set(true);
+    void this.loadLiveExamSummaries(courseId);
 
     try {
       const response = await firstValueFrom(this.liveClassService.getByCourse(courseId));

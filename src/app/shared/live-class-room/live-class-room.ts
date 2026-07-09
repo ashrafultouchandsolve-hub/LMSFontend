@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpEventType } from '@angular/common/http';
 import { LiveClassService } from '../../Service/live-class-service';
+import { LiveExamService } from '../../Service/live-exam.service';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
 
@@ -24,6 +25,7 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
   private readonly route   = inject(ActivatedRoute);
   private readonly router  = inject(Router);
   private readonly svc     = inject(LiveClassService);
+  private readonly examSvc = inject(LiveExamService);
   private readonly authSvc = inject(AuthService);
   protected readonly lang  = inject(LanguageService);
 
@@ -40,6 +42,11 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
   readonly recState         = signal<RecState>('idle');
   readonly recNote          = signal('');
   readonly uploadPct        = signal(0);
+
+  // ── Attached live exam (teacher, course classes only) ────────────
+  readonly examId     = signal('');
+  readonly examStatus = signal<number | null>(null);   // 0 Draft | 1 Published | 2 Closed | null = none
+  readonly examBusy   = signal(false);
 
   private jitsiApi: any = null;
   private mediaRecorder: MediaRecorder | null = null;
@@ -76,6 +83,11 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
         // Auto-prompt the host to record — both course AND free classes are recorded now.
         if (this.isTeacher()) {
           this.showRecordPrompt.set(true);
+        }
+
+        // Course classes: load the attached exam (if any) so the teacher can publish in-room.
+        if (this.isTeacher() && !free) {
+          this.loadExam(id);
         }
 
         // Load Jitsi after DOM update
@@ -115,6 +127,39 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
           'select-background'  // 🎥 Background blur / virtual background (Jitsi built-in)
         ],
       }
+    });
+  }
+
+  // ── Attached live exam (publish near the end of class) ──────────
+
+  private loadExam(liveClassId: string): void {
+    this.examSvc.getManage(liveClassId).subscribe({
+      next: (res: any) => {
+        const exam = res?.data ?? res?.Data ?? null;
+        if (exam) {
+          this.examId.set(exam.id ?? exam.Id ?? '');
+          this.examStatus.set(exam.status ?? exam.Status ?? 0);
+        }
+      },
+      error: () => { /* no exam chrome — class still runs */ },
+    });
+  }
+
+  /** Teacher publishes the attached draft exam — every enrolled student gets notified. */
+  publishExam(): void {
+    if (!this.examId() || this.examBusy()) return;
+    if (!confirm('Publish the exam now? Students will be notified and can start it.')) return;
+    this.examBusy.set(true);
+    this.examSvc.publish(this.examId()).subscribe({
+      next: () => {
+        this.examStatus.set(1);
+        this.examBusy.set(false);
+        this.recNote.set('✅ Exam published — students have been notified.');
+      },
+      error: (err: any) => {
+        this.examBusy.set(false);
+        this.recNote.set(err?.error?.message ?? err?.error?.Message ?? 'Could not publish the exam.');
+      },
     });
   }
 
