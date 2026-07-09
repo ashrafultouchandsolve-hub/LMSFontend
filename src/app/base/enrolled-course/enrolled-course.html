@@ -29,24 +29,36 @@
       <a routerLink="/courses" class="hub-back">← {{ lang.t().ecAllCourses }}</a>
       <div class="hub-grid">
         <button type="button" class="hub-card hub-card--practice" (click)="setView('practice')">
+          @if (courseNotif.sectionBadge(courseId(), 'practice'); as n) {
+            <span class="hub-badge" title="নতুন">{{ n > 99 ? '99+' : n }}</span>
+          }
           <span class="hub-ico">🎯</span>
           <span class="hub-title">{{ lang.t().ecHubPractice }}</span>
           <span class="hub-sub">{{ lang.t().ecHubPracticeSub }}</span>
           <span class="hub-go">→</span>
         </button>
         <button type="button" class="hub-card hub-card--live" (click)="setView('live')">
+          @if (courseNotif.sectionBadge(courseId(), 'live'); as n) {
+            <span class="hub-badge" title="নতুন">{{ n > 99 ? '99+' : n }}</span>
+          }
           <span class="hub-ico">📺</span>
           <span class="hub-title">{{ lang.t().ecHubLive }}</span>
           <span class="hub-sub">{{ lang.t().ecHubLiveSub }}</span>
           <span class="hub-go">→</span>
         </button>
         <button type="button" class="hub-card hub-card--record" (click)="setView('record')">
+          @if (courseNotif.sectionBadge(courseId(), 'record'); as n) {
+            <span class="hub-badge" title="নতুন">{{ n > 99 ? '99+' : n }}</span>
+          }
           <span class="hub-ico">🎬</span>
           <span class="hub-title">{{ lang.t().ecHubRecord }}</span>
           <span class="hub-sub">{{ lang.t().ecHubRecordSub }}</span>
           <span class="hub-go">→</span>
         </button>
         <button type="button" class="hub-card hub-card--exam" (click)="setView('exam')">
+          @if (courseNotif.sectionBadge(courseId(), 'exam'); as n) {
+            <span class="hub-badge" title="নতুন">{{ n > 99 ? '99+' : n }}</span>
+          }
           <span class="hub-ico">📝</span>
           <span class="hub-title">{{ lang.t().ecHubExam }}</span>
           <span class="hub-sub">{{ lang.t().ecHubExamSub }}</span>

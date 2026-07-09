@@ -7,6 +7,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { LanguageService } from '../../Service/language.service';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { ExamService, ExamView } from '../../Service/exam.service';
+import { CourseNotifService } from '../../Service/course-notif.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { CourseLive } from '../course-live/course-live';
 import { CourseClasswork } from '../course-classwork/course-classwork';
@@ -64,6 +65,7 @@ export class EnrolledCourse implements OnDestroy {
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
   private readonly liveClassService = inject(LiveClassService);
+  protected readonly courseNotif = inject(CourseNotifService);
   readonly lang = inject(LanguageService);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
@@ -106,6 +108,8 @@ export class EnrolledCourse implements OnDestroy {
       this.initToken++;
       this.destroyPlyr();
     }
+    // Opening a section clears its "new content" badge (marks the items as seen).
+    if (v !== 'hub') void this.courseNotif.markSectionSeen(this.courseId(), v);
     this.view.set(v);
   }
   protected backToHub(): void { this.setView('hub'); }
@@ -354,6 +358,8 @@ constructor(private readonly sanitizer: DomSanitizer) {
 
       this.courseMeta.set(await this.loadCourseMeta(id));
       await this.loadComments(id);
+      // Compute "new content" badges for the 4 hub cards (practice/live/record/exam).
+      void this.courseNotif.refreshCourse(id);
       // live / recordings / exams are now self-contained child components
 
       const response = await firstValueFrom(this.learningApi.getLessonsByCourse(id));

@@ -74,7 +74,10 @@
 			@for (course of filteredCourses(); track course.id; let i = $index) {
 				<article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
 					<div class="cat-img-wrap">
-						<img class="cat-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+						@if (courseNotif.totalFor(course.id); as n) {
+								<span class="cc-notif-badge" [title]="(lang.isBangla() ? 'নতুন কনটেন্ট' : 'New content') + ': ' + n">🔔 {{ n > 99 ? '99+' : n }}</span>
+							}
+							<img class="cat-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
 						<div class="cat-icon-fallback" aria-hidden="true">
 							<svg viewBox="0 0 40 40" fill="none" width="36" height="36">
 								<rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.2)" />

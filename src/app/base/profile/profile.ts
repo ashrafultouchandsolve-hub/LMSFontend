@@ -9,6 +9,7 @@ import { LearningApiService, StudentProfileDto, StudentProfilePayload } from '..
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { NotificationService } from '../../Service/notification-service';
 import { ExamService } from '../../Service/exam.service';
+import { CourseNotifService } from '../../Service/course-notif.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { NotificationBell } from '../../shared/notification-bell/notification-bell';
 import { AgendaMenu } from '../../shared/agenda-menu/agenda-menu';
@@ -81,6 +82,7 @@ export class Profile implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly learningApi = inject(LearningApiService);
+  private readonly courseNotif = inject(CourseNotifService);
   readonly lang = inject(LanguageService);
 
   // ── Student dashboard shell — sidebar tab state (deep-linkable via ?tab=) ──
@@ -232,6 +234,11 @@ export class Profile implements OnInit {
     return Math.min(100, Math.round((this.completedLessonCount() / total) * 100));
   });
   protected readonly enrolledCount = computed(() => this.enrolledCourses().length);
+
+  /** Total new (unseen) uploads across all enrolled courses — powers the sidebar "My Courses" badge. */
+  protected readonly coursesNewCount = computed(() =>
+    this.courseNotif.grandTotal(this.enrolledCourses().map((c) => c.id)),
+  );
 
   /** Weekly goal — distinct lessons touched in the last 7 days vs the target. */
   protected readonly weeklyLessonsWatched = computed(() => {
@@ -535,6 +542,8 @@ private loadNotifCounts(): void {
         }
       }
       this.enrolledCourses.set(enrolled);
+      // Fan out to compute per-course "new content" badges (also feeds the course cards & hub).
+      void this.courseNotif.refreshCourses(enrolled.map((c: { id: string }) => c.id));
     } catch {
       /* dashboard is best-effort — leave empty state */
     }

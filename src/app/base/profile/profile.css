@@ -1463,6 +1463,16 @@
 	color: #2563eb;
 }
 
+/* New-content badge — gentle pulse so students notice fresh uploads */
+.sd-nav-badge--pulse {
+	animation: sdBadgePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sdBadgePulse {
+	0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+	50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+}
+
 .sd-logout {
 	display: flex;
 	align-items: center;

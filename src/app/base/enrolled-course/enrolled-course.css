@@ -1624,6 +1624,28 @@
 .hub-card--live     { --a1: #fb7185; --a2: #e11d48; --glow: rgba(225, 29, 72, 0.3); }
 .hub-card--record   { --a1: #818cf8; --a2: #4f46e5; --glow: rgba(99, 102, 241, 0.3); }
 .hub-card--exam     { --a1: #a78bfa; --a2: #7c3aed; --glow: rgba(124, 58, 237, 0.3); }
+/* 🔴 "New content" count — sits on the section icon's corner like an app-icon badge */
+.hub-badge {
+  position: absolute;
+  top: 9px;
+  left: 55px;
+  z-index: 3;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.55);
+  animation: hubBadgePop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes hubBadgePop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .hub-ico {
   grid-area: ico;
   display: grid; place-items: center;

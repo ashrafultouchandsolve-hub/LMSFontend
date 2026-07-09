@@ -579,3 +579,29 @@
 	padding: 0;
 	background: none;
 }
+
+/* 🔴 New-content badge — top-left of the thumbnail (enrolled tag sits top-right) */
+.cc-notif-badge {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: 5;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 11px;
+	border-radius: 999px;
+	background: #ef4444;
+	color: #fff;
+	font-size: 0.74rem;
+	font-weight: 800;
+	line-height: 1;
+	border: 2px solid #fff;
+	box-shadow: 0 6px 16px -4px rgba(239, 68, 68, 0.6);
+	animation: ccBadgePulse 2s ease-in-out infinite;
+}
+
+@keyframes ccBadgePulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.07); }
+}

@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { CourseNotifService } from '../../Service/course-notif.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 type EnrolledCourseView = {
@@ -38,6 +39,7 @@ export class MyCourses {
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
   protected readonly lang = inject(LanguageService);
+  protected readonly courseNotif = inject(CourseNotifService);
 
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');
@@ -149,6 +151,8 @@ export class MyCourses {
 
       let enriched = await this.attachRatings(enrolledOnly);
       this.myCourses.set(enriched);
+      // Light up each card with a red count of new (unseen) practice/live/lesson/exam uploads.
+      void this.courseNotif.refreshCourses(enriched.map((c) => c.id));
     } catch {
       this.errorMessage.set('Enrolled courses লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।');
       this.myCourses.set([]);

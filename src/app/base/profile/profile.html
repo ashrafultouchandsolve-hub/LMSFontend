@@ -31,7 +31,7 @@
 				</button>
 				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'courses'" (click)="setTab('courses')">
 					<span class="sd-nav-ic">📚</span> {{ lang.t().profileMyCourses }}
-					@if (lessonNotifCount() > 0) { <span class="sd-nav-badge">{{ lessonNotifCount() }}</span> }
+					@if (coursesNewCount() > 0) { <span class="sd-nav-badge sd-nav-badge--pulse">{{ coursesNewCount() > 99 ? '99+' : coursesNewCount() }}</span> }
 				</button>
 				<button type="button" class="sd-nav-item" [class.active]="activeTab() === 'classes'" (click)="setTab('classes')">
 					<span class="sd-nav-ic">🎥</span> {{ lang.t().profileMyClasses }}
