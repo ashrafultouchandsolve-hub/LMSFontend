@@ -26,6 +26,8 @@ import { AdminService, AdminTeacher } from '../../Service/admin.service';
 
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
+/** In-course admin/teacher sections — each shown on its own page via the sidebar (not stacked). */
+type CourseSection = 'lessons' | 'live' | 'recordings' | 'practice' | 'exams';
 
 type Lesson = {
   id: string;
@@ -257,6 +259,36 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   );
 
   protected readonly currentCourseName = computed(() => this.selectedCourse()?.title ?? 'Course');
+
+  // ── In-course section navigation ─────────────────────────────────
+  // Inside an open course, the old single long page is split into separate sidebar
+  // sections (Lessons / Live / Recordings / Practice / Exams). Only the active one renders.
+  protected readonly courseSection = signal<CourseSection>('lessons');
+
+  /** Sections available for the current role — admin gets all 5; live-teacher gets live/recordings/exams. */
+  protected readonly courseSectionItems = computed<{ key: CourseSection; label: string; icon: string }[]>(() => {
+    const bn = this.lang.isBangla();
+    const admin = this.isAdminMode();
+    const teacher = this.isLiveTeacherMode();
+    const all: { key: CourseSection; label: string; icon: string; show: boolean }[] = [
+      { key: 'lessons',    label: bn ? 'লেসন' : 'Lessons',          icon: '📖', show: admin },
+      { key: 'live',       label: bn ? 'লাইভ ক্লাস' : 'Live Classes', icon: '📺', show: admin || teacher },
+      { key: 'recordings', label: bn ? 'রেকর্ডিং' : 'Recordings',    icon: '🎬', show: admin || teacher },
+      { key: 'practice',   label: bn ? 'প্র্যাকটিস' : 'Practice',      icon: '🎯', show: admin },
+      { key: 'exams',      label: bn ? 'পরীক্ষা' : 'Exams',           icon: '📝', show: true },
+    ];
+    return all.filter((x) => x.show).map(({ key, label, icon }) => ({ key, label, icon }));
+  });
+
+  /** Human label for the active section (drives the course toolbar subtitle). */
+  protected readonly activeSectionLabel = computed(
+    () => this.courseSectionItems().find((s) => s.key === this.courseSection())?.label ?? '',
+  );
+
+  /** Switch which in-course section is shown. */
+  protected selectCourseSection(key: CourseSection): void {
+    this.courseSection.set(key);
+  }
 
   protected readonly sidebarItems = computed<{ key: 'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile' | 'live'; label: string; icon: string }[]>(() => {
     // Admin (course manager): only the course list. Teacher: live + courses + profile.
@@ -611,6 +643,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
   protected async openLessons(courseId: string): Promise<void> {
     this.selectedCourseId.set(courseId);
+    // Land on the first section this role can see (admin → Lessons, live-teacher → Live).
+    this.courseSection.set(this.isAdminMode() ? 'lessons' : 'live');
     await this.loadLessons(courseId);
     await this.loadLiveClasses(courseId);
     await this.loadRecordings(courseId);

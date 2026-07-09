@@ -12,15 +12,34 @@
       </div>
 
       <nav class="sidebar-nav">
-        @for (item of sidebarItems(); track item.key) {
-          <button
-            type="button"
-            class="side-link"
-            [class.active]="item.key === activeSidebarKey()"
-            (click)="selectSidebar(item.key)">
-            <span class="icon">{{ item.icon }}</span>
-            <span>{{ item.label }}</span>
+        @if (selectedCourse()) {
+          <!-- Inside a course: navigate its sections here instead of one long page -->
+          <button type="button" class="side-link side-back-courses" (click)="closeLessonsView()">
+            <span class="icon">←</span>
+            <span>{{ lang.t().tcBackToCourses }}</span>
           </button>
+          <div class="side-course-name" [title]="currentCourseName()">📘 {{ currentCourseName() }}</div>
+          @for (sec of courseSectionItems(); track sec.key) {
+            <button
+              type="button"
+              class="side-link side-sublink"
+              [class.active]="sec.key === courseSection()"
+              (click)="selectCourseSection(sec.key)">
+              <span class="icon">{{ sec.icon }}</span>
+              <span>{{ sec.label }}</span>
+            </button>
+          }
+        } @else {
+          @for (item of sidebarItems(); track item.key) {
+            <button
+              type="button"
+              class="side-link"
+              [class.active]="item.key === activeSidebarKey()"
+              (click)="selectSidebar(item.key)">
+              <span class="icon">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </button>
+          }
         }
       </nav>
 
@@ -225,20 +244,31 @@
       <header class="toolbar">
         <div>
           <button type="button" class="link-btn" (click)="closeLessonsView()">← {{ lang.t().tcBackToCourses }}</button>
-          <h1>{{ lang.t().tcLessonsFor }} {{ currentCourseName() }}</h1>
-          <p>{{ lang.t().tcLessonsSub }}</p>
+          <h1>{{ currentCourseName() }}</h1>
+          <p>{{ activeSectionLabel() }}</p>
         </div>
         <div class="toolbar-actions">
-          @if (isLiveTeacherMode()) {
+          @if (isLiveTeacherMode() && courseSection() === 'live') {
             <button type="button" class="btn btn-outline live-btn" (click)="openLiveModal()">📺 {{ lang.t().tcLiveSchedule }}</button>
           }
-          @if (isAdminMode()) {
+          @if (isAdminMode() && courseSection() === 'lessons') {
             <button type="button" class="btn btn-primary" (click)="openNewLessonModal()">+ {{ lang.t().tcAddLesson }}</button>
           }
         </div>
       </header>
 
-      @if (isAdminMode()) {
+      <!-- Embedded (admin dashboard) hides the teacher sidebar → show the section nav as tabs -->
+      @if (embedded()) {
+        <nav class="course-section-tabs" aria-label="Course sections">
+          @for (sec of courseSectionItems(); track sec.key) {
+            <button type="button" class="cst-tab" [class.active]="sec.key === courseSection()" (click)="selectCourseSection(sec.key)">
+              <span class="cst-ico">{{ sec.icon }}</span> {{ sec.label }}
+            </button>
+          }
+        </nav>
+      }
+
+      @if (isAdminMode() && courseSection() === 'lessons') {
       <section class="panel lesson-list" aria-label="Lesson list">
         @if (isLoadingLessons()) {
           <p class="loading-text">{{ lang.t().tcLoadingLessons }}</p>
@@ -285,7 +315,7 @@
       </section>
       }
 
-      @if (isLiveTeacherMode() || isAdminMode()) {
+      @if ((isLiveTeacherMode() || isAdminMode()) && courseSection() === 'live') {
       <section class="panel live-panel" aria-label="Scheduled live classes">
         <div class="live-panel-head">
           <div>
@@ -372,7 +402,7 @@
       }
 
       <!-- Class recordings: in-course, managed by the appointed teacher or admin (rename / delete) -->
-      @if (isLiveTeacherMode() || isAdminMode()) {
+      @if ((isLiveTeacherMode() || isAdminMode()) && courseSection() === 'recordings') {
       <section class="panel rec-panel" aria-label="Class recordings">
         <div class="live-panel-head">
           <div>
@@ -430,7 +460,7 @@
       }
 
       <!-- Practice materials: admin only -->
-      @if (isAdminMode()) {
+      @if (isAdminMode() && courseSection() === 'practice') {
         <section class="panel pm-panel" aria-label="Practice materials">
           <div class="live-panel-head">
             <div>
@@ -483,6 +513,7 @@
       }
 
       <!-- Exams: admin authors (create/edit/upload question); admin + appointed teacher grade -->
+      @if (courseSection() === 'exams') {
       <section class="panel exam-author-panel" aria-label="Exams">
         <div class="live-panel-head">
           <div>
@@ -537,6 +568,7 @@
           }
         </div>
       </section>
+      }
     }
   </section>
 

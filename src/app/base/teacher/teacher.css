@@ -217,6 +217,61 @@
   cursor: pointer;
 }
 
+/* ── In-course section nav (sidebar) ── */
+.side-back-courses {
+  color: rgba(188, 199, 255, 0.92);
+  font-weight: 600;
+}
+.side-course-name {
+  margin: 12px 2px 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cdd4ff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.side-sublink {
+  padding-left: 16px;
+}
+
+/* ── In-course section tabs (embedded mode, no sidebar) ── */
+.course-section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-self: start;
+}
+.cst-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(84, 98, 154, 0.22);
+  background: #fff;
+  color: #3a4266;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.cst-tab:hover {
+  border-color: #5f6ecc;
+  color: #3730a3;
+}
+.cst-tab.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+.cst-ico {
+  font-size: 1rem;
+}
+
 .dashboard-area {
   padding: 84px 24px 24px;
   display: grid;
