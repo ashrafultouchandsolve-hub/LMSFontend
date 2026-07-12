@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
+import { ProgressService } from '../../Service/progress.service';
 
 type Student = {
   userId: string;
@@ -25,7 +26,11 @@ export class EnrolledStudents implements OnInit {
   private readonly location = inject(Location);
   private readonly authService = inject(AuthService);
   private readonly api = inject(LearningApiService);
+  private readonly progressService = inject(ProgressService);
   protected readonly lang = inject(LanguageService);
+
+  /** userId → composite progress % (server-computed) — helps decide who earned a certificate. */
+  protected readonly progressByUser = signal<Map<string, number>>(new Map());
 
   /** যেখান থেকে এসেছে (admin → course-manager, teacher → teacher panel) সেখানেই ফেরত। */
   protected goBack(): void {
@@ -78,10 +83,26 @@ private async loadData(courseId: string): Promise<void> {
   } finally {
     this.isLoading.set(false);
   }
+
+  // Composite progress per student — best-effort, column just stays empty on failure.
+  try {
+    const rows = await firstValueFrom(this.progressService.getCourseStudentsProgress(courseId));
+    this.progressByUser.set(new Map(rows.map((r) => [String(r.userId), Math.round(r.overallPercent)])));
+  } catch {
+    /* keep empty */
+  }
 }
 
   protected hasReceived(userId: string): boolean {
     return this.issuedUserIds().includes(String(userId));
+  }
+
+  protected hasProgress(userId: string): boolean {
+    return this.progressByUser().has(String(userId));
+  }
+
+  protected progressFor(userId: string): number {
+    return this.progressByUser().get(String(userId)) ?? 0;
   }
 
 

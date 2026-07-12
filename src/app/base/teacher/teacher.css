@@ -40,6 +40,9 @@
 }
 .teacher-root.embedded .dashboard-area {
   padding: 0;
+  /* minmax(0,1fr): an auto track can grow past the container when an item's
+     min-content is wide — that pushed the toolbar/panel off the right edge. */
+  grid-template-columns: minmax(0, 1fr);
 }
 /* ─── TOP NAVBAR ─────────────────────────────────── */
 .top-navbar {

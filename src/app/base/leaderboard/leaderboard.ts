@@ -13,7 +13,10 @@ type LeaderboardEntry = {
   fullName: string;
   correctAnswers: number;
   totalQuestions: number;
-  percentageScore: number;
+  percentageScore: number;      // combined (quiz 35% + exam 35% + live exam 30%, renormalized)
+  mcqPercentage?: number;
+  examPercentage?: number;
+  liveExamPercentage?: number;
 };
 
 // rank যুক্ত entry — rank সবসময় score-অনুযায়ী canonical order থেকে আসে

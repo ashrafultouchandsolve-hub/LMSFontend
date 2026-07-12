@@ -36,6 +36,7 @@
             <th>{{ lang.t().commonStudent }}</th>
             <th>{{ lang.t().esThEmail }}</th>
             <th>{{ lang.t().esThDate }}</th>
+            <th>{{ lang.isBangla() ? 'অগ্রগতি' : 'Progress' }}</th>
             <th>{{ lang.t().esThCert }}</th>
           </tr>
         </thead>
@@ -49,6 +50,16 @@
               </td>
               <td class="td-email">{{ student.email }}</td>
               <td class="td-date">{{ student.enrolledAt | date:'mediumDate' }}</td>
+              <td class="td-progress">
+                @if (hasProgress(student.userId)) {
+                  <div class="es-prog">
+                    <div class="es-prog-bar"><span [style.width.%]="progressFor(student.userId)"></span></div>
+                    <b class="es-prog-pct">{{ progressFor(student.userId) }}%</b>
+                  </div>
+                } @else {
+                  <span class="es-prog-na">—</span>
+                }
+              </td>
               <td class="td-cert">
                 @if (hasReceived(student.userId)) {
                   <span class="cert-issued-badge">✅ {{ lang.t().esIssued }}</span>

@@ -8,8 +8,8 @@ import { LanguageService } from '../../Service/language.service';
 import { LearningApiService, StudentProfileDto, StudentProfilePayload } from '../../Service/learning-api.service';
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { NotificationService } from '../../Service/notification-service';
-import { ExamService } from '../../Service/exam.service';
 import { CourseNotifService } from '../../Service/course-notif.service';
+import { ProgressService, CourseProgress, ProgressComponent, Performance } from '../../Service/progress.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { NotificationBell } from '../../shared/notification-bell/notification-bell';
 import { AgendaMenu } from '../../shared/agenda-menu/agenda-menu';
@@ -37,16 +37,6 @@ type EditForm = {
   guardianPhone: string;
   facebookLink: string;
   linkedInLink: string;
-};
-
-type QuizProgress = {
-  lessonId: string;
-  userId: string;
-  correctAnswers: number;
-  totalQuestions: number;
-  wrongAnswers: number;
-  percentageScore: number;
-  isCompleted: boolean;
 };
 
 type WishlistItem = {
@@ -83,6 +73,7 @@ export class Profile implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly learningApi = inject(LearningApiService);
   private readonly courseNotif = inject(CourseNotifService);
+  private readonly progressService = inject(ProgressService);
   readonly lang = inject(LanguageService);
 
   // ── Student dashboard shell — sidebar tab state (deep-linkable via ?tab=) ──
@@ -138,16 +129,45 @@ export class Profile implements OnInit {
       p.facebookLink || p.linkedInLink);
   });
 
-  protected readonly quizProgress = signal<QuizProgress | null>(null);
-  protected readonly percentageScore = computed(() => this.quizProgress()?.percentageScore ?? 0);
-  protected readonly correctAnswers = computed(() => this.quizProgress()?.correctAnswers ?? 0);
-  protected readonly wrongAnswers = computed(() => this.quizProgress()?.wrongAnswers ?? 0);
+  // ── Total performance (server-computed: quiz + old exam + live exam, leaderboard-consistent blend) ──
+  protected readonly perf = signal<Performance | null>(null);
+  protected readonly hasPerf = computed(() => {
+    const p = this.perf();
+    return !!p && (p.quiz.exists || p.oldExam.exists || p.liveExam.exists);
+  });
+  protected readonly quizWrong = computed(() => {
+    const q = this.perf()?.quiz;
+    return q ? Math.max(0, Math.round(q.max - q.obtained)) : 0;
+  });
 
-  // Exam performance
-  private readonly examService = inject(ExamService);
-  protected readonly examPerf = signal<{ examCount: number; obtained: number; max: number; percentage: number } | null>(null);
-  protected readonly examPercentage = computed(() => this.examPerf()?.percentage ?? 0);
-  protected readonly hasExamPerf = computed(() => (this.examPerf()?.examCount ?? 0) > 0);
+  // Results list: filter (all/exam/liveExam) + collapse so a heavy exam-taker
+  // doesn't get an endless wall of rows on the dashboard.
+  private readonly RESULTS_PREVIEW = 4;
+  protected readonly resultFilter = signal<'all' | 'oldExam' | 'liveExam'>('all');
+  protected readonly resultsExpanded = signal(false);
+
+  /** All results after the active filter (newest-first order comes from the API). */
+  protected readonly filteredResults = computed(() => {
+    const f = this.resultFilter();
+    const all = this.perf()?.results ?? [];
+    return f === 'all' ? all : all.filter((r) => r.kind === f);
+  });
+  /** What's actually rendered — collapsed to a short preview unless expanded. */
+  protected readonly visibleResults = computed(() => {
+    const list = this.filteredResults();
+    return this.resultsExpanded() ? list : list.slice(0, this.RESULTS_PREVIEW);
+  });
+  protected readonly hiddenResultCount = computed(() =>
+    Math.max(0, this.filteredResults().length - this.RESULTS_PREVIEW),
+  );
+  /** Counts per filter for the chip labels (only render chips that have rows). */
+  protected readonly examResultCount = computed(() => (this.perf()?.results ?? []).filter((r) => r.kind === 'oldExam').length);
+  protected readonly liveResultCount = computed(() => (this.perf()?.results ?? []).filter((r) => r.kind === 'liveExam').length);
+
+  protected setResultFilter(f: 'all' | 'oldExam' | 'liveExam'): void {
+    this.resultFilter.set(f);
+    this.resultsExpanded.set(false);   // reset collapse when switching filters
+  }
 
   // ══════════════ Learning dashboard (Continue learning · Overall progress · Weekly goal) ══════════════
   private readonly WEEKLY_GOAL = 3;
@@ -220,7 +240,9 @@ export class Profile implements OnInit {
   });
   protected readonly hasContinue = computed(() => this.continueLearning().length > 0);
 
-  /** Overall progress across ALL enrolled courses = completed lessons / total lessons. */
+  // ── Composite progress (server-computed: video + quiz + exams + live exam + attendance) ──
+  protected readonly courseProgress = signal<CourseProgress[]>([]);
+
   protected readonly totalEnrolledLessons = computed(() =>
     this.enrolledCourses().reduce((sum, c) => sum + (c.lessonCount || 0), 0),
   );
@@ -228,11 +250,36 @@ export class Profile implements OnInit {
     const enrolledIds = new Set(this.enrolledCourses().map((c) => c.id));
     return this.videoHistory().filter((h) => h?.isCompleted && enrolledIds.has(h.courseId)).length;
   });
+  /** Overall = mean of per-course composite %; falls back to the old video-only math until loaded. */
   protected readonly overallProgress = computed(() => {
+    const list = this.courseProgress();
+    if (list.length > 0) {
+      return Math.min(100, Math.round(list.reduce((s, c) => s + (c.overallPercent || 0), 0) / list.length));
+    }
     const total = this.totalEnrolledLessons();
     if (total <= 0) return 0;
     return Math.min(100, Math.round((this.completedLessonCount() / total) * 100));
   });
+
+  /** Chip icon/label for one progress component (bilingual, follows dashboard's inline pattern). */
+  protected compIcon(key: string): string {
+    const m: Record<string, string> = { video: '🎬', quiz: '❓', oldExam: '📝', liveExam: '🔴', attendance: '🎥' };
+    return m[key] ?? '📌';
+  }
+  protected compLabel(key: string): string {
+    const bn = this.lang.isBangla();
+    const m: Record<string, string> = {
+      video: bn ? 'ভিডিও' : 'Video',
+      quiz: bn ? 'কুইজ' : 'Quiz',
+      oldExam: bn ? 'এক্সাম' : 'Exam',
+      liveExam: bn ? 'লাইভ এক্সাম' : 'Live Exam',
+      attendance: bn ? 'উপস্থিতি' : 'Attendance',
+    };
+    return m[key] ?? key;
+  }
+  protected compTitle(comp: ProgressComponent): string {
+    return `${this.compLabel(comp.key)}: ${comp.done}/${comp.total} — ${comp.percent}%`;
+  }
   protected readonly enrolledCount = computed(() => this.enrolledCourses().length);
 
   /** Total new (unseen) uploads across all enrolled courses — powers the sidebar "My Courses" badge. */
@@ -290,8 +337,7 @@ readonly certNotifCount   = signal(0);
     this.loadedRole = true;
     if (this.isStudent()) {
       void this.loadWishlist();
-      void this.loadQuizProgress();
-      void this.loadExamPerformance();
+      void this.loadPerformance();
       void this.loadProfile();
       void this.loadLearningDashboard();
     } else if (this.isTeacher()) {
@@ -444,23 +490,12 @@ readonly certNotifCount   = signal(0);
     }
   }
 
-  private async loadExamPerformance(): Promise<void> {
+  /** Total performance — one server call replaces the old separate quiz + exam fetches
+      (and their duplicated client-side percentage math). */
+  private async loadPerformance(): Promise<void> {
     try {
-      const res: any = await firstValueFrom(this.examService.myPerformance());
-      const d = res?.data ?? res?.Data ?? null;
-      if (d) {
-        const max = Number(d.max ?? d.Max ?? 0);
-        // A student can never score above the exam's total, so cap obtained at max and percentage at 100%.
-        const obtained = Math.min(Math.max(Number(d.obtained ?? d.Obtained ?? 0), 0), max || Infinity);
-        const percentage = max > 0 ? Math.min(100, Math.round((obtained / max) * 100)) : 0;
-        this.examPerf.set({
-          examCount: d.examCount ?? d.ExamCount ?? 0,
-          obtained,
-          max,
-          percentage,
-        });
-      }
-    } catch { /* no exam performance yet */ }
+      this.perf.set(await firstValueFrom(this.progressService.getMyPerformance()));
+    } catch { /* panel shows its empty state */ }
   }
 ngOnInit(): void {
   // ✅ Login check করো আগে
@@ -547,24 +582,13 @@ private loadNotifCounts(): void {
     } catch {
       /* dashboard is best-effort — leave empty state */
     }
-  }
 
-  private async loadQuizProgress(): Promise<void> {
+    // Composite progress (server single-source-of-truth) — separate try so a failure
+    // here still leaves the video-only fallback math working.
     try {
-      const currentUser = this.authService.getCurrentUser() as any;
-      if (!currentUser?.id) return;
-
-      // Call API to get overall quiz progress for all quizzes
-      const response = await firstValueFrom(
-        this.learningApi.getOverallQuizProgress(currentUser.id)
-      );
-      
-      const progressData = (response as any)?.data ?? null;
-      if (progressData) {
-        this.quizProgress.set(progressData);
-      }
-    } catch (err) {
-      console.log('Could not load quiz progress:', err);
+      this.courseProgress.set(await firstValueFrom(this.progressService.getMyProgress()));
+    } catch {
+      /* keep fallback */
     }
   }
 

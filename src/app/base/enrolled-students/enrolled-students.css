@@ -157,3 +157,22 @@
   .es-table th, .es-table td { padding: 10px 10px; }
   .td-email { display: none; }
 }
+/* ── Composite progress column (certificate decisions) ─── */
+.td-progress { min-width: 130px; }
+.es-prog { display: flex; align-items: center; gap: 8px; }
+.es-prog-bar {
+  flex: 1;
+  min-width: 70px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e6eaf5;
+  overflow: hidden;
+}
+.es-prog-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4f46e5, #2563eb);
+}
+.es-prog-pct { font-size: 0.82rem; font-weight: 800; color: #1d4ed8; }
+.es-prog-na { color: #94a3b8; }

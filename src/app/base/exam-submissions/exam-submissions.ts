@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { ExamService, ExamSubmissionView } from '../../Service/exam.service';
@@ -22,6 +22,7 @@ import { Navbar } from '../../shared/navbar/navbar';
 })
 export class ExamSubmissions implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly examService = inject(ExamService);
   private readonly authService = inject(AuthService);
@@ -46,7 +47,12 @@ export class ExamSubmissions implements OnInit {
   }
 
   protected back(): void {
-    this.location.back();
+    // যেখান থেকে এসেছে সেখানেই ফেরত; fresh tab-এ history না থাকলে role অনুযায়ী fallback।
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+    this.router.navigateByUrl(this.isAdmin() ? '/course-manager' : '/teacher');
   }
 
   private async load(): Promise<void> {

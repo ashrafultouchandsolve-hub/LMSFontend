@@ -608,3 +608,16 @@
     margin-left: 0;
   }
 }
+
+/* ── per-component score split under the combined bar ── */
+.score-split {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.score-split small {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}

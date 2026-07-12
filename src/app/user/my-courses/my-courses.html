@@ -111,6 +111,16 @@
 							</div>
 						}
 
+						@if (hasProgress(course.id)) {
+							<div class="cc-progress" aria-label="Course progress">
+								<div class="cc-progress-top">
+									<span>{{ lang.isBangla() ? 'অগ্রগতি' : 'Progress' }}</span>
+									<b>{{ progressFor(course.id) }}%</b>
+								</div>
+								<div class="cc-progress-bar"><span [style.width.%]="progressFor(course.id)"></span></div>
+							</div>
+						}
+
 						<div class="cat-footer">
 							<a [routerLink]="['/enrolled-course', course.id]" class="cat-btn cat-btn--enroll">{{ lang.t().courseStartLearning }}</a>
 							<a [routerLink]="['/course-details', course.id]" class="cat-link">{{ lang.t().exDetails }} →</a>

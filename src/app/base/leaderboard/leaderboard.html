@@ -157,6 +157,13 @@
                         <div class="bar-bg"><div class="bar-fill" [style.width.%]="entry.percentageScore"></div></div>
                         <strong class="bar-label">{{ entry.percentageScore | number:'1.0-1' }}%</strong>
                       </div>
+                      @if (entry.mcqPercentage || entry.examPercentage || entry.liveExamPercentage) {
+                        <div class="score-split">
+                          @if (entry.mcqPercentage) { <small title="Quiz (MCQ)">❓ {{ entry.mcqPercentage | number:'1.0-0' }}%</small> }
+                          @if (entry.examPercentage) { <small title="Exam">📝 {{ entry.examPercentage | number:'1.0-0' }}%</small> }
+                          @if (entry.liveExamPercentage) { <small title="Live Exam">🔴 {{ entry.liveExamPercentage | number:'1.0-0' }}%</small> }
+                        </div>
+                      }
                     </td>
                   </tr>
                 }

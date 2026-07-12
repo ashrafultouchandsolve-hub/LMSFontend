@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -36,6 +36,7 @@ type ExamMeta = {
 })
 export class LiveExamResponses implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly svc = inject(LiveExamService);
   private readonly toastr = inject(ToastrService);
@@ -82,7 +83,9 @@ export class LiveExamResponses implements OnInit {
   protected back(): void {
     if (this.sheet()) { this.closeSheet(); return; }
     if (window.history.length > 1) { this.location.back(); return; }
-    window.location.href = this.isAdmin() ? '/course-manager' : '/teacher';
+    // Router navigation (not window.location.href) — keeps the SPA alive and
+    // respects the base href on the GitHub-Pages subpath deploy.
+    this.router.navigateByUrl(this.isAdmin() ? '/course-manager' : '/teacher');
   }
 
   protected async load(): Promise<void> {

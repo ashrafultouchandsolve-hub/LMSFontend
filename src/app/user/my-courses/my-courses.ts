@@ -5,6 +5,7 @@ import { AuthService } from '../../Service/auth.service';
 import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { CourseNotifService } from '../../Service/course-notif.service';
+import { ProgressService } from '../../Service/progress.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 type EnrolledCourseView = {
@@ -38,8 +39,12 @@ export class MyCourses {
 
   private readonly learningApi = inject(LearningApiService);
   private readonly authService = inject(AuthService);
+  private readonly progressService = inject(ProgressService);
   protected readonly lang = inject(LanguageService);
   protected readonly courseNotif = inject(CourseNotifService);
+
+  /** courseId → composite progress % (server-computed: video + quiz + exams + attendance). */
+  protected readonly progressByCourse = signal<Map<string, number>>(new Map());
 
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');
@@ -159,6 +164,22 @@ export class MyCourses {
     } finally {
       this.isLoading.set(false);
     }
+
+    // Composite progress per course — best-effort, card bars just stay hidden on failure.
+    try {
+      const prog = await firstValueFrom(this.progressService.getMyProgress());
+      this.progressByCourse.set(new Map(prog.map((p) => [p.courseId, Math.round(p.overallPercent)])));
+    } catch {
+      /* keep hidden */
+    }
+  }
+
+  protected hasProgress(courseId: string): boolean {
+    return this.progressByCourse().has(courseId);
+  }
+
+  protected progressFor(courseId: string): number {
+    return this.progressByCourse().get(courseId) ?? 0;
   }
 
   private mapToView(dto: CourseDto): EnrolledCourseView {
