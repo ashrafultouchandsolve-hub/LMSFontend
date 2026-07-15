@@ -216,50 +216,37 @@
 						</div>
 
 						@if (hasPerf()) {
-							<div class="perf-top">
-								<div class="perf-ring" role="img" [attr.aria-label]="perf()!.combinedPercent + '% overall score'">
-									<svg viewBox="0 0 120 120">
-										<circle cx="60" cy="60" r="50" class="perf-ring-track" />
-										<circle cx="60" cy="60" r="50" class="perf-ring-fill" [style.--pct]="perf()!.combinedPercent" />
-									</svg>
-									<div class="perf-ring-core">
-										<strong>{{ perf()!.combinedPercent | number: '1.0-0' }}%</strong>
-										<span>{{ lang.isBangla() ? 'সম্মিলিত স্কোর' : 'Overall Score' }}</span>
+							<div class="perf-tiles">
+								<div class="perf-tile perf-tile-hero" role="img" [attr.aria-label]="perf()!.combinedPercent + '% overall score'">
+									<div class="perf-tile-label">{{ lang.isBangla() ? 'সম্মিলিত' : 'Overall' }}</div>
+									<div class="perf-tile-val">{{ perf()!.combinedPercent | number: '1.0-0' }}<small>%</small></div>
+									<div class="perf-tile-sub">{{ lang.isBangla() ? 'সম্মিলিত স্কোর' : 'Blended score' }}</div>
+									<div class="perf-tile-bar"><span [style.width.%]="perf()!.combinedPercent"></span></div>
+								</div>
+								@if (perf()!.quiz.exists) {
+									<div class="perf-tile">
+										<div class="perf-tile-label">❓ {{ lang.isBangla() ? 'কুইজ' : 'Quiz' }}</div>
+										<div class="perf-tile-val">{{ perf()!.quiz.percent | number: '1.0-0' }}<small>%</small></div>
+										<div class="perf-tile-sub"><span class="perf-tile-ok">✅ {{ perf()!.quiz.obtained | number: '1.0-0' }}</span> · ❌ {{ quizWrong() }}</div>
+										<div class="perf-tile-bar"><span class="pcb-quiz" [style.width.%]="perf()!.quiz.percent"></span></div>
 									</div>
-								</div>
-
-								<div class="perf-comps">
-									@if (perf()!.quiz.exists) {
-										<div class="perf-comp">
-											<div class="perf-comp-head">
-												<span class="perf-comp-name">❓ {{ lang.isBangla() ? 'কুইজ' : 'Quiz' }}</span>
-												<span class="perf-comp-meta">✅ {{ perf()!.quiz.obtained | number: '1.0-0' }} · ❌ {{ quizWrong() }}</span>
-												<b class="perf-comp-pct">{{ perf()!.quiz.percent | number: '1.0-0' }}%</b>
-											</div>
-											<div class="perf-comp-bar"><span class="pcb-quiz" [style.width.%]="perf()!.quiz.percent"></span></div>
-										</div>
-									}
-									@if (perf()!.oldExam.exists) {
-										<div class="perf-comp">
-											<div class="perf-comp-head">
-												<span class="perf-comp-name">📝 {{ lang.isBangla() ? 'এক্সাম' : 'Exam' }}</span>
-												<span class="perf-comp-meta">{{ perf()!.oldExam.obtained | number: '1.0-1' }}/{{ perf()!.oldExam.max | number: '1.0-1' }}</span>
-												<b class="perf-comp-pct">{{ perf()!.oldExam.percent | number: '1.0-0' }}%</b>
-											</div>
-											<div class="perf-comp-bar"><span class="pcb-exam" [style.width.%]="perf()!.oldExam.percent"></span></div>
-										</div>
-									}
-									@if (perf()!.liveExam.exists) {
-										<div class="perf-comp">
-											<div class="perf-comp-head">
-												<span class="perf-comp-name">🔴 {{ lang.isBangla() ? 'লাইভ এক্সাম' : 'Live Exam' }}</span>
-												<span class="perf-comp-meta">{{ perf()!.liveExam.obtained | number: '1.0-1' }}/{{ perf()!.liveExam.max | number: '1.0-1' }}</span>
-												<b class="perf-comp-pct">{{ perf()!.liveExam.percent | number: '1.0-0' }}%</b>
-											</div>
-											<div class="perf-comp-bar"><span class="pcb-live" [style.width.%]="perf()!.liveExam.percent"></span></div>
-										</div>
-									}
-								</div>
+								}
+								@if (perf()!.oldExam.exists) {
+									<div class="perf-tile">
+										<div class="perf-tile-label">📝 {{ lang.isBangla() ? 'এক্সাম' : 'Exam' }}</div>
+										<div class="perf-tile-val">{{ perf()!.oldExam.percent | number: '1.0-0' }}<small>%</small></div>
+										<div class="perf-tile-sub">{{ perf()!.oldExam.obtained | number: '1.0-1' }} / {{ perf()!.oldExam.max | number: '1.0-1' }}</div>
+										<div class="perf-tile-bar"><span class="pcb-exam" [style.width.%]="perf()!.oldExam.percent"></span></div>
+									</div>
+								}
+								@if (perf()!.liveExam.exists) {
+									<div class="perf-tile">
+										<div class="perf-tile-label">🔴 {{ lang.isBangla() ? 'লাইভ' : 'Live' }}</div>
+										<div class="perf-tile-val">{{ perf()!.liveExam.percent | number: '1.0-0' }}<small>%</small></div>
+										<div class="perf-tile-sub">{{ perf()!.liveExam.obtained | number: '1.0-1' }} / {{ perf()!.liveExam.max | number: '1.0-1' }}</div>
+										<div class="perf-tile-bar"><span class="pcb-live" [style.width.%]="perf()!.liveExam.percent"></span></div>
+									</div>
+								}
 							</div>
 
 							@if (examResultCount() + liveResultCount() > 0) {
@@ -285,10 +272,13 @@
 									<div class="perf-result-list">
 										@for (r of visibleResults(); track $index) {
 											<div class="perf-row">
-												<span class="perf-row-ic">{{ r.kind === 'liveExam' ? '🔴' : '📝' }}</span>
+												<span class="perf-row-stripe"
+													[class.st-good]="r.percent >= 70"
+													[class.st-mid]="r.percent >= 40 && r.percent < 70"
+													[class.st-low]="r.percent < 40"></span>
 												<div class="perf-row-main">
 													<span class="perf-row-title">{{ r.title }}</span>
-													<span class="perf-row-course">{{ r.courseTitle }}</span>
+													<span class="perf-row-course">{{ r.courseTitle }} · {{ r.kind === 'liveExam' ? (lang.isBangla() ? 'লাইভ' : 'Live') : (lang.isBangla() ? 'এক্সাম' : 'Exam') }}</span>
 												</div>
 												@if (r.pending) {
 													<span class="perf-pending" [title]="lang.isBangla() ? 'শিক্ষক এখনও গ্রেড দেননি — অটো-মার্ক দেখানো হচ্ছে' : 'Not graded yet — showing auto-marks'">⏳ {{ lang.isBangla() ? 'গ্রেডিং বাকি' : 'Pending' }}</span>

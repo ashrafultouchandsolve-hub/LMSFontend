@@ -46,14 +46,25 @@ export class MyClasses {
     )
   );
 
-  // সব upcoming live class (active না, ended না)
+  // সব upcoming live class (active না, ended না, আর schedule time পার হয়ে যায়নি)।
+  // অতীতের schedule যা teacher কখনো start/end করেনি সেগুলো "missed" — upcoming list এ আসবে না।
   protected readonly upcomingLiveClasses = computed(() =>
     this.courses().flatMap(c =>
       c.liveClasses
-        .filter(lc => !lc.isActive && !lc.isEnded)
+        .filter(lc => !lc.isActive && !lc.isEnded && !this.isMissed(lc))
         .map(lc => ({ ...lc, courseTitle: c.title }))
     ).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
   );
+
+  /**
+   * A class whose scheduled time has passed but was never started (isActive) or ended (isEnded).
+   * The teacher forgot to run it → show it as "Missed/Ended", never as "Upcoming".
+   */
+  protected isMissed(lc: LiveClass): boolean {
+    if (lc.isActive || lc.isEnded) return false;
+    const t = new Date(lc.scheduledAt).getTime();
+    return Number.isFinite(t) && t < Date.now();
+  }
 
   // "By course" breakdown এ শুধু enrolled course দেখাবে। followed (un-enrolled) course এর
   // জন্য আলাদা card দরকার নেই — তারা শুধু লাইভ চললে উপরের "Live now" banner থেকে join করবে।
@@ -177,6 +188,6 @@ export class MyClasses {
   }
 
   protected totalLive(course: CourseWithLive): number {
-    return course.liveClasses.filter(lc => !lc.isEnded).length;
+    return course.liveClasses.filter(lc => !lc.isEnded && !this.isMissed(lc)).length;
   }
 }

@@ -109,7 +109,7 @@ export interface Translations {
   lbIn: string; lbRecHeadPref: string; lbRecHeadPopular: string; lbRecHeadSub: string;
   lbRecEmpty: string; lbViewCourse: string; lbYou: string;
   // Shared / Live class vocabulary
-  liveNow: string; liveUpcoming: string; liveEnded: string; liveJoinNow: string; liveJoin: string;
+  liveNow: string; liveUpcoming: string; liveEnded: string; liveMissed: string; liveJoinNow: string; liveJoin: string;
   commonLoading: string; commonBack: string;
   // My Live Classes
   mcTitle: string; mcSub: string; mcLoginBtn: string; mcLiveNowSec: string; mcUpcomingSec: string;
@@ -425,7 +425,7 @@ const EN: Translations = {
   lbRecHeadPref: '✨ Recommended courses for you', lbRecHeadPopular: '🔥 Popular courses for you',
   lbRecHeadSub: 'Enroll in a course to see its leaderboard here.', lbRecEmpty: 'No courses published yet.',
   lbViewCourse: 'View course →', lbYou: 'You',
-  liveNow: 'Live now', liveUpcoming: 'Upcoming', liveEnded: 'Ended', liveJoinNow: 'Join Now →', liveJoin: 'Join Class',
+  liveNow: 'Live now', liveUpcoming: 'Upcoming', liveEnded: 'Ended', liveMissed: 'Missed', liveJoinNow: 'Join Now →', liveJoin: 'Join Class',
   commonLoading: 'Loading...', commonBack: 'Back',
   mcTitle: 'My Live Classes', mcSub: 'All live classes from your enrolled courses appear here.',
   mcLoginBtn: 'Login', mcLiveNowSec: 'Live now', mcUpcomingSec: 'Upcoming Classes', mcByCourseSec: 'By Course',
@@ -790,7 +790,7 @@ const BN: Translations = {
   lbRecHeadPref: '✨ আপনার জন্য recommended কোর্স', lbRecHeadPopular: '🔥 আপনার জন্য জনপ্রিয় কোর্স',
   lbRecHeadSub: 'কোনো কোর্সে enroll করলে এখানে সেই কোর্সের লিডারবোর্ড দেখা যাবে।', lbRecEmpty: 'এখনো কোনো কোর্স প্রকাশ করা হয়নি।',
   lbViewCourse: 'কোর্স দেখুন →', lbYou: 'আপনি',
-  liveNow: 'এখন লাইভ', liveUpcoming: 'আসন্ন', liveEnded: 'শেষ', liveJoinNow: 'এখনই যোগ দিন →', liveJoin: 'ক্লাসে যোগ দিন',
+  liveNow: 'এখন লাইভ', liveUpcoming: 'আসন্ন', liveEnded: 'শেষ', liveMissed: 'মিস হয়েছে', liveJoinNow: 'এখনই যোগ দিন →', liveJoin: 'ক্লাসে যোগ দিন',
   commonLoading: 'লোড হচ্ছে...', commonBack: 'ফিরে যান',
   mcTitle: 'আমার লাইভ ক্লাস', mcSub: 'আপনার enrolled কোর্সগুলোর সব লাইভ ক্লাস এখানে দেখতে পাবেন।',
   mcLoginBtn: 'লগইন করুন', mcLiveNowSec: 'এখন লাইভ', mcUpcomingSec: 'আসন্ন ক্লাস', mcByCourseSec: 'কোর্স অনুযায়ী',

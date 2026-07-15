@@ -17,11 +17,13 @@
 }
 .cw-muted { margin: 0; font-size: 13.5px; color: #6b7280; }
 
-.cw-list { display: grid; gap: 12px; }
+.cw-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; align-items: start; }
 .cw-card {
   border: 1px solid #eef0f4; border-radius: 14px; overflow: hidden;
   background: #fff;
+  transition: box-shadow .16s, transform .16s;
 }
+.cw-card:hover { box-shadow: 0 12px 28px -14px rgba(20, 26, 56, 0.28); transform: translateY(-2px); }
 .cw-card--due { border-color: #ddd6fe; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.06); }
 
 .cw-card-head {
@@ -48,6 +50,7 @@
   display: flex; flex-direction: column; gap: 10px;
 }
 .cw-block--rec { border-right: 1px solid #f1f2f6; }
+.cw-block--exam { background: #faf9ff; }
 .cw-block-label { font-size: 11.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: #9ca3af; }
 
 .cw-rec-btn {
@@ -66,7 +69,7 @@
 .cw-none { font-size: 12.5px; color: #b0b6c0; font-style: italic; }
 
 .cw-exam { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.cw-exam-title { font-size: 13px; color: #4b5563; font-weight: 600; }
+.cw-exam-title { flex-basis: 100%; font-size: 13px; color: #4b5563; font-weight: 600; }
 .cw-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 14px; border-radius: 10px;
@@ -112,7 +115,11 @@
 .cw-modal-x:hover { background: rgba(255,255,255,0.2); }
 .cw-video { width: 100%; max-height: 70vh; display: block; background: #000; }
 
+@media (max-width: 980px) {
+  .cw-list { grid-template-columns: 1fr; }
+}
 @media (max-width: 640px) {
   .cw-body { grid-template-columns: 1fr; }
   .cw-block--rec { border-right: none; border-bottom: 1px solid #f1f2f6; }
+  .cw-block--exam { background: #fff; }
 }

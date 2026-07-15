@@ -98,7 +98,7 @@
                 <strong>{{ course.title }}</strong>
                 <span>{{ course.instructorName }} · {{ course.category }}</span>
               </div>
-              <span class="mc-live-count">{{ totalLive(course) }} live</span>
+              <span class="mc-live-count" [class.mc-live-count-zero]="totalLive(course) === 0">{{ totalLive(course) }} live</span>
             </div>
 
             <!-- Live classes of this course -->
@@ -109,7 +109,10 @@
             } @else {
               <div class="mc-live-list">
                 @for (lc of course.liveClasses; track lc.id) {
-                  <div class="mc-live-row" [class.mc-live-row-active]="lc.isActive" [class.mc-live-row-ended]="lc.isEnded">
+                  <div class="mc-live-row" [class.mc-live-row-active]="lc.isActive" [class.mc-live-row-ended]="lc.isEnded || isMissed(lc)">
+                    <span class="mc-live-dot"
+                      [class.mc-live-dot-active]="lc.isActive"
+                      [class.mc-live-dot-ended]="lc.isEnded || isMissed(lc)"></span>
                     <div class="mc-live-row-info">
                       <p class="mc-live-row-title">{{ lc.title }}</p>
                       <p class="mc-live-row-time">{{ formatScheduled(lc.scheduledAt) }}</p>
@@ -121,6 +124,8 @@
                         </a>
                       } @else if (lc.isEnded) {
                         <span class="mc-badge mc-badge-ended">{{ lang.t().liveEnded }}</span>
+                      } @else if (isMissed(lc)) {
+                        <span class="mc-badge mc-badge-ended">{{ lang.t().liveMissed }}</span>
                       } @else {
                         <span class="mc-badge mc-badge-upcoming">{{ lang.t().liveUpcoming }}</span>
                       }

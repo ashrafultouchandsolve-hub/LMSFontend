@@ -12,8 +12,10 @@ import { Category, CategoryService, categoryIcon } from '../../Service/category.
 import { LearningApiService } from '../../Service/learning-api.service';
 import { Teacher } from '../../base/teacher/teacher';
 import { AdminSettings } from '../admin-settings/admin-settings';
+import { ParentReportService, ParentReportSummary } from '../../Service/parent-report.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements'|'settings';
+type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements'|'settings'|'parent-reports';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -30,6 +32,8 @@ export class AdminDashboard implements OnInit {
   private readonly annSvc = inject(AnnouncementService);
   private readonly categoryService = inject(CategoryService);
   private readonly learningApi = inject(LearningApiService);
+  private readonly parentReportService = inject(ParentReportService);
+  private readonly sanitizer = inject(DomSanitizer);
   protected readonly lang = inject(LanguageService);
 
   readonly annTypes = [
@@ -76,6 +80,98 @@ annSubmitting  = signal(false);
   showCategoryModal = signal(false);
   categoryModalError = signal('');
   isSavingCategory = signal(false);
+
+  // ── Parent monthly reports ──────────────────────────
+  // default = previous month (the scheduler's rule): report always covers a FINISHED month
+  prMonth = signal(AdminDashboard.previousMonthStr());
+  prForce = signal(false);
+  prSending = signal(false);
+  prSummary = signal<ParentReportSummary | null>(null);
+  prPreviewHtml = signal<SafeHtml | null>(null);
+  prPreviewName = signal('');
+  prPreviewLoading = signal(false);
+  prSearch = signal('');
+
+  filteredPrStudents = computed(() => {
+    const query = this.prSearch().toLowerCase().trim();
+    if (!query) return this.students();
+    return this.students().filter(s =>
+      s.fullName.toLowerCase().includes(query) || s.email.toLowerCase().includes(query));
+  });
+
+  private static previousMonthStr(): string {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  /** "2026-07" → { year: 2026, month: 7 } (null when the picker is empty). */
+  private prYearMonth(): { year: number; month: number } | null {
+    const m = /^(\d{4})-(\d{2})$/.exec(this.prMonth());
+    if (!m) return null;
+    return { year: Number(m[1]), month: Number(m[2]) };
+  }
+
+  prMonthLabel(): string {
+    const ym = this.prYearMonth();
+    if (!ym) return '';
+    const namesEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const namesBn = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+    return `${(this.lang.isBangla() ? namesBn : namesEn)[ym.month - 1]} ${ym.year}`;
+  }
+
+  sendParentReports() {
+    const ym = this.prYearMonth();
+    if (!ym) { this.showMessage(this.lang.isBangla() ? 'মাস নির্বাচন করো।' : 'Pick a month first.', 'error'); return; }
+    const force = this.prForce();
+    const ask = this.lang.isBangla()
+      ? `${this.prMonthLabel()} মাসের রিপোর্ট সব অভিভাবকের ইমেইলে পাঠানো হবে${force ? ' (আগে পাঠানোগুলোও আবার যাবে!)' : ''}। নিশ্চিত?`
+      : `Send ${this.prMonthLabel()} reports to all parent emails${force ? ' (already-sent ones will be RE-sent!)' : ''}?`;
+    if (!confirm(ask)) return;
+
+    this.prSending.set(true);
+    this.prSummary.set(null);
+    this.parentReportService.send(ym.year, ym.month, force).subscribe({
+      next: (summary) => {
+        this.prSending.set(false);
+        this.prSummary.set(summary);
+        const msg = this.lang.isBangla()
+          ? `${summary.sent}টি পাঠানো হয়েছে, ${summary.skipped}টি আগেই পাঠানো, ${summary.failed}টি ব্যর্থ।`
+          : `${summary.sent} sent, ${summary.skipped} already sent, ${summary.failed} failed.`;
+        this.showMessage(msg, summary.failed > 0 ? 'error' : 'success');
+      },
+      error: (e) => {
+        this.prSending.set(false);
+        this.showMessage(e?.error?.message ?? (this.lang.isBangla() ? 'পাঠানো যায়নি।' : 'Send failed.'), 'error');
+      },
+    });
+  }
+
+  openPrPreview(student: AdminStudent) {
+    const ym = this.prYearMonth();
+    if (!ym) { this.showMessage(this.lang.isBangla() ? 'মাস নির্বাচন করো।' : 'Pick a month first.', 'error'); return; }
+    this.prPreviewName.set(student.fullName);
+    this.prPreviewLoading.set(true);
+    this.prPreviewHtml.set(this.sanitizer.bypassSecurityTrustHtml(''));
+    this.parentReportService.preview(student.id, ym.year, ym.month).subscribe({
+      next: (html) => {
+        this.prPreviewLoading.set(false);
+        // trusted: HTML is rendered by OUR backend from data we store; shown inside a sandboxed iframe
+        this.prPreviewHtml.set(this.sanitizer.bypassSecurityTrustHtml(html));
+      },
+      error: () => {
+        this.prPreviewLoading.set(false);
+        this.prPreviewHtml.set(null);
+        this.showMessage(this.lang.isBangla() ? 'প্রিভিউ আনা যায়নি।' : 'Could not load the preview.', 'error');
+      },
+    });
+  }
+
+  closePrPreview() {
+    this.prPreviewHtml.set(null);
+    this.prPreviewName.set('');
+    this.prPreviewLoading.set(false);
+  }
 
   // Search filters for all sections
   searchQuery = signal('');
@@ -200,6 +296,7 @@ annSubmitting  = signal(false);
       case 'store-items': break;
       case 'announcements': this.loadAnnouncements(); break;
       case 'settings': break; // self-contained child component; no data preload needed
+      case 'parent-reports': this.loadStudents(); break;   // student list powers per-student preview
     }
   }
 
@@ -221,7 +318,8 @@ annSubmitting  = signal(false);
       || value === 'comments'
       || value === 'store-items'
       || value === 'announcements'
-      || value === 'settings';
+      || value === 'settings'
+      || value === 'parent-reports';
   }
 
   loadDashboard() {

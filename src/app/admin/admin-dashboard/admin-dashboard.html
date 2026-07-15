@@ -31,6 +31,9 @@
       <button class="nav-item" [class.active]="activeTab() === 'store-items'" (click)="setTab('store-items')">
         <span class="nav-icon">🛍️</span> {{ lang.t().adStoreItems }}
       </button>
+      <button class="nav-item" [class.active]="activeTab() === 'parent-reports'" (click)="setTab('parent-reports')">
+        <span class="nav-icon">📧</span> {{ lang.isBangla() ? 'অভিভাবক রিপোর্ট' : 'Parent Reports' }}
+      </button>
       <button class="nav-item" [class.active]="activeTab() === 'settings'" (click)="setTab('settings')">
         <span class="nav-icon">⚙️</span> Settings
       </button>
@@ -245,6 +248,96 @@
         </tbody>
       </table>
     </div>
+    }
+
+    <!-- ========== PARENT REPORTS ========== -->
+    @if (activeTab() === 'parent-reports') {
+    <div class="page-header">
+      <h1>📧 {{ lang.isBangla() ? 'অভিভাবক মাসিক রিপোর্ট' : 'Parent Monthly Reports' }}</h1>
+      <p>{{ lang.isBangla()
+          ? 'প্রতি মাসের ১ তারিখে আগের মাসের রিপোর্ট কার্ড অভিভাবকের ইমেইলে স্বয়ংক্রিয়ভাবে যায় — এখান থেকে প্রিভিউ দেখতে ও দরকারে ম্যানুয়ালি পাঠাতে পারবে।'
+          : 'Report cards go to parent emails automatically on the 1st of each month — preview them here, or send manually when needed.' }}</p>
+    </div>
+
+    <div class="pr-panel">
+      <div class="pr-controls">
+        <label class="pr-field">
+          <span>{{ lang.isBangla() ? 'রিপোর্টের মাস' : 'Report month' }}</span>
+          <input type="month" class="pr-month" [ngModel]="prMonth()" (ngModelChange)="prMonth.set($event); prSummary.set(null)" />
+        </label>
+        <label class="pr-force" [title]="lang.isBangla() ? 'আগে পাঠানো রিপোর্টও আবার পাঠাবে' : 'Re-sends reports that were already sent'">
+          <input type="checkbox" [ngModel]="prForce()" (ngModelChange)="prForce.set($event)" />
+          {{ lang.isBangla() ? 'আগেরগুলোও আবার পাঠাও (force)' : 'Re-send already sent (force)' }}
+        </label>
+        <button type="button" class="pr-send-btn" [disabled]="prSending()" (click)="sendParentReports()">
+          @if (prSending()) { ⏳ {{ lang.isBangla() ? 'পাঠানো হচ্ছে…' : 'Sending…' }} }
+          @else { 📤 {{ lang.isBangla() ? 'রিপোর্ট পাঠাও' : 'Send reports' }} — {{ prMonthLabel() }} }
+        </button>
+      </div>
+
+      @if (prSummary(); as s) {
+        <div class="pr-summary">
+          <span class="pr-chip pr-chip--ok">✅ {{ lang.isBangla() ? 'পাঠানো হয়েছে' : 'Sent' }}: <b>{{ s.sent }}</b></span>
+          <span class="pr-chip">⏭️ {{ lang.isBangla() ? 'আগেই পাঠানো' : 'Already sent' }}: <b>{{ s.skipped }}</b></span>
+          <span class="pr-chip" [class.pr-chip--bad]="s.failed > 0">⚠️ {{ lang.isBangla() ? 'ব্যর্থ' : 'Failed' }}: <b>{{ s.failed }}</b></span>
+          <span class="pr-chip">👨‍👩‍👧 {{ lang.isBangla() ? 'অভিভাবক ইমেইল আছে' : 'Have parent email' }}: <b>{{ s.eligible }}</b></span>
+        </div>
+        @if (s.errors.length > 0) {
+          <ul class="pr-errors">
+            @for (err of s.errors; track $index) { <li>{{ err }}</li> }
+          </ul>
+        }
+      }
+    </div>
+
+    <h3 class="pr-list-title">👁️ {{ lang.isBangla() ? 'ছাত্রভিত্তিক প্রিভিউ' : 'Per-student preview' }}</h3>
+    <div class="search-box">
+      <input type="text" class="search-input"
+        [placeholder]="lang.t().adSearchNameEmail"
+        [ngModel]="prSearch()" (ngModelChange)="prSearch.set($event)" />
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ lang.t().commonName }}</th>
+            <th>{{ lang.t().commonEmail }}</th>
+            <th>{{ lang.t().tcThActions }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of filteredPrStudents(); track student.id) {
+          <tr>
+            <td>{{ student.fullName }}</td>
+            <td class="email-cell">{{ student.email }}</td>
+            <td class="actions-cell">
+              <button class="btn btn-approve" (click)="openPrPreview(student)">
+                👁️ {{ lang.isBangla() ? 'রিপোর্ট দেখো' : 'Preview report' }}
+              </button>
+            </td>
+          </tr>
+          }
+          @empty { <tr><td colspan="3" class="empty-row">{{ lang.t().adNoStudents }}</td></tr> }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- report preview modal -->
+    @if (prPreviewHtml() !== null || prPreviewLoading()) {
+      <div class="pr-modal-overlay" (click)="closePrPreview()">
+        <div class="pr-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+          <div class="pr-modal-head">
+            <h3>📧 {{ prPreviewName() }} — {{ prMonthLabel() }}</h3>
+            <button type="button" class="pr-modal-x" (click)="closePrPreview()" aria-label="Close">✕</button>
+          </div>
+          @if (prPreviewLoading()) {
+            <p class="pr-modal-loading">{{ lang.t().commonLoading }}</p>
+          } @else {
+            <div class="pr-modal-body" [innerHTML]="prPreviewHtml()"></div>
+          }
+        </div>
+      </div>
+    }
     }
 
     <!-- ========== CATEGORIES ========== -->
