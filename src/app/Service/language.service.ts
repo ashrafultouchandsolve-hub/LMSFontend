@@ -208,6 +208,8 @@ export interface Translations {
   recStatusReady: string; recStatusProcessing: string; recStatusFailed: string;
   recTitleRequired: string; recUpdated: string; recUpdateFailed: string;
   recDeleteConfirm: string; recDeleted: string; recDeleteFailed: string; recWatchFailed: string;
+  // Course delete (irreversible)
+  courseDeleteConfirm: string; courseDeleted: string;
   // Exams (student)
   exSectionTitle: string; exCourseTitle: string; exFirst: string; exSecond: string; exThird: string; exFinal: string;
   exLocked: string; exNotAvailable: string; exPending: string; exSubmitted: string; exGraded: string;
@@ -542,6 +544,8 @@ const EN: Translations = {
   recStatusReady: 'Ready', recStatusProcessing: 'Processing…', recStatusFailed: 'Failed',
   recTitleRequired: 'Title is required.', recUpdated: 'Recording updated.', recUpdateFailed: 'Failed to update recording.',
   recDeleteConfirm: 'Delete this recording? This cannot be undone.', recDeleted: 'Recording deleted.', recDeleteFailed: 'Failed to delete recording.', recWatchFailed: 'Could not open the recording.',
+  courseDeleteConfirm: '⚠️ Permanently delete this course?\n\nThis will remove EVERYTHING tied to it — lessons & videos, PDFs and practice materials, exams and student submissions, live classes, ratings, comments, enrolments and payments — from both the database and the server storage.\n\nThis action CANNOT be undone and the course can NOT be restored.\n\nType-check done? Press OK to delete permanently.',
+  courseDeleted: 'Course and all of its content were permanently deleted.',
   exSectionTitle: 'My Exams', exCourseTitle: 'Course:', exFirst: '1st Exam', exSecond: '2nd Exam', exThird: '3rd Exam', exFinal: 'Final Exam',
   exLocked: 'Locked', exNotAvailable: 'Not available yet', exPending: 'Pending', exSubmitted: 'Submitted', exGraded: 'Graded',
   exMissed: 'Missed', exClosed: 'Closed — deadline passed', exDeadline: 'Deadline', exInstruction: 'Instruction', exQuestion: 'Question',
@@ -907,6 +911,8 @@ const BN: Translations = {
   recStatusReady: 'প্রস্তুত', recStatusProcessing: 'প্রসেসিং…', recStatusFailed: 'ব্যর্থ',
   recTitleRequired: 'টাইটেল দিতে হবে।', recUpdated: 'রেকর্ডিং আপডেট হয়েছে।', recUpdateFailed: 'রেকর্ডিং আপডেট ব্যর্থ হয়েছে।',
   recDeleteConfirm: 'এই রেকর্ডিং ডিলিট করবেন? এটি ফেরানো যাবে না।', recDeleted: 'রেকর্ডিং ডিলিট হয়েছে।', recDeleteFailed: 'রেকর্ডিং ডিলিট ব্যর্থ হয়েছে।', recWatchFailed: 'রেকর্ডিং খোলা যায়নি।',
+  courseDeleteConfirm: '⚠️ এই কোর্সটি স্থায়ীভাবে ডিলিট করবেন?\n\nএর সাথে জড়িত সবকিছু মুছে যাবে — লেসন ও ভিডিও, পিডিএফ ও প্র্যাকটিস মেটেরিয়াল, পরীক্ষা ও শিক্ষার্থীদের জমা দেওয়া উত্তর, লাইভ ক্লাস, রেটিং, কমেন্ট, এনরোলমেন্ট ও পেমেন্ট — ডেটাবেজ এবং সার্ভার স্টোরেজ দুই জায়গা থেকেই।\n\nএই কাজটি কোনোভাবেই ফেরানো যাবে না এবং কোর্সটি আর রিস্টোর করা যাবে না।\n\nনিশ্চিত হলে OK চাপুন — স্থায়ীভাবে ডিলিট হবে।',
+  courseDeleted: 'কোর্স এবং এর সব কন্টেন্ট স্থায়ীভাবে ডিলিট করা হয়েছে।',
   exSectionTitle: 'আমার পরীক্ষা', exCourseTitle: 'কোর্স:', exFirst: '১ম পরীক্ষা', exSecond: '২য় পরীক্ষা', exThird: '৩য় পরীক্ষা', exFinal: 'ফাইনাল পরীক্ষা',
   exLocked: 'লক', exNotAvailable: 'এখনো উপলব্ধ নয়', exPending: 'বাকি আছে', exSubmitted: 'জমা হয়েছে', exGraded: 'মূল্যায়িত',
   exMissed: 'মিস হয়েছে', exClosed: 'বন্ধ — সময় শেষ', exDeadline: 'শেষ তারিখ', exInstruction: 'নির্দেশনা', exQuestion: 'প্রশ্ন',

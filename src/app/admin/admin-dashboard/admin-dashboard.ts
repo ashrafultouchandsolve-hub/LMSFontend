@@ -491,9 +491,10 @@ annSubmitting  = signal(false);
   }
 
   deleteCourse(id: string) {
-    if (!confirm('Delete this course?')) return;
+    // Irreversible full delete — DB rows + all uploaded files on the server. Warn hard.
+    if (!confirm(this.lang.t().courseDeleteConfirm)) return;
     this.adminService.deleteCourse(id).subscribe({
-      next: () => { this.showMessage('Course deleted.', 'success'); this.loadCourses(); },
+      next: () => { this.showMessage(this.lang.t().courseDeleted, 'success'); this.loadCourses(); },
       error: () => this.showMessage('Failed.', 'error')
     });
   }

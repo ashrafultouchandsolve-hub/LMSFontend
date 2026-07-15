@@ -624,7 +624,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       return;
     }
 
-    const shouldDelete = window.confirm('আপনি কি নিশ্চিতভাবে এই কোর্সটি ডিলিট করতে চান?');
+    // Irreversible: deletes the course + every lesson, file, exam, submission and
+    // payment tied to it, from both the DB and the server. Warn hard before firing.
+    const shouldDelete = window.confirm(this.lang.t().courseDeleteConfirm);
     if (!shouldDelete) {
       return;
     }
@@ -635,7 +637,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       if (this.selectedCourseId() === courseId) {
         this.selectedCourseId.set(null);
       }
-      this.setNotice('কোর্স সফলভাবে মুছে ফেলা হয়েছে।', 'success');
+      this.setNotice(this.lang.t().courseDeleted, 'success');
     } catch (error) {
       this.setNotice(this.extractApiErrorMessage(error, 'কোর্স ডিলিট করা যায়নি।'), 'error');
     }
