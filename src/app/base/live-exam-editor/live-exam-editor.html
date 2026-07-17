@@ -31,6 +31,15 @@
       </div>
     } @else {
 
+      <!-- sticky validation banner — names the exact problem + points to the question -->
+      @if (validationError()) {
+        <div id="lee-error-banner" class="lee-error-banner" role="alert">
+          <span class="lee-error-icon" aria-hidden="true">⚠️</span>
+          <span class="lee-error-text">{{ validationError() }}</span>
+          <button type="button" class="lee-error-close" (click)="clearValidationError()" aria-label="Dismiss">✕</button>
+        </div>
+      }
+
       <!-- header card (Google-Forms style, thick colored top border) -->
       <section class="lee-card lee-header-card">
         <p class="lee-context">📺 Exam for: <strong>{{ liveClassTitle() || 'Live class' }}</strong></p>
@@ -40,7 +49,7 @@
           class="lee-title-input"
           placeholder="Exam title"
           [ngModel]="title()"
-          (ngModelChange)="title.set($event)" />
+          (ngModelChange)="onTitleChange($event)" />
 
         <textarea
           rows="2"
@@ -66,7 +75,7 @@
                 type="number"
                 min="1"
                 [ngModel]="durationMinutes()"
-                (ngModelChange)="durationMinutes.set($event)" />
+                (ngModelChange)="onDurationChange($event)" />
               <span>minutes</span>
             </div>
           }
@@ -81,7 +90,7 @@
 
       <!-- question cards -->
       @for (q of questions(); track $index; let i = $index) {
-        <section class="lee-card lee-q-card">
+        <section class="lee-card lee-q-card" [id]="'lee-q-' + i" [class.lee-q-card--error]="errorIndex() === i">
           <div class="lee-q-top">
             <span class="lee-q-num">Question {{ i + 1 }}</span>
             <select

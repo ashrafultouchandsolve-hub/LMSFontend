@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, NonNullableFormBuilder, Validators } 
 import { LearningApiService } from '../../Service/learning-api.service';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
+import { ConfirmService } from '../../Service/confirm.service';
 
 type StoreItem = {
   id: string;
@@ -30,6 +31,7 @@ export class AdminItem implements OnInit {
   private readonly authService = inject(AuthService);
   protected readonly lang = inject(LanguageService);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly confirmDialog = inject(ConfirmService);
 
   protected readonly items = signal<StoreItem[]>([]);
   protected readonly searchTerm = signal('');
@@ -323,7 +325,12 @@ export class AdminItem implements OnInit {
   }
 
   protected async deleteItem(itemId: string): Promise<void> {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!(await this.confirmDialog.confirm({
+      title: 'Delete item?',
+      message: 'This store item will be removed permanently.',
+      tone: 'danger',
+      confirmText: 'Delete',
+    }))) return;
 
     this.isSaving.set(true);
     try {

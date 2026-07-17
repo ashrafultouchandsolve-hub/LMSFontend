@@ -1,0 +1,25 @@
+@if (svc.state(); as s) {
+  <div class="cd-backdrop" (click)="svc.resolve(false)">
+    <div
+      class="cd-card"
+      [class.cd-card--danger]="s.tone === 'danger'"
+      role="alertdialog"
+      aria-modal="true"
+      [attr.aria-label]="title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="cd-icon" aria-hidden="true">{{ icon }}</div>
+      <h3 class="cd-title">{{ title }}</h3>
+      <p class="cd-message">{{ s.message }}</p>
+
+      <div class="cd-actions">
+        <button type="button" class="cd-btn cd-btn--cancel" (click)="svc.resolve(false)" autofocus>
+          {{ cancelText }}
+        </button>
+        <button type="button" class="cd-btn cd-btn--confirm" (click)="svc.resolve(true)">
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

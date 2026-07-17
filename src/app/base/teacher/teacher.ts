@@ -21,6 +21,7 @@ import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 import { environment } from '../../../environments/environments';
 import { Navbar } from '../../shared/navbar/navbar';
 import { LanguageService } from '../../Service/language.service';
+import { ConfirmService } from '../../Service/confirm.service';
 import { Category, CategoryService } from '../../Service/category.service';
 import { AdminService, AdminTeacher } from '../../Service/admin.service';
 
@@ -93,6 +94,7 @@ export class Teacher implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly route = inject(ActivatedRoute);
   protected readonly lang = inject(LanguageService);
+  private readonly confirmDialog = inject(ConfirmService);
 
   protected readonly searchTerm = signal('');
   protected readonly selectedCourseId = signal<string | null>(null);
@@ -366,8 +368,12 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   }
 
   protected async startFreeLive(): Promise<void> {
+    // Snapshot before any await — form fields can be cleared while the confirm
+    // dialog is open (same failure mode as createLiveClass's empty-title 400).
     const title = this.freeLiveTitle.trim();
-    if (!this.freeLiveCourseId) {
+    const courseId = this.freeLiveCourseId;
+    const description = this.freeLiveDesc.trim();
+    if (!courseId) {
       this.setNotice('Choose which course this free live class is for.', 'error');
       return;
     }
@@ -378,9 +384,14 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
     // Soft warning: 3 free classes per course is the guideline.
     try {
-      const cntRes: any = await firstValueFrom(this.liveClassService.freeCount(this.freeLiveCourseId));
+      const cntRes: any = await firstValueFrom(this.liveClassService.freeCount(courseId));
       const n = cntRes?.data ?? cntRes?.Data ?? 0;
-      if (n >= 3 && !window.confirm(`This course already has ${n} free live classes (3 is the suggested limit). Start another free class anyway?`)) {
+      if (n >= 3 && !(await this.confirmDialog.confirm({
+        title: 'Start another free class?',
+        message: `This course already has ${n} free live classes (3 is the suggested limit).`,
+        icon: '🎥',
+        confirmText: 'Start anyway',
+      }))) {
         return;
       }
     } catch { /* best-effort; don't block */ }
@@ -388,7 +399,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     this.isStartingFree.set(true);
     try {
       const res: any = await firstValueFrom(
-        this.liveClassService.startFree({ courseId: this.freeLiveCourseId, title, description: this.freeLiveDesc.trim() }),
+        this.liveClassService.startFree({ courseId, title, description }),
       );
       const newId = res?.data?.id ?? res?.Data?.Id ?? null;
       this.freeLiveTitle = '';
@@ -405,7 +416,13 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   }
 
   protected async endFreeLive(id: string): Promise<void> {
-    if (!window.confirm('End this free live class?')) return;
+    if (!(await this.confirmDialog.confirm({
+      title: 'End free live class?',
+      message: 'Students will no longer be able to join this session.',
+      tone: 'danger',
+      icon: '🔴',
+      confirmText: 'End class',
+    }))) return;
     try {
       await firstValueFrom(this.liveClassService.endFree(id));
       await this.loadMyFreeClasses();
@@ -607,7 +624,12 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   /** Admin: flip a course between "completed" and "ongoing". */
   protected async toggleComplete(course: Course): Promise<void> {
     const next = !course.completed;
-    if (next && !window.confirm('Mark this course as completed?')) return;
+    if (next && !(await this.confirmDialog.confirm({
+      title: 'Mark as completed?',
+      message: 'The course will be shown as completed to enrolled students.',
+      icon: '🎓',
+      confirmText: 'Mark completed',
+    }))) return;
     try {
       await firstValueFrom(this.learningApi.setCourseCompleted(course.id, next));
       this.courses.update(list => list.map(c => c.id === course.id ? { ...c, completed: next } : c));
@@ -626,7 +648,12 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
     // Irreversible: deletes the course + every lesson, file, exam, submission and
     // payment tied to it, from both the DB and the server. Warn hard before firing.
-    const shouldDelete = window.confirm(this.lang.t().courseDeleteConfirm);
+    const shouldDelete = await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'কোর্স ডিলিট করবেন?' : 'Delete course?',
+      message: this.lang.t().courseDeleteConfirm,
+      tone: 'danger',
+      confirmText: this.lang.isBangla() ? 'ডিলিট' : 'Delete',
+    });
     if (!shouldDelete) {
       return;
     }
@@ -871,7 +898,12 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   }
 
   protected async deletePractice(id: string): Promise<void> {
-    if (!window.confirm('Delete this practice material?')) return;
+    if (!(await this.confirmDialog.confirm({
+      title: 'Delete practice material?',
+      message: 'This material will be removed for all students.',
+      tone: 'danger',
+      confirmText: 'Delete',
+    }))) return;
     try {
       await firstValueFrom(this.practiceService.delete(id));
       const c = this.selectedCourse();
@@ -1014,22 +1046,32 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       return;
     }
 
+    // Snapshot the payload BEFORE any await — if the user closes the live modal
+    // while the confirm dialog is open, closeLiveModal() wipes the form fields,
+    // which used to fire the request with an empty title (400: Title is required).
+    const payload = {
+      courseId: selected.id,
+      title: this.liveTitle.trim(),
+      description: this.liveDesc.trim(),
+      scheduledAt: scheduledDate.toISOString(),
+    };
+
     // Soft warning: encourage 3 free live classes before paid ones.
     try {
       const cntRes: any = await firstValueFrom(this.liveClassService.freeCount(selected.id));
       const n = cntRes?.data ?? cntRes?.Data ?? 0;
-      if (n < 3 && !window.confirm(`You've done only ${n} of the 3 suggested free live classes for this course. Create this paid live class anyway?`)) {
+      if (n < 3 && !(await this.confirmDialog.confirm({
+        title: 'Create paid live class?',
+        message: `You've done only ${n} of the 3 suggested free live classes for this course.`,
+        icon: '💳',
+        confirmText: 'Create anyway',
+      }))) {
         return;
       }
     } catch { /* best-effort; don't block */ }
 
     try {
-      await firstValueFrom(this.liveClassService.create({
-        courseId: selected.id,
-        title: this.liveTitle.trim(),
-        description: this.liveDesc.trim(),
-        scheduledAt: scheduledDate.toISOString(),
-      }));
+      await firstValueFrom(this.liveClassService.create(payload));
 
       await this.loadLiveClasses(selected.id);
       this.setNotice('Live class scheduled successfully.', 'success');
@@ -1181,7 +1223,12 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       return;
     }
 
-    const shouldDelete = window.confirm('আপনি কি নিশ্চিতভাবে এই লেসনটি ডিলিট করতে চান?');
+    const shouldDelete = await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'লেসন ডিলিট করবেন?' : 'Delete lesson?',
+      message: 'আপনি কি নিশ্চিতভাবে এই লেসনটি ডিলিট করতে চান?',
+      tone: 'danger',
+      confirmText: this.lang.isBangla() ? 'ডিলিট' : 'Delete',
+    });
     if (!shouldDelete) {
       return;
     }
@@ -1509,7 +1556,12 @@ private async loadTeacherCourses(): Promise<void> {
   }
 
   protected async deleteRecording(rec: LiveClass): Promise<void> {
-    if (!confirm(this.lang.t().recDeleteConfirm)) return;
+    if (!(await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'রেকর্ডিং ডিলিট করবেন?' : 'Delete recording?',
+      message: this.lang.t().recDeleteConfirm,
+      tone: 'danger',
+      confirmText: this.lang.isBangla() ? 'ডিলিট' : 'Delete',
+    }))) return;
     try {
       await firstValueFrom(this.liveClassService.deleteLiveClass(rec.id));
       await this.loadRecordings(this.selectedCourseId()!);

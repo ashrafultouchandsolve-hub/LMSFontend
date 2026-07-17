@@ -6,6 +6,7 @@ import { LearningApiService } from '../../Service/learning-api.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
+import { ConfirmService } from '../../Service/confirm.service';
 
 interface QuizForm {
   question: string;
@@ -31,6 +32,7 @@ export class QuizEditorComponent implements OnInit {
   private authService = inject(AuthService);
   private api = inject(LearningApiService);
   protected readonly lang = inject(LanguageService);
+  private readonly confirmDialog = inject(ConfirmService);
 
 
   lessonId = signal('');
@@ -117,15 +119,16 @@ export class QuizEditorComponent implements OnInit {
   }
 
   async deleteQuiz(id: string) {
-    const confirmDelete = confirm('DO you want to delete this quiz?');
-    if(confirmDelete){
-      await firstValueFrom(this.api.deleteQuiz(id));
-      this.showNotice('Quiz Deleted Successfully', 'success');
-      await this.loadQuizzes();
-    }else{
-      return;
-    }
-    
+    const confirmDelete = await this.confirmDialog.confirm({
+      title: 'Delete quiz?',
+      message: 'This quiz and its questions will be removed permanently.',
+      tone: 'danger',
+      confirmText: 'Delete',
+    });
+    if (!confirmDelete) return;
+    await firstValueFrom(this.api.deleteQuiz(id));
+    this.showNotice('Quiz Deleted Successfully', 'success');
+    await this.loadQuizzes();
   }
 
   showNotice(msg: string, type: 'success'|'error') {

@@ -14,6 +14,7 @@ import { Teacher } from '../../base/teacher/teacher';
 import { AdminSettings } from '../admin-settings/admin-settings';
 import { ParentReportService, ParentReportSummary } from '../../Service/parent-report.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ConfirmService } from '../../Service/confirm.service';
 
 type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements'|'settings'|'parent-reports';
 
@@ -34,6 +35,7 @@ export class AdminDashboard implements OnInit {
   private readonly learningApi = inject(LearningApiService);
   private readonly parentReportService = inject(ParentReportService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly confirmDialog = inject(ConfirmService);
   protected readonly lang = inject(LanguageService);
 
   readonly annTypes = [
@@ -120,14 +122,19 @@ annSubmitting  = signal(false);
     return `${(this.lang.isBangla() ? namesBn : namesEn)[ym.month - 1]} ${ym.year}`;
   }
 
-  sendParentReports() {
+  async sendParentReports() {
     const ym = this.prYearMonth();
     if (!ym) { this.showMessage(this.lang.isBangla() ? 'মাস নির্বাচন করো।' : 'Pick a month first.', 'error'); return; }
     const force = this.prForce();
     const ask = this.lang.isBangla()
-      ? `${this.prMonthLabel()} মাসের রিপোর্ট সব অভিভাবকের ইমেইলে পাঠানো হবে${force ? ' (আগে পাঠানোগুলোও আবার যাবে!)' : ''}। নিশ্চিত?`
+      ? `${this.prMonthLabel()} মাসের রিপোর্ট সব অভিভাবকের ইমেইলে পাঠানো হবে${force ? ' (আগে পাঠানোগুলোও আবার যাবে!)' : ''}।`
       : `Send ${this.prMonthLabel()} reports to all parent emails${force ? ' (already-sent ones will be RE-sent!)' : ''}?`;
-    if (!confirm(ask)) return;
+    if (!(await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'রিপোর্ট পাঠাবেন?' : 'Send reports?',
+      message: ask,
+      icon: '📧',
+      confirmText: this.lang.isBangla() ? 'পাঠান' : 'Send',
+    }))) return;
 
     this.prSending.set(true);
     this.prSummary.set(null);
@@ -429,8 +436,13 @@ annSubmitting  = signal(false);
     });
   }
 
-  deleteCategory(id: string) {
-    if (!confirm('Delete this category? Courses in it keep their category name.')) return;
+  async deleteCategory(id: string) {
+    if (!(await this.confirmDialog.confirm({
+      title: 'Delete category?',
+      message: 'Courses in it keep their category name.',
+      tone: 'danger',
+      confirmText: 'Delete',
+    }))) return;
     this.categoryService.delete(id).subscribe({
       next: () => { this.showMessage('Category deleted.', 'success'); this.loadCategories(); },
       error: (e) => this.showMessage(this.categoryError(e, 'Failed to delete category.'), 'error')
@@ -490,9 +502,14 @@ annSubmitting  = signal(false);
     });
   }
 
-  deleteCourse(id: string) {
+  async deleteCourse(id: string) {
     // Irreversible full delete — DB rows + all uploaded files on the server. Warn hard.
-    if (!confirm(this.lang.t().courseDeleteConfirm)) return;
+    if (!(await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'কোর্স ডিলিট করবেন?' : 'Delete course?',
+      message: this.lang.t().courseDeleteConfirm,
+      tone: 'danger',
+      confirmText: this.lang.isBangla() ? 'ডিলিট' : 'Delete',
+    }))) return;
     this.adminService.deleteCourse(id).subscribe({
       next: () => { this.showMessage(this.lang.t().courseDeleted, 'success'); this.loadCourses(); },
       error: () => this.showMessage('Failed.', 'error')
@@ -523,8 +540,13 @@ annSubmitting  = signal(false);
     });
   }
 
-  deleteComment(id: string) {
-    if (!confirm('Delete this comment?')) return;
+  async deleteComment(id: string) {
+    if (!(await this.confirmDialog.confirm({
+      title: 'Delete comment?',
+      message: 'This comment will be removed permanently.',
+      tone: 'danger',
+      confirmText: 'Delete',
+    }))) return;
     this.adminService.deleteComment(id).subscribe({
       next: () => { this.showMessage('Comment deleted.', 'success'); this.loadComments(); },
       error: () => this.showMessage('Failed.', 'error')
@@ -577,8 +599,13 @@ deactivateAnn(id: string) {
   });
 }
  
-deleteAnn(id: string) {
-  if (!confirm('Delete this announcement?')) return;
+async deleteAnn(id: string) {
+  if (!(await this.confirmDialog.confirm({
+    title: 'Delete announcement?',
+    message: 'This announcement will be removed permanently.',
+    tone: 'danger',
+    confirmText: 'Delete',
+  }))) return;
   this.annSvc.delete(id).subscribe({
     next: () => { this.showMessage('Deleted.', 'success'); this.loadAnnouncements(); },
     error: () => this.showMessage('Failed.', 'error')

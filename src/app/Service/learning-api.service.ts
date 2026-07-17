@@ -118,6 +118,18 @@ export type StudentProfileDto = {
   guardianPhone: string | null;
   facebookLink: string | null;
   linkedInLink: string | null;
+  // onboarding info (steps 02–04) — also editable from the profile page
+  board: string | null;
+  sscExamYear: string | null;
+  thana: string | null;
+  district: string | null;
+  motherName: string | null;
+  guardianOccupation: string | null;
+  referralSource: string | null;
+  parentEmail: string | null;
+  mobileNumber: string | null;
+  agreedNotifications?: boolean;
+  profileInfoCompletedAt: string | null;
 };
 
 export type StudentProfilePayload = {
@@ -133,6 +145,32 @@ export type StudentProfilePayload = {
   guardianPhone?: string | null;
   facebookLink?: string | null;
   linkedInLink?: string | null;
+};
+
+// Post-registration onboarding modal payload (steps 02–04) → api/Student/complete-onboarding
+export type StudentOnboardingPayload = {
+  // step 02 — student information
+  fullName: string;
+  dateOfBirth: string;          // ISO yyyy-MM-dd
+  gender: string;
+  mobileNumber: string;
+  // step 03 — academic information
+  board: string;
+  institution: string;
+  sscExamYear: string;
+  thana: string;
+  district: string;
+  // step 04 — parent/guardian information
+  guardianName: string;         // father/guardian
+  motherName: string;
+  guardianPhone: string;
+  parentEmail?: string | null;  // optional
+  guardianOccupation: string;
+  referralSource?: string | null;
+  // agreements
+  agreedInfoCorrect: boolean;
+  agreedDataStorage: boolean;
+  agreedNotifications: boolean;
 };
 
 export type EnrollmentDto = {
@@ -244,6 +282,11 @@ export class LearningApiService {
     const formData = new FormData();
     formData.append('file', file);
     return this.withFallback((base) => this.http.post<any>(`${base}/student/upload-profile-image`, formData));
+  }
+
+  /** Post-registration onboarding modal (steps 02–04): saves student/academic/guardian info. */
+  completeStudentOnboarding(dto: StudentOnboardingPayload): Observable<any> {
+    return this.withFallback((base) => this.http.post<any>(`${base}/student/complete-onboarding`, dto));
   }
 
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -84,6 +84,14 @@ export class LiveExamEditor implements OnInit {
   protected readonly showPublishModal = signal(false);
   protected readonly showCloseModal = signal(false);
 
+  /**
+   * Inline validation feedback. Instead of a toast that flashes past, a sticky banner
+   * names the exact problem and `errorIndex` outlines + scrolls to the offending question
+   * so the teacher can see and fix it immediately (was: silent fail on missing correct answer).
+   */
+  protected readonly validationError = signal('');
+  protected readonly errorIndex = signal<number | null>(null);
+
   /** Question editing locks once the exam leaves Draft (backend enforces too). */
   protected readonly isLocked = computed(() => this.status() !== LiveExamStatus.Draft);
 
@@ -102,6 +110,16 @@ export class LiveExamEditor implements OnInit {
       default: return 'Draft';
     }
   });
+
+  constructor() {
+    // Editing any question or the title dismisses a stale validation banner/highlight,
+    // so the teacher never sees an error for something they've already fixed.
+    effect(() => {
+      this.questions();
+      this.title();
+      untracked(() => this.clearValidationError());
+    });
+  }
 
   ngOnInit(): void {
     this.liveClassId.set(this.route.snapshot.paramMap.get('liveClassId') ?? '');
@@ -272,12 +290,15 @@ export class LiveExamEditor implements OnInit {
   }
 
   // ── validation ───────────────────────────────────────────────────
-  private validate(): string | null {
-    if (!this.title().trim()) return 'Exam title is required.';
+  /** Returns the first problem (message + which question, if any) or null when valid. */
+  private validate(): { message: string; questionIndex: number | null } | null {
+    if (!this.title().trim())
+      return { message: 'Add an exam title before saving.', questionIndex: null };
 
     if (this.isTimed()) {
       const mins = Number(this.durationMinutes());
-      if (!mins || mins < 1) return 'Duration must be at least 1 minute.';
+      if (!mins || mins < 1)
+        return { message: 'Timed exam: set a duration of at least 1 minute.', questionIndex: null };
     }
 
     // Questions are locked (and enforced server-side) once published — only details are saved then.
@@ -287,20 +308,50 @@ export class LiveExamEditor implements OnInit {
     for (let i = 0; i < list.length; i++) {
       const n = i + 1;
       const q = list[i];
-      if (!q.text.trim()) return `Question ${n}: question text is required.`;
+      if (!q.text.trim())
+        return { message: `Question ${n}: write the question text.`, questionIndex: i };
       if (this.isChoice(q.type)) {
         const filled = q.options.filter((o) => o.text.trim());
-        if (filled.length < 2) return `Question ${n}: add at least 2 options.`;
+        if (filled.length < 2)
+          return { message: `Question ${n}: add at least 2 options.`, questionIndex: i };
         const correct = filled.filter((o) => o.isCorrect).length;
         if (q.type === LiveExamQuestionType.MultipleChoice && correct !== 1) {
-          return `Question ${n}: mark exactly one correct option.`;
+          return { message: `Question ${n}: select the one correct answer — tick the circle next to it.`, questionIndex: i };
         }
         if (q.type === LiveExamQuestionType.Checkboxes && correct < 1) {
-          return `Question ${n}: mark at least one correct option.`;
+          return { message: `Question ${n}: tick at least one correct answer.`, questionIndex: i };
         }
       }
     }
     return null;
+  }
+
+  /** Show the sticky error banner, outline the bad question, and scroll it into view. */
+  private showValidationError(message: string, questionIndex: number | null): void {
+    this.validationError.set(message);
+    this.errorIndex.set(questionIndex);
+    this.toastr.error(message);
+    // let the banner/highlight render, then bring the problem on-screen
+    setTimeout(() => {
+      const id = questionIndex != null ? `lee-q-${questionIndex}` : 'lee-error-banner';
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 40);
+  }
+
+  /** Dismiss the banner + question highlight (called on edit and on dismiss click). */
+  protected clearValidationError(): void {
+    if (this.validationError()) this.validationError.set('');
+    if (this.errorIndex() !== null) this.errorIndex.set(null);
+  }
+
+  protected onTitleChange(value: string): void {
+    this.title.set(value);
+    this.clearValidationError();
+  }
+
+  protected onDurationChange(value: number | null): void {
+    this.durationMinutes.set(value);
+    this.clearValidationError();
   }
 
   private buildDto(): SaveLiveExamDto {
@@ -327,9 +378,10 @@ export class LiveExamEditor implements OnInit {
   protected async save(): Promise<void> {
     const err = this.validate();
     if (err) {
-      this.toastr.error(err);
+      this.showValidationError(err.message, err.questionIndex);
       return;
     }
+    this.clearValidationError();
     this.isSaving.set(true);
     try {
       const res: any = await firstValueFrom(this.svc.save(this.liveClassId(), this.buildDto()));

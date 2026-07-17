@@ -954,6 +954,37 @@
 .edit-field textarea { resize: vertical; }
 .edit-note { font-size: 0.72rem; color: rgba(17, 24, 39, 0.45); }
 
+/* policy re-confirmation box (required on every save) */
+.edit-agreement {
+	margin-top: 16px;
+	border: 1px solid rgba(37, 99, 235, 0.18);
+	background: #f8fbff;
+	border-radius: 12px;
+	padding: 14px;
+}
+.edit-agreement-title {
+	margin: 0 0 10px;
+	font-weight: 800;
+	color: #0f172a;
+	font-size: 0.9rem;
+}
+.edit-agreement-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-top: 8px;
+	font-size: 0.86rem;
+	color: #334155;
+	cursor: pointer;
+}
+.edit-agreement-item input[type='checkbox'] {
+	margin-top: 3px;
+	width: 16px;
+	height: 16px;
+	accent-color: #2563eb;
+	flex-shrink: 0;
+}
+
 .edit-modal-foot {
 	display: flex;
 	justify-content: flex-end;

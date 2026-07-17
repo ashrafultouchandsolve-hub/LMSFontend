@@ -5,6 +5,7 @@ import { AuthService } from '../../Service/auth.service';
 import { LearningApiService, LessonDto } from '../../Service/learning-api.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LanguageService } from '../../Service/language.service';
+import { ConfirmService } from '../../Service/confirm.service';
 import { LiveClass, LiveClassService } from '../../Service/live-class-service';
 import { ExamService, ExamView } from '../../Service/exam.service';
 import { CourseNotifService } from '../../Service/course-notif.service';
@@ -67,6 +68,7 @@ export class EnrolledCourse implements OnDestroy {
   private readonly liveClassService = inject(LiveClassService);
   protected readonly courseNotif = inject(CourseNotifService);
   readonly lang = inject(LanguageService);
+  private readonly confirmDialog = inject(ConfirmService);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
   protected readonly courseId = signal('');
@@ -729,7 +731,12 @@ constructor(private readonly sanitizer: DomSanitizer) {
   }
 
   protected async deleteComment(commentId: string): Promise<void> {
-    if (!globalThis.confirm('Delete this comment?')) return;
+    if (!(await this.confirmDialog.confirm({
+      title: 'Delete comment?',
+      message: 'Your comment will be removed permanently.',
+      tone: 'danger',
+      confirmText: 'Delete',
+    }))) return;
 
     try {
       await firstValueFrom(this.learningApi.deleteCourseComment(commentId));

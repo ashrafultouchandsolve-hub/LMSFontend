@@ -382,13 +382,47 @@
 								<span class="detail-value" [class.muted]="!profile()?.address">{{ profile()?.address || lang.t().profileNotSet }}</span>
 							</div>
 							<div class="detail-item">
-								<span class="detail-label">{{ lang.t().profileGuardianName }}</span>
+								<span class="detail-label">{{ lang.t().siBoard }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.board">{{ profile()?.board || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().siSscYear }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.sscExamYear">{{ profile()?.sscExamYear || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().siThana }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.thana">{{ profile()?.thana || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().siDistrict }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.district">{{ profile()?.district || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().siFatherName }}</span>
 								<span class="detail-value" [class.muted]="!profile()?.guardianName">{{ profile()?.guardianName || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().siMotherName }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.motherName">{{ profile()?.motherName || lang.t().profileNotSet }}</span>
 							</div>
 							<div class="detail-item">
 								<span class="detail-label">{{ lang.t().profileGuardianPhone }}</span>
 								<span class="detail-value" [class.muted]="!profile()?.guardianPhone">{{ profile()?.guardianPhone || lang.t().profileNotSet }}</span>
 							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().registerParentEmail }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.parentEmail">{{ profile()?.parentEmail || lang.t().profileNotSet }}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">{{ lang.t().siOccupation }}</span>
+								<span class="detail-value" [class.muted]="!profile()?.guardianOccupation">{{ profile()?.guardianOccupation || lang.t().profileNotSet }}</span>
+							</div>
+							@if (profile()?.referralSource) {
+								<div class="detail-item">
+									<span class="detail-label">{{ lang.t().profileReferral }}</span>
+									<span class="detail-value">{{ profile()?.referralSource }}</span>
+								</div>
+							}
 							@if (profile()?.facebookLink) {
 								<div class="detail-item">
 									<span class="detail-label">{{ lang.t().profileFacebook }}</span>
@@ -545,15 +579,15 @@
 							<small class="edit-note">{{ lang.t().profileEmailNote }}</small>
 						</label>
 						<label class="edit-field">
-							<span>{{ lang.t().profilePhone }}</span>
+							<span>{{ lang.t().profilePhone }} *</span>
 							<input type="tel" [(ngModel)]="editForm.phone" />
 						</label>
 						<label class="edit-field">
-							<span>{{ lang.t().profileDob }}</span>
+							<span>{{ lang.t().profileDob }} *</span>
 							<input type="date" [(ngModel)]="editForm.dateOfBirth" />
 						</label>
 						<label class="edit-field">
-							<span>{{ lang.t().profileGender }}</span>
+							<span>{{ lang.t().profileGender }} *</span>
 							<select [(ngModel)]="editForm.gender">
 								<option value="">{{ lang.t().profileGenderSelect }}</option>
 								<option value="Male">{{ lang.t().profileGenderMale }}</option>
@@ -565,13 +599,91 @@
 							<span>{{ lang.t().profileClass }}</span>
 							<input type="text" [(ngModel)]="editForm.classOrGrade" />
 						</label>
-						<label class="edit-field">
-							<span>{{ lang.t().profileInstitution }}</span>
-							<input type="text" [(ngModel)]="editForm.institution" />
-						</label>
 						<label class="edit-field edit-field--wide">
 							<span>{{ lang.t().profileAddress }}</span>
 							<input type="text" [(ngModel)]="editForm.address" />
+						</label>
+					</div>
+
+					<!-- ── Academic information (step 03 fields) ── -->
+					<p class="edit-section-title">🏫 {{ lang.t().siTitle3 }}</p>
+					<div class="edit-grid">
+						<label class="edit-field">
+							<span>{{ lang.t().siBoard }} *</span>
+							<select [(ngModel)]="editForm.board">
+								<option value="">{{ lang.t().siBoardPick }}</option>
+								@for (option of boardOptions; track option) {
+									<option [value]="option">{{ option }}</option>
+								}
+							</select>
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siSscYear }} *</span>
+							<select [(ngModel)]="editForm.sscExamYear">
+								<option value="">{{ lang.t().siSscYearPick }}</option>
+								@for (year of sscYearOptions; track year) {
+									<option [value]="year">{{ year }}</option>
+								}
+							</select>
+						</label>
+						<label class="edit-field edit-field--wide">
+							<span>{{ lang.t().siInstitute }} *</span>
+							<input type="text" [placeholder]="lang.t().siInstitutePlaceholder" [(ngModel)]="editForm.institution" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siDistrict }} *</span>
+							<input type="text" list="profileDistrictList" autocomplete="off"
+								[placeholder]="lang.t().siDistrictPlaceholder" [(ngModel)]="editForm.district" />
+							<datalist id="profileDistrictList">
+								@for (d of bdDistricts; track d) { <option [value]="d"></option> }
+							</datalist>
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siThana }} *</span>
+							<input type="text" list="profileThanaList" autocomplete="off"
+								[placeholder]="lang.t().siThanaPlaceholder" [(ngModel)]="editForm.thana" />
+							<datalist id="profileThanaList">
+								@for (t of thanaList; track t) { <option [value]="t"></option> }
+							</datalist>
+						</label>
+					</div>
+
+					<!-- ── Parent/Guardian information (step 04 fields) ── -->
+					<p class="edit-section-title">👨‍👩‍👧 {{ lang.t().siTitle4 }}</p>
+					<div class="edit-grid">
+						<label class="edit-field">
+							<span>{{ lang.t().siFatherName }} *</span>
+							<input type="text" [(ngModel)]="editForm.guardianName" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siMotherName }} *</span>
+							<input type="text" [(ngModel)]="editForm.motherName" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siParentMobile }} *</span>
+							<input type="tel" [(ngModel)]="editForm.guardianPhone" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siParentEmailOpt }}</span>
+							<input type="email" placeholder="parent@example.com" [(ngModel)]="editForm.parentEmail" />
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().siOccupation }} *</span>
+							<select [(ngModel)]="editForm.guardianOccupation">
+								<option value="">{{ lang.t().profileGenderSelect }}</option>
+								@for (option of occupationOptions; track option) {
+									<option [value]="option">{{ option }}</option>
+								}
+							</select>
+						</label>
+						<label class="edit-field">
+							<span>{{ lang.t().profileReferral }}</span>
+							<select [(ngModel)]="editForm.referralSource">
+								<option value=""></option>
+								@for (option of referralOptions; track option) {
+									<option [value]="option">{{ option }}</option>
+								}
+							</select>
 						</label>
 					</div>
 
@@ -579,14 +691,6 @@
 						<span class="edit-section-hint">{{ lang.t().profileOptionalHint }}</span>
 					</p>
 					<div class="edit-grid">
-						<label class="edit-field">
-							<span>{{ lang.t().profileGuardianName }}</span>
-							<input type="text" [(ngModel)]="editForm.guardianName" />
-						</label>
-						<label class="edit-field">
-							<span>{{ lang.t().profileGuardianPhone }}</span>
-							<input type="tel" [(ngModel)]="editForm.guardianPhone" />
-						</label>
 						<label class="edit-field">
 							<span>{{ lang.t().profileFacebook }}</span>
 							<input type="url" placeholder="https://facebook.com/…" [(ngModel)]="editForm.facebookLink" />
@@ -598,6 +702,23 @@
 						<label class="edit-field edit-field--wide">
 							<span>{{ lang.t().profileBio }}</span>
 							<textarea rows="3" [placeholder]="lang.t().profileBioPlaceholder" [(ngModel)]="editForm.bio"></textarea>
+						</label>
+					</div>
+
+					<!-- ── Policy re-confirmation (required on every save) ── -->
+					<div class="edit-agreement">
+						<p class="edit-agreement-title">✅ {{ lang.t().siAgreementTitle }}</p>
+						<label class="edit-agreement-item">
+							<input type="checkbox" [(ngModel)]="agreeInfoCorrect" />
+							<span>{{ lang.t().siAgreeCorrect }} *</span>
+						</label>
+						<label class="edit-agreement-item">
+							<input type="checkbox" [(ngModel)]="agreeDataStorage" />
+							<span>{{ lang.t().siAgreeData }} *</span>
+						</label>
+						<label class="edit-agreement-item">
+							<input type="checkbox" [(ngModel)]="agreeNotifications" />
+							<span>{{ lang.t().siAgreeNotif }}</span>
 						</label>
 					</div>
 				</div>

@@ -1,5 +1,308 @@
 <main class="onboarding-page">
-  <section class="onboarding-card">
+  <!-- ══ Student info modal (steps 02–04) — shown once, right after registration ══ -->
+  @if (showInfoModal()) {
+    <div class="info-modal-backdrop">
+      <section class="info-modal" role="dialog" aria-modal="true" aria-label="Student information">
+        <header class="info-modal-head">
+          <p class="info-eyebrow">📋 {{ lang.t().siLead }}</p>
+          <p class="step-label">{{ lang.t().obStep }} {{ infoStep() }} {{ lang.t().obOf }} 4</p>
+        </header>
+
+        <div class="progress-bar" aria-hidden="true">
+          <span class="progress-fill" [style.width.%]="((infoStep() - 1) / 4) * 100"></span>
+        </div>
+
+        <!-- ── step 02 · Student Information ── -->
+        @if (infoStep() === 2) {
+          <form class="info-step" [formGroup]="studentInfoForm">
+            <h1>🧑‍🎓 {{ lang.t().siTitle2 }}</h1>
+            <p class="info-desc">{{ lang.t().siDesc2 }}</p>
+
+            <div class="info-field">
+              <label for="siFullName">{{ lang.t().siFullName }} *</label>
+              <input id="siFullName" type="text" formControlName="fullName" autocomplete="name" />
+              @if (studentInfoForm.controls.fullName.touched && studentInfoForm.controls.fullName.invalid) {
+                <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+              }
+            </div>
+
+            <div class="info-grid">
+              <div class="info-field">
+                <label for="siDob">{{ lang.t().siDob }} *</label>
+                <input id="siDob" type="date" formControlName="dateOfBirth" [max]="todayIso" />
+                @if (studentInfoForm.controls.dateOfBirth.touched && studentInfoForm.controls.dateOfBirth.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+
+              <div class="info-field">
+                <label>{{ lang.t().siGender }} *</label>
+                <div class="chip-row">
+                  @for (option of genderOptions; track option) {
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.chip-active]="studentInfoForm.controls.gender.value === option"
+                      (click)="pickGender(option)"
+                    >
+                      {{ genderLabel(option) }}
+                    </button>
+                  }
+                </div>
+                @if (studentInfoForm.controls.gender.touched && studentInfoForm.controls.gender.invalid) {
+                  <p class="field-error">{{ lang.t().siPickRequired }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-field">
+                <label for="siMobile">{{ lang.t().siMobile }} *</label>
+                <input id="siMobile" type="tel" formControlName="mobileNumber" autocomplete="tel" placeholder="01XXXXXXXXX" />
+                @if (studentInfoForm.controls.mobileNumber.touched && studentInfoForm.controls.mobileNumber.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+
+              <div class="info-field">
+                <label for="siEmail">{{ lang.t().siEmail }}</label>
+                <input id="siEmail" type="email" formControlName="email" />
+              </div>
+            </div>
+
+            <div class="info-field">
+              <label>{{ lang.t().siPhoto }}</label>
+              <div class="photo-row">
+                @if (photoPreview()) {
+                  <img class="photo-preview" [src]="photoPreview()" alt="Profile preview" />
+                  <button type="button" class="chip" (click)="removePhoto()">✕ {{ lang.t().siPhotoRemove }}</button>
+                } @else {
+                  <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelected($event)" />
+                }
+              </div>
+              <p class="photo-hint" [class.field-error]="photoError()">{{ photoError() || lang.t().siPhotoHint }}</p>
+            </div>
+          </form>
+        }
+
+        <!-- ── step 03 · Academic Information ── -->
+        @if (infoStep() === 3) {
+          <form class="info-step" [formGroup]="academicInfoForm">
+            <h1>🏫 {{ lang.t().siTitle3 }}</h1>
+            <p class="info-desc">{{ lang.t().siDesc3 }}</p>
+
+            <div class="info-grid">
+              <div class="info-field">
+                <label for="siBoard">{{ lang.t().siBoard }} *</label>
+                <select id="siBoard" formControlName="board">
+                  <option value="" disabled>{{ lang.t().siBoardPick }}</option>
+                  @for (option of boardOptions; track option) {
+                    <option [value]="option">{{ option }}</option>
+                  }
+                </select>
+                @if (academicInfoForm.controls.board.touched && academicInfoForm.controls.board.invalid) {
+                  <p class="field-error">{{ lang.t().siPickRequired }}</p>
+                }
+              </div>
+
+              <div class="info-field">
+                <label for="siSscYear">{{ lang.t().siSscYear }} *</label>
+                <select id="siSscYear" formControlName="sscExamYear">
+                  <option value="" disabled>{{ lang.t().siSscYearPick }}</option>
+                  @for (year of sscYearOptions; track year) {
+                    <option [value]="year">{{ year }}</option>
+                  }
+                </select>
+                @if (academicInfoForm.controls.sscExamYear.touched && academicInfoForm.controls.sscExamYear.invalid) {
+                  <p class="field-error">{{ lang.t().siPickRequired }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="info-field">
+              <label for="siInstitute">{{ lang.t().siInstitute }} *</label>
+              <input id="siInstitute" type="text" formControlName="institution" [placeholder]="lang.t().siInstitutePlaceholder" />
+              @if (academicInfoForm.controls.institution.touched && academicInfoForm.controls.institution.invalid) {
+                <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+              }
+            </div>
+
+            <div class="info-grid">
+              <div class="info-field suggest-anchor">
+                <label for="siDistrict">{{ lang.t().siDistrict }} *</label>
+                <input
+                  id="siDistrict"
+                  type="text"
+                  formControlName="district"
+                  [placeholder]="lang.t().siDistrictPlaceholder"
+                  autocomplete="off"
+                  (input)="onDistrictInput()"
+                  (focus)="onDistrictInput()"
+                  (blur)="hideDistrictSuggestions()"
+                />
+                @if (districtSuggestions().length) {
+                  <ul class="suggest-list">
+                    @for (suggestion of districtSuggestions(); track suggestion) {
+                      <li (mousedown)="pickDistrict(suggestion)">📍 {{ suggestion }}</li>
+                    }
+                  </ul>
+                }
+                @if (academicInfoForm.controls.district.touched && academicInfoForm.controls.district.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+
+              <div class="info-field suggest-anchor">
+                <label for="siThana">{{ lang.t().siThana }} *</label>
+                <input
+                  id="siThana"
+                  type="text"
+                  formControlName="thana"
+                  [placeholder]="lang.t().siThanaPlaceholder"
+                  autocomplete="off"
+                  (input)="onThanaInput()"
+                  (focus)="onThanaInput()"
+                  (blur)="hideThanaSuggestions()"
+                />
+                @if (thanaSuggestions().length) {
+                  <ul class="suggest-list">
+                    @for (suggestion of thanaSuggestions(); track suggestion) {
+                      <li (mousedown)="pickThana(suggestion)">📍 {{ suggestion }}</li>
+                    }
+                  </ul>
+                }
+                @if (academicInfoForm.controls.thana.touched && academicInfoForm.controls.thana.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+            </div>
+          </form>
+        }
+
+        <!-- ── step 04 · Parent/Guardian Information ── -->
+        @if (infoStep() === 4) {
+          <form class="info-step" [formGroup]="guardianInfoForm" (ngSubmit)="submitInfoModal()">
+            <h1>👨‍👩‍👧 {{ lang.t().siTitle4 }}</h1>
+            <p class="info-desc">{{ lang.t().siDesc4 }}</p>
+
+            <div class="info-grid">
+              <div class="info-field">
+                <label for="siFather">{{ lang.t().siFatherName }} *</label>
+                <input id="siFather" type="text" formControlName="guardianName" />
+                @if (guardianInfoForm.controls.guardianName.touched && guardianInfoForm.controls.guardianName.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+
+              <div class="info-field">
+                <label for="siMother">{{ lang.t().siMotherName }} *</label>
+                <input id="siMother" type="text" formControlName="motherName" />
+                @if (guardianInfoForm.controls.motherName.touched && guardianInfoForm.controls.motherName.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-field">
+                <label for="siParentMobile">{{ lang.t().siParentMobile }} *</label>
+                <input id="siParentMobile" type="tel" formControlName="guardianPhone" placeholder="01XXXXXXXXX" />
+                @if (guardianInfoForm.controls.guardianPhone.touched && guardianInfoForm.controls.guardianPhone.invalid) {
+                  <p class="field-error">{{ lang.t().siFieldRequired }}</p>
+                }
+              </div>
+
+              <div class="info-field">
+                <label for="siParentEmail">{{ lang.t().siParentEmailOpt }}</label>
+                <input id="siParentEmail" type="email" formControlName="parentEmail" placeholder="parent@example.com" />
+                @if (guardianInfoForm.controls.parentEmail.touched && guardianInfoForm.controls.parentEmail.invalid) {
+                  <p class="field-error">{{ lang.t().registerParentEmailError }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="info-field">
+              <label>{{ lang.t().siOccupation }} *</label>
+              <div class="chip-row">
+                @for (option of occupationOptions; track option) {
+                  <button
+                    type="button"
+                    class="chip"
+                    [class.chip-active]="guardianInfoForm.controls.guardianOccupation.value === option"
+                    (click)="pickOccupation(option)"
+                  >
+                    {{ occupationLabel(option) }}
+                  </button>
+                }
+              </div>
+              @if (guardianInfoForm.controls.guardianOccupation.touched && guardianInfoForm.controls.guardianOccupation.invalid) {
+                <p class="field-error">{{ lang.t().siPickRequired }}</p>
+              }
+            </div>
+
+            <div class="info-field">
+              <label>{{ lang.t().siReferral }}</label>
+              <div class="chip-row">
+                @for (option of referralOptions; track option) {
+                  <button
+                    type="button"
+                    class="chip"
+                    [class.chip-active]="guardianInfoForm.controls.referralSource.value === option"
+                    (click)="pickReferral(option)"
+                  >
+                    {{ referralLabel(option) }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="agreement-box">
+              <p class="agreement-title">✅ {{ lang.t().siAgreementTitle }}</p>
+              <label class="agreement-item">
+                <input type="checkbox" formControlName="agreedInfoCorrect" />
+                <span>{{ lang.t().siAgreeCorrect }} *</span>
+              </label>
+              <label class="agreement-item">
+                <input type="checkbox" formControlName="agreedDataStorage" />
+                <span>{{ lang.t().siAgreeData }} *</span>
+              </label>
+              <label class="agreement-item">
+                <input type="checkbox" formControlName="agreedNotifications" />
+                <span>{{ lang.t().siAgreeNotif }}</span>
+              </label>
+            </div>
+          </form>
+        }
+
+        @if (infoError()) {
+          <p class="info-error">⚠️ {{ infoError() }}</p>
+        }
+
+        <footer class="info-actions">
+          @if (infoStep() > 2) {
+            <button type="button" class="skip-button" [disabled]="isSavingInfo()" (click)="infoStepBack()">
+              {{ lang.t().siBack }}
+            </button>
+          } @else {
+            <span></span>
+          }
+
+          @if (infoStep() < 4) {
+            <button type="button" class="next-button" (click)="infoStepNext()">{{ lang.t().siNext }}</button>
+          } @else {
+            <button type="button" class="next-button" [disabled]="isSavingInfo()" (click)="submitInfoModal()">
+              @if (isSavingInfo()) { {{ lang.t().siSaving }} } @else { {{ lang.t().siConfirm }} }
+            </button>
+          }
+        </footer>
+      </section>
+    </div>
+  }
+
+  <!-- Hidden until the profile check resolves (no racing past the mandatory modal);
+       inert while the modal is open so keyboard Tab can't escape into Skip/Continue. -->
+  @if (profileChecked()) {
+  <section class="onboarding-card" [inert]="showInfoModal()">
     <header class="card-head">
       <p class="step-label">{{ lang.t().obStep }} {{ step() }} {{ lang.t().obOf }} {{ totalSteps }}</p>
       <button type="button" class="skip-button" (click)="skipStep()">{{ lang.t().obSkip }}</button>
@@ -79,4 +382,10 @@
       </section>
     }
   </section>
+  } @else {
+  <!-- profile check in flight — lightweight shell so the page isn't blank -->
+  <section class="onboarding-card onboarding-card-loading" aria-busy="true">
+    <div class="progress-bar"><span class="progress-fill progress-indeterminate"></span></div>
+  </section>
+  }
 </main>

@@ -66,15 +66,14 @@ export class AuthService {
     );
   }
 
-  // Register করুন
-  register(fullName: string, email: string, password: string, role: number = 1, mobileNumber?: string, parentEmail?: string): Observable<LoginResponse> {
+  // Register করুন — parent/guardian info এখন post-registration onboarding modal-এ নেওয়া হয়
+  register(fullName: string, email: string, password: string, role: number = 1, mobileNumber?: string): Observable<LoginResponse> {
     return this.service.register({
       FullName: fullName,
       Email: email,
       Password: password,
       Role: role,
-      MobileNumber: mobileNumber,
-      ParentEmail: parentEmail
+      MobileNumber: mobileNumber
     }).pipe(
       tap((response) => {
         if (response.token) {

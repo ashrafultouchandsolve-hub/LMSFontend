@@ -741,3 +741,49 @@ input::-moz-selection, textarea::-moz-selection {
 	transition: color 0.2s;
 }
 .cat-link:hover { color: var(--card-color, #6366f1); }
+
+/* ══════════ Brand-styled toastr (fancy notification cards) ══════════ */
+.toast-container .ngx-toastr {
+	border-radius: 16px;
+	padding: 16px 18px 16px 54px;
+	box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+	font-family: inherit;
+	opacity: 1;
+	backdrop-filter: blur(6px);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	background-size: 22px;
+	background-position: 18px center;
+}
+.toast-container .ngx-toastr:hover {
+	box-shadow: 0 20px 48px rgba(15, 23, 42, 0.32);
+	transform: translateY(-1px);
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.toast-container .toast-success { background-color: #059669; background-image: none; }
+.toast-container .toast-error   { background-color: #dc2626; background-image: none; }
+.toast-container .toast-info    { background-color: #2563eb; background-image: none; }
+.toast-container .toast-warning { background-color: #d97706; background-image: none; }
+/* emoji badge instead of the default png icons */
+.toast-container .ngx-toastr::before {
+	position: absolute;
+	left: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 20px;
+	line-height: 1;
+}
+.toast-container .toast-success::before { content: '✅'; }
+.toast-container .toast-error::before   { content: '⛔'; }
+.toast-container .toast-info::before    { content: '💡'; }
+.toast-container .toast-warning::before { content: '⚠️'; }
+.toast-container .toast-title   { font-weight: 800; font-size: 0.95rem; }
+.toast-container .toast-message { font-size: 0.9rem; font-weight: 500; }
+.toast-container .toast-progress { height: 3px; opacity: 0.5; border-radius: 0 0 16px 16px; }
+.toast-container .toast-close-button {
+	font-weight: 400;
+	text-shadow: none;
+	opacity: 0.7;
+	top: 2px;
+	right: 4px;
+}
+.toast-container .toast-close-button:hover { opacity: 1; }

@@ -9,6 +9,7 @@ import { LiveClassService } from '../../Service/live-class-service';
 import { LiveExamService } from '../../Service/live-exam.service';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
+import { ConfirmService } from '../../Service/confirm.service';
 
 declare const JitsiMeetExternalAPI: any; // Jitsi global API
 
@@ -28,6 +29,7 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
   private readonly examSvc = inject(LiveExamService);
   private readonly authSvc = inject(AuthService);
   protected readonly lang  = inject(LanguageService);
+  private readonly confirmDialog = inject(ConfirmService);
 
   readonly isLoading = signal(true);
   readonly error     = signal('');
@@ -146,11 +148,17 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
   }
 
   /** Teacher publishes the attached draft exam — every enrolled student gets notified. */
-  publishExam(): void {
-    if (!this.examId() || this.examBusy()) return;
-    if (!confirm('Publish the exam now? Students will be notified and can start it.')) return;
+  async publishExam(): Promise<void> {
+    const examId = this.examId(); // snapshot before the await — state must not shift mid-dialog
+    if (!examId || this.examBusy()) return;
+    if (!(await this.confirmDialog.confirm({
+      title: 'Publish exam now?',
+      message: 'Students will be notified and can start it right away.',
+      icon: '📝',
+      confirmText: 'Publish',
+    }))) return;
     this.examBusy.set(true);
-    this.examSvc.publish(this.examId()).subscribe({
+    this.examSvc.publish(examId).subscribe({
       next: () => {
         this.examStatus.set(1);
         this.examBusy.set(false);
@@ -267,7 +275,13 @@ export class LiveClassRoom implements AfterViewInit, OnDestroy {
   }
 
   async endClass() {
-    if (!confirm(this.lang.t().lcEndConfirm)) return;
+    if (!(await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'ক্লাস শেষ করবেন?' : 'End class?',
+      message: this.lang.t().lcEndConfirm,
+      tone: 'danger',
+      icon: '🔴',
+      confirmText: this.lang.isBangla() ? 'শেষ করুন' : 'End class',
+    }))) return;
 
     // Finalize any in-progress recording so we have the full blob.
     if (this.recState() === 'recording') {

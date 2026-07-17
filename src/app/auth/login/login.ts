@@ -55,13 +55,21 @@ export class Login {
         // ✅ Role check করে redirect করো
         const user = this.authService.getCurrentUser() as { role?: number } | null;
 
-        // Student: enrollment check-টা cosmetic delay-এর সাথে parallel-এ চালাই — বাড়তি wait হয় না।
+        // Student: enrollment + onboarding check cosmetic delay-এর সাথে parallel-এ চালাই — বাড়তি wait হয় না।
         const enrolledPromise = user?.role === 0 ? this.hasEnrollments() : Promise.resolve(false);
+        const onboardingPendingPromise = user?.role === 0 ? this.needsStudentOnboarding() : Promise.resolve(false);
         await this.delay(1500);
 
         // Admin = 2 → সবসময় admin dashboard
         if (user?.role === 2) {
           await this.router.navigateByUrl('/admin');
+          return;
+        }
+
+        // Student whose post-registration info modal (steps 02–04) was never completed
+        // (tab closed / navigated away mid-flow) → back to the mandatory modal first.
+        if (user?.role === 0 && (await onboardingPendingPromise)) {
+          await this.router.navigateByUrl('/onboarding-preferences');
           return;
         }
 
@@ -100,6 +108,17 @@ export class Login {
       const res: any = await firstValueFrom(this.learningApi.getMyEnrollments());
       const list = res?.data ?? res?.Data ?? [];
       return Array.isArray(list) && list.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Post-registration info modal এখনো complete হয়নি কিনা (error হলে false — login কখনো আটকায় না)। */
+  private async needsStudentOnboarding(): Promise<boolean> {
+    try {
+      const res: any = await firstValueFrom(this.learningApi.getMyStudentProfile());
+      const data = res?.data ?? res?.Data;
+      return !!data && !data.profileInfoCompletedAt;
     } catch {
       return false;
     }

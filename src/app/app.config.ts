@@ -17,6 +17,16 @@ export const appConfig: ApplicationConfig = {
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     provideRouter(routes),
     provideAnimations(),
-    provideToastr()
+    // toastr.css angular.json-এ যুক্ত (এটা ছাড়া toast গুলো invisible ছিল) + brand styling styles.css-এ।
+    provideToastr({
+      positionClass: 'toast-top-right',
+      timeOut: 4200,
+      extendedTimeOut: 1500,
+      progressBar: true,
+      closeButton: true,
+      maxOpened: 4,
+      autoDismiss: true,
+      preventDuplicates: true,
+    })
   ]
 };

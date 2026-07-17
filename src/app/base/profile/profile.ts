@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
-import { LearningApiService, StudentProfileDto, StudentProfilePayload } from '../../Service/learning-api.service';
+import { LearningApiService, StudentProfileDto, StudentProfilePayload, StudentOnboardingPayload } from '../../Service/learning-api.service';
+import { BD_DISTRICTS, BD_ALL_UPAZILAS, BD_UPAZILAS } from '../../Service/bd-locations';
 import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { NotificationService } from '../../Service/notification-service';
 import { CourseNotifService } from '../../Service/course-notif.service';
@@ -37,6 +38,15 @@ type EditForm = {
   guardianPhone: string;
   facebookLink: string;
   linkedInLink: string;
+  // onboarding info (steps 02–04) — editable here too
+  board: string;
+  sscExamYear: string;
+  thana: string;
+  district: string;
+  motherName: string;
+  guardianOccupation: string;
+  referralSource: string;
+  parentEmail: string;
 };
 
 type WishlistItem = {
@@ -103,6 +113,31 @@ export class Profile implements OnInit {
 
   protected editForm: EditForm = this.emptyForm();
 
+  // ── Onboarding-info edit support (same option sets as the signup modal) ──
+  protected readonly boardOptions = [
+    'Dhaka', 'Barishal', 'Chattogram', 'Cumilla', 'Dinajpur', 'Jashore',
+    'Mymensingh', 'Rajshahi', 'Sylhet', 'Madrasah', 'Technical', 'Other',
+  ];
+  protected readonly sscYearOptions = (() => {
+    const current = new Date().getFullYear();
+    const years: string[] = [];
+    for (let year = current + 4; year >= current - 8; year -= 1) years.push(String(year));
+    return years;
+  })();
+  protected readonly occupationOptions = ['Service', 'Teacher', 'Business', 'Farmer', 'Expatriate', 'Housewife', 'Other'];
+  protected readonly referralOptions = ['Facebook', 'YouTube', 'Google Search', 'From Friend', 'Telegram', 'Teacher', 'Other'];
+  protected readonly bdDistricts = BD_DISTRICTS;
+  /** Thana datalist — narrows to the chosen district's upazilas when it's recognised. */
+  protected get thanaList(): string[] {
+    return BD_UPAZILAS[this.editForm.district?.trim()] ?? BD_ALL_UPAZILAS;
+  }
+
+  // Policy re-confirmation: the two required agreements must be re-ticked on every
+  // profile save; the notifications opt-in prefills from the stored value.
+  protected agreeInfoCorrect = false;
+  protected agreeDataStorage = false;
+  protected agreeNotifications = false;
+
   /** Resolved avatar image (uploaded photo or selected preview). */
   protected readonly avatarUrl = computed(() => {
     const path = this.profile()?.profileImagePath;
@@ -126,7 +161,9 @@ export class Profile implements OnInit {
     if (!p) return false;
     return !!(p.phone || p.bio || p.dateOfBirth || p.gender || p.address ||
       p.institution || p.classOrGrade || p.guardianName || p.guardianPhone ||
-      p.facebookLink || p.linkedInLink);
+      p.facebookLink || p.linkedInLink ||
+      p.board || p.sscExamYear || p.thana || p.district || p.motherName ||
+      p.guardianOccupation || p.parentEmail);
   });
 
   // ── Total performance (server-computed: quiz + old exam + live exam, leaderboard-consistent blend) ──
@@ -394,6 +431,8 @@ readonly certNotifCount   = signal(0);
       fullName: '', phone: '', bio: '', dateOfBirth: '', gender: '', address: '',
       institution: '', classOrGrade: '', guardianName: '', guardianPhone: '',
       facebookLink: '', linkedInLink: '',
+      board: '', sscExamYear: '', thana: '', district: '', motherName: '',
+      guardianOccupation: '', referralSource: '', parentEmail: '',
     };
   }
 
@@ -411,7 +450,7 @@ readonly certNotifCount   = signal(0);
     const p = this.profile();
     this.editForm = {
       fullName: p?.fullName ?? this.userName(),
-      phone: p?.phone ?? '',
+      phone: p?.phone ?? p?.mobileNumber ?? '',
       bio: p?.bio ?? '',
       dateOfBirth: p?.dateOfBirth ? p.dateOfBirth.substring(0, 10) : '',
       gender: p?.gender ?? '',
@@ -422,7 +461,19 @@ readonly certNotifCount   = signal(0);
       guardianPhone: p?.guardianPhone ?? '',
       facebookLink: p?.facebookLink ?? '',
       linkedInLink: p?.linkedInLink ?? '',
+      board: p?.board ?? '',
+      sscExamYear: p?.sscExamYear ?? '',
+      thana: p?.thana ?? '',
+      district: p?.district ?? '',
+      motherName: p?.motherName ?? '',
+      guardianOccupation: p?.guardianOccupation ?? '',
+      referralSource: p?.referralSource ?? '',
+      parentEmail: p?.parentEmail ?? '',
     };
+    // Policy must be re-confirmed on every save; notifications keeps its stored value.
+    this.agreeInfoCorrect = false;
+    this.agreeDataStorage = false;
+    this.agreeNotifications = p?.agreedNotifications ?? false;
     this.selectedImageFile = null;
     this.imagePreview.set(null);
     this.saveError.set(null);
@@ -454,24 +505,70 @@ readonly certNotifCount   = signal(0);
       this.saveError.set('Full name is required.');
       return;
     }
+
+    // The onboarding set (steps 02–04) is mandatory — same contract as the signup modal.
+    const f = this.editForm;
+    const requiredFilled = f.dateOfBirth && f.gender && f.phone.trim() && f.board && f.institution.trim()
+      && f.sscExamYear && f.thana.trim() && f.district.trim() && f.guardianName.trim()
+      && f.motherName.trim() && f.guardianPhone.trim() && f.guardianOccupation;
+    if (!requiredFilled) {
+      this.saveError.set(this.lang.t().siFieldRequired);
+      return;
+    }
+    if (f.dateOfBirth > new Date().toISOString().slice(0, 10)) {
+      this.saveError.set(this.lang.t().siFieldRequired);
+      return;
+    }
+
+    // Policy re-confirmation — the two required agreements must be ticked to save.
+    if (!this.agreeInfoCorrect || !this.agreeDataStorage) {
+      this.saveError.set(this.lang.t().siAgreeRequired);
+      return;
+    }
+
     this.isSaving.set(true);
     this.saveError.set(null);
     try {
+      // 1) profile-page-only fields (bio, address, class, links) — existing endpoint
       const payload: StudentProfilePayload = {
         fullName: name,
-        phone: this.editForm.phone || null,
-        bio: this.editForm.bio || null,
-        dateOfBirth: this.editForm.dateOfBirth || null,
-        gender: this.editForm.gender || null,
-        address: this.editForm.address || null,
-        institution: this.editForm.institution || null,
-        classOrGrade: this.editForm.classOrGrade || null,
-        guardianName: this.editForm.guardianName || null,
-        guardianPhone: this.editForm.guardianPhone || null,
-        facebookLink: this.editForm.facebookLink || null,
-        linkedInLink: this.editForm.linkedInLink || null,
+        phone: f.phone || null,
+        bio: f.bio || null,
+        dateOfBirth: f.dateOfBirth || null,
+        gender: f.gender || null,
+        address: f.address || null,
+        institution: f.institution || null,
+        classOrGrade: f.classOrGrade || null,
+        guardianName: f.guardianName || null,
+        guardianPhone: f.guardianPhone || null,
+        facebookLink: f.facebookLink || null,
+        linkedInLink: f.linkedInLink || null,
       };
       await firstValueFrom(this.learningApi.updateStudentProfile(payload));
+
+      // 2) onboarding info + re-confirmed agreements — same endpoint the signup modal
+      //    uses, so validation & the User-record sync (ParentEmail etc.) stay in one place.
+      const onboarding: StudentOnboardingPayload = {
+        fullName: name,
+        dateOfBirth: f.dateOfBirth,
+        gender: f.gender,
+        mobileNumber: f.phone.trim(),
+        board: f.board,
+        institution: f.institution.trim(),
+        sscExamYear: f.sscExamYear,
+        thana: f.thana.trim(),
+        district: f.district.trim(),
+        guardianName: f.guardianName.trim(),
+        motherName: f.motherName.trim(),
+        guardianPhone: f.guardianPhone.trim(),
+        parentEmail: f.parentEmail.trim() || null,
+        guardianOccupation: f.guardianOccupation,
+        referralSource: f.referralSource || null,
+        agreedInfoCorrect: this.agreeInfoCorrect,
+        agreedDataStorage: this.agreeDataStorage,
+        agreedNotifications: this.agreeNotifications,
+      };
+      await firstValueFrom(this.learningApi.completeStudentOnboarding(onboarding));
 
       if (this.selectedImageFile) {
         await firstValueFrom(this.learningApi.uploadStudentProfileImage(this.selectedImageFile));

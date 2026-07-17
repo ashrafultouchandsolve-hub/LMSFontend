@@ -88,6 +88,7 @@ export interface Translations {
   loginEmail: string; loginEmailError: string; loginPassword: string; loginPasswordError: string;
   loginRemember: string; loginForgot: string; loginLoggingIn: string; loginBtn: string;
   loginNoAccount: string; loginCreateOne: string; loginRedirecting: string;
+  loginOrContinue: string; loginGoogle: string;
   // Register
   registerEyebrow: string; registerTitle: string; registerLead: string; registerNewLearner: string;
   registerStartStrong: string; registerF1Title: string; registerF1Desc: string;
@@ -99,6 +100,7 @@ export interface Translations {
   registerPasswordPlaceholder: string; registerConfirmPassword: string; registerRepeatPassword: string; registerConfirmPasswordError: string;
   registerTerms: string; registerSubmitting: string; registerBtn: string;
   registerHaveAccount: string; registerLoginHere: string; registerGoHome: string;
+  registerOrSignUp: string; registerGoogle: string; registerGoLogin: string;
   // Leaderboard
   lbTitle: string; lbSubtitle: string; lbLoading: string; lbEmpty: string;
   lbTableRank: string; lbTableStudent: string; lbTableCorrect: string; lbTableTotal: string; lbTableScore: string;
@@ -133,6 +135,20 @@ export interface Translations {
   obStep: string; obOf: string; obSkip: string; obSkillLevel: string; obSkillLevelDesc: string;
   obGoal: string; obGoalDesc: string; obLanguage: string; obLanguageDesc: string;
   obInterests: string; obInterestsDesc: string; obContinue: string;
+  // Student info onboarding modal (steps 02–04, right after registration)
+  siLead: string; siTitle2: string; siTitle3: string; siTitle4: string;
+  siDesc2: string; siDesc3: string; siDesc4: string;
+  siFullName: string; siDob: string; siGender: string; siGenderMale: string; siGenderFemale: string; siGenderOther: string;
+  siMobile: string; siEmail: string; siPhoto: string; siPhotoHint: string; siPhotoRemove: string;
+  siBoard: string; siBoardPick: string; siInstitute: string; siInstitutePlaceholder: string;
+  siSscYear: string; siSscYearPick: string; siThana: string; siThanaPlaceholder: string;
+  siDistrict: string; siDistrictPlaceholder: string;
+  siFatherName: string; siMotherName: string; siParentMobile: string; siParentEmailOpt: string;
+  siOccupation: string; siReferral: string;
+  siAgreementTitle: string; siAgreeCorrect: string; siAgreeData: string; siAgreeNotif: string;
+  siBack: string; siNext: string; siConfirm: string; siSaving: string;
+  siFieldRequired: string; siPickRequired: string; siAgreeRequired: string; siSaveFailed: string;
+  profileReferral: string;
   // Instructors
   insTag: string; insTitle1: string; insSub: string; insNoYet: string; insNoYetDesc: string;
   insCourses: string; insInstructor: string; insExpert: string;
@@ -400,6 +416,7 @@ const EN: Translations = {
   loginPassword: 'Password', loginPasswordError: 'Password must be at least 6 characters.',
   loginRemember: 'Remember me', loginForgot: 'Forgot password?', loginLoggingIn: 'Logging in...', loginBtn: 'Login now',
   loginNoAccount: "Don't have an account?", loginCreateOne: 'Create one', loginRedirecting: 'Logging in and launching your home page...',
+  loginOrContinue: 'or continue with', loginGoogle: 'Continue with Google',
   registerEyebrow: 'Create account', registerTitle: 'Join the learning platform.',
   registerLead: 'Create your learning profile to track courses, quizzes, assignments, and monitor your progress all in one place.',
   registerNewLearner: 'New learner', registerStartStrong: 'Start strong from day one',
@@ -412,7 +429,8 @@ const EN: Translations = {
   registerRole: 'Select role', registerRolePlaceholder: 'Select one', registerStudent: 'Student', registerTeacher: 'Teacher', registerRoleError: 'Please select Student or Teacher.',
   registerPasswordPlaceholder: 'Create a password', registerConfirmPassword: 'Confirm password', registerRepeatPassword: 'Repeat password', registerConfirmPasswordError: 'Confirm your password.',
   registerTerms: 'I agree to the learning platform terms.', registerSubmitting: 'Submitting...', registerBtn: 'Create account',
-  registerHaveAccount: "Don't have an account?", registerLoginHere: 'Create one', registerGoHome: 'Go Home',
+  registerHaveAccount: 'Already have an account?', registerLoginHere: 'Create one', registerGoHome: 'Go Home',
+  registerOrSignUp: 'or sign up with', registerGoogle: 'Sign up with Google', registerGoLogin: 'Sign in',
   lbTitle: 'Top Performers', lbSubtitle: 'Best students based on quiz scores',
   lbLoading: 'Loading rankings...', lbEmpty: 'No quiz attempts yet',
   lbTableRank: 'Rank', lbTableStudent: 'Student', lbTableCorrect: 'Correct',
@@ -451,6 +469,24 @@ const EN: Translations = {
   obGoal: 'Goal', obGoalDesc: 'What goal do you want to achieve by learning?', obLanguage: 'Language',
   obLanguageDesc: 'Which language are you comfortable learning in?', obInterests: 'Interests (Multiple Select)',
   obInterestsDesc: 'Select as many interests as you like, then continue.', obContinue: 'Continue',
+  siLead: 'Complete your profile to continue', siTitle2: 'Student Information', siTitle3: 'Academic Information', siTitle4: 'Parent/Guardian Information',
+  siDesc2: 'Tell us about yourself.', siDesc3: 'Your board, institute and location details.',
+  siDesc4: 'For emergency & communication purposes.',
+  siFullName: 'Full Name', siDob: 'Date of Birth', siGender: 'Gender', siGenderMale: 'Male', siGenderFemale: 'Female', siGenderOther: 'Other',
+  siMobile: 'Student Mobile Number', siEmail: 'Student Email', siPhoto: 'Profile Picture (optional)',
+  siPhotoHint: 'JPG, PNG or WEBP — max 5MB.', siPhotoRemove: 'Remove',
+  siBoard: 'Board', siBoardPick: 'Select your board', siInstitute: 'Institute Name', siInstitutePlaceholder: 'e.g. Dhaka College',
+  siSscYear: 'SSC Exam Year', siSscYearPick: 'Select year', siThana: 'Thana/Upazila', siThanaPlaceholder: 'Start typing your thana/upazila…',
+  siDistrict: 'District', siDistrictPlaceholder: 'Start typing your district…',
+  siFatherName: "Father/Guardian Name", siMotherName: "Mother's Name", siParentMobile: "Parent's Mobile Number", siParentEmailOpt: "Parent's Email (optional)",
+  siOccupation: "Guardian's Occupation", siReferral: 'How did you hear about Nirvoor E-learning?',
+  siAgreementTitle: 'Agreement', siAgreeCorrect: 'I confirm that all information is correct.',
+  siAgreeData: 'I agree to store my data for emergency & analytical purposes.',
+  siAgreeNotif: 'I agree to receive regular notifications & promotional messages.',
+  siBack: '← Back', siNext: 'Next →', siConfirm: 'Confirm & Continue', siSaving: 'Saving…',
+  siFieldRequired: 'This field is required.', siPickRequired: 'Please select an option.',
+  siAgreeRequired: 'Please accept the required agreements to continue.', siSaveFailed: 'Could not save your info. Please try again.',
+  profileReferral: 'Heard about us via',
   insTag: 'Our Team', insTitle1: 'Meet Our', insSub: 'Learn from the best teachers in Bangladesh. Every instructor is an expert in their field.',
   insNoYet: 'No instructors yet', insNoYetDesc: 'Instructors will appear here once approved.',
   insCourses: 'Courses', insInstructor: 'Instructor', insExpert: 'Expert instructor',
@@ -767,6 +803,7 @@ const BN: Translations = {
   loginPassword: 'পাসওয়ার্ড', loginPasswordError: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
   loginRemember: 'আমাকে মনে রাখুন', loginForgot: 'পাসওয়ার্ড ভুলে গেছেন?', loginLoggingIn: 'লগইন হচ্ছে...', loginBtn: 'লগইন করুন',
   loginNoAccount: 'অ্যাকাউন্ট নেই?', loginCreateOne: 'তৈরি করুন', loginRedirecting: 'লগইন হচ্ছে এবং হোম পেজ লোড হচ্ছে...',
+  loginOrContinue: 'অথবা যেভাবে চালিয়ে যাবেন', loginGoogle: 'Google দিয়ে চালিয়ে যান',
   registerEyebrow: 'অ্যাকাউন্ট তৈরি করুন', registerTitle: 'লার্নিং প্ল্যাটফর্মে যোগ দিন।',
   registerLead: 'পাঠ, স্ট্রিক এবং অগ্রগতি ট্র্যাক করতে আপনার প্রোফাইল সেট আপ করুন।',
   registerNewLearner: 'নতুন শিক্ষার্থী', registerStartStrong: 'প্রথম দিন থেকেই শক্তিশালীভাবে শুরু করুন',
@@ -780,6 +817,7 @@ const BN: Translations = {
   registerPasswordPlaceholder: 'পাসওয়ার্ড তৈরি করুন', registerConfirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন', registerRepeatPassword: 'পাসওয়ার্ড পুনরায় দিন', registerConfirmPasswordError: 'আপনার পাসওয়ার্ড নিশ্চিত করুন।',
   registerTerms: 'আমি লার্নিং প্ল্যাটফর্মের শর্তাবলীতে সম্মত।', registerSubmitting: 'জমা হচ্ছে...', registerBtn: 'অ্যাকাউন্ট তৈরি করুন',
   registerHaveAccount: 'ইতিমধ্যে অ্যাকাউন্ট আছে?', registerLoginHere: 'এখানে লগইন করুন', registerGoHome: 'হোমে যান',
+  registerOrSignUp: 'অথবা যেভাবে সাইন আপ করবেন', registerGoogle: 'Google দিয়ে সাইন আপ করুন', registerGoLogin: 'সাইন ইন',
   lbTitle: 'শীর্ষ পারফরমার', lbSubtitle: 'কুইজ স্কোরের ভিত্তিতে সেরা শিক্ষার্থী',
   lbLoading: 'র‍্যাঙ্কিং লোড হচ্ছে...', lbEmpty: 'এখনও কোনো কুইজ অ্যাটেম্প্ট নেই',
   lbTableRank: 'র‍্যাঙ্ক', lbTableStudent: 'শিক্ষার্থী', lbTableCorrect: 'সঠিক',
@@ -818,6 +856,24 @@ const BN: Translations = {
   obGoal: 'লক্ষ্য', obGoalDesc: 'শিখে আপনি কোন লক্ষ্য অর্জন করতে চান?', obLanguage: 'ভাষা',
   obLanguageDesc: 'কোন ভাষায় শিখতে কমফোর্টেবল?', obInterests: 'আগ্রহ (একাধিক নির্বাচন)',
   obInterestsDesc: 'আপনার আগ্রহ যত খুশি সিলেক্ট করুন, তারপর continue দিন।', obContinue: 'চালিয়ে যান',
+  siLead: 'চালিয়ে যেতে আপনার প্রোফাইল সম্পূর্ণ করুন', siTitle2: 'শিক্ষার্থীর তথ্য', siTitle3: 'একাডেমিক তথ্য', siTitle4: 'অভিভাবকের তথ্য',
+  siDesc2: 'আপনার সম্পর্কে জানান।', siDesc3: 'আপনার বোর্ড, প্রতিষ্ঠান ও ঠিকানার তথ্য।',
+  siDesc4: 'জরুরি প্রয়োজন ও যোগাযোগের জন্য।',
+  siFullName: 'পূর্ণ নাম', siDob: 'জন্ম তারিখ', siGender: 'লিঙ্গ', siGenderMale: 'ছেলে', siGenderFemale: 'মেয়ে', siGenderOther: 'অন্যান্য',
+  siMobile: 'শিক্ষার্থীর মোবাইল নম্বর', siEmail: 'শিক্ষার্থীর ইমেইল', siPhoto: 'প্রোফাইল ছবি (ঐচ্ছিক)',
+  siPhotoHint: 'JPG, PNG বা WEBP — সর্বোচ্চ 5MB।', siPhotoRemove: 'মুছুন',
+  siBoard: 'বোর্ড', siBoardPick: 'আপনার বোর্ড নির্বাচন করুন', siInstitute: 'প্রতিষ্ঠানের নাম', siInstitutePlaceholder: 'যেমন: ঢাকা কলেজ',
+  siSscYear: 'SSC পরীক্ষার সাল', siSscYearPick: 'সাল নির্বাচন করুন', siThana: 'থানা/উপজেলা', siThanaPlaceholder: 'আপনার থানা/উপজেলা লিখুন…',
+  siDistrict: 'জেলা', siDistrictPlaceholder: 'আপনার জেলা লিখুন…',
+  siFatherName: 'বাবা/অভিভাবকের নাম', siMotherName: 'মায়ের নাম', siParentMobile: 'অভিভাবকের মোবাইল নম্বর', siParentEmailOpt: 'অভিভাবকের ইমেইল (ঐচ্ছিক)',
+  siOccupation: 'অভিভাবকের পেশা', siReferral: 'Nirvoor E-learning সম্পর্কে কীভাবে জানলেন?',
+  siAgreementTitle: 'সম্মতি', siAgreeCorrect: 'আমি নিশ্চিত করছি যে সব তথ্য সঠিক।',
+  siAgreeData: 'জরুরি ও বিশ্লেষণের প্রয়োজনে আমার তথ্য সংরক্ষণে আমি সম্মত।',
+  siAgreeNotif: 'নিয়মিত নোটিফিকেশন ও প্রমোশনাল মেসেজ পেতে আমি সম্মত।',
+  siBack: '← পেছনে', siNext: 'পরবর্তী →', siConfirm: 'নিশ্চিত করে এগিয়ে যান', siSaving: 'সংরক্ষণ হচ্ছে…',
+  siFieldRequired: 'এই ঘরটি পূরণ করা আবশ্যক।', siPickRequired: 'একটি অপশন নির্বাচন করুন।',
+  siAgreeRequired: 'চালিয়ে যেতে আবশ্যক সম্মতিগুলো দিন।', siSaveFailed: 'তথ্য সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।',
+  profileReferral: 'আমাদের সম্পর্কে জেনেছেন',
   insTag: 'আমাদের টিম', insTitle1: 'পরিচিত হোন আমাদের', insSub: 'বাংলাদেশের সেরা শিক্ষকদের সাথে পড়ুন। প্রতিটি instructor তাদের বিষয়ে expert।',
   insNoYet: 'এখনো কোনো instructor নেই', insNoYetDesc: 'অনুমোদনের পর instructor এখানে দেখা যাবে।',
   insCourses: 'কোর্স', insInstructor: 'ইনস্ট্রাক্টর', insExpert: 'অভিজ্ঞ ইনস্ট্রাক্টর',
