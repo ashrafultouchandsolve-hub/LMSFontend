@@ -1,8 +1,10 @@
 import { Component, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 import { ExamService, ExamView } from '../../Service/exam.service';
 import { LanguageService } from '../../Service/language.service';
+import { apiError } from '../../Service/api-error';
 
 @Component({
   selector: 'app-course-exams',
@@ -15,6 +17,7 @@ export class CourseExams implements OnInit, OnDestroy {
   @Input({ required: true }) courseId!: string;
 
   private readonly examService = inject(ExamService);
+  private readonly toastr = inject(ToastrService);
   protected readonly lang = inject(LanguageService);
 
   protected readonly exams = signal<ExamView[]>([]);
@@ -129,6 +132,11 @@ export class CourseExams implements OnInit, OnDestroy {
       await firstValueFrom(this.examService.submit(exam.id, file));
       delete this.examFiles[exam.id];
       this.examAnswerNames.update((m) => { const c = { ...m }; delete c[exam.id]; return c; });
+      this.toastr.success(this.lang.isBangla() ? 'উত্তর জমা হয়েছে।' : 'Your answer has been submitted.');
+    } catch (e) {
+      this.toastr.error(apiError(e, this.lang.isBangla()
+        ? 'উত্তর জমা দেওয়া যায়নি। আবার চেষ্টা করুন।'
+        : 'Could not submit your answer. Please try again.'));
     } finally {
       this.submittingExamId.set(null);
       await this.load();
@@ -138,14 +146,16 @@ export class CourseExams implements OnInit, OnDestroy {
   protected viewQuestion(exam: ExamView): void {
     this.examService.viewQuestion(exam.id).subscribe({
       next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
-      error: () => {},
+      error: (e) => this.toastr.error(apiError(e, this.lang.isBangla()
+        ? 'প্রশ্নপত্র খোলা যায়নি।' : 'Could not open the question paper.')),
     });
   }
 
   protected viewMyAnswer(exam: ExamView): void {
     this.examService.myAnswer(exam.id).subscribe({
       next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
-      error: () => {},
+      error: (e) => this.toastr.error(apiError(e, this.lang.isBangla()
+        ? 'আপনার উত্তর খোলা যায়নি।' : 'Could not open your answer.')),
     });
   }
 

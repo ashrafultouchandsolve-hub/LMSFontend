@@ -1805,3 +1805,376 @@
   .pr-controls { align-items: stretch; flex-direction: column; }
   .pr-send-btn { margin-left: 0; }
 }
+
+/* ── Coupons ─────────────────────────────────────────── */
+.cp-form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px;
+  margin-bottom: 24px;
+}
+
+.cp-form-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.cp-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.cp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cp-field label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.cp-required { color: var(--red); }
+.cp-optional {
+  text-transform: none;
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.cp-hint {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.cp-input {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 11px 13px;
+  font-size: 13.5px;
+  font-family: 'Sora', sans-serif;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.cp-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+}
+
+.cp-input--code {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1.4px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* Discount value + its unit symbol */
+.cp-value-wrap { position: relative; }
+.cp-value-wrap .cp-input { padding-right: 38px; }
+.cp-value-unit {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.cp-type-group { display: flex; gap: 8px; }
+.cp-type-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--muted);
+  font-family: 'Sora', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.cp-type-btn:hover { border-color: #c9cfdd; color: var(--text); }
+.cp-type-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Course picker ── */
+.cp-picker {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.cp-picker-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.cp-picker-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.cp-picker-count {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent);
+  font-size: 10.5px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cp-picker-tools { display: flex; gap: 8px; align-items: center; }
+.cp-input--search { width: 200px; padding: 8px 12px; font-size: 12.5px; }
+
+.cp-mini-btn {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--muted);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.cp-mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.cp-course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.cp-course-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 14px 14px 14px 38px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  transition: all 0.18s;
+}
+.cp-course-card:hover { border-color: #c9cfdd; box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06); }
+.cp-course-card.selected {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+
+.cp-course-check {
+  position: absolute;
+  left: 13px;
+  top: 15px;
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #fff;
+  transition: all 0.18s;
+}
+.cp-course-card.selected .cp-course-check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.cp-course-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.cp-course-cat {
+  font-size: 10.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cp-course-flag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  margin-top: 2px;
+}
+.cp-course-flag--sale { background: rgba(249, 115, 22, 0.13); color: #c2410c; }
+.cp-course-flag--none { background: #f1f3f9; color: var(--muted); }
+.cp-course-flag--free { background: rgba(34, 197, 94, 0.13); color: #15803d; }
+
+.cp-course-price { font-size: 12.5px; color: var(--text); }
+.cp-course-price s { color: var(--muted); margin-right: 4px; }
+
+.cp-course-after {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.cp-empty-note {
+  grid-column: 1 / -1;
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cp-error {
+  margin-top: 16px;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: rgba(239, 68, 68, 0.09);
+  color: #b91c1c;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.cp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cp-btn {
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.cp-btn--ghost {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--muted);
+}
+.cp-btn--ghost:hover { color: var(--text); border-color: #c9cfdd; }
+.cp-btn--save { background: var(--accent); color: #fff; }
+.cp-btn--save:hover:not(:disabled) { filter: brightness(1.07); }
+.cp-btn--save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Coupon list ── */
+.cp-list { display: flex; flex-direction: column; gap: 12px; }
+
+.cp-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.cp-item--dim { opacity: 0.72; }
+
+.cp-item-left { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+.cp-item-top { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+.cp-item-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  padding: 5px 11px;
+  border-radius: 8px;
+  background: #f1f3f9;
+  color: var(--text);
+  border: 1px dashed #c9cfdd;
+}
+
+.cp-item-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.cp-item-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.cp-item-status[data-tone='live']      { background: rgba(34, 197, 94, 0.13);  color: #15803d; }
+.cp-item-status[data-tone='scheduled'] { background: rgba(59, 130, 246, 0.13); color: #1d4ed8; }
+.cp-item-status[data-tone='ended']     { background: #f1f3f9;                  color: var(--muted); }
+.cp-item-status[data-tone='used-up']   { background: rgba(239, 68, 68, 0.11);  color: #b91c1c; }
+
+.cp-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cp-item-courses { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.cp-course-chip {
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.09);
+  color: var(--accent);
+  font-weight: 500;
+}
+.cp-course-chip--warn { background: rgba(239, 68, 68, 0.1); color: #b91c1c; }
+
+.cp-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+@media (max-width: 720px) {
+  .cp-item { flex-direction: column; }
+  .cp-picker-head { align-items: stretch; }
+  .cp-input--search { width: 100%; }
+}

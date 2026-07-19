@@ -39,11 +39,69 @@
 				</p>
 			}
 
+			<!-- Coupon -->
+			<div class="coupon-box">
+				@if (appliedCoupon(); as coupon) {
+					<div class="coupon-applied">
+						<div class="coupon-applied-left">
+							<span class="coupon-tick">🎟️</span>
+							<div>
+								<strong class="coupon-applied-code">{{ coupon.code }}</strong>
+								<span class="coupon-applied-value">{{ couponValueLabel() }}</span>
+							</div>
+						</div>
+						<button type="button" class="coupon-remove" (click)="removeCoupon()">
+							{{ lang.isBangla() ? 'বাদ দিন' : 'Remove' }}
+						</button>
+					</div>
+				} @else {
+					<label class="coupon-label">
+						{{ lang.isBangla() ? '🎟️ কুপন কোড আছে?' : '🎟️ Have a coupon code?' }}
+					</label>
+					<div class="coupon-row">
+						<input
+							type="text"
+							class="coupon-input"
+							[placeholder]="lang.isBangla() ? 'কোড লিখুন' : 'Enter code'"
+							[value]="couponInput()"
+							(input)="couponInput.set($any($event.target).value.toUpperCase()); couponError.set('')"
+							(keyup.enter)="applyCoupon()"
+							[disabled]="isCheckingCoupon()" />
+						<button
+							type="button"
+							class="coupon-apply"
+							[disabled]="isCheckingCoupon() || !couponInput().trim()"
+							(click)="applyCoupon()">
+							{{ isCheckingCoupon()
+								? (lang.isBangla() ? 'দেখছি…' : 'Checking…')
+								: (lang.isBangla() ? 'অ্যাপ্লাই' : 'Apply') }}
+						</button>
+					</div>
+				}
+
+				@if (couponError()) {
+					<p class="coupon-error" role="status" aria-live="polite">⚠ {{ couponError() }}</p>
+				}
+			</div>
+
 			<div class="order-info">
 				<div class="order-row">
 					<span>{{ lang.t().payCourse }}</span>
 					<strong>{{ courseTitle() }}</strong>
 				</div>
+
+				<!-- With a coupon the student sees the full sum, not just the final number -->
+				@if (appliedCoupon()) {
+					<div class="order-row">
+						<span>{{ lang.isBangla() ? 'কোর্সের দাম' : 'Course price' }}</span>
+						<strong class="amount-struck">{{ originalPayableText() }}</strong>
+					</div>
+					<div class="order-row order-row--save">
+						<span>{{ lang.isBangla() ? 'কুপন ডিসকাউন্ট' : 'Coupon discount' }}</span>
+						<strong>− {{ savedText() }}</strong>
+					</div>
+				}
+
 				<div class="order-row">
 					<span>{{ lang.t().payAmount }}</span>
 					<strong class="amount-highlight">{{ totalPayableText() }}</strong>

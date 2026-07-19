@@ -1,0 +1,150 @@
+<main class="aiw-page">
+  <button type="button" class="aiw-back" (click)="backToCourse()">← {{ lang.t().aiwBackToCourse }}</button>
+
+  @if (isLoading()) {
+    <div class="aiw-loading">
+      <span class="aiw-spinner"></span> {{ lang.t().aiwLoading }}
+    </div>
+  } @else if (loadError()) {
+    <div class="aiw-error-box">⚠ {{ loadError() }}</div>
+  } @else if (task(); as t) {
+
+    <!-- Task header -->
+    <header class="aiw-head">
+      <span class="aiw-type-chip">✍️ {{ t.type }}</span>
+      <h1>{{ t.title }}</h1>
+      @if (t.instructions) {
+        <p class="aiw-instructions">📋 {{ t.instructions }}</p>
+      }
+    </header>
+
+    @if (result(); as r) {
+
+      <!-- ══ RESULT (read-only — one attempt) ══ -->
+      <section class="aiw-result" aria-label="Result">
+        <div class="aiw-score-row">
+          <div class="aiw-score-dial" [attr.data-tone]="scoreTone(r.finalMarks)">
+            <span class="aiw-score-num">{{ r.finalMarks }}</span>
+            <span class="aiw-score-max">/100</span>
+          </div>
+          <div class="aiw-score-side">
+            <h2>{{ lang.t().aiwResultTitle }}</h2>
+            <p class="aiw-score-meta">
+              {{ r.topicText }} · {{ r.inputKind }} · {{ r.submittedAt | date:'dd MMM yyyy, hh:mm a' }}
+            </p>
+            @if (r.adjustedByAdmin) {
+              <p class="aiw-adjusted-note">✏️ {{ lang.t().aiwAdjustedNote }} ({{ lang.t().aiwAiGave }} {{ r.aiMarks }}/100)</p>
+            }
+            @if (r.offTopic) {
+              <p class="aiw-offtopic-banner">⚠ {{ lang.t().aiwOffTopicNote }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Breakdown bars -->
+        <div class="aiw-breakdown">
+          <h3>{{ lang.t().aiwBreakdown }}</h3>
+          @for (item of [
+            { label: lang.t().aiwGrammar, value: r.breakdown.grammar },
+            { label: lang.t().aiwSpelling, value: r.breakdown.spelling },
+            { label: lang.t().aiwStructure, value: r.breakdown.structure },
+            { label: lang.t().aiwRelevance, value: r.breakdown.relevance }
+          ]; track item.label) {
+            <div class="aiw-bd-row">
+              <span class="aiw-bd-label">{{ item.label }}</span>
+              <div class="aiw-bd-track">
+                <div class="aiw-bd-fill" [style.width.%]="item.value * 4"></div>
+              </div>
+              <span class="aiw-bd-value">{{ item.value }}/25</span>
+            </div>
+          }
+        </div>
+
+        @if (r.feedback) {
+          <div class="aiw-feedback">
+            <h3>💬 {{ lang.t().aiwFeedback }}</h3>
+            <p>{{ r.feedback }}</p>
+          </div>
+        }
+
+        @if (r.extractedText) {
+          <details class="aiw-transcript">
+            <summary>📄 {{ r.inputKind === 'Typed' ? lang.t().aiwYourWriting : lang.t().aiwTranscribed }}</summary>
+            <pre>{{ r.extractedText }}</pre>
+          </details>
+        }
+
+        @if (r.hasFile) {
+          <button type="button" class="aiw-file-btn" (click)="viewMyFile()">📎 {{ lang.t().aiwViewFile }}</button>
+        }
+      </section>
+
+    } @else if (isSubmitting()) {
+
+      <!-- ══ GRADING SPINNER ══ -->
+      <section class="aiw-checking" aria-live="polite">
+        <span class="aiw-robot">🤖</span>
+        <span class="aiw-spinner aiw-spinner--big"></span>
+        <h2>{{ lang.t().aiwChecking }}</h2>
+        <p>{{ lang.t().aiwCheckingSub }}</p>
+      </section>
+
+    } @else {
+
+      <!-- ══ ATTEMPT FORM ══ -->
+      <section class="aiw-form" aria-label="Write your answer">
+        <p class="aiw-one-attempt">⚠️ {{ lang.t().aiwOneAttempt }}</p>
+
+        @if (t.topics.length > 0) {
+          <div class="aiw-topics">
+            <h3>{{ lang.t().aiwPickTopic }} <span class="aiw-req">*</span></h3>
+            <div class="aiw-topic-list">
+              @for (topic of t.topics; track topic.id) {
+                <button type="button" class="aiw-topic"
+                  [class.selected]="selectedTopicId() === topic.id"
+                  (click)="pickTopic(topic.id)">
+                  <span class="aiw-topic-radio">{{ selectedTopicId() === topic.id ? '●' : '○' }}</span>
+                  {{ topic.text }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="aiw-answer">
+          <h3>{{ lang.t().aiwYourAnswer }}</h3>
+
+          @if (pickedFile(); as f) {
+            <div class="aiw-picked-file">
+              <span class="aiw-picked-ico">{{ f.name.toLowerCase().endsWith('.pdf') ? '📕' : '🖼️' }}</span>
+              <span class="aiw-picked-name">{{ f.name }}</span>
+              <button type="button" class="aiw-picked-remove" (click)="clearFile()">✕ {{ lang.t().aiwRemoveFile }}</button>
+            </div>
+            <p class="aiw-either-note">{{ lang.t().aiwFileChosenNote }}</p>
+          } @else {
+            <textarea class="aiw-textarea" rows="12"
+              [placeholder]="lang.t().aiwTypePlaceholder"
+              [value]="typedText()"
+              (input)="onTextInput($event)"></textarea>
+            <div class="aiw-textarea-meta">
+              <span>{{ wordCount() }} {{ lang.t().aiwWords }}</span>
+            </div>
+
+            <div class="aiw-or"><span>{{ lang.t().aiwOr }}</span></div>
+
+            <label class="aiw-upload">
+              📷 {{ lang.t().aiwUploadHere }}
+              <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                hidden (change)="onFileSelected($event)" />
+            </label>
+            <p class="aiw-upload-hint">{{ lang.t().aiwUploadHint }}</p>
+          }
+        </div>
+
+        <button type="button" class="aiw-submit" [disabled]="!canSubmit()" (click)="submit()">
+          🤖 {{ lang.t().aiwSubmit }}
+        </button>
+      </section>
+    }
+  }
+</main>

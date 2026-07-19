@@ -68,6 +68,7 @@ export const routes: Routes = [
     { path: 'certificates', component: Certificates, canActivate: [authGuard] },
     { path: 'quiz-editor/:lessonId', component: QuizEditorComponent, canActivate: [authGuard, adminGuard] },
     { path: 'quiz/:lessonId', component: QuizAttemptComponent, canActivate: [authGuard] },
+    { path: 'ai-writing/:taskId', loadComponent: () => import('./base/ai-writing/ai-writing').then(m => m.AiWriting), canActivate: [authGuard] },
     { path: 'history', component: VideoHistoryComponent, canActivate: [authGuard] },
     { path: 'enrolled-students/:courseId', component: EnrolledStudents, canActivate: [authGuard, adminGuard] },
     {

@@ -31,6 +31,9 @@
       <button class="nav-item" [class.active]="activeTab() === 'store-items'" (click)="setTab('store-items')">
         <span class="nav-icon">🛍️</span> {{ lang.t().adStoreItems }}
       </button>
+      <button class="nav-item" [class.active]="activeTab() === 'coupons'" (click)="setTab('coupons')">
+        <span class="nav-icon">🎟️</span> {{ lang.isBangla() ? 'কুপন' : 'Coupons' }}
+      </button>
       <button class="nav-item" [class.active]="activeTab() === 'parent-reports'" (click)="setTab('parent-reports')">
         <span class="nav-icon">📧</span> {{ lang.isBangla() ? 'অভিভাবক রিপোর্ট' : 'Parent Reports' }}
       </button>
@@ -46,9 +49,6 @@
   <!-- Main Content -->
   <main class="main-content">
 
-    @if (message()) {
-    <div class="toast" [class.toast-error]="messageType() === 'error'">{{ message() }}</div>
-    }
     @if (isLoading()) {
     <div class="loading-bar"></div>
     }
@@ -595,6 +595,200 @@
     }
   </div>
 }
+
+    <!-- ========== COUPONS ========== -->
+    @if (activeTab() === 'coupons') {
+    <div class="page-header">
+      <h1>🎟️ {{ lang.isBangla() ? 'কুপন কোড' : 'Coupon Codes' }}</h1>
+      <p>{{ lang.isBangla()
+        ? 'কোর্স বেছে নিয়ে ডিসকাউন্ট কোড বানান — স্টুডেন্ট enroll করার সময় কোডটি apply করলে দাম কমে যাবে।'
+        : 'Create a discount code, pick the courses it works on. Students apply it at checkout and the price drops.' }}</p>
+    </div>
+
+    <!-- Create / edit form -->
+    <div class="cp-form-card">
+      <h3 class="cp-form-title">
+        {{ cpEditingId()
+          ? (lang.isBangla() ? '✏️ কুপন এডিট' : '✏️ Edit coupon')
+          : (lang.isBangla() ? '➕ নতুন কুপন' : '➕ New coupon') }}
+      </h3>
+
+      <div class="cp-form-grid">
+        <div class="cp-field">
+          <label>{{ lang.isBangla() ? 'কুপন কোড' : 'Coupon code' }} <span class="cp-required">*</span></label>
+          <input type="text" class="cp-input cp-input--code" placeholder="e.g. EIDMUBARAK25"
+            [value]="cpCode()"
+            (input)="cpCode.set($any($event.target).value.toUpperCase()); cpError.set('')" />
+          <span class="cp-hint">{{ lang.isBangla() ? 'বড় হাতের অক্ষরে সেভ হবে' : 'Saved in uppercase — students can type it either way' }}</span>
+        </div>
+
+        <div class="cp-field">
+          <label>{{ lang.isBangla() ? 'ডিসকাউন্টের ধরন' : 'Discount type' }}</label>
+          <div class="cp-type-group">
+            @for (t of couponTypes; track t.value) {
+              <button type="button" class="cp-type-btn" [class.active]="cpType() === t.value"
+                (click)="cpType.set(t.value); cpError.set('')">
+                {{ t.icon }} {{ t.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="cp-field">
+          <label>
+            {{ lang.isBangla() ? 'ডিসকাউন্ট' : 'Discount' }} <span class="cp-required">*</span>
+          </label>
+          <div class="cp-value-wrap">
+            <input type="number" class="cp-input" min="1" [attr.max]="cpIsPercent() ? 100 : null"
+              [placeholder]="cpIsPercent() ? '20' : '500'"
+              [value]="cpValue() ?? ''"
+              (input)="cpValue.set($any($event.target).value === '' ? null : +$any($event.target).value); cpError.set('')" />
+            <span class="cp-value-unit">{{ cpIsPercent() ? '%' : '৳' }}</span>
+          </div>
+        </div>
+
+        <div class="cp-field">
+          <label>{{ lang.isBangla() ? 'শুরুর তারিখ' : 'Starts on' }} <span class="cp-required">*</span></label>
+          <input type="date" class="cp-input" [value]="cpStart()"
+            (input)="cpStart.set($any($event.target).value); cpError.set('')" />
+        </div>
+
+        <div class="cp-field">
+          <label>{{ lang.isBangla() ? 'শেষ তারিখ' : 'Ends on' }} <span class="cp-required">*</span></label>
+          <input type="date" class="cp-input" [value]="cpEnd()" [min]="cpStart()"
+            (input)="cpEnd.set($any($event.target).value); cpError.set('')" />
+          <span class="cp-hint">{{ lang.isBangla() ? 'শেষ দিনটিও কুপন কাজ করবে' : 'The end day is included' }}</span>
+        </div>
+
+        <div class="cp-field">
+          <label>{{ lang.isBangla() ? 'সর্বোচ্চ কতবার' : 'Max uses' }} <span class="cp-optional">{{ lang.isBangla() ? '(ঐচ্ছিক)' : '(optional)' }}</span></label>
+          <input type="number" class="cp-input" min="1" placeholder="e.g. 50"
+            [value]="cpMaxUses() ?? ''"
+            (input)="cpMaxUses.set($any($event.target).value === '' ? null : +$any($event.target).value); cpError.set('')" />
+          <span class="cp-hint">{{ lang.isBangla() ? 'খালি রাখলে আনলিমিটেড' : 'Leave empty for unlimited' }}</span>
+        </div>
+      </div>
+
+      <!-- Course picker — each card shows the course's own running discount, so the admin
+           can decide the coupon value knowing what students already pay. -->
+      <div class="cp-picker">
+        <div class="cp-picker-head">
+          <label class="cp-picker-label">
+            {{ lang.isBangla() ? 'কোন কোর্সে চলবে?' : 'Which courses?' }} <span class="cp-required">*</span>
+            <span class="cp-picker-count">{{ cpSelectedCourseIds().length }} {{ lang.isBangla() ? 'টি নির্বাচিত' : 'selected' }}</span>
+          </label>
+          <div class="cp-picker-tools">
+            <input type="text" class="cp-input cp-input--search" [placeholder]="lang.isBangla() ? 'কোর্স খুঁজুন…' : 'Search courses…'"
+              [value]="couponCourseSearch()" (input)="couponCourseSearch.set($any($event.target).value)" />
+            <button type="button" class="cp-mini-btn" (click)="selectAllCouponCourses()">{{ lang.isBangla() ? 'সব' : 'All' }}</button>
+            <button type="button" class="cp-mini-btn" (click)="clearCouponCourses()">{{ lang.isBangla() ? 'বাদ' : 'None' }}</button>
+          </div>
+        </div>
+
+        <div class="cp-course-grid">
+          @for (course of filteredCouponCourses(); track course.id) {
+            <button type="button" class="cp-course-card" [class.selected]="isCourseSelected(course.id)"
+              (click)="toggleCouponCourse(course.id)">
+              <span class="cp-course-check">{{ isCourseSelected(course.id) ? '✓' : '' }}</span>
+              <span class="cp-course-title">{{ course.title }}</span>
+              @if (course.category) { <span class="cp-course-cat">{{ course.category }}</span> }
+
+              <!-- Existing campaign state — the whole point of this card -->
+              @if (course.price <= 0) {
+                <span class="cp-course-flag cp-course-flag--free">{{ lang.isBangla() ? 'ফ্রি কোর্স — কুপন লাগবে না' : 'Free course — coupon not needed' }}</span>
+              } @else if (course.discountActive) {
+                <span class="cp-course-flag cp-course-flag--sale">
+                  🔥 {{ course.discountPercent }}% {{ lang.isBangla() ? 'ডিসকাউন্ট চলছে' : 'discount already running' }}
+                </span>
+                <span class="cp-course-price">
+                  <s>৳{{ course.price }}</s> <b>৳{{ course.effectivePrice }}</b>
+                </span>
+              } @else {
+                <span class="cp-course-flag cp-course-flag--none">{{ lang.isBangla() ? 'কোনো ডিসকাউন্ট নেই' : 'No discount running' }}</span>
+                <span class="cp-course-price"><b>৳{{ course.price }}</b></span>
+              }
+
+              <!-- Live preview of what this coupon would do to that price -->
+              @if (isCourseSelected(course.id) && course.price > 0 && (cpValue() ?? 0) > 0) {
+                <span class="cp-course-after">
+                  {{ lang.isBangla() ? 'কুপনের পর' : 'With coupon' }} → <b>৳{{ couponFinalPrice(course) }}</b>
+                </span>
+              }
+            </button>
+          }
+          @empty {
+            <p class="cp-empty-note">{{ isLoading() ? 'Loading…' : (lang.isBangla() ? 'কোনো কোর্স নেই।' : 'No courses found.') }}</p>
+          }
+        </div>
+      </div>
+
+      @if (cpError()) {
+        <p class="cp-error">⚠ {{ cpError() }}</p>
+      }
+
+      <div class="cp-form-actions">
+        @if (cpEditingId()) {
+          <button type="button" class="cp-btn cp-btn--ghost" (click)="resetCouponForm()">
+            {{ lang.isBangla() ? 'বাতিল' : 'Cancel' }}
+          </button>
+        }
+        <button type="button" class="cp-btn cp-btn--save" [disabled]="cpSaving()" (click)="submitCoupon()">
+          @if (cpSaving()) {
+            <span class="ann-spinner"></span> {{ lang.isBangla() ? 'সেভ হচ্ছে…' : 'Saving…' }}
+          } @else {
+            {{ cpEditingId()
+              ? (lang.isBangla() ? '✓ আপডেট করুন' : '✓ Update coupon')
+              : (lang.isBangla() ? '🎟️ কুপন তৈরি করুন' : '🎟️ Create coupon') }}
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- Existing coupons -->
+    <div class="cp-list">
+      @for (coupon of coupons(); track coupon.id) {
+        <div class="cp-item" [class.cp-item--dim]="couponStatus(coupon).tone !== 'live'">
+          <div class="cp-item-left">
+            <div class="cp-item-top">
+              <code class="cp-item-code">{{ coupon.code }}</code>
+              <span class="cp-item-value">{{ couponValueLabel(coupon.discountType, coupon.discountValue) }}</span>
+              <span class="cp-item-status" [attr.data-tone]="couponStatus(coupon).tone">
+                ● {{ couponStatus(coupon).label }}
+              </span>
+            </div>
+
+            <div class="cp-item-meta">
+              <span>📅 {{ coupon.startDate | date:'dd MMM yyyy' }} — {{ coupon.endDate | date:'dd MMM yyyy' }}</span>
+              <span>
+                👥 {{ coupon.usedCount }}{{ coupon.maxUses ? ' / ' + coupon.maxUses : '' }}
+                {{ lang.isBangla() ? 'বার ব্যবহৃত' : 'used' }}
+              </span>
+            </div>
+
+            <div class="cp-item-courses">
+              @for (c of coupon.courses; track c.id) {
+                <span class="cp-course-chip">{{ c.title }}</span>
+              }
+              @empty {
+                <span class="cp-course-chip cp-course-chip--warn">{{ lang.isBangla() ? 'কোনো কোর্স যুক্ত নেই' : 'No courses attached' }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="cp-item-actions">
+            <button class="btn" (click)="editCoupon(coupon)">✏️ {{ lang.isBangla() ? 'এডিট' : 'Edit' }}</button>
+            <button class="btn btn-delete" (click)="deleteCoupon(coupon)">{{ lang.t().commonDelete }}</button>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="ann-empty">
+          <span>🎟️</span>
+          <p>{{ lang.isBangla() ? 'এখনো কোনো কুপন বানানো হয়নি।' : 'No coupons yet — create your first one above.' }}</p>
+        </div>
+      }
+    </div>
+    }
 
     <!-- ========== STORE ITEMS ========== -->
     @if (activeTab() === 'store-items') {

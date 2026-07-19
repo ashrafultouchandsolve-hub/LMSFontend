@@ -15,8 +15,11 @@ import { AdminSettings } from '../admin-settings/admin-settings';
 import { ParentReportService, ParentReportSummary } from '../../Service/parent-report.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ConfirmService } from '../../Service/confirm.service';
+import { Coupon, CouponDiscountType, CouponSelectableCourse, CouponService } from '../../Service/coupon.service';
+import { ToastrService } from 'ngx-toastr';
+import { apiError } from '../../Service/api-error';
 
-type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements'|'settings'|'parent-reports';
+type Tab = 'dashboard' | 'teachers' | 'students' | 'courses' | 'categories' | 'comments' | 'store-items'|'announcements'|'settings'|'parent-reports'|'coupons';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -36,6 +39,8 @@ export class AdminDashboard implements OnInit {
   private readonly parentReportService = inject(ParentReportService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly confirmDialog = inject(ConfirmService);
+  private readonly couponService = inject(CouponService);
+  private readonly toastr = inject(ToastrService);
   protected readonly lang = inject(LanguageService);
 
   readonly annTypes = [
@@ -64,8 +69,6 @@ annSubmitting  = signal(false);
 
   activeTab = signal<Tab>('dashboard');
   isLoading = signal(false);
-  message = signal('');
-  messageType = signal<'success' | 'error'>('success');
 
   stats    = signal<DashboardStats | null>(null);
   teachers = signal<AdminTeacher[]>([]);
@@ -287,7 +290,6 @@ annSubmitting  = signal(false);
   setTab(tab: Tab) {
     this.activeTab.set(tab);
     this.saveTab(tab);
-    this.message.set('');
     this.editingCommentId.set(null);
     this.loadTabData(tab);
   }
@@ -304,6 +306,7 @@ annSubmitting  = signal(false);
       case 'announcements': this.loadAnnouncements(); break;
       case 'settings': break; // self-contained child component; no data preload needed
       case 'parent-reports': this.loadStudents(); break;   // student list powers per-student preview
+      case 'coupons': this.loadCoupons(); this.loadCouponCourses(); break;   // courses feed the picker
     }
   }
 
@@ -326,7 +329,8 @@ annSubmitting  = signal(false);
       || value === 'store-items'
       || value === 'announcements'
       || value === 'settings'
-      || value === 'parent-reports';
+      || value === 'parent-reports'
+      || value === 'coupons';
   }
 
   loadDashboard() {
@@ -449,9 +453,9 @@ annSubmitting  = signal(false);
     });
   }
 
-  /** Pull the exact message the API returned (handles camelCase + PascalCase bodies). */
+  /** Kept as a thin alias so existing call sites read naturally; delegates to the shared extractor. */
   private categoryError(e: any, fallback: string): string {
-    return e?.error?.message ?? e?.error?.Message ?? fallback;
+    return apiError(e, fallback);
   }
 
   onCategoryImageSelected(event: Event, id: string) {
@@ -460,7 +464,7 @@ annSubmitting  = signal(false);
     if (!file) return;
     this.categoryService.uploadImage(id, file).subscribe({
       next: () => { this.showMessage('Image updated.', 'success'); this.loadCategories(); },
-      error: () => this.showMessage('Failed to upload image.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not upload the image. Please try again.'), 'error')
     });
     input.value = '';
   }
@@ -477,28 +481,28 @@ annSubmitting  = signal(false);
   approveTeacher(id: string) {
     this.adminService.approveTeacher(id).subscribe({
       next: () => { this.showMessage('Teacher approved!', 'success'); this.loadTeachers(); },
-      error: () => this.showMessage('Failed.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not approve this teacher. Please try again.'), 'error')
     });
   }
 
   blockTeacher(id: string) {
     this.adminService.blockTeacher(id).subscribe({
       next: () => { this.showMessage('Teacher blocked.', 'success'); this.loadTeachers(); },
-      error: () => this.showMessage('Failed.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not block this teacher. Please try again.'), 'error')
     });
   }
 
   blockStudent(id: string) {
     this.adminService.blockStudent(id).subscribe({
       next: () => { this.showMessage('Student blocked.', 'success'); this.loadStudents(); },
-      error: () => this.showMessage('Failed.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not block this student. Please try again.'), 'error')
     });
   }
 
   unblockStudent(id: string) {
     this.adminService.unblockStudent(id).subscribe({
       next: () => { this.showMessage('Student unblocked.', 'success'); this.loadStudents(); },
-      error: () => this.showMessage('Failed.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not unblock this student. Please try again.'), 'error')
     });
   }
 
@@ -512,7 +516,7 @@ annSubmitting  = signal(false);
     }))) return;
     this.adminService.deleteCourse(id).subscribe({
       next: () => { this.showMessage(this.lang.t().courseDeleted, 'success'); this.loadCourses(); },
-      error: () => this.showMessage('Failed.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not delete this course. Please try again.'), 'error')
     });
   }
 
@@ -536,7 +540,7 @@ annSubmitting  = signal(false);
         this.editingCommentId.set(null);
         this.loadComments();
       },
-      error: () => this.showMessage('Failed to update.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not update this comment. Please try again.'), 'error')
     });
   }
 
@@ -549,7 +553,199 @@ annSubmitting  = signal(false);
     }))) return;
     this.adminService.deleteComment(id).subscribe({
       next: () => { this.showMessage('Comment deleted.', 'success'); this.loadComments(); },
-      error: () => this.showMessage('Failed.', 'error')
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not delete this comment. Please try again.'), 'error')
+    });
+  }
+
+  // ── Coupons ─────────────────────────────────────────
+  // Admin binds a code to one or more courses. Each course card shows whether that course
+  // already has a discount campaign running, because the coupon stacks on top of it — the
+  // admin needs to see the real starting price before choosing a value.
+  readonly couponTypes = [
+    { value: CouponDiscountType.Percent, label: 'Percent', icon: '%' },
+    { value: CouponDiscountType.Flat, label: 'Flat', icon: '৳' },
+  ] as const;
+
+  coupons = signal<Coupon[]>([]);
+  couponCourses = signal<CouponSelectableCourse[]>([]);
+  couponCourseSearch = signal('');
+
+  cpEditingId = signal<string | null>(null);
+  cpCode = signal('');
+  cpType = signal<CouponDiscountType>(CouponDiscountType.Percent);
+  cpValue = signal<number | null>(null);
+  cpStart = signal(AdminDashboard.todayStr());
+  cpEnd = signal('');
+  cpMaxUses = signal<number | null>(null);
+  cpSelectedCourseIds = signal<string[]>([]);
+  cpSaving = signal(false);
+  cpError = signal('');
+
+  private static todayStr(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  filteredCouponCourses = computed(() => {
+    const query = this.couponCourseSearch().toLowerCase().trim();
+    if (!query) return this.couponCourses();
+    return this.couponCourses().filter(c =>
+      c.title.toLowerCase().includes(query) || (c.category ?? '').toLowerCase().includes(query));
+  });
+
+  /** The courses currently ticked — drives the live "students will pay" preview. */
+  cpSelectedCourses = computed(() => {
+    const ids = this.cpSelectedCourseIds();
+    return this.couponCourses().filter(c => ids.includes(c.id));
+  });
+
+  /** Percent vs flat — read by the template for the unit symbol and the 100 cap. */
+  cpIsPercent = computed(() => this.cpType() === CouponDiscountType.Percent);
+
+  isCourseSelected(courseId: string): boolean {
+    return this.cpSelectedCourseIds().includes(courseId);
+  }
+
+  toggleCouponCourse(courseId: string) {
+    this.cpSelectedCourseIds.update(ids =>
+      ids.includes(courseId) ? ids.filter(id => id !== courseId) : [...ids, courseId]);
+    this.cpError.set('');
+  }
+
+  selectAllCouponCourses() {
+    this.cpSelectedCourseIds.set(this.filteredCouponCourses().map(c => c.id));
+  }
+
+  clearCouponCourses() {
+    this.cpSelectedCourseIds.set([]);
+  }
+
+  /** What a student would pay for this course with the coupon as currently typed. */
+  couponFinalPrice(course: CouponSelectableCourse): number {
+    const base = course.effectivePrice;
+    const value = this.cpValue() ?? 0;
+    if (base <= 0 || value <= 0) return base;
+    const off = this.cpType() === CouponDiscountType.Percent
+      ? (base * Math.min(value, 100)) / 100
+      : value;
+    return Math.round(Math.max(0, base - Math.min(off, base)) * 100) / 100;
+  }
+
+  /** "20% off" / "৳500 off" — used on both the form preview and the coupon list. */
+  couponValueLabel(type: CouponDiscountType, value: number): string {
+    return type === CouponDiscountType.Percent ? `${value}% off` : `৳${value} off`;
+  }
+
+  couponStatus(coupon: Coupon): { label: string; tone: 'live' | 'scheduled' | 'ended' | 'used-up' } {
+    if (coupon.isExhausted) return { label: 'Used up', tone: 'used-up' };
+    if (coupon.isRunning) return { label: 'Live', tone: 'live' };
+    // Not running and not exhausted → either not started yet or the window has passed.
+    const startsInFuture = new Date(coupon.startDate).setHours(0, 0, 0, 0) > new Date().setHours(0, 0, 0, 0);
+    return startsInFuture ? { label: 'Scheduled', tone: 'scheduled' } : { label: 'Ended', tone: 'ended' };
+  }
+
+  loadCoupons() {
+    this.isLoading.set(true);
+    this.couponService.getAll().subscribe({
+      next: (data) => { this.coupons.set(data); this.isLoading.set(false); },
+      error: () => this.isLoading.set(false),
+    });
+  }
+
+  loadCouponCourses() {
+    this.couponService.getSelectableCourses().subscribe({
+      next: (data) => this.couponCourses.set(data),
+      error: () => this.couponCourses.set([]),
+    });
+  }
+
+  resetCouponForm() {
+    this.cpEditingId.set(null);
+    this.cpCode.set('');
+    this.cpType.set(CouponDiscountType.Percent);
+    this.cpValue.set(null);
+    this.cpStart.set(AdminDashboard.todayStr());
+    this.cpEnd.set('');
+    this.cpMaxUses.set(null);
+    this.cpSelectedCourseIds.set([]);
+    this.cpError.set('');
+  }
+
+  editCoupon(coupon: Coupon) {
+    this.cpEditingId.set(coupon.id);
+    this.cpCode.set(coupon.code);
+    this.cpType.set(coupon.discountType);
+    this.cpValue.set(coupon.discountValue);
+    this.cpStart.set(coupon.startDate.slice(0, 10));
+    this.cpEnd.set(coupon.endDate.slice(0, 10));
+    this.cpMaxUses.set(coupon.maxUses);
+    this.cpSelectedCourseIds.set(coupon.courses.map(c => c.id));
+    this.cpError.set('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  submitCoupon() {
+    const code = this.cpCode().trim().toUpperCase();
+    const value = this.cpValue() ?? 0;
+
+    // Mirror the backend rules so the admin gets instant feedback; the API re-checks anyway.
+    if (!code) { this.cpError.set('Coupon code is required.'); return; }
+    if (value <= 0) { this.cpError.set('Discount value must be greater than 0.'); return; }
+    if (this.cpType() === CouponDiscountType.Percent && value > 100) {
+      this.cpError.set('A percentage discount cannot be more than 100%.'); return;
+    }
+    if (!this.cpStart() || !this.cpEnd()) { this.cpError.set('Start and end dates are required.'); return; }
+    if (this.cpEnd() < this.cpStart()) { this.cpError.set('End date cannot be before the start date.'); return; }
+    if (this.cpSelectedCourseIds().length === 0) { this.cpError.set('Select at least one course.'); return; }
+
+    const payload = {
+      code,
+      discountType: this.cpType(),
+      discountValue: value,
+      startDate: this.cpStart(),
+      endDate: this.cpEnd(),
+      maxUses: this.cpMaxUses() && this.cpMaxUses()! > 0 ? this.cpMaxUses() : null,
+      courseIds: this.cpSelectedCourseIds(),
+    };
+
+    this.cpSaving.set(true);
+    this.cpError.set('');
+
+    const editingId = this.cpEditingId();
+    const request$ = editingId
+      ? this.couponService.update(editingId, payload)
+      : this.couponService.create(payload);
+
+    request$.subscribe({
+      next: () => {
+        this.cpSaving.set(false);
+        this.showMessage(editingId ? 'Coupon updated.' : 'Coupon created.', 'success');
+        this.resetCouponForm();
+        this.loadCoupons();
+      },
+      error: (e) => {
+        this.cpSaving.set(false);
+        this.cpError.set(e?.error?.message ?? e?.error?.Message ?? 'Could not save the coupon.');
+      },
+    });
+  }
+
+  async deleteCoupon(coupon: Coupon) {
+    if (!(await this.confirmDialog.confirm({
+      title: 'Delete coupon?',
+      message: `"${coupon.code}" will stop working immediately. Students who already used it keep their enrollment.`,
+      tone: 'danger',
+      icon: '🎟️',
+      confirmText: 'Delete',
+    }))) return;
+
+    this.couponService.delete(coupon.id).subscribe({
+      next: () => {
+        this.showMessage('Coupon deleted.', 'success');
+        if (this.cpEditingId() === coupon.id) this.resetCouponForm();
+        this.loadCoupons();
+      },
+      error: (e) => this.showMessage(this.apiErr(e, 'Could not delete the coupon. Please try again.'), 'error'),
     });
   }
 
@@ -559,9 +755,15 @@ annSubmitting  = signal(false);
   }
 
   private showMessage(msg: string, type: 'success' | 'error') {
-    this.message.set(msg);
-    this.messageType.set(type);
-    setTimeout(() => this.message.set(''), 3000);
+    // Unified with the rest of the app: transient feedback goes through toastr (the live-exam
+    // pattern) instead of the old inline banner.
+    if (type === 'error') this.toastr.error(msg);
+    else this.toastr.success(msg);
+  }
+
+  /** Backend message with a friendly fallback — shared app-wide extractor. */
+  private apiErr(e: unknown, fallback: string): string {
+    return apiError(e, fallback);
   }
 
   loadAnnouncements() {
@@ -588,17 +790,17 @@ createAnnouncement() {
       this.annSubmitting.set(false);
       this.loadAnnouncements();
     },
-    error: () => { this.showMessage('Failed.', 'error'); this.annSubmitting.set(false); }
+    error: (e) => { this.showMessage(this.apiErr(e, 'Could not create the announcement. Please try again.'), 'error'); this.annSubmitting.set(false); }
   });
 }
- 
+
 deactivateAnn(id: string) {
   this.annSvc.deactivate(id).subscribe({
     next: () => { this.showMessage('Deactivated.', 'success'); this.loadAnnouncements(); },
-    error: () => this.showMessage('Failed.', 'error')
+    error: (e) => this.showMessage(this.apiErr(e, 'Could not deactivate the announcement. Please try again.'), 'error')
   });
 }
- 
+
 async deleteAnn(id: string) {
   if (!(await this.confirmDialog.confirm({
     title: 'Delete announcement?',
@@ -608,7 +810,7 @@ async deleteAnn(id: string) {
   }))) return;
   this.annSvc.delete(id).subscribe({
     next: () => { this.showMessage('Deleted.', 'success'); this.loadAnnouncements(); },
-    error: () => this.showMessage('Failed.', 'error')
+    error: (e) => this.showMessage(this.apiErr(e, 'Could not delete the announcement. Please try again.'), 'error')
   });
 }
  

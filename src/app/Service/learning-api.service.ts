@@ -781,7 +781,7 @@ getMyEnrollments(): Observable<any> {
   );
 }
 
-initiatePayment(body: { courseId: string }): Observable<any> {
+initiatePayment(body: { courseId: string; couponCode?: string }): Observable<any> {
   return this.withFallback((base) =>
     this.http.post<any>(`${base}/payment/initiate`, body)
   );

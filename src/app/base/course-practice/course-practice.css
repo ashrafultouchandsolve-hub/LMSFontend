@@ -42,6 +42,13 @@
 }
 .cp-card--pdf { --a1: #ef4444; --a2: #b91c1c; }
 .cp-card--doc { --a1: #2563eb; --a2: #1e40af; }
+.cp-card--aiw { --a1: #10b981; --a2: #047857; }
+.cp-aiw-marks {
+  align-self: flex-start;
+  font-size: 13px; font-weight: 800; color: #047857;
+  background: color-mix(in srgb, #10b981 14%, #fff);
+  padding: 4px 12px; border-radius: 20px;
+}
 .cp-card:hover { transform: translateY(-5px); border-color: var(--a1); box-shadow: 0 22px 44px -22px rgba(20,26,56,0.4); }
 
 .cp-card-top { display: flex; align-items: center; justify-content: space-between; }
@@ -98,6 +105,7 @@
 }
 .cp-gate-card--board { --g1: #ef4444; --g2: #b91c1c; }
 .cp-gate-card--model { --g1: #7c3aed; --g2: #4f46e5; }
+.cp-gate-card--aiw { --g1: #10b981; --g2: #047857; }
 .cp-gate-card:hover {
   transform: translateY(-5px);
   border-color: var(--g1);

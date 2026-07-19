@@ -512,6 +512,140 @@
         </section>
       }
 
+      <!-- AI Writing tasks: admin authors; submissions + mark override inline -->
+      @if (isAdminMode() && courseSection() === 'aiwriting') {
+        <section class="panel pm-panel" aria-label="AI writing tasks">
+          <div class="live-panel-head">
+            <div>
+              <h2>✍️ {{ lang.t().aiwAdminTitle }}</h2>
+              <p>{{ lang.t().aiwAdminSub }}</p>
+            </div>
+          </div>
+
+          <!-- Add / edit form -->
+          <div class="aiw-form">
+            <div class="aiw-form-row">
+              <select class="pm-input aiw-type-select" [(ngModel)]="aiwType" [attr.aria-label]="lang.t().aiwTypeLabel">
+                @for (t of aiwTypeOptions; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+              <input type="text" class="pm-input" [(ngModel)]="aiwTitle" [placeholder]="lang.t().aiwTitlePlaceholder" maxlength="120" />
+            </div>
+            <textarea class="pm-input aiw-textarea" rows="2" [(ngModel)]="aiwInstructions"
+              [placeholder]="lang.t().aiwInstructionsPlaceholder"></textarea>
+            <textarea class="pm-input aiw-textarea" rows="3" [(ngModel)]="aiwTopicsText"
+              [placeholder]="lang.t().aiwTopicsPlaceholder"></textarea>
+            <p class="aiw-hint">💡 {{ lang.t().aiwTopicsHint }}</p>
+            <div class="aiw-form-row aiw-form-actions">
+              <label class="aiw-publish-check">
+                <input type="checkbox" [(ngModel)]="aiwPublished" />
+                {{ lang.t().aiwPublishNow }}
+              </label>
+              <button type="button" class="btn btn-primary" [disabled]="isSavingAiw()" (click)="saveAiwTask()">
+                {{ isSavingAiw() ? lang.t().tpSaving : (aiwEditingId ? lang.t().commonSave : lang.t().aiwAddTask) }}
+              </button>
+              @if (aiwEditingId) {
+                <button type="button" class="btn btn-ghost" (click)="resetAiwForm()">{{ lang.t().commonCancel }}</button>
+              }
+            </div>
+          </div>
+
+          <!-- Existing tasks -->
+          @if (aiwTasks().length === 0) {
+            <p class="empty-state">{{ lang.t().aiwNoTasks }}</p>
+          } @else {
+            <div class="pm-list">
+              @for (t of aiwTasks(); track t.id) {
+                <div class="aiw-task-block">
+                  <div class="pm-row">
+                    <span class="pm-badge aiw-badge">{{ t.type }}</span>
+                    <div class="pm-row-info">
+                      <strong>{{ t.title }}</strong>
+                      <span class="pm-type-tag">📑 {{ t.topics.length }} {{ lang.t().aiwTopicsCount }} · 👥 {{ t.submissionCount }} {{ lang.t().aiwSubsCount }}</span>
+                      @if (t.isPublished) {
+                        <span class="exam-badge exam-badge--ok">{{ lang.t().aiwStatusLive }}</span>
+                      } @else {
+                        <span class="exam-badge exam-badge--locked">{{ lang.t().aiwStatusDraft }}</span>
+                      }
+                    </div>
+                    <button type="button" class="btn btn-outline" (click)="toggleAiwPublish(t)">
+                      {{ t.isPublished ? lang.t().aiwUnpublish : lang.t().aiwPublish }}
+                    </button>
+                    <button type="button" class="btn btn-outline" (click)="toggleAiwSubmissions(t.id)">
+                      📊 {{ lang.t().aiwSubmissions }}
+                    </button>
+                    <button type="button" class="btn btn-ghost" (click)="editAiwTask(t)">{{ lang.t().commonEdit }}</button>
+                    <button type="button" class="btn btn-danger" (click)="deleteAiwTask(t)">{{ lang.t().commonDelete }}</button>
+                  </div>
+
+                  <!-- Inline submissions -->
+                  @if (aiwExpandedTaskId() === t.id) {
+                    <div class="aiw-subs">
+                      @if (isLoadingAiwSubs()) {
+                        <p class="empty-state">{{ lang.t().aiwLoadingSubs }}</p>
+                      } @else if (aiwSubmissions().length === 0) {
+                        <p class="empty-state">{{ lang.t().aiwNoSubs }}</p>
+                      } @else {
+                        @for (row of aiwSubmissions(); track row.submissionId) {
+                          <div class="aiw-sub-row">
+                            <div class="aiw-sub-head">
+                              <div class="aiw-sub-student">
+                                <strong>{{ row.studentName }}</strong>
+                                <span class="aiw-sub-meta">{{ row.topicText }} · {{ row.inputKind }} · {{ row.submittedAt | date:'dd MMM, hh:mm a' }}</span>
+                              </div>
+                              <div class="aiw-sub-marks">
+                                <span class="aiw-mark-chip" [class.aiw-mark-chip--adjusted]="row.adjustedByAdmin">
+                                  {{ row.finalMarks }}/100
+                                </span>
+                                @if (row.adjustedByAdmin) {
+                                  <span class="aiw-adjusted-tag" [title]="lang.t().aiwAiGave + ' ' + row.aiMarks">✏️ {{ lang.t().aiwAdjusted }} (AI: {{ row.aiMarks }})</span>
+                                }
+                                @if (row.offTopic) {
+                                  <span class="aiw-offtopic-tag">⚠ {{ lang.t().aiwOffTopic }}</span>
+                                }
+                              </div>
+                            </div>
+                            <p class="aiw-sub-breakdown">
+                              {{ lang.t().aiwGrammar }} {{ row.breakdown.grammar }}/25 ·
+                              {{ lang.t().aiwSpelling }} {{ row.breakdown.spelling }}/25 ·
+                              {{ lang.t().aiwStructure }} {{ row.breakdown.structure }}/25 ·
+                              {{ lang.t().aiwRelevance }} {{ row.breakdown.relevance }}/25
+                            </p>
+                            @if (row.feedback) {
+                              <p class="aiw-sub-feedback">💬 {{ row.feedback }}</p>
+                            }
+                            @if (row.extractedText) {
+                              <details class="aiw-sub-text">
+                                <summary>📄 {{ lang.t().aiwViewText }}</summary>
+                                <pre>{{ row.extractedText }}</pre>
+                              </details>
+                            }
+                            <div class="aiw-sub-actions">
+                              @if (row.hasFile) {
+                                <button type="button" class="btn btn-outline" (click)="viewAiwFile(row.submissionId)">📎 {{ lang.t().aiwViewFile }}</button>
+                              }
+                              @if (aiwOverrideId === row.submissionId) {
+                                <input type="number" class="pm-input aiw-override-input" min="0" max="100"
+                                  [(ngModel)]="aiwOverrideMarks" />
+                                <button type="button" class="btn btn-primary" (click)="saveAiwOverride(row)">{{ lang.t().commonSave }}</button>
+                                <button type="button" class="btn btn-ghost" (click)="cancelAiwOverride()">{{ lang.t().commonCancel }}</button>
+                              } @else {
+                                <button type="button" class="btn btn-outline" (click)="startAiwOverride(row)">✏️ {{ lang.t().aiwChangeMark }}</button>
+                              }
+                            </div>
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
       <!-- Exams: admin authors (create/edit/upload question); admin + appointed teacher grade -->
       @if (courseSection() === 'exams') {
       <section class="panel exam-author-panel" aria-label="Exams">

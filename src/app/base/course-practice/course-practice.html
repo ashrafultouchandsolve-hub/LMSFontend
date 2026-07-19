@@ -39,6 +39,46 @@
           <span class="cp-gate-lock">🔒 {{ lang.t().pmLocked }}</span>
         }
       </button>
+
+      <!-- AI Writing -->
+      <button type="button" class="cp-gate-card cp-gate-card--aiw" [class.locked]="count('AiWriting') === 0"
+        (click)="openType('AiWriting')">
+        <span class="cp-gate-ico">✍️</span>
+        <h3 class="cp-gate-title">{{ lang.t().aiwGateTitle }}</h3>
+        @if (count('AiWriting') > 0) {
+          <span class="cp-gate-count">{{ count('AiWriting') }}</span>
+          <span class="cp-gate-go">{{ lang.t().pmOpen }} →</span>
+        } @else {
+          <span class="cp-gate-lock">🔒 {{ lang.t().pmLocked }}</span>
+        }
+      </button>
+    </div>
+
+  } @else if (selectedType() === 'AiWriting') {
+
+    <!-- AI Writing task cards -->
+    <button type="button" class="cp-back" (click)="back()">← {{ lang.t().pmBack }}</button>
+    <h3 class="cp-sub-title">✍️ {{ lang.t().aiwGateTitle }}</h3>
+
+    <div class="cp-grid">
+      @for (t of aiwTasks(); track t.id) {
+        <article class="cp-card cp-card--aiw">
+          <div class="cp-card-top">
+            <span class="cp-card-ico">✍️</span>
+            <span class="cp-card-type">{{ t.type }}</span>
+          </div>
+          <h3 class="cp-card-title">{{ t.title }}</h3>
+          @if (t.instructions) {
+            <p class="cp-card-desc">{{ t.instructions }}</p>
+          }
+          @if (t.myAttempted) {
+            <span class="cp-aiw-marks">🏆 {{ t.myFinalMarks }}/100</span>
+            <button type="button" class="cp-open" (click)="openAiwTask(t)">{{ lang.t().aiwViewResult }}</button>
+          } @else {
+            <button type="button" class="cp-open" (click)="openAiwTask(t)">🤖 {{ lang.t().aiwStart }} →</button>
+          }
+        </article>
+      }
     </div>
 
   } @else {

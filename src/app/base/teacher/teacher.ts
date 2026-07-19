@@ -16,6 +16,7 @@ import { FreeLiveClass, LiveClass, LiveClassService } from '../../Service/live-c
 import { ExamService, ExamView } from '../../Service/exam.service';
 import { LiveExamService, LiveExamSummary } from '../../Service/live-exam.service';
 import { PracticeService, PracticeMaterial, PracticeType } from '../../Service/practice.service';
+import { AiWritingService, AiWritingTask, AiWritingSubmissionRow } from '../../Service/ai-writing.service';
 import { CommonModule,DatePipe } from '@angular/common';
 import { TeacherProfileComponent } from '../teacher-profile/teacher-profile';
 import { environment } from '../../../environments/environments';
@@ -28,7 +29,7 @@ import { AdminService, AdminTeacher } from '../../Service/admin.service';
 type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 type VideoType = 'YouTube' | 'Vimeo' | 'Direct URL';
 /** In-course admin/teacher sections — each shown on its own page via the sidebar (not stacked). */
-type CourseSection = 'lessons' | 'live' | 'recordings' | 'practice' | 'exams';
+type CourseSection = 'lessons' | 'live' | 'recordings' | 'practice' | 'exams' | 'aiwriting';
 
 type Lesson = {
   id: string;
@@ -277,6 +278,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       { key: 'live',       label: bn ? 'লাইভ ক্লাস' : 'Live Classes', icon: '📺', show: admin || teacher },
       { key: 'recordings', label: bn ? 'রেকর্ডিং' : 'Recordings',    icon: '🎬', show: admin || teacher },
       { key: 'practice',   label: bn ? 'প্র্যাকটিস' : 'Practice',      icon: '🎯', show: admin },
+      { key: 'aiwriting',  label: bn ? 'এআই রাইটিং' : 'AI Writing',    icon: '✍️', show: admin },
       { key: 'exams',      label: bn ? 'পরীক্ষা' : 'Exams',           icon: '📝', show: true },
     ];
     return all.filter((x) => x.show).map(({ key, label, icon }) => ({ key, label, icon }));
@@ -679,6 +681,7 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     await this.loadRecordings(courseId);
     await this.loadExams(courseId);
     await this.loadPractice(courseId);
+    await this.loadAiwTasks(courseId);
   }
 
   // ── Exams (admin authors; admin + appointed teacher grade) ───────
@@ -916,6 +919,168 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
 
   protected viewPractice(id: string): void {
     this.practiceService.viewFile(id).subscribe({
+      next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
+      error: () => {},
+    });
+  }
+
+  // ── AI Writing tasks (admin only) ────────────────────────────────
+  private readonly aiWritingService = inject(AiWritingService);
+  protected readonly aiwTasks = signal<AiWritingTask[]>([]);
+  protected readonly isSavingAiw = signal(false);
+  protected readonly aiwTypeOptions = ['Paragraph', 'Letter', 'Essay', 'Application', 'Email', 'Story'];
+  protected aiwEditingId: string | null = null;
+  protected aiwType = 'Paragraph';
+  protected aiwTitle = '';
+  protected aiwInstructions = '';
+  /** One topic per line — split on save. */
+  protected aiwTopicsText = '';
+  protected aiwPublished = true;
+
+  // Inline submissions expand + per-row mark override
+  protected readonly aiwExpandedTaskId = signal<string | null>(null);
+  protected readonly aiwSubmissions = signal<AiWritingSubmissionRow[]>([]);
+  protected readonly isLoadingAiwSubs = signal(false);
+  protected aiwOverrideId: string | null = null;
+  protected aiwOverrideMarks: number | null = null;
+
+  private async loadAiwTasks(courseId: string): Promise<void> {
+    try {
+      this.aiwTasks.set(await firstValueFrom(this.aiWritingService.getCourseTasks(courseId)));
+    } catch {
+      this.aiwTasks.set([]);
+    }
+  }
+
+  protected resetAiwForm(): void {
+    this.aiwEditingId = null;
+    this.aiwType = 'Paragraph';
+    this.aiwTitle = '';
+    this.aiwInstructions = '';
+    this.aiwTopicsText = '';
+    this.aiwPublished = true;
+  }
+
+  protected editAiwTask(t: AiWritingTask): void {
+    this.aiwEditingId = t.id;
+    this.aiwType = t.type;
+    this.aiwTitle = t.title;
+    this.aiwInstructions = t.instructions;
+    this.aiwTopicsText = t.topics.map((x) => x.text).join('\n');
+    this.aiwPublished = t.isPublished;
+  }
+
+  protected async saveAiwTask(): Promise<void> {
+    const course = this.selectedCourse();
+    if (!course) return;
+    const topics = this.aiwTopicsText.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (!this.aiwTitle.trim()) { this.setNotice(this.lang.t().aiwTitleRequired, 'error'); return; }
+    if (topics.length === 0) { this.setNotice(this.lang.t().aiwTopicsRequired, 'error'); return; }
+
+    const dto = {
+      courseId: course.id,
+      type: this.aiwType,
+      title: this.aiwTitle.trim(),
+      instructions: this.aiwInstructions.trim(),
+      topics,
+      isPublished: this.aiwPublished,
+    };
+
+    this.isSavingAiw.set(true);
+    try {
+      if (this.aiwEditingId) {
+        await firstValueFrom(this.aiWritingService.updateTask(this.aiwEditingId, dto));
+      } else {
+        await firstValueFrom(this.aiWritingService.createTask(dto));
+      }
+      await this.loadAiwTasks(course.id);
+      this.resetAiwForm();
+      this.setNotice(this.lang.t().aiwSaved, 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Task সেভ করা যায়নি।'), 'error');
+    } finally {
+      this.isSavingAiw.set(false);
+    }
+  }
+
+  protected async toggleAiwPublish(t: AiWritingTask): Promise<void> {
+    try {
+      await firstValueFrom(this.aiWritingService.togglePublish(t.id));
+      const c = this.selectedCourse();
+      if (c) await this.loadAiwTasks(c.id);
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Failed.'), 'error');
+    }
+  }
+
+  protected async deleteAiwTask(t: AiWritingTask): Promise<void> {
+    if (!(await this.confirmDialog.confirm({
+      title: this.lang.isBangla() ? 'টাস্ক ডিলিট করবেন?' : 'Delete this task?',
+      message: this.lang.t().aiwDeleteWarn,
+      tone: 'danger',
+      confirmText: this.lang.isBangla() ? 'ডিলিট' : 'Delete',
+    }))) return;
+    try {
+      await firstValueFrom(this.aiWritingService.deleteTask(t.id));
+      if (this.aiwExpandedTaskId() === t.id) this.aiwExpandedTaskId.set(null);
+      const c = this.selectedCourse();
+      if (c) await this.loadAiwTasks(c.id);
+      this.setNotice(this.lang.t().aiwDeleted, 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Delete করা যায়নি।'), 'error');
+    }
+  }
+
+  protected async toggleAiwSubmissions(taskId: string): Promise<void> {
+    if (this.aiwExpandedTaskId() === taskId) {
+      this.aiwExpandedTaskId.set(null);
+      return;
+    }
+    this.aiwExpandedTaskId.set(taskId);
+    this.aiwSubmissions.set([]);
+    this.isLoadingAiwSubs.set(true);
+    try {
+      this.aiwSubmissions.set(await firstValueFrom(this.aiWritingService.getSubmissions(taskId)));
+    } catch {
+      this.aiwSubmissions.set([]);
+    } finally {
+      this.isLoadingAiwSubs.set(false);
+    }
+  }
+
+  protected startAiwOverride(row: AiWritingSubmissionRow): void {
+    this.aiwOverrideId = row.submissionId;
+    this.aiwOverrideMarks = row.finalMarks;
+  }
+
+  protected cancelAiwOverride(): void {
+    this.aiwOverrideId = null;
+    this.aiwOverrideMarks = null;
+  }
+
+  protected async saveAiwOverride(row: AiWritingSubmissionRow): Promise<void> {
+    const marks = this.aiwOverrideMarks;
+    if (marks == null || marks < 0 || marks > 100) {
+      this.setNotice(this.lang.t().aiwMarksRange, 'error');
+      return;
+    }
+    try {
+      await firstValueFrom(this.aiWritingService.overrideMark(row.submissionId, marks));
+      this.cancelAiwOverride();
+      const expanded = this.aiwExpandedTaskId();
+      if (expanded) {
+        this.aiwSubmissions.set(await firstValueFrom(this.aiWritingService.getSubmissions(expanded)));
+      }
+      const c = this.selectedCourse();
+      if (c) await this.loadAiwTasks(c.id);
+      this.setNotice(this.lang.t().aiwMarkUpdated, 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, 'Mark আপডেট করা যায়নি।'), 'error');
+    }
+  }
+
+  protected viewAiwFile(submissionId: string): void {
+    this.aiWritingService.viewFile(submissionId).subscribe({
       next: (blob) => window.open(URL.createObjectURL(blob), '_blank'),
       error: () => {},
     });
@@ -1717,15 +1882,13 @@ private mapCourse(
 
       const backendMessage = this.normalizeBackendMessage(rawBackendMessage);
 
+      // Show the backend's own message when it has one; otherwise the friendly fallback.
+      // Never the HTTP status code — that "(404)" noise is exactly what confuses users.
       if (backendMessage) {
-        return `${fallbackMessage} (${error.status}): ${backendMessage}`;
+        return backendMessage;
       }
 
-      if (error.status === 500) {
-        return `${fallbackMessage} (500): সার্ভারে Internal Error হয়েছে। Backend log দেখে exact exception ঠিক করতে হবে।`;
-      }
-
-      return `${fallbackMessage} (HTTP ${error.status})`;
+      return fallbackMessage;
     }
 
     return fallbackMessage;

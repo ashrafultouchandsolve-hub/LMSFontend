@@ -251,6 +251,23 @@ export interface Translations {
   pmTitle: string; pmSub: string; pmStudentSub: string; pmFieldName: string; pmDescPlaceholder: string;
   pmChooseFile: string; pmAdd: string; pmOpen: string; pmNone: string; pmNoneDesc: string;
   pmTypeBoard: string; pmTypeModel: string; pmTypeLabel: string; pmLocked: string; pmLockedMsg: string; pmBack: string;
+  // AI Writing (AI-graded writing practice)
+  aiwGateTitle: string; aiwViewResult: string; aiwStart: string; aiwLockedMsg: string;
+  aiwAdminTitle: string; aiwAdminSub: string; aiwTypeLabel: string; aiwTitlePlaceholder: string;
+  aiwInstructionsPlaceholder: string; aiwTopicsPlaceholder: string; aiwTopicsHint: string; aiwPublishNow: string;
+  aiwAddTask: string; aiwNoTasks: string; aiwTopicsCount: string; aiwSubsCount: string;
+  aiwUnpublish: string; aiwPublish: string; aiwSubmissions: string; aiwLoadingSubs: string; aiwNoSubs: string;
+  aiwAiGave: string; aiwAdjusted: string; aiwOffTopic: string; aiwViewText: string; aiwViewFile: string; aiwChangeMark: string;
+  aiwTitleRequired: string; aiwTopicsRequired: string; aiwSaved: string; aiwDeleteWarn: string; aiwDeleted: string;
+  aiwMarksRange: string; aiwMarkUpdated: string;
+  aiwBackToCourse: string; aiwLoading: string; aiwTaskNotFound: string; aiwResultTitle: string;
+  aiwAdjustedNote: string; aiwOffTopicNote: string; aiwBreakdown: string; aiwFeedback: string;
+  aiwGrammar: string; aiwSpelling: string; aiwStructure: string; aiwRelevance: string;
+  aiwYourWriting: string; aiwTranscribed: string; aiwChecking: string; aiwCheckingSub: string;
+  aiwOneAttempt: string; aiwPickTopic: string; aiwYourAnswer: string; aiwRemoveFile: string; aiwFileChosenNote: string;
+  aiwTypePlaceholder: string; aiwWords: string; aiwOr: string; aiwUploadHere: string; aiwUploadHint: string; aiwSubmit: string;
+  aiwFileTypes: string; aiwFileTooBig: string; aiwGradedToast: string; aiwAlreadyAttempted: string; aiwSubmitFailed: string;
+  aiwStatusLive: string; aiwStatusDraft: string;
   // Admin role-restructure: categories, course manager, appointment
   navAdmin: string; adCategories: string; adCategoriesSub: string; adCategoryNamePlaceholder: string;
   adAddCategory: string; adNoCategories: string; adManageCourses: string; adSetImage: string; adAuthorCourses: string;
@@ -606,6 +623,33 @@ const EN: Translations = {
   pmChooseFile: 'Choose PDF / DOC', pmAdd: 'Add material', pmOpen: 'Open', pmNone: 'No practice materials yet', pmNoneDesc: 'Practice materials will appear here once your instructor uploads them.',
   pmTypeBoard: 'Previous Board Question', pmTypeModel: 'Special Model Test Question', pmTypeLabel: 'Question type',
   pmLocked: 'Locked', pmLockedMsg: 'No questions have been added here yet. Please check back soon.', pmBack: 'Back',
+  // AI Writing
+  aiwGateTitle: 'AI Writing', aiwViewResult: 'View result', aiwStart: 'Start writing', aiwLockedMsg: 'No writing tasks have been added here yet. Please check back soon.',
+  aiwAdminTitle: 'AI Writing Tasks', aiwAdminSub: 'Create writing tasks; students submit once and the AI grades it out of 100.',
+  aiwTypeLabel: 'Writing type', aiwTitlePlaceholder: 'Task title (e.g. My Village)',
+  aiwInstructionsPlaceholder: 'Instructions for students (e.g. write 120-150 words)…',
+  aiwTopicsPlaceholder: 'Topics — one per line. The student picks one.', aiwTopicsHint: 'One topic per line — the student chooses one of them.',
+  aiwPublishNow: 'Published (visible to students)', aiwAddTask: 'Add task', aiwNoTasks: 'No writing tasks yet.',
+  aiwTopicsCount: 'topics', aiwSubsCount: 'submissions', aiwUnpublish: 'Unpublish', aiwPublish: 'Publish',
+  aiwSubmissions: 'Submissions', aiwLoadingSubs: 'Loading submissions…', aiwNoSubs: 'No submissions yet.',
+  aiwAiGave: 'AI gave', aiwAdjusted: 'Adjusted', aiwOffTopic: 'Off topic', aiwViewText: 'View text', aiwViewFile: 'View file', aiwChangeMark: 'Change mark',
+  aiwTitleRequired: 'Task title is required.', aiwTopicsRequired: 'Add at least one topic (one per line).',
+  aiwSaved: 'Task saved.', aiwDeleteWarn: 'This task and all its student submissions will be permanently deleted.',
+  aiwDeleted: 'Task deleted.', aiwMarksRange: 'Marks must be between 0 and 100.', aiwMarkUpdated: 'Mark updated.',
+  aiwBackToCourse: 'Back to course', aiwLoading: 'Loading…', aiwTaskNotFound: 'This task could not be found.',
+  aiwResultTitle: 'Your Result', aiwAdjustedNote: 'Your teacher adjusted this mark', aiwOffTopicNote: 'This writing did not match the chosen topic.',
+  aiwBreakdown: 'Score breakdown', aiwFeedback: 'Feedback',
+  aiwGrammar: 'Grammar', aiwSpelling: 'Spelling', aiwStructure: 'Structure', aiwRelevance: 'Relevance',
+  aiwYourWriting: 'Your writing', aiwTranscribed: 'Transcribed text',
+  aiwChecking: 'AI is checking your writing…', aiwCheckingSub: 'This can take up to a minute. Please wait.',
+  aiwOneAttempt: 'You get ONE attempt for this task. Make it count!', aiwPickTopic: 'Pick a topic', aiwYourAnswer: 'Your writing',
+  aiwRemoveFile: 'Remove', aiwFileChosenNote: 'A file is attached — submit to have it checked, or remove it to type instead.',
+  aiwTypePlaceholder: 'Write your answer here…', aiwWords: 'words', aiwOr: 'OR', aiwUploadHere: 'Upload a photo or PDF',
+  aiwUploadHint: 'JPG, PNG or PDF — a clear photo of your handwriting works best (max 10 MB).', aiwSubmit: 'Submit for AI checking',
+  aiwFileTypes: 'Only JPG, PNG or PDF files are allowed.', aiwFileTooBig: 'File too large — maximum 10 MB.',
+  aiwGradedToast: 'Your writing has been graded!', aiwAlreadyAttempted: 'You have already attempted this task.',
+  aiwSubmitFailed: 'Could not check your writing. Please try again.',
+  aiwStatusLive: 'Live', aiwStatusDraft: 'Draft (hidden)',
   navAdmin: 'Admin Panel',
   adCategories: 'Categories', adCategoriesSub: 'Create categories, then build courses inside each one.',
   adCategoryNamePlaceholder: 'New category name (e.g. SSC 2027)', adAddCategory: 'Add Category',
@@ -993,6 +1037,33 @@ const BN: Translations = {
   pmChooseFile: 'PDF / DOC বেছে নিন', pmAdd: 'যোগ করুন', pmOpen: 'খুলুন', pmNone: 'এখনো কোনো প্র্যাকটিস ম্যাটেরিয়াল নেই', pmNoneDesc: 'শিক্ষক আপলোড করলে এখানে দেখা যাবে।',
   pmTypeBoard: 'বিগত বোর্ড প্রশ্ন', pmTypeModel: 'স্পেশাল মডেল টেস্ট প্রশ্ন', pmTypeLabel: 'প্রশ্নের ধরন',
   pmLocked: 'লকড', pmLockedMsg: 'এখানে এখনো কোনো প্রশ্ন যোগ করা হয়নি। শীঘ্রই আবার দেখুন।', pmBack: 'পিছনে',
+  // AI Writing
+  aiwGateTitle: 'এআই রাইটিং', aiwViewResult: 'ফলাফল দেখুন', aiwStart: 'লেখা শুরু করুন', aiwLockedMsg: 'এখানে এখনো কোনো রাইটিং টাস্ক যোগ করা হয়নি। শীঘ্রই আবার দেখুন।',
+  aiwAdminTitle: 'এআই রাইটিং টাস্ক', aiwAdminSub: 'রাইটিং টাস্ক তৈরি করুন; স্টুডেন্ট একবার সাবমিট করবে, এআই ১০০-তে নম্বর দেবে।',
+  aiwTypeLabel: 'লেখার ধরন', aiwTitlePlaceholder: 'টাস্কের শিরোনাম (যেমন My Village)',
+  aiwInstructionsPlaceholder: 'স্টুডেন্টদের জন্য নির্দেশনা (যেমন ১২০-১৫০ শব্দ লিখুন)…',
+  aiwTopicsPlaceholder: 'টপিক — প্রতি লাইনে একটি। স্টুডেন্ট একটি বেছে নেবে।', aiwTopicsHint: 'প্রতি লাইনে একটি টপিক — স্টুডেন্ট এদের একটি বেছে নেবে।',
+  aiwPublishNow: 'প্রকাশিত (স্টুডেন্টরা দেখতে পাবে)', aiwAddTask: 'টাস্ক যোগ করুন', aiwNoTasks: 'এখনো কোনো রাইটিং টাস্ক নেই।',
+  aiwTopicsCount: 'টপিক', aiwSubsCount: 'সাবমিশন', aiwUnpublish: 'আনপাবলিশ', aiwPublish: 'পাবলিশ',
+  aiwSubmissions: 'সাবমিশন', aiwLoadingSubs: 'সাবমিশন লোড হচ্ছে…', aiwNoSubs: 'এখনো কোনো সাবমিশন নেই।',
+  aiwAiGave: 'এআই দিয়েছে', aiwAdjusted: 'পরিবর্তিত', aiwOffTopic: 'টপিকের বাইরে', aiwViewText: 'লেখা দেখুন', aiwViewFile: 'ফাইল দেখুন', aiwChangeMark: 'নম্বর পরিবর্তন',
+  aiwTitleRequired: 'টাস্কের শিরোনাম দিন।', aiwTopicsRequired: 'কমপক্ষে একটি টপিক দিন (প্রতি লাইনে একটি)।',
+  aiwSaved: 'টাস্ক সেভ হয়েছে।', aiwDeleteWarn: 'এই টাস্ক ও এর সব স্টুডেন্ট সাবমিশন স্থায়ীভাবে মুছে যাবে।',
+  aiwDeleted: 'টাস্ক ডিলিট হয়েছে।', aiwMarksRange: 'নম্বর ০ থেকে ১০০-এর মধ্যে হতে হবে।', aiwMarkUpdated: 'নম্বর আপডেট হয়েছে।',
+  aiwBackToCourse: 'কোর্সে ফিরে যান', aiwLoading: 'লোড হচ্ছে…', aiwTaskNotFound: 'এই টাস্কটি পাওয়া যায়নি।',
+  aiwResultTitle: 'আপনার ফলাফল', aiwAdjustedNote: 'আপনার শিক্ষক এই নম্বর পরিবর্তন করেছেন', aiwOffTopicNote: 'এই লেখাটি নির্বাচিত টপিকের সাথে মেলেনি।',
+  aiwBreakdown: 'নম্বরের বিস্তারিত', aiwFeedback: 'মতামত',
+  aiwGrammar: 'ব্যাকরণ', aiwSpelling: 'বানান', aiwStructure: 'গঠন', aiwRelevance: 'প্রাসঙ্গিকতা',
+  aiwYourWriting: 'আপনার লেখা', aiwTranscribed: 'পঠিত লেখা',
+  aiwChecking: 'এআই আপনার লেখা যাচাই করছে…', aiwCheckingSub: 'এতে এক মিনিট পর্যন্ত সময় লাগতে পারে। অপেক্ষা করুন।',
+  aiwOneAttempt: 'এই টাস্কে আপনি মাত্র একবার সুযোগ পাবেন। ভালোভাবে লিখুন!', aiwPickTopic: 'একটি টপিক বেছে নিন', aiwYourAnswer: 'আপনার লেখা',
+  aiwRemoveFile: 'বাদ দিন', aiwFileChosenNote: 'একটি ফাইল যুক্ত আছে — যাচাই করতে সাবমিট করুন, অথবা টাইপ করতে বাদ দিন।',
+  aiwTypePlaceholder: 'এখানে আপনার উত্তর লিখুন…', aiwWords: 'শব্দ', aiwOr: 'অথবা', aiwUploadHere: 'ছবি বা পিডিএফ আপলোড করুন',
+  aiwUploadHint: 'JPG, PNG বা PDF — হাতের লেখার পরিষ্কার ছবি সবচেয়ে ভালো কাজ করে (সর্বোচ্চ ১০ MB)।', aiwSubmit: 'এআই যাচাইয়ের জন্য সাবমিট করুন',
+  aiwFileTypes: 'শুধু JPG, PNG বা PDF ফাইল অনুমোদিত।', aiwFileTooBig: 'ফাইল অনেক বড় — সর্বোচ্চ ১০ MB।',
+  aiwGradedToast: 'আপনার লেখা যাচাই হয়েছে!', aiwAlreadyAttempted: 'আপনি এই টাস্কে ইতিমধ্যে চেষ্টা করেছেন।',
+  aiwSubmitFailed: 'আপনার লেখা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
+  aiwStatusLive: 'লাইভ', aiwStatusDraft: 'ড্রাফট (লুকানো)',
   navAdmin: 'অ্যাডমিন প্যানেল',
   adCategories: 'ক্যাটাগরি', adCategoriesSub: 'ক্যাটাগরি তৈরি করুন, তারপর প্রতিটির ভেতরে কোর্স বানান।',
   adCategoryNamePlaceholder: 'নতুন ক্যাটাগরির নাম (যেমন: SSC 2027)', adAddCategory: 'ক্যাটাগরি যোগ করুন',
