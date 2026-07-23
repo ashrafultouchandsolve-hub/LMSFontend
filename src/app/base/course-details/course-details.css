@@ -795,3 +795,111 @@
 	.course-main-card, .course-side-card, .back-link, .cd-incl,
 	.enroll-button, .rate-toggle, .cd-incl:hover { animation: none !important; transition: none !important; }
 }
+
+/* ─── CURRICULUM ─────────────────────────────────────────────────────── */
+.cd-curr-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-bottom: 0.9rem;
+}
+.cd-curr-head h2 { margin: 0; }
+.cd-curr-meta { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+
+.cd-curr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.cd-curr-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 14px;
+	background: #f8fafc;
+	border: 1px solid #eef0f4;
+	border-radius: 12px;
+	transition: border-color .15s, background .15s, transform .12s;
+}
+.cd-curr-item:hover { background: #f4f7ff; border-color: #dbe4ff; transform: translateX(2px); }
+.cd-curr-num {
+	flex-shrink: 0;
+	width: 26px; height: 26px;
+	display: grid; place-items: center;
+	background: #eef2ff; color: #4f46e5;
+	border-radius: 8px;
+	font-size: 12.5px; font-weight: 800;
+}
+.cd-curr-ic { flex-shrink: 0; font-size: 15px; }
+.cd-curr-title {
+	flex: 1;
+	min-width: 0;
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #1e293b;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.cd-curr-tags { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.cd-curr-tag {
+	font-size: 11px;
+	font-weight: 700;
+	color: #475569;
+	background: #eef0f6;
+	padding: 3px 9px;
+	border-radius: 20px;
+}
+.cd-curr-tag--free { background: #dcfce7; color: #15803d; }
+.cd-curr-dur { font-size: 12px; color: #94a3b8; font-weight: 600; white-space: nowrap; }
+
+.cd-curr-empty { color: #64748b; font-size: 0.92rem; }
+.cd-curr-loading { display: flex; flex-direction: column; gap: 8px; }
+.cd-curr-skel {
+	height: 48px;
+	border-radius: 12px;
+	background: linear-gradient(90deg, #eef0f6 0%, #f7f8fc 50%, #eef0f6 100%);
+	background-size: 200% 100%;
+	animation: cd-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes cd-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+@media (max-width: 560px) {
+	.cd-curr-dur { display: none; }
+	.cd-curr-title { white-space: normal; }
+}
+
+/* ─── RATINGS & REVIEWS ──────────────────────────────────────────────── */
+.cd-rev-summary {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 28px;
+	align-items: center;
+	padding: 18px 20px;
+	background: #f8fafc;
+	border: 1px solid #eef0f4;
+	border-radius: 14px;
+}
+.cd-rev-score { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cd-rev-avg { font-size: 2.6rem; font-weight: 800; color: #0f172a; line-height: 1; }
+.cd-rev-out { font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+.cd-rev-stars { display: flex; gap: 2px; margin-top: 4px; }
+.cd-rev-star { color: #d8dee9; font-size: 15px; }
+.cd-rev-star.filled { color: #f59e0b; }
+.cd-rev-total { font-size: 0.78rem; color: #64748b; font-weight: 600; margin-top: 3px; }
+
+.cd-rev-bars { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.cd-rev-bar-row { display: flex; align-items: center; gap: 10px; }
+.cd-rev-bar-star { font-size: 12px; font-weight: 700; color: #64748b; width: 32px; flex-shrink: 0; }
+.cd-rev-bar-track { flex: 1; height: 8px; background: #e6eaf2; border-radius: 20px; overflow: hidden; }
+.cd-rev-bar-fill { display: block; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 20px; transition: width .4s ease; }
+.cd-rev-bar-count { font-size: 12px; font-weight: 700; color: #94a3b8; width: 24px; text-align: right; flex-shrink: 0; }
+
+.cd-rev-list { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.cd-rev-item { padding: 14px 16px; background: #fff; border: 1px solid #eef0f4; border-radius: 12px; }
+.cd-rev-item-stars { display: flex; gap: 2px; margin-bottom: 6px; }
+.cd-rev-item-stars .cd-rev-star { font-size: 13px; }
+.cd-rev-text { margin: 0; font-size: 0.92rem; color: #334155; line-height: 1.55; }
+
+@media (max-width: 560px) {
+	.cd-rev-summary { grid-template-columns: 1fr; gap: 16px; }
+	.cd-curr-skel, .cd-rev-bar-fill { animation: none; }
+}

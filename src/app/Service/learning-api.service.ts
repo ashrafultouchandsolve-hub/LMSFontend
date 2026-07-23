@@ -34,8 +34,46 @@ export type CourseDto = {
   enrollmentCount?: number;
   videoCount?: number;
   practiceCount?: number;
+  /** Present on the filtered/paged catalogue response — saves a rating request per course. */
+  averageRating?: number;
+  totalRatings?: number;
   createdAt?: string;
   updatedAt?: string;
+};
+
+/** Sort options accepted by the catalogue endpoint. */
+export type CourseSort = 'popular' | 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'title';
+
+/** Filter/sort/page options for {@link LearningApiService.searchCourses}. */
+export type CourseQuery = {
+  search?: string;
+  /** Category names — sent as a comma-separated list. */
+  categories?: string[];
+  /** Levels — sent as a comma-separated list. */
+  levels?: string[];
+  price?: 'free' | 'paid';
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  sort?: CourseSort;
+  page?: number;
+  pageSize?: number;
+};
+
+/** Per-filter-value counts, so the sidebar can show counts and hide empty options. */
+export type CourseFacets = {
+  categories: Record<string, number>;
+  levels: Record<string, number>;
+};
+
+export type PagedResponse<T> = {
+  message: string;
+  data: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  facets?: CourseFacets;
 };
 
 export type LessonDto = {
@@ -301,6 +339,33 @@ export class LearningApiService {
   getAllCourses(): Observable<ApiResponse<CourseDto[]>> {
     return this.withFallback((baseUrl) =>
       this.http.get<ApiResponse<CourseDto[]>>(`${baseUrl}/course/getall`),
+    );
+  }
+
+  /**
+   * Filtered/sorted/paged course catalogue. Hits the same endpoint as
+   * {@link getAllCourses} — sending any param switches the server to its
+   * DB-level filter path, which also returns `averageRating`/`totalRatings`
+   * so the caller doesn't need a rating request per course.
+   *
+   * Courses whose enrollment window has closed are excluded server-side.
+   */
+  searchCourses(query: CourseQuery): Observable<PagedResponse<CourseDto>> {
+    let params = new HttpParams()
+      .set('page', String(query.page ?? 1))
+      .set('pageSize', String(query.pageSize ?? 12))
+      .set('sort', query.sort ?? 'popular');
+
+    if (query.search?.trim())      params = params.set('search', query.search.trim());
+    if (query.categories?.length)  params = params.set('categories', query.categories.join(','));
+    if (query.levels?.length)      params = params.set('levels', query.levels.join(','));
+    if (query.price)               params = params.set('price', query.price);
+    if (query.minPrice != null)    params = params.set('minPrice', String(query.minPrice));
+    if (query.maxPrice != null)    params = params.set('maxPrice', String(query.maxPrice));
+    if (query.minRating != null)   params = params.set('minRating', String(query.minRating));
+
+    return this.withFallback((baseUrl) =>
+      this.http.get<PagedResponse<CourseDto>>(`${baseUrl}/course/getall`, { params }),
     );
   }
 

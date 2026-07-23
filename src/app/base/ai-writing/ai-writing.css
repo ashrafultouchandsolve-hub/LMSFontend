@@ -198,3 +198,13 @@
   .aiw-score-row { justify-content: center; text-align: center; }
   .aiw-bd-label { flex-basis: 90px; }
 }
+
+/* Re-take affordance on the result view */
+.aiw-retake-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.aiw-retake {
+  padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; font-weight: 700; font-size: 14px;
+  transition: transform .12s, box-shadow .15s;
+}
+.aiw-retake:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(124,58,237,.3); }
+.aiw-retake-note { font-size: 12.5px; color: #6b7280; }

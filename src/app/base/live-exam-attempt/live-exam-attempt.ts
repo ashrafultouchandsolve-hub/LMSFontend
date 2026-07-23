@@ -282,6 +282,16 @@ export class LiveExamAttempt implements OnInit, OnDestroy {
     return [...(q.options ?? [])].sort((a, b) => a.order - b.order);
   }
 
+  /** Absolute URL for a question's attached prompt file (public /uploads). */
+  protected attachmentUrl(fileUrl: string | null | undefined): string {
+    return this.svc.fileDownloadUrl(fileUrl);
+  }
+
+  protected isImageAttachment(fileUrl: string | null | undefined): boolean {
+    const ext = (fileUrl ?? '').split('.').pop()?.toLowerCase() ?? '';
+    return ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
+  }
+
   private clearInvalid(questionId: string): void {
     if (!this.invalidIds().has(questionId)) return;
     this.invalidIds.update((prev) => {

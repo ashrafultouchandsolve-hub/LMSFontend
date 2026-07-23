@@ -1,22 +1,22 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
-import { CourseDto, LearningApiService } from '../../Service/learning-api.service';
+import { CourseDto, CourseFacets, CourseQuery, CourseSort, LearningApiService } from '../../Service/learning-api.service';
 import { LanguageService } from '../../Service/language.service';
 import { Category, CategoryService, categoryIcon } from '../../Service/category.service';
 import { enrollmentWindow } from '../../Service/enrollment-window';
 import { DiscountInfo, discountInfo, discountPeriodLabel } from '../../Service/discount';
+import { RecommendationService } from '../../Service/recommendation.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
-/** A selectable option in the sidebar dropdown. */
-type CategoryOption = { label: string; value: string; icon: string };
+type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 
 type CoursesViewItem = {
   id: string;
   title: string;
   description: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  level: CourseLevel;
   category: string;
   instructorName: string;
   lessonCount: number;
@@ -38,6 +38,14 @@ type CoursesViewItem = {
   discountEndDate?: string | null;
 };
 
+/** One removable pill in the "active filters" strip. */
+type FilterChip = { kind: 'category' | 'level' | 'price' | 'rating' | 'search'; value: string; label: string };
+
+const LEVELS: CourseLevel[] = ['Beginner', 'Intermediate', 'Advanced'];
+const RATING_OPTIONS = [4.5, 4, 3.5, 3];
+const PAGE_SIZE = 12;
+const SEARCH_DEBOUNCE_MS = 350;
+
 @Component({
   selector: 'app-courses',
   imports: [RouterLink, Navbar],
@@ -46,105 +54,300 @@ type CoursesViewItem = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Courses {
-  private readonly authService  = inject(AuthService);
-  private readonly learningApi  = inject(LearningApiService);
+  private readonly authService     = inject(AuthService);
+  private readonly learningApi     = inject(LearningApiService);
   private readonly categoryService = inject(CategoryService);
-  private readonly route        = inject(ActivatedRoute);
-  readonly lang                 = inject(LanguageService);
+  private readonly reco            = inject(RecommendationService);
+  private readonly route           = inject(ActivatedRoute);
+  private readonly router          = inject(Router);
+  readonly lang                    = inject(LanguageService);
 
-  protected readonly isLoadingCourses  = signal(false);
-  protected readonly searchTerm        = signal('');
-  protected readonly courses           = signal<CoursesViewItem[]>([]);
-  protected readonly wishlistToggleId  = signal<string | null>(null);
+  // ---- filter state -------------------------------------------------------
+  protected readonly searchInput        = signal('');   // what's in the box right now
+  protected readonly selectedCategories = signal<string[]>([]);
+  protected readonly selectedLevels     = signal<CourseLevel[]>([]);
+  protected readonly priceFilter        = signal<'free' | 'paid' | null>(null);
+  protected readonly minRating          = signal<number | null>(null);
+  protected readonly sort               = signal<CourseSort>('popular');
+  protected readonly page               = signal(1);
 
-  // ✅ Active category — homepage থেকে queryParam আসলে সেটা set হবে
-  protected readonly activeCategory = signal('All');
+  // ---- result state -------------------------------------------------------
+  protected readonly items      = signal<CourseDto[]>([]);
+  protected readonly total      = signal(0);
+  protected readonly totalPages = signal(0);
+  protected readonly facets     = signal<CourseFacets>({ categories: {}, levels: {} });
+  protected readonly isLoading  = signal(true);
+  protected readonly loadFailed = signal(false);
 
-  // ✅ Admin-managed categories (loaded from backend — shared with home page & admin)
+  // ---- view state ---------------------------------------------------------
+  protected readonly viewMode        = signal<'grid' | 'list'>('grid');
+  protected readonly filtersOpen     = signal(false);   // mobile drawer
+  protected readonly sortOpen        = signal(false);
   protected readonly dynamicCategories = signal<Category[]>([]);
 
-  /** Category names that have a dedicated entry; anything else falls under "Other". */
-  private readonly knownCategoryNames = computed(
-    () => new Set(this.dynamicCategories().map(c => c.name)),
+  // "Recommended for you" — personalised strip shown on the default (unfiltered) view.
+  protected readonly recommended = signal<CourseDto[]>([]);
+  protected readonly recoUsedPrefs = signal(false);
+
+  // Enrollment + wishlist come from one request each (not one per course) and are
+  // merged into the view by id — see `viewItems`.
+  private readonly enrolledIds = signal<Set<string>>(new Set());
+  private readonly wishlistIds = signal<Set<string>>(new Set());
+  protected readonly wishlistToggleId = signal<string | null>(null);
+
+  protected readonly levels        = LEVELS;
+  protected readonly ratingOptions = RATING_OPTIONS;
+  protected readonly skeletonSlots = Array.from({ length: 6 });
+
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  protected readonly sortOptions: ReadonlyArray<{ value: CourseSort; label: () => string }> = [
+    { value: 'popular',    label: () => this.lang.t().sortPopular },
+    { value: 'newest',     label: () => this.lang.t().sortNewest },
+    { value: 'rating',     label: () => this.lang.t().sortRating },
+    { value: 'price_asc',  label: () => this.lang.t().sortPriceAsc },
+    { value: 'price_desc', label: () => this.lang.t().sortPriceDesc },
+    { value: 'title',      label: () => this.lang.t().sortTitle },
+  ];
+
+  protected readonly activeSortLabel = computed(
+    () => this.sortOptions.find(o => o.value === this.sort())?.label() ?? '',
   );
 
-  // ✅ Sidebar category dropdown open/close state
-  protected readonly categoryDropdownOpen = signal(false);
+  /**
+   * Category checkboxes, driven by the server's facet counts rather than the raw
+   * admin category list — an admin category with no courses would otherwise sit
+   * in the sidebar and return nothing when clicked. A currently-selected value is
+   * always kept so the user can untick it even when it now yields 0.
+   */
+  protected readonly categoryOptions = computed(() => {
+    const counts = this.facets().categories;
+    const selected = this.selectedCategories();
+    const names = new Set([...Object.keys(counts), ...selected]);
 
-  /** Active category-র icon/label (dropdown toggle-এ দেখানোর জন্য)। */
-  protected readonly activeCategoryMeta = computed<CategoryOption>(() => {
-    const val = this.activeCategory();
-    return this.availableCategories().find(c => c.value === val)
-        ?? { label: val, value: val, icon: categoryIcon(val) };
+    // Preserve the admin-defined ordering, then append any category that only
+    // exists on courses (e.g. one removed from the managed list since).
+    const managed = this.dynamicCategories().map(c => c.name);
+    const ordered = [
+      ...managed.filter(n => names.has(n)),
+      ...[...names].filter(n => !managed.includes(n)).sort(),
+    ];
+
+    return ordered.map(name => ({
+      label: name,
+      value: name,
+      icon: categoryIcon(name),
+      count: counts[name] ?? 0,
+    }));
   });
 
-  protected readonly hasCourses = computed(() => this.courses().length > 0);
+  protected levelCount(level: CourseLevel): number {
+    return this.facets().levels[level] ?? 0;
+  }
 
-  // ✅ category + search দুটো মিলিয়ে filter
-  protected readonly filteredCourses = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-    const cat  = this.activeCategory();
-
-    return this.courses().filter((course) => {
-      // Course start হয়ে গেলে (start day passed) public listing থেকে লুকাও।
-      if (enrollmentWindow(course.startDate).state === 'closed') return false;
-
-      const matchesCat  = cat === 'All'
-        ? true
-        : cat === 'Other'
-          ? !this.knownCategoryNames().has(course.category)   // anything without a dedicated category
-          : course.category === cat;
-      const matchesTerm = !term || [
-        course.title, course.description,
-        course.category, course.instructorName, course.level,
-      ].join(' ').toLowerCase().includes(term);
-
-      return matchesCat && matchesTerm;
-    });
+  /** Server rows + locally-known enrollment/wishlist state. */
+  protected readonly viewItems = computed<CoursesViewItem[]>(() => {
+    const enrolled = this.enrolledIds();
+    const wished   = this.wishlistIds();
+    return this.items().map(dto => ({
+      id: dto.id,
+      title: dto.title,
+      description: dto.description,
+      level: this.normalizeLevel(dto.level),
+      category: dto.category,
+      instructorName: dto.instructorName,
+      lessonCount: dto.lessonCount ?? 0,
+      enrollmentCount: dto.enrollmentCount ?? 0,
+      videoCount: dto.videoCount ?? 0,
+      practiceCount: dto.practiceCount ?? 0,
+      durationMinutes: dto.durationMinutes,
+      price: dto.price,
+      isEnrolled: enrolled.has(dto.id),
+      isWishlisted: wished.has(dto.id),
+      isCompleted: dto.isCompleted ?? false,
+      thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
+      averageRating: dto.averageRating ?? 0,
+      totalRatings: dto.totalRatings ?? 0,
+      startDate: dto.startDate ?? null,
+      endDate: dto.endDate ?? null,
+      discountPercent: dto.discountPercent ?? null,
+      discountStartDate: dto.discountStartDate ?? null,
+      discountEndDate: dto.discountEndDate ?? null,
+    }));
   });
 
-  protected readonly hasFilteredCourses = computed(() => this.filteredCourses().length > 0);
+  protected readonly hasResults = computed(() => this.viewItems().length > 0);
 
-  // ✅ Check if current user is a teacher
-  protected readonly isTeacher = computed(() => {
-    const currentUser = this.authService.getCurrentUser();
-    return currentUser?.role === 1;
+  protected readonly activeChips = computed<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+    const term = this.searchInput().trim();
+    if (term) chips.push({ kind: 'search', value: term, label: `"${term}"` });
+    for (const c of this.selectedCategories()) chips.push({ kind: 'category', value: c, label: c });
+    for (const l of this.selectedLevels())     chips.push({ kind: 'level', value: l, label: this.levelLabel(l) });
+    const p = this.priceFilter();
+    if (p) chips.push({ kind: 'price', value: p, label: p === 'free' ? this.lang.t().filterFree : this.lang.t().filterPaid });
+    const r = this.minRating();
+    if (r != null) chips.push({ kind: 'rating', value: String(r), label: `${r}★ ${this.lang.t().filterAndUp}` });
+    return chips;
   });
 
-  // ✅ Staff = teacher (role 1) or admin (role 2). Staff manage courses — they
-  //    don't enroll or wishlist, so those buttons are hidden for them.
+  protected readonly hasActiveFilters = computed(() => this.activeChips().length > 0);
+
+  /** Page numbers for the pager, with '…' gaps when there are many pages. */
+  protected readonly pageNumbers = computed<(number | '…')[]>(() => {
+    const totalP = this.totalPages();
+    const cur = this.page();
+    if (totalP <= 7) return Array.from({ length: totalP }, (_, i) => i + 1);
+
+    const out: (number | '…')[] = [1];
+    const from = Math.max(2, cur - 1);
+    const to   = Math.min(totalP - 1, cur + 1);
+    if (from > 2) out.push('…');
+    for (let i = from; i <= to; i++) out.push(i);
+    if (to < totalP - 1) out.push('…');
+    out.push(totalP);
+    return out;
+  });
+
+  /** "Showing 1–12 of 46" range. */
+  protected readonly rangeStart = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * PAGE_SIZE + 1));
+  protected readonly rangeEnd   = computed(() => Math.min(this.page() * PAGE_SIZE, this.total()));
+
   protected readonly isStaff = computed(() => {
     const role = this.authService.getCurrentUser()?.role;
     return role === 1 || role === 2;
   });
 
-  // ✅ Sidebar dropdown: All + admin-managed categories that actually HAVE courses
-  //    (empty categories are hidden from students), + Other only if some course
-  //    has a category that's no longer in the managed list.
-  protected readonly availableCategories = computed<CategoryOption[]>(() => {
-    const courseCategoryNames = new Set(this.courses().map(c => c.category));
-    const opts: CategoryOption[] = [{ label: 'All', value: 'All', icon: '🗂' }];
-    for (const c of this.dynamicCategories()) {
-      if (courseCategoryNames.has(c.name)) {
-        opts.push({ label: c.name, value: c.name, icon: categoryIcon(c.name) });
-      }
-    }
-    const hasOther = this.courses().some(c => !this.knownCategoryNames().has(c.category));
-    if (hasOther) opts.push({ label: 'Other', value: 'Other', icon: '📦' });
-    return opts;
-  });
-
-  /** Course count per category pill (handles All / Other / specific). */
-  protected categoryCount(value: string): number {
-    const list = this.courses();
-    if (value === 'All') return list.length;
-    if (value === 'Other') return list.filter(c => !this.knownCategoryNames().has(c.category)).length;
-    return list.filter(c => c.category === value).length;
+  constructor() {
+    this.readStateFromUrl();
+    this.loadCategories();
+    void this.initPersonalization();
+    void this.load();
   }
 
-  constructor() {
-    void this.loadAllCourses();
-    this.loadCategories();
+  /** Enrollment/wishlist first (so recommendations can exclude enrolled courses), then reco. */
+  private async initPersonalization(): Promise<void> {
+    await this.loadEnrollmentAndWishlist();
+    await this.loadRecommended();
+  }
+
+  /** Whole "Recommended for you" strip only shows on the untouched default view. */
+  protected readonly showReco = computed(
+    () => this.recommended().length > 0 && !this.hasActiveFilters() && this.page() === 1,
+  );
+
+  /** Compact card shape for the recommendation strip. */
+  protected readonly recommendedView = computed(() =>
+    this.recommended().map((c) => ({
+      id: c.id,
+      title: c.title,
+      category: c.category,
+      level: this.normalizeLevel(c.level),
+      price: c.price,
+      thumbnailUrl: this.getImageUrl(c.thumbnailPath),
+      averageRating: c.averageRating ?? 0,
+      totalRatings: c.totalRatings ?? 0,
+    })),
+  );
+
+  // ---- URL <-> state ------------------------------------------------------
+
+  /**
+   * Seeds filter state from the URL so deep links and the browser back button work.
+   * `?category=X` (singular) is the legacy shape the navbar mega-dropdown and the
+   * home-page category marquee still link with — it must keep working.
+   */
+  private readStateFromUrl(): void {
+    const q = this.route.snapshot.queryParams;
+
+    const legacyCategory = q['category'];
+    const categories = q['categories'] ?? legacyCategory;
+    if (categories) this.selectedCategories.set(String(categories).split(',').filter(Boolean));
+
+    if (q['levels']) {
+      this.selectedLevels.set(
+        String(q['levels']).split(',').filter((l): l is CourseLevel => LEVELS.includes(l as CourseLevel)),
+      );
+    }
+    if (q['q'])     this.searchInput.set(String(q['q']));
+    if (q['price'] === 'free' || q['price'] === 'paid') this.priceFilter.set(q['price']);
+    if (q['rating']) {
+      const r = Number(q['rating']);
+      if (!Number.isNaN(r)) this.minRating.set(r);
+    }
+    if (q['sort'] && this.sortOptions.some(o => o.value === q['sort'])) this.sort.set(q['sort'] as CourseSort);
+    if (q['view'] === 'list') this.viewMode.set('list');
+    const p = Number(q['page']);
+    if (!Number.isNaN(p) && p > 0) this.page.set(p);
+  }
+
+  /** Mirrors current filter state into the URL (replaceUrl so we don't spam history). */
+  private writeStateToUrl(): void {
+    const cats = this.selectedCategories();
+    const lvls = this.selectedLevels();
+    const queryParams: Record<string, string | null> = {
+      // legacy single-category param is retired once the user touches the filters
+      category:   null,
+      categories: cats.length ? cats.join(',') : null,
+      levels:     lvls.length ? lvls.join(',') : null,
+      q:          this.searchInput().trim() || null,
+      price:      this.priceFilter(),
+      rating:     this.minRating() != null ? String(this.minRating()) : null,
+      sort:       this.sort() === 'popular' ? null : this.sort(),
+      page:       this.page() === 1 ? null : String(this.page()),
+      view:       this.viewMode() === 'grid' ? null : 'list',
+    };
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  // ---- data loading -------------------------------------------------------
+
+  private buildQuery(): CourseQuery {
+    return {
+      search: this.searchInput().trim() || undefined,
+      categories: this.selectedCategories().length ? this.selectedCategories() : undefined,
+      levels: this.selectedLevels().length ? this.selectedLevels() : undefined,
+      price: this.priceFilter() ?? undefined,
+      minRating: this.minRating() ?? undefined,
+      sort: this.sort(),
+      page: this.page(),
+      pageSize: PAGE_SIZE,
+    };
+  }
+
+  private async load(): Promise<void> {
+    this.isLoading.set(true);
+    this.loadFailed.set(false);
+    try {
+      const res = await firstValueFrom(this.learningApi.searchCourses(this.buildQuery()));
+      const rows = Array.isArray(res?.data) ? res.data : ((res as any)?.Data ?? []);
+      this.items.set(rows);
+      this.total.set(res?.total ?? rows.length);
+      this.totalPages.set(res?.totalPages ?? 1);
+      this.facets.set({
+        categories: res?.facets?.categories ?? {},
+        levels: res?.facets?.levels ?? {},
+      });
+    } catch {
+      this.items.set([]);
+      this.total.set(0);
+      this.totalPages.set(0);
+      this.loadFailed.set(true);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  /** Any filter change resets to page 1, syncs the URL, and refetches. */
+  private applyFilters(): void {
+    this.page.set(1);
+    this.writeStateToUrl();
+    void this.load();
   }
 
   private loadCategories(): void {
@@ -154,23 +357,158 @@ export class Courses {
     });
   }
 
-  // ✅ Category select করো (select করলে dropdown বন্ধ হয়ে যাবে)
-  protected setCategory(value: string): void {
-    this.activeCategory.set(value);
-    this.categoryDropdownOpen.set(false);
+  /**
+   * One request each for "which courses am I in" and "what have I wishlisted",
+   * instead of the old per-course checks. Best-effort: cards render either way.
+   */
+  private async loadEnrollmentAndWishlist(): Promise<void> {
+    if (!this.authService.isLoggedIn()) return;
+    const userId = this.authService.getCurrentUser()?.id;
+
+    try {
+      const res = await firstValueFrom(this.learningApi.getMyEnrollments());
+      const list = (res as any)?.data ?? (res as any)?.Data ?? [];
+      if (Array.isArray(list)) {
+        this.enrolledIds.set(new Set(list.map((c: any) => String(c?.id ?? c?.courseId ?? '')).filter(Boolean)));
+      }
+    } catch { /* badge just won't show */ }
+
+    if (!userId) return;
+    try {
+      const res = await firstValueFrom(this.learningApi.getWishlist(String(userId)));
+      const list = (res as any)?.data ?? (res as any)?.Data ?? res ?? [];
+      if (Array.isArray(list)) {
+        this.wishlistIds.set(new Set(list.map((i: any) => String(i?.courseId ?? i?.id ?? '')).filter(Boolean)));
+      }
+    } catch { /* heart just stays hollow */ }
   }
 
-  // ✅ Category dropdown খোলা/বন্ধ
-  protected toggleCategoryDropdown(): void {
-    this.categoryDropdownOpen.update(open => !open);
+  /**
+   * Build the "Recommended for you" strip. Ranks the full catalogue against the student's
+   * saved interests via the category-aware engine (category is the dominant signal), excludes
+   * enrolled/closed courses, and falls back to popular when there are no preference matches.
+   * Category names are taken from the courses themselves, so it always maps to real categories.
+   */
+  private async loadRecommended(): Promise<void> {
+    if (!this.authService.isLoggedIn() || this.isStaff()) return;
+    try {
+      const res = await firstValueFrom(this.learningApi.getAllCourses());
+      const raw: CourseDto[] = Array.isArray(res?.data) ? res.data : ((res as any)?.Data ?? []);
+
+      const enrolled = this.enrolledIds();
+      const candidates = raw.filter(
+        (c) => enrollmentWindow(c.startDate).state !== 'closed' && !enrolled.has(c.id),
+      );
+      if (candidates.length === 0) { this.recommended.set([]); return; }
+
+      let prefs: { skillLevel?: string; interests?: string[] } | null = null;
+      try { prefs = await firstValueFrom(this.learningApi.getUserPreferences()); }
+      catch { prefs = null; } // 404 = no preferences saved yet
+
+      const categoryNames = [...new Set(candidates.map((c) => c.category).filter(Boolean))];
+      const ranked = this.reco.rankCourses(candidates as any, prefs, {
+        limit: 10, categories: categoryNames, excludeIds: enrolled,
+      }) as CourseDto[];
+
+      if (ranked.length > 0) {
+        this.recoUsedPrefs.set(true);
+        this.recommended.set(ranked);
+      } else {
+        this.recoUsedPrefs.set(false);
+        this.recommended.set(this.reco.popularFallback(candidates as any, 10) as CourseDto[]);
+      }
+    } catch {
+      this.recommended.set([]);
+    }
   }
 
-  protected closeCategoryDropdown(): void {
-    this.categoryDropdownOpen.set(false);
+  // ---- filter mutations ---------------------------------------------------
+
+  protected onSearchInput(term: string): void {
+    this.searchInput.set(term);
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.applyFilters(), SEARCH_DEBOUNCE_MS);
   }
 
-  protected updateSearchTerm(term: string): void {
-    this.searchTerm.set(term);
+  protected toggleCategory(name: string): void {
+    this.selectedCategories.update(list =>
+      list.includes(name) ? list.filter(c => c !== name) : [...list, name],
+    );
+    this.applyFilters();
+  }
+
+  protected toggleLevel(level: CourseLevel): void {
+    this.selectedLevels.update(list =>
+      list.includes(level) ? list.filter(l => l !== level) : [...list, level],
+    );
+    this.applyFilters();
+  }
+
+  protected setPrice(value: 'free' | 'paid' | null): void {
+    this.priceFilter.update(cur => (cur === value ? null : value));
+    this.applyFilters();
+  }
+
+  protected setMinRating(value: number | null): void {
+    this.minRating.update(cur => (cur === value ? null : value));
+    this.applyFilters();
+  }
+
+  protected setSort(value: CourseSort): void {
+    this.sort.set(value);
+    this.sortOpen.set(false);
+    this.applyFilters();
+  }
+
+  protected toggleSortMenu(): void { this.sortOpen.update(o => !o); }
+  protected closeSortMenu(): void  { this.sortOpen.set(false); }
+
+  protected setViewMode(mode: 'grid' | 'list'): void {
+    this.viewMode.set(mode);
+    this.writeStateToUrl();
+  }
+
+  protected toggleFilters(): void { this.filtersOpen.update(o => !o); }
+  protected closeFilters(): void  { this.filtersOpen.set(false); }
+
+  protected removeChip(chip: FilterChip): void {
+    switch (chip.kind) {
+      case 'search':   this.searchInput.set(''); break;
+      case 'category': this.selectedCategories.update(l => l.filter(c => c !== chip.value)); break;
+      case 'level':    this.selectedLevels.update(l => l.filter(x => x !== chip.value)); break;
+      case 'price':    this.priceFilter.set(null); break;
+      case 'rating':   this.minRating.set(null); break;
+    }
+    this.applyFilters();
+  }
+
+  protected clearAllFilters(): void {
+    this.searchInput.set('');
+    this.selectedCategories.set([]);
+    this.selectedLevels.set([]);
+    this.priceFilter.set(null);
+    this.minRating.set(null);
+    this.applyFilters();
+  }
+
+  protected goToPage(p: number | '…'): void {
+    if (p === '…' || p === this.page() || p < 1 || p > this.totalPages()) return;
+    this.page.set(p);
+    this.writeStateToUrl();
+    void this.load();
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  protected isCategorySelected(name: string): boolean { return this.selectedCategories().includes(name); }
+  protected isLevelSelected(level: CourseLevel): boolean { return this.selectedLevels().includes(level); }
+
+  // ---- presentation helpers ----------------------------------------------
+
+  protected levelLabel(level: CourseLevel): string {
+    const t = this.lang.t();
+    return level === 'Beginner' ? t.levelBeginner
+         : level === 'Intermediate' ? t.levelIntermediate
+         : t.levelAdvanced;
   }
 
   protected formatPrice(price: number): string {
@@ -185,7 +523,6 @@ export class Courses {
     return discountInfo(course.price, course.discountPercent, course.discountStartDate, course.discountEndDate);
   }
 
-  /** "1 Jul – 10 Jul" label for the discount badge. */
   protected discountPeriod(course: CoursesViewItem): string {
     return discountPeriodLabel(course.discountStartDate, course.discountEndDate);
   }
@@ -195,26 +532,21 @@ export class Courses {
   }
 
   protected async toggleWishlist(course: CoursesViewItem): Promise<void> {
-    const currentUser = this.authService.getCurrentUser();
-    const userId = currentUser?.id != null ? String(currentUser.id) : '';
-    if (!userId) return;
+    const userId = this.authService.getCurrentUser()?.id;
+    if (userId == null) return;
 
     this.wishlistToggleId.set(course.id);
     try {
-      const response = await firstValueFrom(this.learningApi.toggleWishlist(course.id, userId));
+      const response = await firstValueFrom(this.learningApi.toggleWishlist(course.id, String(userId)));
       const nextState = (response as any)?.data ?? (response as any)?.Data;
-      const updatedState = typeof nextState === 'boolean' ? nextState : !course.isWishlisted;
-      this.courses.update(items => items.map(item =>
-        item.id === course.id ? { ...item, isWishlisted: updatedState } : item
-      ));
+      const nowWishlisted = typeof nextState === 'boolean' ? nextState : !course.isWishlisted;
+      this.wishlistIds.update(set => {
+        const next = new Set(set);
+        if (nowWishlisted) next.add(course.id); else next.delete(course.id);
+        return next;
+      });
     } catch {}
     finally { this.wishlistToggleId.set(null); }
-  }
-
-  protected getLevelClass(level: CoursesViewItem['level']): string {
-    if (level === 'Advanced')    return 'course-badge-adv';
-    if (level === 'Intermediate') return 'course-badge-int';
-    return 'course-badge-beg';
   }
 
   protected getCardColor(index: number): string {
@@ -222,13 +554,7 @@ export class Courses {
     return colors[index % colors.length];
   }
 
-  protected getImageClass(level: CoursesViewItem['level']): string {
-    if (level === 'Advanced')    return 'track-img-adv';
-    if (level === 'Intermediate') return 'track-img-int';
-    return 'track-img-beg';
-  }
-
-  protected getImageUrl(thumbnailPath: string | null): string {
+  protected getImageUrl(thumbnailPath: string | null | undefined): string {
     if (!thumbnailPath) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
     return this.learningApi.buildDownloadUrl(thumbnailPath);
   }
@@ -237,108 +563,7 @@ export class Courses {
     (event.target as HTMLImageElement).src = this.getImageUrl(null);
   }
 
-  private async loadAllCourses(): Promise<void> {
-    this.isLoadingCourses.set(true);
-    let mapped: CoursesViewItem[] = [];
-    try {
-      // ✅ Homepage থেকে category queryParam আসলে set করো
-      const catParam = this.route.snapshot.queryParams['category'];
-      if (catParam) this.activeCategory.set(catParam);
-
-      const response = await firstValueFrom(this.learningApi.getAllCourses());
-      const raw = Array.isArray(response.data)
-        ? response.data
-        : ((response as any).Data ?? []);
-
-      mapped = raw.map((c: CourseDto) => this.mapCourseForView(c));
-      // ⚡ Course card-গুলো সাথে সাথে দেখাও — enrollment/wishlist/rating-এর জন্য first paint আটকে রেখো না।
-      this.courses.set(mapped);
-    } catch {
-      this.courses.set([]);
-      mapped = [];
-    } finally {
-      this.isLoadingCourses.set(false);
-    }
-    // 🔵 enrollment + wishlist + rating background-এ এনে signal-এ id দিয়ে merge করি।
-    void this.enrichCourses(mapped);
-  }
-
-  /**
-   * Course-এর enrolled/wishlist state + rating background-এ এনে বিদ্যমান signal-এ id দিয়ে merge করে।
-   * first paint আটকায় না; card আগে দেখা যায়, badge/star একটু পরে fill-in হয়।
-   */
-  private async enrichCourses(base: CoursesViewItem[]): Promise<void> {
-    if (base.length === 0) { return; }
-    try {
-      let cur = await this.attachEnrollmentState(base);
-      this.mergeCourses(cur);
-      cur = await this.attachWishlistState(cur);
-      this.mergeCourses(cur);
-      cur = await this.attachRatings(cur);
-      this.mergeCourses(cur);
-    } catch { /* enrichment best-effort — base card গুলো তো দেখাই যাচ্ছে */ }
-  }
-
-  /** id দিয়ে match করে enriched course গুলো বর্তমান signal-এ merge করে (index নয়, order-safe)। */
-  private mergeCourses(enriched: CoursesViewItem[]): void {
-    const byId = new Map(enriched.map((c) => [c.id, c]));
-    this.courses.update((list) => list.map((c) => byId.get(c.id) ?? c));
-  }
-
-  private mapCourseForView(dto: CourseDto): CoursesViewItem {
-    return {
-      id: dto.id, title: dto.title, description: dto.description,
-      level: this.normalizeLevel(dto.level), category: dto.category,
-      instructorName: dto.instructorName, lessonCount: dto.lessonCount ?? 0,
-      enrollmentCount: dto.enrollmentCount ?? 0,
-      videoCount: dto.videoCount ?? 0,
-      practiceCount: dto.practiceCount ?? 0,
-      durationMinutes: dto.durationMinutes, price: dto.price,
-      isEnrolled: false, isWishlisted: false,
-      isCompleted: dto.isCompleted ?? false,
-      thumbnailUrl: this.getImageUrl(dto.thumbnailPath),
-      startDate: dto.startDate ?? null,
-      endDate: dto.endDate ?? null,
-      discountPercent: dto.discountPercent ?? null,
-      discountStartDate: dto.discountStartDate ?? null,
-      discountEndDate: dto.discountEndDate ?? null,
-    };
-  }
-
-  private async attachEnrollmentState(courses: CoursesViewItem[]): Promise<CoursesViewItem[]> {
-    if (!this.authService.isLoggedIn()) return courses;
-    return Promise.all(courses.map(async (c) => {
-      try { return { ...c, isEnrolled: await firstValueFrom(this.learningApi.checkMyEnrollment(c.id)) }; }
-      catch { return { ...c, isEnrolled: false }; }
-    }));
-  }
-
-  private async attachWishlistState(courses: CoursesViewItem[]): Promise<CoursesViewItem[]> {
-    if (!this.authService.isLoggedIn()) return courses;
-    const userId = this.authService.getCurrentUser()?.id;
-    if (!userId) return courses;
-    try {
-      const response = await firstValueFrom(this.learningApi.getWishlist(String(userId)));
-      const items = (response as any)?.data ?? (response as any)?.Data ?? response ?? [];
-      const ids = new Set<string>(
-        Array.isArray(items) ? items.map((i: any) => String(i?.courseId ?? i?.id ?? '')).filter(Boolean) : []
-      );
-      return courses.map(c => ({ ...c, isWishlisted: ids.has(c.id) }));
-    } catch { return courses; }
-  }
-
-  private async attachRatings(courses: CoursesViewItem[]): Promise<CoursesViewItem[]> {
-    return Promise.all(courses.map(async (c) => {
-      try {
-        const res = await firstValueFrom(this.learningApi.getRatingSummary(c.id));
-        const d = (res as any)?.data ?? (res as any)?.Data;
-        if (d) return { ...c, averageRating: parseFloat(d.averageRating) || 0, totalRatings: d.totalRatings || 0 };
-      } catch {}
-      return c;
-    }));
-  }
-
-  private normalizeLevel(level: string): CoursesViewItem['level'] {
+  private normalizeLevel(level: string): CourseLevel {
     if (level === 'Intermediate' || level === 'Advanced') return level;
     return 'Beginner';
   }

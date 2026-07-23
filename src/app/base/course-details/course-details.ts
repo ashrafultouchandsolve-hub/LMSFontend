@@ -36,6 +36,27 @@ type CourseDetailsView = {
   discountEndDate: string | null;
 };
 
+/** One row in the "what you'll learn" curriculum list. */
+type CurriculumLesson = {
+  id: string;
+  title: string;
+  orderIndex: number;
+  durationMinutes: number;
+  isFreePreview: boolean;
+  hasVideo: boolean;
+  quizCount: number;
+};
+
+/** A single student review shown under the ratings summary. */
+type ReviewItem = {
+  rating: number;
+  feedback: string;
+  ratedAt: string | null;
+};
+
+/** One bar in the 5→1 star histogram. */
+type RatingBar = { star: number; count: number; percent: number };
+
 @Component({
   selector: 'app-course-details',
   imports: [RouterLink, Navbar],
@@ -83,9 +104,15 @@ export class CourseDetails {
   protected readonly isCheckingEnrollment = signal(false);
   protected readonly teachers = signal<CourseTeacher[]>([]);
   
+  // Curriculum
+  protected readonly lessons = signal<CurriculumLesson[]>([]);
+  protected readonly isLoadingLessons = signal(true);
+
   // Rating signals
   protected readonly averageRating = signal(0);
   protected readonly totalRatings = signal(0);
+  protected readonly ratingDistribution = signal<Record<number, number>>({});
+  protected readonly recentReviews = signal<ReviewItem[]>([]);
   protected readonly userRating = signal(0);
   protected readonly userFeedback = signal('');
   protected readonly isSubmittingRating = signal(false);
@@ -128,6 +155,21 @@ readonly lang = inject(LanguageService);
 
     return currentCourse.description.length > this.shortDescriptionLimit;
   });
+
+  /** 5→1 star histogram bars, width as a share of the highest bar's count. */
+  protected readonly ratingBars = computed<RatingBar[]>(() => {
+    const dist = this.ratingDistribution();
+    const max = Math.max(1, ...Object.values(dist));
+    return [5, 4, 3, 2, 1].map((star) => {
+      const count = dist[star] ?? 0;
+      return { star, count, percent: Math.round((count / max) * 100) };
+    });
+  });
+
+  /** Number of lessons that are free to preview before enrolling. */
+  protected readonly freePreviewCount = computed(
+    () => this.lessons().filter((l) => l.isFreePreview).length,
+  );
 
   constructor() {
     // Sync auth state for navbar helpers
@@ -214,6 +256,30 @@ readonly lang = inject(LanguageService);
     }
   }
 
+  /** Loads the lesson list so students can preview the syllabus before enrolling. */
+  private async loadCurriculum(courseId: string): Promise<void> {
+    this.isLoadingLessons.set(true);
+    try {
+      const res: any = await firstValueFrom(this.learningApi.getLessonsByCourse(courseId));
+      const arr = Array.isArray(res?.data) ? res.data : Array.isArray(res?.Data) ? res.Data : [];
+      const mapped: CurriculumLesson[] = arr.map((l: any) => ({
+        id: String(l.id ?? l.Id ?? ''),
+        title: l.title ?? l.Title ?? 'Untitled lesson',
+        orderIndex: l.orderIndex ?? l.OrderIndex ?? 0,
+        durationMinutes: l.durationMinutes ?? l.DurationMinutes ?? 0,
+        isFreePreview: Boolean(l.isFreePreview ?? l.IsFreePreview ?? false),
+        hasVideo: Boolean(l.videoUrl ?? l.VideoUrl ?? l.videoPath ?? l.VideoPath),
+        quizCount: l.quizCount ?? l.QuizCount ?? 0,
+      }));
+      mapped.sort((a, b) => a.orderIndex - b.orderIndex);
+      this.lessons.set(mapped);
+    } catch {
+      this.lessons.set([]);
+    } finally {
+      this.isLoadingLessons.set(false);
+    }
+  }
+
   private async loadStats(courseId: string): Promise<void> {
     try {
       const res: any = await firstValueFrom(this.learningApi.getCourseStats(courseId));
@@ -259,6 +325,7 @@ readonly lang = inject(LanguageService);
       this.isImageBroken.set(false);
       void this.loadTeachers(courseId);
       void this.loadStats(courseId);
+      void this.loadCurriculum(courseId);
 
       const currentUserId = this.authService.getCurrentUser()?.id ?? '';
       if (currentUserId) {
@@ -331,8 +398,26 @@ readonly lang = inject(LanguageService);
       const res = await firstValueFrom(this.learningApi.getRatingSummary(courseId));
       const data = (res as any)?.data ?? (res as any)?.Data;
       if (data) {
-        this.averageRating.set(parseFloat(data.averageRating) || 0);
-        this.totalRatings.set(data.totalRatings || 0);
+        this.averageRating.set(parseFloat(data.averageRating ?? data.AverageRating) || 0);
+        this.totalRatings.set(data.totalRatings ?? data.TotalRatings ?? 0);
+
+        // Distribution + recent feedback already come back in this one response —
+        // no extra request needed to render the full reviews section.
+        const rawDist = data.ratingDistribution ?? data.RatingDistribution ?? {};
+        const dist: Record<number, number> = {};
+        for (const [k, v] of Object.entries(rawDist)) dist[Number(k)] = Number(v) || 0;
+        this.ratingDistribution.set(dist);
+
+        const rawFeedbacks = data.recentFeedbacks ?? data.RecentFeedbacks ?? [];
+        this.recentReviews.set(
+          (Array.isArray(rawFeedbacks) ? rawFeedbacks : [])
+            .map((f: any) => ({
+              rating: f.rating ?? f.Rating ?? 0,
+              feedback: f.feedback ?? f.Feedback ?? '',
+              ratedAt: f.ratedAt ?? f.RatedAt ?? null,
+            }))
+            .filter((f: ReviewItem) => f.feedback.trim().length > 0),
+        );
       }
     } catch (error) {
       console.error('Error loading rating summary:', error);

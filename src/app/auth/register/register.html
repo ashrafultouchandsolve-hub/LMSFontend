@@ -57,6 +57,22 @@
 					}
 				</div>
 
+				<!-- Academic group — students only, optional -->
+				@if (preselectedRole() !== 'teacher') {
+					<div class="field animate-field" style="--delay: 3">
+						<label for="group">{{ lang.t().registerGroup }}</label>
+						<div class="input-wrapper">
+							<select id="group" formControlName="group">
+								<option value="">{{ lang.t().registerGroupPlaceholder }}</option>
+								<option value="Science">{{ lang.t().registerGroupScience }}</option>
+								<option value="Commerce">{{ lang.t().registerGroupCommerce }}</option>
+								<option value="Arts">{{ lang.t().registerGroupArts }}</option>
+								<option value="Others">{{ lang.t().registerGroupOthers }}</option>
+							</select>
+						</div>
+					</div>
+				}
+
 				<div class="field-grid animate-field" style="--delay: 4">
 					<div class="field">
 						<label for="password">{{ lang.t().loginPassword }}</label>

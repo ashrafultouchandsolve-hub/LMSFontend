@@ -60,6 +60,11 @@ export class NotificationBell implements OnInit {
     if (this.isOpen()) this.load();
   }
 
+  viewAll() {
+    this.isOpen.set(false);
+    this.router.navigate(['/notifications']);
+  }
+
   markAllRead() {
     this.svc.markAllRead().subscribe({
       next: () => {

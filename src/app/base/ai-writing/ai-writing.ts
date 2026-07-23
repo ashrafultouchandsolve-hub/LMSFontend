@@ -141,6 +141,14 @@ export class AiWriting implements OnInit {
     }
   }
 
+  /** Clear the graded result and reset the form so the student can attempt again. */
+  protected retake(): void {
+    this.result.set(null);
+    this.typedText.set('');
+    this.pickedFile.set(null);
+    this.selectedTopicId.set(null);
+  }
+
   protected viewMyFile(): void {
     const r = this.result();
     if (!r?.hasFile) return;

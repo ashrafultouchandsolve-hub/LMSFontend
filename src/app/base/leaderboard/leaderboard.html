@@ -11,11 +11,28 @@
       @if (mode() === 'recommend') {
         <h1 class="hero-title">{{ lang.t().lbRecommendTitle }}</h1>
         <p class="hero-sub">{{ lang.t().lbRecommendSub }}</p>
+      } @else if (scope() === 'global') {
+        <h1 class="hero-title">{{ lang.t().lbGlobalTitle }}</h1>
+        <p class="hero-sub">{{ lang.t().lbGlobalSub }}</p>
       } @else {
         <h1 class="hero-title">{{ lang.t().lbRankingTitle }}</h1>
         <p class="hero-sub">{{ lang.t().lbRankingSub }}</p>
       }
     </div>
+
+    <!-- ── Scope toggle: whole platform vs my enrolled courses ── -->
+    @if (mode() !== 'loading' && mode() !== 'error') {
+      <div class="scope-toggle" role="group" [attr.aria-label]="lang.t().lbScopeLabel">
+        <button type="button" class="scope-btn" [class.active]="scope() === 'global'" (click)="setScope('global')">
+          🌍 {{ lang.t().lbScopeGlobal }}
+        </button>
+        @if (canPickCourse()) {
+          <button type="button" class="scope-btn" [class.active]="scope() === 'course'" (click)="setScope('course')">
+            📚 {{ lang.t().lbScopeCourse }}
+          </button>
+        }
+      </div>
+    }
 
     @if (mode() === 'loading') {
       <div class="hero-loading">
@@ -26,18 +43,20 @@
       <div class="hero-error">⚠️ {{ error() }}</div>
     } @else if (mode() === 'ranking') {
 
-      <!-- ── Course dropdown selector ── -->
-      <div class="course-picker">
-        <span class="course-picker-label">📚 {{ lang.t().lbCourseLabel }}</span>
-        <div class="course-select-wrap">
-          <select class="course-select" (change)="onCourseChange($any($event.target).value)">
-            @for (c of enrolledCourses(); track c.id) {
-              <option [value]="c.id" [selected]="c.id === selectedCourseId()">{{ c.title }}</option>
-            }
-          </select>
-          <span class="course-select-caret">▾</span>
+      <!-- ── Course dropdown selector (course scope only) ── -->
+      @if (scope() === 'course') {
+        <div class="course-picker">
+          <span class="course-picker-label">📚 {{ lang.t().lbCourseLabel }}</span>
+          <div class="course-select-wrap">
+            <select class="course-select" (change)="onCourseChange($any($event.target).value)">
+              @for (c of enrolledCourses(); track c.id) {
+                <option [value]="c.id" [selected]="c.id === selectedCourseId()">{{ c.title }}</option>
+              }
+            </select>
+            <span class="course-select-caret">▾</span>
+          </div>
         </div>
-      </div>
+      }
 
       @if (isBoardLoading()) {
         <div class="hero-loading">

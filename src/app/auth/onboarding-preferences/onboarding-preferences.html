@@ -363,7 +363,7 @@
         <p>{{ lang.t().obInterestsDesc }}</p>
 
         <div class="option-grid">
-          @for (option of interestOptions; track option) {
+          @for (option of interestOptions(); track option) {
             <button
               type="button"
               class="option-card"

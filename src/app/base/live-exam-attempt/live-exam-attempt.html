@@ -123,6 +123,19 @@
                 </div>
                 <p class="lea-q-text">{{ q.text }}@if (q.isRequired) {<span class="lea-star"> *</span>}</p>
 
+                <!-- teacher-attached prompt file (image inline / PDF link) -->
+                @if (q.fileUrl) {
+                  <div class="lea-q-attach">
+                    @if (isImageAttachment(q.fileUrl)) {
+                      <a [href]="attachmentUrl(q.fileUrl)" target="_blank" rel="noopener">
+                        <img class="lea-q-attach-img" [src]="attachmentUrl(q.fileUrl)" alt="Question attachment" />
+                      </a>
+                    } @else {
+                      <a class="lea-q-attach-doc" [href]="attachmentUrl(q.fileUrl)" target="_blank" rel="noopener">📄 View attached file</a>
+                    }
+                  </div>
+                }
+
                 @switch (q.type) {
 
                   @case (QType.ShortAnswer) {

@@ -27,6 +27,10 @@ interface QuestionForm {
   isRequired: boolean;
   points: number;
   options: OptionForm[];
+  /** Optional teacher-attached prompt file URL (already uploaded), + transient UI flags. */
+  fileUrl?: string | null;
+  fileName?: string | null;
+  uploadingFile?: boolean;
 }
 
 /**
@@ -152,6 +156,8 @@ export class LiveExamEditor implements OnInit {
             text: q.text ?? '',
             isRequired: !!q.isRequired,
             points: Number(q.points) || 0,
+            fileUrl: q.fileUrl ?? null,
+            fileName: q.fileUrl ? this.fileNameFromUrl(q.fileUrl) : null,
             options: [...(q.options ?? [])]
               .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
               .map((o) => ({ text: o.text ?? '', isCorrect: !!o.isCorrect })),
@@ -189,6 +195,8 @@ export class LiveExamEditor implements OnInit {
         text: '',
         isRequired: false,
         points: 1,
+        fileUrl: null,
+        fileName: null,
         options: [
           { text: '', isCorrect: false },
           { text: '', isCorrect: false },
@@ -217,6 +225,57 @@ export class LiveExamEditor implements OnInit {
     this.questions.update((list) =>
       list.map((q, i) => (i === index ? { ...q, ...patch } : q)),
     );
+  }
+
+  private fileNameFromUrl(url: string): string {
+    const raw = (url.split('/').pop() ?? 'attachment').split('?')[0];
+    return raw;
+  }
+
+  /** Attach a prompt file to a question: upload immediately, stash the returned URL. */
+  protected async onQuestionFileChange(index: number, event: Event): Promise<void> {
+    if (this.isLocked()) return;
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const ext = (file.name.split('.').pop() ?? '').toLowerCase();
+    if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext)) {
+      this.toastr.error('Only PDF, JPG or PNG files can be attached to a question.');
+      input.value = '';
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      this.toastr.error('That file is larger than 50 MB.');
+      input.value = '';
+      return;
+    }
+    this.patchQuestion(index, { uploadingFile: true });
+    try {
+      const res: any = await firstValueFrom(this.svc.uploadQuestionFile(file));
+      const url = res?.data?.fileUrl ?? res?.Data?.FileUrl ?? res?.data?.FileUrl ?? res?.Data?.fileUrl ?? null;
+      if (!url) throw new Error('no url');
+      this.patchQuestion(index, { fileUrl: url, fileName: file.name, uploadingFile: false });
+    } catch (err: any) {
+      this.patchQuestion(index, { uploadingFile: false });
+      this.toastr.error(err?.error?.message ?? 'Could not upload the file. Please try again.');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  protected removeQuestionFile(index: number): void {
+    if (this.isLocked()) return;
+    this.patchQuestion(index, { fileUrl: null, fileName: null });
+  }
+
+  /** Absolute URL for previewing an attached file in the editor. */
+  protected questionFileUrl(url: string | null | undefined): string {
+    return url ? this.svc.fileDownloadUrl(url) : '';
+  }
+
+  protected isImageFile(name: string | null | undefined): boolean {
+    const ext = (name ?? '').split('.').pop()?.toLowerCase() ?? '';
+    return ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
   }
 
   /** Type change: keep options in memory (hidden for non-choice); seed 2 blanks for choice types. */
@@ -365,6 +424,7 @@ export class LiveExamEditor implements OnInit {
         isRequired: q.isRequired,
         points: Math.max(0, Number(q.points) || 0),
         order: i,
+        fileUrl: q.fileUrl || null,
         options: this.isChoice(q.type)
           ? q.options
               .filter((o) => o.text.trim())
@@ -436,6 +496,10 @@ export class LiveExamEditor implements OnInit {
       return;
     }
     const role = this.authService.getCurrentUser()?.role;
-    this.router.navigateByUrl(role === 2 ? '/course-manager' : '/teacher');
+    // ?course/?section reopen the course's Live Classes panel instead of the bare course list.
+    const courseId = this.courseId();
+    void this.router.navigate([role === 2 ? '/course-manager' : '/teacher'], {
+      queryParams: courseId ? { course: courseId, section: 'live' } : {},
+    });
   }
 }

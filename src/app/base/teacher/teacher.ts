@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, si
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse, HttpEvent } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../Service/auth.service';
 import {
@@ -292,6 +292,39 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   /** Switch which in-course section is shown. */
   protected selectCourseSection(key: CourseSection): void {
     this.courseSection.set(key);
+    this.syncCourseUrl();
+  }
+
+  /**
+   * Mirror "which course + section is open" into the URL (`?course=&section=`).
+   *
+   * Without this the open course lived only in component state, so anything that
+   * navigated away and came back (Add exam → save → Back, live-exam responses,
+   * a browser refresh) re-created this component in its default state and dumped
+   * the teacher back on the course list. `replaceUrl` keeps section switching out
+   * of the history stack — Back should leave the course, not walk the tabs.
+   */
+  private syncCourseUrl(): void {
+    if (this.embedded()) return;
+    const courseId = this.selectedCourseId();
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        course: courseId ?? null,
+        section: courseId ? this.courseSection() : null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Re-open the course + section encoded in the URL once the course list is loaded. */
+  private async restoreCourseFromUrl(): Promise<void> {
+    if (this.embedded()) return;
+    const params = this.route.snapshot.queryParamMap;
+    const courseId = params.get('course');
+    if (!courseId || !this.courses().some((c) => c.id === courseId)) return;
+    await this.openLessons(courseId, (params.get('section') as CourseSection | null) ?? undefined);
   }
 
   protected readonly sidebarItems = computed<{ key: 'dashboard' | 'courses' | 'users' | 'enrollments' | 'teacher-profile' | 'live'; label: string; icon: string }[]>(() => {
@@ -314,9 +347,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
       const cat = this.route.snapshot.queryParamMap.get('category') ?? '';
       this.categoryFilter.set(cat);
       void this.loadCategoriesAndTeachers();
-      void this.loadAllCoursesAdmin();
+      void this.loadAllCoursesAdmin().then(() => this.restoreCourseFromUrl());
     } else {
-      void this.loadTeacherCourses();
+      void this.loadTeacherCourses().then(() => this.restoreCourseFromUrl());
     }
   }
 
@@ -672,10 +705,14 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     }
   }
 
-  protected async openLessons(courseId: string): Promise<void> {
+  protected async openLessons(courseId: string, section?: CourseSection): Promise<void> {
     this.selectedCourseId.set(courseId);
-    // Land on the first section this role can see (admin → Lessons, live-teacher → Live).
-    this.courseSection.set(this.isAdminMode() ? 'lessons' : 'live');
+    // Land on the requested section (URL restore) or the first one this role can
+    // see (admin → Lessons, live-teacher → Live).
+    const allowed = this.courseSectionItems().some((s) => s.key === section);
+    this.courseSection.set(allowed ? section! : this.isAdminMode() ? 'lessons' : 'live');
+    this.resetLiveListView();
+    this.syncCourseUrl();
     await this.loadLessons(courseId);
     await this.loadLiveClasses(courseId);
     await this.loadRecordings(courseId);
@@ -1089,7 +1126,9 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
   protected closeLessonsView(): void {
     this.selectedCourseId.set(null);
     this.liveClasses.set([]);
+    this.resetLiveListView();
     this.closeLiveModal();
+    this.syncCourseUrl();
   }
 
   protected openNewLessonModal(): void {
@@ -1238,6 +1277,8 @@ protected readonly issuedCertificates = signal<string[]>([]); // userId list
     try {
       await firstValueFrom(this.liveClassService.create(payload));
 
+      // Clear any search/filter so the class that was just created is actually on screen.
+      this.resetLiveListView();
       await this.loadLiveClasses(selected.id);
       this.setNotice('Live class scheduled successfully.', 'success');
       this.closeLiveModal();
@@ -1602,15 +1643,165 @@ private async loadTeacherCourses(): Promise<void> {
     return this.liveExamSummaries().get(liveClassId) ?? null;
   }
 
-  /** Every exam of the selected course — survives the live class ending (ended classes drop out of the class list). */
-  protected readonly liveExamList = computed(() =>
-    Array.from(this.liveExamSummaries().values())
-      .sort((a, b) => (a.status === 1 ? 0 : 1) - (b.status === 1 ? 0 : 1)));
+  /**
+   * Orphaned exams only — ones whose live class is no longer in the list (deleted class).
+   * Everything else already has its own row above, so re-listing them just made the page longer.
+   */
+  protected readonly liveExamList = computed(() => {
+    const known = new Set(this.liveClasses().map((lc) => lc.id));
+    return Array.from(this.liveExamSummaries().values())
+      .filter((ex) => !known.has(ex.liveClassId))
+      .sort((a, b) => (a.status === 1 ? 0 : 1) - (b.status === 1 ? 0 : 1));
+  });
 
   protected liveExamStatusLabel(s: LiveExamSummary): string {
     return s.status === 1 ? `🟢 Exam live · ${s.submittedCount} submitted`
          : s.status === 2 ? `⚪ Exam closed · ${s.gradedCount}/${s.submittedCount} graded`
          : '📝 Exam draft';
+  }
+
+  // ── Publish / close an exam straight from the live-class list ─────
+  // A teacher who just finished a class and attached an exam shouldn't have to
+  // open the builder again only to press Publish.
+  protected readonly busyExamId = signal<string | null>(null);
+
+  protected async publishLiveExam(ex: LiveExamSummary): Promise<void> {
+    if (ex.questionCount === 0) {
+      this.setNotice('Add at least one question before publishing this exam.', 'error');
+      return;
+    }
+    const ok = await this.confirmDialog.confirm({
+      title: 'Publish this exam?',
+      message: `“${ex.title || 'Untitled exam'}” becomes visible to every enrolled student and they get notified. Questions can no longer be edited afterwards.`,
+      icon: '🚀',
+      confirmText: 'Publish',
+    });
+    if (!ok) return;
+    await this.runExamAction(ex.examId, () => this.liveExamService.publish(ex.examId), 'Exam published — students have been notified.', 'Exam publish করা যায়নি।');
+  }
+
+  protected async closeLiveExam(ex: LiveExamSummary): Promise<void> {
+    const ok = await this.confirmDialog.confirm({
+      title: 'Close this exam?',
+      message: `No new submissions will be accepted for “${ex.title || 'Untitled exam'}”. ${ex.submittedCount} student(s) have submitted so far.`,
+      icon: '🔒',
+      tone: 'danger',
+      confirmText: 'Close exam',
+    });
+    if (!ok) return;
+    await this.runExamAction(ex.examId, () => this.liveExamService.close(ex.examId), 'Exam closed.', 'Exam close করা যায়নি।');
+  }
+
+  private async runExamAction(examId: string, call: () => Observable<any>, success: string, fallbackError: string): Promise<void> {
+    const courseId = this.selectedCourseId();
+    this.busyExamId.set(examId);
+    try {
+      await firstValueFrom(call());
+      if (courseId) await this.loadLiveExamSummaries(courseId);
+      this.setNotice(success, 'success');
+    } catch (error) {
+      this.setNotice(this.extractApiErrorMessage(error, fallbackError), 'error');
+    } finally {
+      this.busyExamId.set(null);
+    }
+  }
+
+  // ── Live-class list: ordering, filtering, paging ──────────────────
+  // 30–40 classes per course is normal, so the raw list was unusable. Rows are
+  // ranked (live → upcoming → ended) then searched, filtered and paged.
+  protected readonly liveSearch = signal('');
+  protected readonly liveFilter = signal<'all' | 'live' | 'upcoming' | 'ended'>('all');
+  private static readonly LIVE_PAGE = 8;
+  protected readonly liveVisibleCount = signal(Teacher.LIVE_PAGE);
+
+  /** 0 = happening now, 1 = upcoming, 2 = finished. */
+  private liveRank(lc: LiveClass): 0 | 1 | 2 {
+    return lc.isActive ? 0 : lc.isEnded ? 2 : 1;
+  }
+
+  private liveTime(lc: LiveClass): number {
+    const t = new Date(lc.scheduledAt).getTime();
+    return Number.isNaN(t) ? 0 : t;
+  }
+
+  /**
+   * Newest-first ordering: live classes pin to the top, then upcoming ones
+   * (soonest first, so a class you just scheduled shows immediately), then
+   * finished ones with the most recent first. The API's ascending order used to
+   * bury every new class at the bottom of the page.
+   */
+  protected readonly sortedLiveClasses = computed(() =>
+    [...this.liveClasses()].sort((a, b) => {
+      const rank = this.liveRank(a) - this.liveRank(b);
+      if (rank !== 0) return rank;
+      // Upcoming reads forwards (next class first); live/ended read backwards (latest first).
+      return this.liveRank(a) === 1 ? this.liveTime(a) - this.liveTime(b) : this.liveTime(b) - this.liveTime(a);
+    }),
+  );
+
+  protected readonly liveCounts = computed(() => {
+    const list = this.liveClasses();
+    return {
+      all: list.length,
+      live: list.filter((lc) => lc.isActive).length,
+      upcoming: list.filter((lc) => !lc.isActive && !lc.isEnded).length,
+      ended: list.filter((lc) => lc.isEnded).length,
+    };
+  });
+
+  protected readonly liveFilterTabs = computed(() => {
+    const c = this.liveCounts();
+    return [
+      { key: 'all' as const, label: 'All', count: c.all },
+      { key: 'live' as const, label: '🔴 Live now', count: c.live },
+      { key: 'upcoming' as const, label: 'Upcoming', count: c.upcoming },
+      { key: 'ended' as const, label: 'Finished', count: c.ended },
+    ];
+  });
+
+  protected readonly filteredLiveClasses = computed(() => {
+    const keyword = this.liveSearch().trim().toLowerCase();
+    const filter = this.liveFilter();
+    return this.sortedLiveClasses().filter((lc) => {
+      const matchesFilter =
+        filter === 'all' ||
+        (filter === 'live' && lc.isActive) ||
+        (filter === 'upcoming' && !lc.isActive && !lc.isEnded) ||
+        (filter === 'ended' && lc.isEnded);
+      if (!matchesFilter) return false;
+      if (!keyword) return true;
+      return `${lc.title} ${lc.description}`.toLowerCase().includes(keyword);
+    });
+  });
+
+  /** Only the first page renders — keeps a 40-class course to one screenful. */
+  protected readonly visibleLiveClasses = computed(() =>
+    this.filteredLiveClasses().slice(0, this.liveVisibleCount()),
+  );
+
+  protected readonly hiddenLiveCount = computed(() =>
+    Math.max(0, this.filteredLiveClasses().length - this.liveVisibleCount()),
+  );
+
+  protected showMoreLiveClasses(): void {
+    this.liveVisibleCount.update((n) => n + Teacher.LIVE_PAGE);
+  }
+
+  protected setLiveFilter(key: 'all' | 'live' | 'upcoming' | 'ended'): void {
+    this.liveFilter.set(key);
+    this.liveVisibleCount.set(Teacher.LIVE_PAGE);
+  }
+
+  protected setLiveSearch(value: string): void {
+    this.liveSearch.set(value);
+    this.liveVisibleCount.set(Teacher.LIVE_PAGE);
+  }
+
+  /** Back to an unfiltered first page (course switch, or after scheduling a class). */
+  private resetLiveListView(): void {
+    this.liveSearch.set('');
+    this.liveFilter.set('all');
+    this.liveVisibleCount.set(Teacher.LIVE_PAGE);
   }
 
   private async loadLiveExamSummaries(courseId: string): Promise<void> {
@@ -1628,7 +1819,8 @@ private async loadTeacherCourses(): Promise<void> {
     void this.loadLiveExamSummaries(courseId);
 
     try {
-      const response = await firstValueFrom(this.liveClassService.getByCourse(courseId));
+      // includeEnded=true → ended classes stay in the teacher's list (with recording status).
+      const response = await firstValueFrom(this.liveClassService.getByCourse(courseId, true));
       const anyRes = response as any;
       const liveClassArray = Array.isArray(anyRes?.data)
         ? anyRes.data
@@ -1644,6 +1836,8 @@ private async loadTeacherCourses(): Promise<void> {
         isActive: Boolean(item.isActive ?? item.IsActive),
         isEnded: Boolean(item.isEnded ?? item.IsEnded),
         roomUrl: item.roomUrl ?? item.RoomUrl ?? '',
+        recordingPath: item.recordingPath ?? item.RecordingPath ?? '',
+        recordingStatus: item.recordingStatus ?? item.RecordingStatus ?? '',
       })));
     } catch {
       this.liveClasses.set([]);

@@ -66,10 +66,15 @@ export const routes: Routes = [
     { path: 'assignments', component: Assignment, canActivate: [authGuard] },
     { path: 'myClasses', component: MyClasses, canActivate: [authGuard] },
     { path: 'certificates', component: Certificates, canActivate: [authGuard] },
+    // Wishlist lives as a profile tab; the standalone path renders Profile with the
+    // wishlist tab pre-selected via route data (see Profile's tab bootstrap).
+    { path: 'wishlist', component: Profile, canActivate: [authGuard], data: { defaultTab: 'wishlist' } },
     { path: 'quiz-editor/:lessonId', component: QuizEditorComponent, canActivate: [authGuard, adminGuard] },
     { path: 'quiz/:lessonId', component: QuizAttemptComponent, canActivate: [authGuard] },
     { path: 'ai-writing/:taskId', loadComponent: () => import('./base/ai-writing/ai-writing').then(m => m.AiWriting), canActivate: [authGuard] },
     { path: 'history', component: VideoHistoryComponent, canActivate: [authGuard] },
+    { path: 'notifications', loadComponent: () => import('./base/notifications/notifications').then(m => m.Notifications), canActivate: [authGuard] },
+    { path: 'announcements', loadComponent: () => import('./base/announcements/announcements').then(m => m.Announcements) },
     { path: 'enrolled-students/:courseId', component: EnrolledStudents, canActivate: [authGuard, adminGuard] },
     {
   path: 'live-class/:id',

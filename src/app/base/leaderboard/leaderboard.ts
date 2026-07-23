@@ -39,6 +39,8 @@ type ProfileUser = { id?: string | number; fullName?: string; email?: string; ro
 
 type Mode = 'loading' | 'ranking' | 'recommend' | 'error';
 type SortKey = 'score' | 'correct';
+/** Whole-platform board vs a single enrolled course. */
+type Scope = 'global' | 'course';
 
 @Component({
   selector: 'app-leaderboard',
@@ -56,6 +58,9 @@ export class Leaderboard implements OnInit {
   protected readonly mode = signal<Mode>('loading');
   protected readonly error = signal('');
   protected readonly currentUserId = signal('');
+
+  // ── scope: whole platform vs a single enrolled course ──
+  protected readonly scope = signal<Scope>('global');
 
   // ── enrolled-course ranking state ──
   protected readonly enrolledCourses = signal<EnrolledCourse[]>([]);
@@ -93,8 +98,13 @@ export class Leaderboard implements OnInit {
   });
 
   protected readonly selectedCourseTitle = computed(() =>
-    this.enrolledCourses().find(c => c.id === this.selectedCourseId())?.title ?? ''
+    this.scope() === 'global'
+      ? this.lang.t().lbScopeGlobal
+      : this.enrolledCourses().find(c => c.id === this.selectedCourseId())?.title ?? ''
   );
+
+  /** The course toggle is only offered once we know the student has enrolled courses. */
+  protected readonly canPickCourse = computed(() => this.enrolledCourses().length > 0);
 
   protected readonly myRank = computed(() => {
     const idx = this.rankedEntries().findIndex(e => e.userId === this.currentUserId());
@@ -112,30 +122,76 @@ export class Leaderboard implements OnInit {
     void this.bootstrap();
   }
 
-  // enrollment দেখে ঠিক করি: ranking mode না recommend mode
+  // Default view is the whole-platform board; enrollments load in the background so
+  // the "My Courses" toggle can appear for students who have any.
   private async bootstrap(): Promise<void> {
     this.mode.set('loading');
     this.error.set('');
+
+    // Populate the enrolled-course list without blocking the global board.
+    void this.loadEnrolledCourses();
+
+    try {
+      this.scope.set('global');
+      this.mode.set('ranking');
+      await this.loadGlobalBoard();
+    } catch (err) {
+      console.error('Leaderboard bootstrap error:', err);
+      this.error.set(this.lang.t().lbLoadFailed);
+      this.mode.set('error');
+    }
+  }
+
+  private async loadEnrolledCourses(): Promise<void> {
     try {
       const res = await firstValueFrom(this.learningApi.getMyEnrollments());
       const raw = (res as any)?.Data ?? (res as any)?.data ?? [];
       const courses: EnrolledCourse[] = (Array.isArray(raw) ? raw : [])
         .map((c: any) => ({ id: String(c.id ?? c.Id ?? ''), title: c.title ?? c.Title ?? 'Untitled course' }))
         .filter((c: EnrolledCourse) => c.id);
+      this.enrolledCourses.set(courses);
+      if (courses.length > 0 && !this.selectedCourseId()) this.selectedCourseId.set(courses[0].id);
+    } catch {
+      this.enrolledCourses.set([]);
+    }
+  }
 
-      if (courses.length > 0) {
-        this.enrolledCourses.set(courses);
-        this.selectedCourseId.set(courses[0].id);
-        this.mode.set('ranking');
-        await this.loadBoard(courses[0].id);
-      } else {
-        this.mode.set('recommend');
-        await this.loadRecommendations();
-      }
+  // Toggle between the global board and the per-course board.
+  protected async setScope(scope: Scope): Promise<void> {
+    if (this.scope() === scope) return;
+    this.searchTerm.set('');
+    this.sortKey.set('score');
+    this.scope.set(scope);
+
+    if (scope === 'global') {
+      this.mode.set('ranking');
+      await this.loadGlobalBoard();
+      return;
+    }
+
+    // course scope
+    if (this.enrolledCourses().length === 0) {
+      this.mode.set('recommend');
+      await this.loadRecommendations();
+      return;
+    }
+    const courseId = this.selectedCourseId() || this.enrolledCourses()[0].id;
+    this.selectedCourseId.set(courseId);
+    this.mode.set('ranking');
+    await this.loadBoard(courseId);
+  }
+
+  private async loadGlobalBoard(): Promise<void> {
+    this.isBoardLoading.set(true);
+    try {
+      const res = await firstValueFrom(this.learningApi.getLeaderboard());
+      const data = (res as any)?.Data ?? (res as any)?.data ?? res ?? [];
+      this.entries.set(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Leaderboard bootstrap error:', err);
-      this.error.set('Leaderboard লোড করা যায়নি।');
-      this.mode.set('error');
+      console.error('Global leaderboard load error:', err);
+      this.entries.set([]);
+    } finally {
+      this.isBoardLoading.set(false);
     }
   }
 

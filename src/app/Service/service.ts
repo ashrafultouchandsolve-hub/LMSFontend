@@ -14,6 +14,7 @@ export type RegisterRequest = {
   Password: string;
   Role: number;
   MobileNumber?: string;
+  Group?: string;
 };
 
 export type LoginResponse = {

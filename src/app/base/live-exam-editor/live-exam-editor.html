@@ -112,6 +112,30 @@
             (ngModelChange)="patchQuestion(i, { text: $event })"
             [disabled]="isLocked()" />
 
+          <!-- optional prompt file attached to the question (image/PDF the student reads) -->
+          <div class="lee-qfile">
+            @if (q.fileUrl) {
+              <div class="lee-qfile-attached">
+                @if (isImageFile(q.fileName)) {
+                  <a [href]="questionFileUrl(q.fileUrl)" target="_blank" rel="noopener">
+                    <img class="lee-qfile-thumb" [src]="questionFileUrl(q.fileUrl)" [alt]="q.fileName || 'attachment'" />
+                  </a>
+                } @else {
+                  <a class="lee-qfile-doc" [href]="questionFileUrl(q.fileUrl)" target="_blank" rel="noopener">📄 {{ q.fileName || 'View attachment' }}</a>
+                }
+                @if (!isLocked()) {
+                  <button type="button" class="lee-qfile-remove" (click)="removeQuestionFile(i)">✕ Remove file</button>
+                }
+              </div>
+            } @else if (!isLocked()) {
+              <label class="lee-qfile-add">
+                <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png"
+                       (change)="onQuestionFileChange(i, $event)" [disabled]="q.uploadingFile" />
+                <span>{{ q.uploadingFile ? '⏳ Uploading…' : '📎 Attach a file to this question (optional)' }}</span>
+              </label>
+            }
+          </div>
+
           <!-- answer area preview / option builder -->
           @if (q.type === QT.ShortAnswer) {
             <p class="lee-answer-preview">Short answer text</p>

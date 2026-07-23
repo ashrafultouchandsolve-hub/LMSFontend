@@ -24,6 +24,7 @@ export interface LiveExamQuestionView {
   isRequired: boolean;
   points: number;
   order: number;
+  fileUrl?: string | null;   // optional teacher-attached prompt file
   options: LiveExamOptionView[];
 }
 
@@ -51,6 +52,7 @@ export interface SaveLiveExamDto {
     isRequired: boolean;
     points: number;
     order: number;
+    fileUrl?: string | null;
     options: { text: string; isCorrect: boolean; order: number }[];
   }[];
 }
@@ -139,6 +141,7 @@ export interface LiveExamTakeQuestion {
   isRequired: boolean;
   points: number;
   order: number;
+  fileUrl?: string | null;   // optional teacher-attached prompt file (image/PDF)
   options: { id: string; text: string; order: number }[];
 }
 
@@ -189,6 +192,14 @@ export class LiveExamService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.baseUrl + '/LiveExam';
 
+  /** Absolute URL for a public /uploads file (e.g. a question's attached prompt file). */
+  fileDownloadUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const base = environment.baseUrl.replace(/\/api$/i, '');
+    return path.startsWith('/uploads/') ? `${base}${path}` : `${base}/uploads/${path}`;
+  }
+
   // ── staff: builder ──────────────────────────────────────────────
   getManage(liveClassId: string): Observable<{ data: LiveExamManageView | null; liveClassTitle: string; courseId: string }> {
     return this.http.get<any>(`${this.baseUrl}/live-class/${liveClassId}/manage`);
@@ -196,6 +207,13 @@ export class LiveExamService {
 
   save(liveClassId: string, dto: SaveLiveExamDto): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/save/${liveClassId}`, dto);
+  }
+
+  /** Upload a prompt file to attach to a question; returns { fileUrl } for the save payload. */
+  uploadQuestionFile(file: File): Observable<any> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/upload-question-file`, fd);
   }
 
   publish(examId: string): Observable<any> {

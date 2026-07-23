@@ -186,12 +186,21 @@
             </div>
           }
 
+          @if(isStudent()) {
+            <div class="nav-dropdown-group">
+              <a routerLink="/wishlist" class="nav-dropdown-group-label">❤️ {{ lang.t().navWishlist }}</a>
+            </div>
+          }
+
           @if(isLoggedIn()) {
             <div class="nav-dropdown-divider"></div>
             <div class="nav-dropdown-group">
               <a routerLink="/history" class="nav-dropdown-group-label">📹 Video History</a>
             </div>
           }
+          <div class="nav-dropdown-group">
+            <a routerLink="/announcements" class="nav-dropdown-group-label">📢 {{ lang.t().annTitle }}</a>
+          </div>
         </div>
       </div>
     </div>
@@ -225,7 +234,9 @@
     }
     @if(isStudent()) {
       <a routerLink="/leaderboard" class="mobile-nav-item" (click)="toggleMobileMenu()">🏆 Leaderboard</a>
+      <a routerLink="/wishlist" class="mobile-nav-item" (click)="toggleMobileMenu()">❤️ {{ lang.t().navWishlist }}</a>
     }
+    <a routerLink="/announcements" class="mobile-nav-item" (click)="toggleMobileMenu()">📢 {{ lang.t().annTitle }}</a>
     @if(isLoggedIn()) {
       <a routerLink="/history" class="mobile-nav-item" (click)="toggleMobileMenu()">📹 Video History</a>
     }

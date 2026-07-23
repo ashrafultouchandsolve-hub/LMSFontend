@@ -4,7 +4,7 @@ export type Language = 'en' | 'bn';
 
 export interface Translations {
   // Navbar (navLive = public free live classes link)
-  navTracks: string; navCourses: string; navVision: string; navLogin: string; navLive: string;
+  navTracks: string; navCourses: string; navVision: string; navLogin: string; navLive: string; navWishlist: string;
   navLiveFree: string; navLiveScheduled: string; navLiveNone: string; navLiveViewAll: string;
   navGetStarted: string; navLogout: string; navProfile: string; navTeacher: string; navHi: string;
   // Hero
@@ -28,6 +28,19 @@ export interface Translations {
   coursePrice: string; courseSeeMore: string; courseEnrolled: string; courseEnrollNow: string;
   courseCompleted: string; tcMarkCompleted: string; tcMarkOngoing: string;
   courseStartLearning: string; courseDurationUnit: string; courseManage: string;
+  // Courses catalogue — hero, filter rail, sort, pager
+  coursesEyebrow: string; coursesHeading: string; coursesSubheading: string;
+  coursesLoadFailed: string; coursesLoadFailedDesc: string;
+  filtersTitle: string; filterClearAll: string; filterClose: string;
+  filterCategory: string; filterLevel: string; filterPrice: string; filterRating: string;
+  filterFree: string; filterPaid: string; filterAndUp: string;
+  resultsOf: string; resultsCourses: string;
+  sortBy: string; sortPopular: string; sortNewest: string; sortRating: string;
+  sortPriceAsc: string; sortPriceDesc: string; sortTitle: string;
+  viewToggleLabel: string; viewGrid: string; viewList: string;
+  paginationLabel: string; paginationPrev: string; paginationNext: string;
+  ratingsLabel: string; courseStatsLabel: string;
+  wishlistAdd: string; wishlistRemove: string;
   // Features
   feature1Title: string; feature1Desc: string; feature2Title: string; feature2Desc: string; feature3Title: string; feature3Desc: string;
   // Workflow / What you get
@@ -60,6 +73,7 @@ export interface Translations {
   cdIncludes: string; cdIncLive: string; cdFree: string; cdIncVideos: string; cdIncPractice: string;
   cdIncStudents: string; cdIncCert: string; cdPriceLabel: string; cdContinue: string; cdRatings: string;
   cdRateThis: string; cdClose: string; cdInWishlist: string; cdAddWishlist: string; cdUpdating: string; cdAdding: string;
+  cdCurriculum: string; cdLessonsWord: string; cdFreePreview: string; cdCurriculumEmpty: string; cdMinShort: string; cdReviewsTitle: string;
   // Enrolled Course
   ecBack: string; ecNoLesson: string; ecLessons: string; ecInstructor: string;
   // Profile
@@ -95,6 +109,7 @@ export interface Translations {
   registerF2Title: string; registerF2Desc: string; registerF3Title: string; registerF3Desc: string;
   registerFullName: string; registerFullNamePlaceholder: string; registerFullNameError: string;
   registerMobile: string; registerMobilePlaceholder: string; registerMobileError: string;
+  registerGroup: string; registerGroupPlaceholder: string; registerGroupScience: string; registerGroupCommerce: string; registerGroupArts: string; registerGroupOthers: string;
   registerParentEmail: string; registerParentEmailPlaceholder: string; registerParentEmailError: string;
   registerRole: string; registerRolePlaceholder: string; registerStudent: string; registerTeacher: string; registerRoleError: string;
   registerPasswordPlaceholder: string; registerConfirmPassword: string; registerRepeatPassword: string; registerConfirmPasswordError: string;
@@ -110,6 +125,15 @@ export interface Translations {
   lbSort: string; lbSortScore: string; lbSortCorrect: string; lbNoResult: string; lbJumpToMe: string;
   lbIn: string; lbRecHeadPref: string; lbRecHeadPopular: string; lbRecHeadSub: string;
   lbRecEmpty: string; lbViewCourse: string; lbYou: string;
+  lbScopeLabel: string; lbScopeGlobal: string; lbScopeCourse: string; lbLoadFailed: string;
+  lbGlobalTitle: string; lbGlobalSub: string;
+  // Notifications page
+  notifEyebrow: string; notifTitle: string; notifSub: string; notifMarkAll: string;
+  notifAll: string; notifUnread: string; notifEmpty: string; notifNoUnread: string; notifEmptyDesc: string;
+  // Announcements page
+  annEyebrow: string; annTitle: string; annSub: string; annEmpty: string; annEmptyDesc: string; annExpires: string;
+  // Relative time
+  timeJustNow: string; timeMinutesAgo: string; timeHoursAgo: string; timeDaysAgo: string;
   // Shared / Live class vocabulary
   liveNow: string; liveUpcoming: string; liveEnded: string; liveMissed: string; liveJoinNow: string; liveJoin: string;
   commonLoading: string; commonBack: string;
@@ -193,6 +217,7 @@ export interface Translations {
   tcBackToCourses: string; tcLessonsFor: string; tcLessonsSub: string; tcLiveSchedule: string; tcAddLesson: string;
   tcLoadingLessons: string; tcPreview: string; tcOpenVideo: string; tcThumbnail: string; tcAddQuiz: string; tcNoLesson: string;
   tcScheduledLive: string; tcLivePanelSub: string; tcLoadingLive: string; tcStart: string; tcEnd: string; tcNoLiveScheduled: string;
+  tcEndInRoomHint: string; tcRecReady: string; tcRecNone: string;
   tcCreateLiveTitle: string; tcScheduledAt: string; tcLiveTitlePlaceholder: string; tcLiveDescPlaceholder: string; tcCreateLiveBtn: string;
   tcInstructorName: string; tcLevelLabel: string; tcPriceLabel: string; tcDurationLabel: string; tcThumbnailUrl: string;
   tcUploadThumb: string; tcPublishCourse: string; tcSaveCourse: string;
@@ -208,7 +233,7 @@ export interface Translations {
   tcUploadingVideo: string; tcLessonThumb: string; tcResourceUrl: string; tcFreePreview: string; tcSaveLesson: string;
   tcEnrolled: string; tcIssue: string; tcEditCourse: string; tcEditLesson: string;
   // Notification bell
-  nbTitle: string; nbMarkAll: string; nbEmpty: string;
+  nbTitle: string; nbMarkAll: string; nbEmpty: string; nbViewAll: string;
   // Payment
   payBackHome: string; paySecure: string; paySummaryNote: string; payPayable: string; payMethods: string;
   payCard: string; payInternetBanking: string; payOrderSummary: string; payCourse: string; payAmount: string;
@@ -265,6 +290,7 @@ export interface Translations {
   aiwGrammar: string; aiwSpelling: string; aiwStructure: string; aiwRelevance: string;
   aiwYourWriting: string; aiwTranscribed: string; aiwChecking: string; aiwCheckingSub: string;
   aiwOneAttempt: string; aiwPickTopic: string; aiwYourAnswer: string; aiwRemoveFile: string; aiwFileChosenNote: string;
+  aiwRetake: string; aiwRetakeNote: string;
   aiwTypePlaceholder: string; aiwWords: string; aiwOr: string; aiwUploadHere: string; aiwUploadHint: string; aiwSubmit: string;
   aiwFileTypes: string; aiwFileTooBig: string; aiwGradedToast: string; aiwAlreadyAttempted: string; aiwSubmitFailed: string;
   aiwStatusLive: string; aiwStatusDraft: string;
@@ -326,7 +352,7 @@ export interface Translations {
 }
 
 const EN: Translations = {
-  navTracks: 'Tracks', navCourses: 'Courses', navVision: 'Vision', navLogin: 'Login', navLive: 'Live',
+  navTracks: 'Tracks', navCourses: 'Courses', navVision: 'Vision', navLogin: 'Login', navLive: 'Live', navWishlist: 'Wishlist',
   navLiveFree: 'Free live', navLiveScheduled: 'Course live', navLiveNone: 'No live class right now', navLiveViewAll: 'View all live classes',
   navGetStarted: 'Get started', navLogout: 'Logout', navProfile: 'Profile', navTeacher: 'Instructor', navHi: 'Hi,',
   heroEyebrow: 'Trusted learning ecosystem', heroH1Part1: 'Learn in-demand', heroH1Accent: 'skills', heroH1Part2: 'with structured paths.',
@@ -349,6 +375,19 @@ const EN: Translations = {
   courseCategory: 'Category:', courseInstructor: 'Instructor:', courseLessons: 'Lessons:',
   courseDuration: 'Duration:', coursePrice: 'Price:', courseSeeMore: 'See more',
   courseEnrolled: 'Enrolled', courseEnrollNow: 'Enroll Now', courseStartLearning: 'Start learning', courseDurationUnit: 'months', courseManage: 'Manage',
+  coursesEyebrow: 'Course catalogue', coursesHeading: 'Explore Courses',
+  coursesSubheading: 'Find the right course by category, level, price or rating.',
+  coursesLoadFailed: 'Could not load courses', coursesLoadFailedDesc: 'Something went wrong. Please check your connection and try again.',
+  filtersTitle: 'Filters', filterClearAll: 'Clear all', filterClose: 'Close filters',
+  filterCategory: 'Category', filterLevel: 'Level', filterPrice: 'Price', filterRating: 'Rating',
+  filterFree: 'Free', filterPaid: 'Paid', filterAndUp: '& up',
+  resultsOf: 'of', resultsCourses: 'courses',
+  sortBy: 'Sort by', sortPopular: 'Most popular', sortNewest: 'Newest', sortRating: 'Highest rated',
+  sortPriceAsc: 'Price: low to high', sortPriceDesc: 'Price: high to low', sortTitle: 'Title (A–Z)',
+  viewToggleLabel: 'View mode', viewGrid: 'Grid view', viewList: 'List view',
+  paginationLabel: 'Pagination', paginationPrev: 'Prev', paginationNext: 'Next',
+  ratingsLabel: 'ratings', courseStatsLabel: 'Course statistics',
+  wishlistAdd: '♡ Add to Wishlist', wishlistRemove: '✓ In Wishlist',
   courseCompleted: 'Completed', tcMarkCompleted: '✓ Mark Completed', tcMarkOngoing: '↺ Mark Ongoing',
   feature1Title: 'Outcome-based curriculum', feature1Desc: 'Follow role-focused modules designed around practical, job-ready outcomes.',
   feature2Title: 'Progress and performance analytics', feature2Desc: 'Track completion, assessment scores, and learning consistency in one dashboard.',
@@ -403,6 +442,7 @@ const EN: Translations = {
   cdIncludes: 'This course includes', cdIncLive: '3 live classes', cdFree: 'Free', cdIncVideos: 'Video lessons', cdIncPractice: 'Practice materials',
   cdIncStudents: 'Students enrolled', cdIncCert: 'Certificate of completion', cdPriceLabel: 'Course price', cdContinue: 'Continue Learning →', cdRatings: 'ratings',
   cdRateThis: '⭐ Rate this course', cdClose: 'Close', cdInWishlist: 'In Wishlist', cdAddWishlist: 'Add to Wishlist', cdUpdating: 'Updating…', cdAdding: 'Adding…',
+  cdCurriculum: 'Course content', cdLessonsWord: 'lessons', cdFreePreview: 'free preview', cdCurriculumEmpty: 'The lesson list will appear here once the instructor adds content.', cdMinShort: 'min', cdReviewsTitle: 'Ratings & reviews',
   ecBack: '← Back to Course', ecNoLesson: 'No lesson selected', ecLessons: 'Lessons', ecInstructor: 'Instructor',
   profileRole: 'Role', profileDashboard: 'Student dashboard', profileWeekly: 'Weekly performance', profileLive: 'Live',
   profileCompletion: 'completion', profileCompleted: 'Completed', profileRemaining: 'Remaining',
@@ -442,6 +482,7 @@ const EN: Translations = {
   registerF3Title: 'Black-blue identity', registerF3Desc: 'Consistent with the home and login pages, visually and functionally.',
   registerFullName: 'Full name', registerFullNamePlaceholder: 'Your name', registerFullNameError: 'Enter your full name.',
   registerMobile: 'Mobile number', registerMobilePlaceholder: 'e.g. 01XXXXXXXXX', registerMobileError: 'Enter a valid mobile number.',
+  registerGroup: 'Group (optional)', registerGroupPlaceholder: 'Select your group', registerGroupScience: 'Science', registerGroupCommerce: 'Commerce', registerGroupArts: 'Arts', registerGroupOthers: 'Others',
   registerParentEmail: "Parent / guardian email", registerParentEmailPlaceholder: 'parent@example.com', registerParentEmailError: 'Enter a valid parent email.',
   registerRole: 'Select role', registerRolePlaceholder: 'Select one', registerStudent: 'Student', registerTeacher: 'Teacher', registerRoleError: 'Please select Student or Teacher.',
   registerPasswordPlaceholder: 'Create a password', registerConfirmPassword: 'Confirm password', registerRepeatPassword: 'Repeat password', registerConfirmPasswordError: 'Confirm your password.',
@@ -462,6 +503,12 @@ const EN: Translations = {
   lbRecHeadPref: '✨ Recommended courses for you', lbRecHeadPopular: '🔥 Popular courses for you',
   lbRecHeadSub: 'Enroll in a course to see its leaderboard here.', lbRecEmpty: 'No courses published yet.',
   lbViewCourse: 'View course →', lbYou: 'You',
+  lbScopeLabel: 'Leaderboard scope', lbScopeGlobal: 'Global', lbScopeCourse: 'My Courses', lbLoadFailed: 'Leaderboard could not be loaded.',
+  lbGlobalTitle: 'Global Leaderboard', lbGlobalSub: 'Top learners across the whole platform',
+  notifEyebrow: 'Notifications', notifTitle: 'Your notifications', notifSub: 'Everything that happened across your courses.', notifMarkAll: 'Mark all as read',
+  notifAll: 'All', notifUnread: 'Unread', notifEmpty: 'No notifications yet', notifNoUnread: 'You are all caught up', notifEmptyDesc: 'New lessons, quiz results and reminders will show up here.',
+  annEyebrow: 'Announcements', annTitle: 'Announcements', annSub: 'Latest updates and notices from your instructors.', annEmpty: 'No announcements right now', annEmptyDesc: 'When there is something new, it will appear here.', annExpires: 'Active until',
+  timeJustNow: 'Just now', timeMinutesAgo: 'minutes ago', timeHoursAgo: 'hours ago', timeDaysAgo: 'days ago',
   liveNow: 'Live now', liveUpcoming: 'Upcoming', liveEnded: 'Ended', liveMissed: 'Missed', liveJoinNow: 'Join Now →', liveJoin: 'Join Class',
   commonLoading: 'Loading...', commonBack: 'Back',
   mcTitle: 'My Live Classes', mcSub: 'All live classes from your enrolled courses appear here.',
@@ -553,6 +600,7 @@ const EN: Translations = {
   tcAddQuiz: 'Add Quiz', tcNoLesson: 'No lesson found for this course.',
   tcScheduledLive: 'Scheduled Live Classes', tcLivePanelSub: "Schedule, start, join and end this course's live sessions from here.",
   tcLoadingLive: 'Loading live classes...', tcStart: 'Start Class', tcEnd: 'End Class', tcNoLiveScheduled: 'No live class scheduled yet.',
+  tcEndInRoomHint: 'Opens the class — press “End class” inside to stop and save the recording.', tcRecReady: 'Recording ready', tcRecNone: 'No recording',
   tcCreateLiveTitle: 'Create Live Class', tcScheduledAt: 'Scheduled At', tcLiveTitlePlaceholder: 'e.g. Chapter 5 Discussion',
   tcLiveDescPlaceholder: 'What the class is about...', tcCreateLiveBtn: 'Create Live Class',
   tcInstructorName: 'Instructor Name', tcLevelLabel: 'Level', tcPriceLabel: 'Price (0 = Free)', tcDurationLabel: 'Duration (months)',
@@ -573,7 +621,7 @@ const EN: Translations = {
   tcUploadVideo: 'Or Upload Video File', tcUploadingVideo: 'Uploading video...', tcLessonThumb: 'Lesson Thumbnail (optional)',
   tcResourceUrl: 'Resource URL (optional)', tcFreePreview: 'Free preview lesson', tcSaveLesson: 'Save Lesson',
   tcEnrolled: 'Enrolled', tcIssue: 'Issue', tcEditCourse: 'Edit Course', tcEditLesson: 'Edit Lesson',
-  nbTitle: 'Notifications', nbMarkAll: 'Mark all as read', nbEmpty: 'No notifications',
+  nbTitle: 'Notifications', nbMarkAll: 'Mark all as read', nbEmpty: 'No notifications', nbViewAll: 'View all notifications →',
   payBackHome: 'Back to Home', paySecure: 'Secure Payment',
   paySummaryNote: "You will be redirected to SSLCommerz's secure payment gateway, where you can pay with Card, bKash, Nagad and more.",
   payPayable: 'Payable Amount', payMethods: 'Accepted Payment Methods', payCard: 'Credit / Debit Card',
@@ -643,6 +691,7 @@ const EN: Translations = {
   aiwYourWriting: 'Your writing', aiwTranscribed: 'Transcribed text',
   aiwChecking: 'AI is checking your writing…', aiwCheckingSub: 'This can take up to a minute. Please wait.',
   aiwOneAttempt: 'You get ONE attempt for this task. Make it count!', aiwPickTopic: 'Pick a topic', aiwYourAnswer: 'Your writing',
+  aiwRetake: 'Try again', aiwRetakeNote: 'You can re-take this task — only your latest attempt is kept.',
   aiwRemoveFile: 'Remove', aiwFileChosenNote: 'A file is attached — submit to have it checked, or remove it to type instead.',
   aiwTypePlaceholder: 'Write your answer here…', aiwWords: 'words', aiwOr: 'OR', aiwUploadHere: 'Upload a photo or PDF',
   aiwUploadHint: 'JPG, PNG or PDF — a clear photo of your handwriting works best (max 10 MB).', aiwSubmit: 'Submit for AI checking',
@@ -740,7 +789,7 @@ const EN: Translations = {
 };
 
 const BN: Translations = {
-  navTracks: 'ট্র্যাকস', navCourses: 'কোর্সসমূহ', navVision: 'আমাদের লক্ষ্য', navLogin: 'লগইন', navLive: 'লাইভ',
+  navTracks: 'ট্র্যাকস', navCourses: 'কোর্সসমূহ', navVision: 'আমাদের লক্ষ্য', navLogin: 'লগইন', navLive: 'লাইভ', navWishlist: 'উইশলিস্ট',
   navLiveFree: 'ফ্রি লাইভ', navLiveScheduled: 'কোর্স লাইভ', navLiveNone: 'এখন কোনো লাইভ ক্লাস নেই', navLiveViewAll: 'সব লাইভ ক্লাস দেখুন',
   navGetStarted: 'শুরু করুন', navLogout: 'লগআউট', navProfile: 'প্রোফাইল', navTeacher: 'শিক্ষক', navHi: 'হ্যালো,',
   heroEyebrow: 'বিশ্বস্ত শিক্ষা প্ল্যাটফর্ম', heroH1Part1: 'চাহিদাসম্পন্ন', heroH1Accent: 'দক্ষতা', heroH1Part2: 'শিখুন কাঠামোবদ্ধ পথে।',
@@ -763,6 +812,19 @@ const BN: Translations = {
   courseCategory: 'বিষয়:', courseInstructor: 'প্রশিক্ষক:', courseLessons: 'পাঠ:',
   courseDuration: 'সময়কাল:', coursePrice: 'মূল্য:', courseSeeMore: 'আরো দেখুন',
   courseEnrolled: 'ভর্তি হয়েছেন', courseEnrollNow: 'এখনই ভর্তি হন', courseStartLearning: 'শেখা শুরু করুন', courseDurationUnit: 'মাস', courseManage: 'ম্যানেজ',
+  coursesEyebrow: 'কোর্স ক্যাটালগ', coursesHeading: 'কোর্স খুঁজুন',
+  coursesSubheading: 'বিষয়, স্তর, মূল্য বা রেটিং অনুযায়ী আপনার উপযুক্ত কোর্সটি বেছে নিন।',
+  coursesLoadFailed: 'কোর্স লোড করা যায়নি', coursesLoadFailedDesc: 'কিছু একটা সমস্যা হয়েছে। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।',
+  filtersTitle: 'ফিল্টার', filterClearAll: 'সব মুছুন', filterClose: 'ফিল্টার বন্ধ করুন',
+  filterCategory: 'বিষয়', filterLevel: 'স্তর', filterPrice: 'মূল্য', filterRating: 'রেটিং',
+  filterFree: 'ফ্রি', filterPaid: 'পেইড', filterAndUp: 'ও তার বেশি',
+  resultsOf: 'এর মধ্যে', resultsCourses: 'কোর্স',
+  sortBy: 'সাজান', sortPopular: 'সবচেয়ে জনপ্রিয়', sortNewest: 'নতুন আগে', sortRating: 'সর্বোচ্চ রেটিং',
+  sortPriceAsc: 'মূল্য: কম থেকে বেশি', sortPriceDesc: 'মূল্য: বেশি থেকে কম', sortTitle: 'নাম (অ-ঔ)',
+  viewToggleLabel: 'ভিউ মোড', viewGrid: 'গ্রিড ভিউ', viewList: 'লিস্ট ভিউ',
+  paginationLabel: 'পেজিনেশন', paginationPrev: 'পূর্ববর্তী', paginationNext: 'পরবর্তী',
+  ratingsLabel: 'রেটিং', courseStatsLabel: 'কোর্সের পরিসংখ্যান',
+  wishlistAdd: '♡ উইশলিস্টে যোগ করুন', wishlistRemove: '✓ উইশলিস্টে আছে',
   courseCompleted: 'সম্পন্ন', tcMarkCompleted: '✓ সম্পন্ন করুন', tcMarkOngoing: '↺ চলমান করুন',
   feature1Title: 'ফলাফল-ভিত্তিক পাঠ্যক্রম', feature1Desc: 'বাস্তব, চাকরি-উপযোগী ফলাফলের উপর ভিত্তি করে রোল-কেন্দ্রিক মডিউল অনুসরণ করুন।',
   feature2Title: 'অগ্রগতি ও কর্মক্ষমতা বিশ্লেষণ', feature2Desc: 'একটি ড্যাশবোর্ডে সম্পন্নতা, মূল্যায়ন স্কোর ট্র্যাক করুন।',
@@ -817,6 +879,7 @@ const BN: Translations = {
   cdIncludes: 'এই কোর্সে যা পাবেন', cdIncLive: '৩টি লাইভ ক্লাস', cdFree: 'ফ্রি', cdIncVideos: 'ভিডিও লেসন', cdIncPractice: 'প্র্যাকটিস ম্যাটেরিয়াল',
   cdIncStudents: 'শিক্ষার্থী ভর্তি', cdIncCert: 'সমাপনী সার্টিফিকেট', cdPriceLabel: 'কোর্স ফি', cdContinue: 'শেখা চালিয়ে যান →', cdRatings: 'রেটিং',
   cdRateThis: '⭐ এই কোর্স রেট করুন', cdClose: 'বন্ধ', cdInWishlist: 'উইশলিস্টে আছে', cdAddWishlist: 'উইশলিস্টে যোগ করুন', cdUpdating: 'আপডেট হচ্ছে…', cdAdding: 'যোগ হচ্ছে…',
+  cdCurriculum: 'কোর্স কনটেন্ট', cdLessonsWord: 'টি লেসন', cdFreePreview: 'ফ্রি প্রিভিউ', cdCurriculumEmpty: 'ইন্সট্রাক্টর কনটেন্ট যোগ করলে লেসনের তালিকা এখানে দেখা যাবে।', cdMinShort: 'মিনিট', cdReviewsTitle: 'রেটিং ও রিভিউ',
   ecBack: '← কোর্সে ফিরুন', ecNoLesson: 'কোনো পাঠ নির্বাচিত হয়নি', ecLessons: 'পাঠসমূহ', ecInstructor: 'প্রশিক্ষক',
   profileRole: 'ভূমিকা', profileDashboard: 'শিক্ষার্থী ড্যাশবোর্ড', profileWeekly: 'সাপ্তাহিক পারফরম্যান্স', profileLive: 'লাইভ',
   profileCompletion: 'সম্পন্ন', profileCompleted: 'সম্পন্ন হয়েছে', profileRemaining: 'বাকি আছে',
@@ -856,6 +919,7 @@ const BN: Translations = {
   registerF3Title: 'ব্ল্যাক-ব্লু পরিচয়', registerF3Desc: 'হোম এবং লগইন পেজের সাথে দৃশ্যত ও কার্যকরীভাবে সামঞ্জস্যপূর্ণ।',
   registerFullName: 'পূর্ণ নাম', registerFullNamePlaceholder: 'আপনার নাম', registerFullNameError: 'আপনার পূর্ণ নাম দিন।',
   registerMobile: 'মোবাইল নম্বর', registerMobilePlaceholder: 'যেমন ০১XXXXXXXXX', registerMobileError: 'সঠিক মোবাইল নম্বর দিন।',
+  registerGroup: 'গ্রুপ (ঐচ্ছিক)', registerGroupPlaceholder: 'আপনার গ্রুপ বেছে নিন', registerGroupScience: 'বিজ্ঞান', registerGroupCommerce: 'ব্যবসায় শিক্ষা', registerGroupArts: 'মানবিক', registerGroupOthers: 'অন্যান্য',
   registerParentEmail: 'অভিভাবকের ইমেইল', registerParentEmailPlaceholder: 'parent@example.com', registerParentEmailError: 'সঠিক অভিভাবকের ইমেইল দিন।',
   registerRole: 'ভূমিকা নির্বাচন করুন', registerRolePlaceholder: 'একটি বেছে নিন', registerStudent: 'শিক্ষার্থী', registerTeacher: 'শিক্ষক', registerRoleError: 'শিক্ষার্থী বা শিক্ষক বেছে নিন।',
   registerPasswordPlaceholder: 'পাসওয়ার্ড তৈরি করুন', registerConfirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন', registerRepeatPassword: 'পাসওয়ার্ড পুনরায় দিন', registerConfirmPasswordError: 'আপনার পাসওয়ার্ড নিশ্চিত করুন।',
@@ -876,6 +940,12 @@ const BN: Translations = {
   lbRecHeadPref: '✨ আপনার জন্য recommended কোর্স', lbRecHeadPopular: '🔥 আপনার জন্য জনপ্রিয় কোর্স',
   lbRecHeadSub: 'কোনো কোর্সে enroll করলে এখানে সেই কোর্সের লিডারবোর্ড দেখা যাবে।', lbRecEmpty: 'এখনো কোনো কোর্স প্রকাশ করা হয়নি।',
   lbViewCourse: 'কোর্স দেখুন →', lbYou: 'আপনি',
+  lbScopeLabel: 'লিডারবোর্ড স্কোপ', lbScopeGlobal: 'গ্লোবাল', lbScopeCourse: 'আমার কোর্স', lbLoadFailed: 'লিডারবোর্ড লোড করা যায়নি।',
+  lbGlobalTitle: 'গ্লোবাল লিডারবোর্ড', lbGlobalSub: 'পুরো প্ল্যাটফর্মের সেরা শিক্ষার্থীরা',
+  notifEyebrow: 'নোটিফিকেশন', notifTitle: 'আপনার নোটিফিকেশন', notifSub: 'আপনার কোর্সগুলোতে ঘটে যাওয়া সবকিছু।', notifMarkAll: 'সব পঠিত করুন',
+  notifAll: 'সব', notifUnread: 'অপঠিত', notifEmpty: 'এখনো কোনো নোটিফিকেশন নেই', notifNoUnread: 'সব পড়া হয়ে গেছে', notifEmptyDesc: 'নতুন লেসন, কুইজ ফলাফল ও রিমাইন্ডার এখানে দেখা যাবে।',
+  annEyebrow: 'ঘোষণা', annTitle: 'ঘোষণা', annSub: 'ইন্সট্রাক্টরদের সর্বশেষ আপডেট ও নোটিশ।', annEmpty: 'এই মুহূর্তে কোনো ঘোষণা নেই', annEmptyDesc: 'নতুন কিছু এলে এখানে দেখা যাবে।', annExpires: 'সক্রিয় থাকবে',
+  timeJustNow: 'এইমাত্র', timeMinutesAgo: 'মিনিট আগে', timeHoursAgo: 'ঘণ্টা আগে', timeDaysAgo: 'দিন আগে',
   liveNow: 'এখন লাইভ', liveUpcoming: 'আসন্ন', liveEnded: 'শেষ', liveMissed: 'মিস হয়েছে', liveJoinNow: 'এখনই যোগ দিন →', liveJoin: 'ক্লাসে যোগ দিন',
   commonLoading: 'লোড হচ্ছে...', commonBack: 'ফিরে যান',
   mcTitle: 'আমার লাইভ ক্লাস', mcSub: 'আপনার enrolled কোর্সগুলোর সব লাইভ ক্লাস এখানে দেখতে পাবেন।',
@@ -967,6 +1037,7 @@ const BN: Translations = {
   tcAddQuiz: 'কুইজ যোগ করুন', tcNoLesson: 'এই কোর্সে কোনো পাঠ পাওয়া যায়নি।',
   tcScheduledLive: 'নির্ধারিত লাইভ ক্লাস', tcLivePanelSub: 'এই কোর্সের লাইভ সেশন schedule, start, join আর end এখান থেকে manage করুন।',
   tcLoadingLive: 'লাইভ ক্লাস লোড হচ্ছে...', tcStart: 'ক্লাস শুরু', tcEnd: 'ক্লাস শেষ', tcNoLiveScheduled: 'এখনো কোনো লাইভ ক্লাস schedule করা হয়নি।',
+  tcEndInRoomHint: 'ক্লাস খুলবে — ভেতরে “End class” চাপলে রেকর্ডিং সেভ হয়ে ক্লাস শেষ হবে।', tcRecReady: 'রেকর্ডিং প্রস্তুত', tcRecNone: 'রেকর্ডিং নেই',
   tcCreateLiveTitle: 'লাইভ ক্লাস তৈরি করুন', tcScheduledAt: 'নির্ধারিত সময়', tcLiveTitlePlaceholder: 'যেমন: অধ্যায় ৫ আলোচনা',
   tcLiveDescPlaceholder: 'কী নিয়ে class হবে...', tcCreateLiveBtn: 'লাইভ ক্লাস তৈরি',
   tcInstructorName: 'প্রশিক্ষকের নাম', tcLevelLabel: 'স্তর', tcPriceLabel: 'মূল্য (০ = ফ্রি)', tcDurationLabel: 'সময়কাল (মাস)',
@@ -987,7 +1058,7 @@ const BN: Translations = {
   tcUploadVideo: 'অথবা ভিডিও ফাইল আপলোড করুন', tcUploadingVideo: 'ভিডিও আপলোড হচ্ছে...', tcLessonThumb: 'পাঠের থাম্বনেইল (ঐচ্ছিক)',
   tcResourceUrl: 'রিসোর্স URL (ঐচ্ছিক)', tcFreePreview: 'ফ্রি প্রিভিউ পাঠ', tcSaveLesson: 'পাঠ সংরক্ষণ',
   tcEnrolled: 'ভর্তি', tcIssue: 'প্রদান', tcEditCourse: 'কোর্স এডিট', tcEditLesson: 'পাঠ এডিট',
-  nbTitle: 'নোটিফিকেশন', nbMarkAll: 'সব পঠিত করুন', nbEmpty: 'কোনো নোটিফিকেশন নেই',
+  nbTitle: 'নোটিফিকেশন', nbMarkAll: 'সব পঠিত করুন', nbEmpty: 'কোনো নোটিফিকেশন নেই', nbViewAll: 'সব নোটিফিকেশন দেখুন →',
   payBackHome: 'হোমে ফিরুন', paySecure: 'নিরাপদ পেমেন্ট',
   paySummaryNote: 'আপনাকে SSLCommerz-এর নিরাপদ payment gateway তে redirect করা হবে। সেখানে Card, bKash, Nagad সহ সব method দিয়ে payment করতে পারবেন।',
   payPayable: 'প্রদেয় পরিমাণ', payMethods: 'গৃহীত পেমেন্ট মাধ্যম', payCard: 'ক্রেডিট / ডেবিট কার্ড',
@@ -1057,6 +1128,7 @@ const BN: Translations = {
   aiwYourWriting: 'আপনার লেখা', aiwTranscribed: 'পঠিত লেখা',
   aiwChecking: 'এআই আপনার লেখা যাচাই করছে…', aiwCheckingSub: 'এতে এক মিনিট পর্যন্ত সময় লাগতে পারে। অপেক্ষা করুন।',
   aiwOneAttempt: 'এই টাস্কে আপনি মাত্র একবার সুযোগ পাবেন। ভালোভাবে লিখুন!', aiwPickTopic: 'একটি টপিক বেছে নিন', aiwYourAnswer: 'আপনার লেখা',
+  aiwRetake: 'আবার চেষ্টা করুন', aiwRetakeNote: 'আপনি আবার চেষ্টা করতে পারবেন — শুধু সর্বশেষ চেষ্টাটির নম্বর সংরক্ষিত থাকবে।',
   aiwRemoveFile: 'বাদ দিন', aiwFileChosenNote: 'একটি ফাইল যুক্ত আছে — যাচাই করতে সাবমিট করুন, অথবা টাইপ করতে বাদ দিন।',
   aiwTypePlaceholder: 'এখানে আপনার উত্তর লিখুন…', aiwWords: 'শব্দ', aiwOr: 'অথবা', aiwUploadHere: 'ছবি বা পিডিএফ আপলোড করুন',
   aiwUploadHint: 'JPG, PNG বা PDF — হাতের লেখার পরিষ্কার ছবি সবচেয়ে ভালো কাজ করে (সর্বোচ্চ ১০ MB)।', aiwSubmit: 'এআই যাচাইয়ের জন্য সাবমিট করুন',

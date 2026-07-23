@@ -1,0 +1,57 @@
+<main class="notif-page">
+  <app-navbar></app-navbar>
+
+  <div class="notif-shell">
+    <header class="notif-hero">
+      <div class="notif-hero-text">
+        <span class="notif-eyebrow">🔔 {{ lang.t().notifEyebrow }}</span>
+        <h1 class="notif-title">{{ lang.t().notifTitle }}</h1>
+        <p class="notif-sub">{{ lang.t().notifSub }}</p>
+      </div>
+      @if (unreadCount() > 0) {
+        <button type="button" class="notif-markall" (click)="markAllRead()">
+          ✓ {{ lang.t().notifMarkAll }}
+        </button>
+      }
+    </header>
+
+    <div class="notif-tabs">
+      <button type="button" class="notif-tab" [class.active]="filter() === 'all'" (click)="setFilter('all')">
+        {{ lang.t().notifAll }} <span class="notif-tab-count">{{ items().length }}</span>
+      </button>
+      <button type="button" class="notif-tab" [class.active]="filter() === 'unread'" (click)="setFilter('unread')">
+        {{ lang.t().notifUnread }} <span class="notif-tab-count">{{ unreadCount() }}</span>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="notif-list">
+        @for (s of [1,2,3,4,5]; track s) {
+          <div class="notif-skel"><span class="sk-dot"></span><span class="sk-lines"><i></i><i></i></span></div>
+        }
+      </div>
+    } @else if (visible().length === 0) {
+      <div class="notif-empty">
+        <span class="notif-empty-emoji" aria-hidden="true">📭</span>
+        <h3>{{ filter() === 'unread' ? lang.t().notifNoUnread : lang.t().notifEmpty }}</h3>
+        <p>{{ lang.t().notifEmptyDesc }}</p>
+      </div>
+    } @else {
+      <ul class="notif-list">
+        @for (n of visible(); track n.id) {
+          <li class="notif-item" [class.unread]="!n.isRead" [class.clickable]="!!n.link" (click)="open(n)">
+            <span class="notif-item-icon" [attr.data-type]="n.type">{{ getIcon(n.type) }}</span>
+            <div class="notif-item-body">
+              <div class="notif-item-top">
+                <h4 class="notif-item-title">{{ n.title }}</h4>
+                @if (!n.isRead) { <span class="notif-dot" aria-hidden="true"></span> }
+              </div>
+              <p class="notif-item-msg">{{ n.message }}</p>
+              <span class="notif-item-time">{{ timeAgo(n.createdAt) }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</main>

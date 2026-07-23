@@ -104,6 +104,11 @@
 							<div class="sd-badge"><strong>{{ enrolledCount() }}</strong><span>{{ lang.isBangla() ? 'কোর্স' : 'Courses' }}</span></div>
 							<div class="sd-badge"><strong>{{ completedCourseCount() }}</strong><span>{{ lang.isBangla() ? 'সম্পন্ন' : 'Completed' }}</span></div>
 							<div class="sd-badge"><strong>{{ completedLessonCount() }}</strong><span>{{ lang.isBangla() ? 'লেসন' : 'Lessons' }}</span></div>
+							@if (globalRank()) {
+								<a routerLink="/leaderboard" class="sd-badge sd-badge--rank" [title]="lang.t().lbScopeGlobal">
+									<strong>#{{ globalRank() }}</strong><span>🏆 {{ lang.isBangla() ? 'র‍্যাঙ্ক' : 'Rank' }}</span>
+								</a>
+							}
 						</div>
 					</section>
 

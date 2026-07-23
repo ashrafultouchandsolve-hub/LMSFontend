@@ -1,113 +1,249 @@
 <main class="courses-page">
   <app-navbar></app-navbar>
 
+  <!-- ── Page hero: title, result count, search ─────────────────────────── -->
+  <header class="courses-hero">
+    <div class="hero-inner">
+      <span class="courses-eyebrow">{{ lang.t().coursesEyebrow }}</span>
+      <h1 class="courses-title">{{ lang.t().coursesHeading }}</h1>
+      <p class="courses-subtitle">{{ lang.t().coursesSubheading }}</p>
+
+      <label class="hero-search">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input
+          type="search"
+          class="search-input"
+          [placeholder]="lang.t().coursesSearchPlaceholder"
+          [value]="searchInput()"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+      </label>
+    </div>
+  </header>
+
   <div class="courses-layout">
 
-    <!-- ✅ Category Sidebar (dropdown) -->
-    <aside class="category-sidebar">
-      <div class="sidebar-head">
-        <span class="sidebar-head-icon" aria-hidden="true">📂</span>
-        <div class="sidebar-head-text">
-          <h3 class="sidebar-title">Browse by Category</h3>
-          <span class="sidebar-subtitle">{{ availableCategories().length }} groups · {{ categoryCount('All') }} courses</span>
-        </div>
+    <!-- ── Filter rail ──────────────────────────────────────────────────── -->
+    @if (filtersOpen()) {
+      <div class="filter-backdrop" (click)="closeFilters()"></div>
+    }
+
+    <aside class="filter-rail" [class.open]="filtersOpen()">
+      <div class="rail-head">
+        <h2 class="rail-title">{{ lang.t().filtersTitle }}</h2>
+        @if (hasActiveFilters()) {
+          <button type="button" class="rail-clear" (click)="clearAllFilters()">{{ lang.t().filterClearAll }}</button>
+        }
+        <button type="button" class="rail-close" (click)="closeFilters()" [attr.aria-label]="lang.t().filterClose">✕</button>
       </div>
 
-      <div class="category-dropdown" [class.open]="categoryDropdownOpen()">
-        <button
-          type="button"
-          class="category-dropdown-toggle"
-          (click)="toggleCategoryDropdown()"
-          [attr.aria-expanded]="categoryDropdownOpen()">
-          <span class="cat-icon">{{ activeCategoryMeta().icon }}</span>
-          <span class="cat-text">
-            <span class="cat-eyebrow">Showing</span>
-            <span class="cat-label">{{ activeCategoryMeta().value === 'All' ? 'All Courses' : activeCategoryMeta().label }}</span>
-          </span>
-          <span class="cat-count">{{ categoryCount(activeCategory()) }}</span>
-          <span class="dropdown-arrow" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </span>
-        </button>
-
-        @if (categoryDropdownOpen()) {
-          <div class="category-backdrop" (click)="closeCategoryDropdown()"></div>
-          <ul class="category-list">
-            @for (cat of availableCategories(); track cat.value) {
+      <!-- Category -->
+      @if (categoryOptions().length > 0) {
+        <section class="filter-group">
+          <h3 class="filter-group-title">{{ lang.t().filterCategory }}</h3>
+          <ul class="filter-list">
+            @for (cat of categoryOptions(); track cat.value) {
               <li>
-                <button
-                  class="category-btn"
-                  [class.active]="activeCategory() === cat.value"
-                  (click)="setCategory(cat.value)">
-                  <span class="cat-icon">{{ cat.icon }}</span>
-                  <span class="cat-label">{{ cat.value === 'All' ? 'All Courses' : cat.label }}</span>
-                  @if (activeCategory() === cat.value) {
-                    <span class="cat-check" aria-hidden="true">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </span>
-                  }
-                  <span class="cat-count">{{ categoryCount(cat.value) }}</span>
-                </button>
+                <label class="filter-option" [class.checked]="isCategorySelected(cat.value)">
+                  <input type="checkbox" [checked]="isCategorySelected(cat.value)" (change)="toggleCategory(cat.value)" />
+                  <span class="opt-box" aria-hidden="true"></span>
+                  <span class="opt-icon" aria-hidden="true">{{ cat.icon }}</span>
+                  <span class="opt-label">{{ cat.label }}</span>
+                  <span class="opt-count">{{ cat.count }}</span>
+                </label>
               </li>
             }
           </ul>
-        }
-      </div>
+        </section>
+      }
+
+      <!-- Level -->
+      <section class="filter-group">
+        <h3 class="filter-group-title">{{ lang.t().filterLevel }}</h3>
+        <ul class="filter-list">
+          @for (lvl of levels; track lvl) {
+            <li>
+              <label class="filter-option" [class.checked]="isLevelSelected(lvl)">
+                <input type="checkbox" [checked]="isLevelSelected(lvl)" (change)="toggleLevel(lvl)" />
+                <span class="opt-box" aria-hidden="true"></span>
+                <span class="opt-label">{{ levelLabel(lvl) }}</span>
+                <span class="opt-count">{{ levelCount(lvl) }}</span>
+              </label>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- Price -->
+      <section class="filter-group">
+        <h3 class="filter-group-title">{{ lang.t().filterPrice }}</h3>
+        <div class="filter-pills">
+          <button type="button" class="filter-pill" [class.active]="priceFilter() === 'free'" (click)="setPrice('free')">
+            {{ lang.t().filterFree }}
+          </button>
+          <button type="button" class="filter-pill" [class.active]="priceFilter() === 'paid'" (click)="setPrice('paid')">
+            {{ lang.t().filterPaid }}
+          </button>
+        </div>
+      </section>
+
+      <!-- Rating -->
+      <section class="filter-group">
+        <h3 class="filter-group-title">{{ lang.t().filterRating }}</h3>
+        <ul class="filter-list">
+          @for (r of ratingOptions; track r) {
+            <li>
+              <button type="button" class="filter-rating" [class.active]="minRating() === r" (click)="setMinRating(r)">
+                <span class="rating-stars" aria-hidden="true">⭐</span>
+                <span class="rating-value">{{ r }}</span>
+                <span class="rating-suffix">{{ lang.t().filterAndUp }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
     </aside>
 
-    <!-- Right side: search + grid -->
+    <!-- ── Results ──────────────────────────────────────────────────────── -->
     <div class="courses-main">
 
-      <!-- Active category header -->
-      <div class="courses-filter-bar">
-        <div class="filter-left">
-          <h2 class="filter-title">
-            @if (activeCategory() === 'All') {
-              🗂 All Courses
-            } @else {
-              {{ activeCategory() }}
+      <!-- Recommended for you (default view only) -->
+      @if (showReco()) {
+        <section class="reco-strip" [attr.aria-label]="lang.t().recoTitle">
+          <div class="reco-head">
+            <h2 class="reco-title">✨ {{ lang.t().recoTitle }}</h2>
+            <span class="reco-sub">{{ recoUsedPrefs() ? lang.t().recoSubPrefs : lang.t().recoSubPopular }}</span>
+          </div>
+          <div class="reco-scroller">
+            @for (r of recommendedView(); track r.id) {
+              <a [routerLink]="['/course-details', r.id]" class="reco-card">
+                <div class="reco-thumb">
+                  <img [src]="r.thumbnailUrl" [alt]="r.title" loading="lazy" (error)="onImageError($event)" />
+                  <span class="reco-level">{{ levelLabel(r.level) }}</span>
+                </div>
+                <div class="reco-body">
+                  <span class="reco-cat">{{ r.category }}</span>
+                  <h3 class="reco-name">{{ r.title }}</h3>
+                  <div class="reco-foot">
+                    <span class="reco-price" [class.reco-price--free]="r.price <= 0">{{ formatPrice(r.price) }}</span>
+                    @if (r.totalRatings > 0) {
+                      <span class="reco-rating">⭐ {{ r.averageRating.toFixed(1) }}</span>
+                    }
+                  </div>
+                </div>
+              </a>
             }
-          </h2>
-          <span class="filter-count">{{ filteredCourses().length }} courses</span>
+          </div>
+        </section>
+      }
+
+
+      <div class="results-bar">
+        <div class="results-left">
+          <button type="button" class="filter-toggle" (click)="toggleFilters()">
+            <span aria-hidden="true">⚙</span> {{ lang.t().filtersTitle }}
+            @if (hasActiveFilters()) { <span class="filter-toggle-dot">{{ activeChips().length }}</span> }
+          </button>
+          @if (!isLoading()) {
+            <span class="results-count">
+              @if (total() > 0) {
+                {{ rangeStart() }}–{{ rangeEnd() }} {{ lang.t().resultsOf }} <b>{{ total() }}</b> {{ lang.t().resultsCourses }}
+              } @else {
+                <b>0</b> {{ lang.t().resultsCourses }}
+              }
+            </span>
+          }
         </div>
 
-        <section class="courses-search" aria-label="Search courses">
-          <label class="search-field">
-            <span class="search-icon" aria-hidden="true">🔍</span>
-            <input
-              type="search"
-              class="search-input"
-              [placeholder]="lang.t().coursesSearchPlaceholder"
-              [value]="searchTerm()"
-              (input)="updateSearchTerm($any($event.target).value)"
-            />
-          </label>
-        </section>
+        <div class="results-right">
+          <!-- Sort -->
+          <div class="sort-menu" [class.open]="sortOpen()">
+            <button type="button" class="sort-toggle" (click)="toggleSortMenu()" [attr.aria-expanded]="sortOpen()">
+              <span class="sort-eyebrow">{{ lang.t().sortBy }}</span>
+              <span class="sort-current">{{ activeSortLabel() }}</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (sortOpen()) {
+              <div class="sort-backdrop" (click)="closeSortMenu()"></div>
+              <ul class="sort-list">
+                @for (opt of sortOptions; track opt.value) {
+                  <li>
+                    <button type="button" class="sort-item" [class.active]="sort() === opt.value" (click)="setSort(opt.value)">
+                      {{ opt.label() }}
+                      @if (sort() === opt.value) {
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          <!-- Grid / list -->
+          <div class="view-toggle" role="group" [attr.aria-label]="lang.t().viewToggleLabel">
+            <button type="button" [class.active]="viewMode() === 'grid'" (click)="setViewMode('grid')" [attr.aria-label]="lang.t().viewGrid">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </button>
+            <button type="button" [class.active]="viewMode() === 'list'" (click)="setViewMode('list')" [attr.aria-label]="lang.t().viewList">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="4" rx="1.5"/><rect x="3" y="10" width="18" height="4" rx="1.5"/><rect x="3" y="16" width="18" height="4" rx="1.5"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
 
-      @if (isLoadingCourses()) {
+      <!-- Active filter chips -->
+      @if (hasActiveFilters()) {
+        <div class="chip-row">
+          @for (chip of activeChips(); track chip.kind + chip.value) {
+            <button type="button" class="chip" (click)="removeChip(chip)">
+              {{ chip.label }}
+              <span class="chip-x" aria-hidden="true">✕</span>
+            </button>
+          }
+          <button type="button" class="chip-clear" (click)="clearAllFilters()">{{ lang.t().filterClearAll }}</button>
+        </div>
+      }
+
+      <!-- States -->
+      @if (isLoading()) {
+        <section class="courses-grid" aria-busy="true" [attr.aria-label]="lang.t().coursesLoading">
+          @for (s of skeletonSlots; track $index) {
+            <article class="skeleton-card">
+              <div class="sk-img"></div>
+              <div class="sk-body">
+                <span class="sk-line sk-badge"></span>
+                <span class="sk-line sk-title"></span>
+                <span class="sk-line sk-text"></span>
+                <span class="sk-line sk-text short"></span>
+                <div class="sk-stats"><span></span><span></span><span></span></div>
+              </div>
+            </article>
+          }
+        </section>
+      } @else if (loadFailed()) {
         <article class="courses-empty-state">
-          <h3>{{ lang.t().coursesLoading }}</h3>
-          <p>{{ lang.t().coursesLoadingDesc }}</p>
+          <span class="empty-emoji" aria-hidden="true">⚠️</span>
+          <h3>{{ lang.t().coursesLoadFailed }}</h3>
+          <p>{{ lang.t().coursesLoadFailedDesc }}</p>
         </article>
-      } @else if (!hasCourses()) {
+      } @else if (!hasResults()) {
         <article class="courses-empty-state">
-          <h3>{{ lang.t().coursesNone }}</h3>
-          <p>{{ lang.t().coursesNoneDesc }}</p>
-        </article>
-      } @else if (!hasFilteredCourses()) {
-        <article class="courses-empty-state">
-          <h3>{{ lang.t().coursesNoMatch }}</h3>
-          <p>{{ lang.t().coursesNoMatchDesc }}</p>
+          <span class="empty-emoji" aria-hidden="true">🔍</span>
+          <h3>{{ hasActiveFilters() ? lang.t().coursesNoMatch : lang.t().coursesNone }}</h3>
+          <p>{{ hasActiveFilters() ? lang.t().coursesNoMatchDesc : lang.t().coursesNoneDesc }}</p>
+          @if (hasActiveFilters()) {
+            <button type="button" class="empty-cta" (click)="clearAllFilters()">{{ lang.t().filterClearAll }}</button>
+          }
         </article>
       } @else {
-        <section class="courses-grid" aria-label="All courses list">
-          @for (course of filteredCourses(); track course.id; let i = $index) {
+        <section class="courses-grid" [class.list-view]="viewMode() === 'list'" [attr.aria-label]="lang.t().coursesHeading">
+          @for (course of viewItems(); track course.id; let i = $index) {
             @let w = enrollWindow(course.startDate);
             @let d = discountFor(course);
-            <article class="cat-card" [style]="'--card-color:' + getCardColor(i)">
+            <article class="cat-card" [class.cat-card--list]="viewMode() === 'list'" [style]="'--card-color:' + getCardColor(i)">
               <div class="cat-img-wrap">
-                <img class="cat-thumbnail" [src]="getImageUrl(course.thumbnailUrl)" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
+                <img class="cat-thumbnail" [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" loading="lazy" (error)="onImageError($event)" />
                 <div class="cat-icon-fallback" aria-hidden="true">
                   <svg viewBox="0 0 40 40" fill="none" width="36" height="36">
                     <rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.2)" />
@@ -131,9 +267,7 @@
                 }
               </div>
               <div class="cat-body">
-                <span class="cat-badge">
-                  {{ course.level === 'Beginner' ? lang.t().levelBeginner : course.level === 'Intermediate' ? lang.t().levelIntermediate : lang.t().levelAdvanced }}
-                </span>
+                <span class="cat-badge">{{ levelLabel(course.level) }}</span>
                 <h3>{{ course.title }}</h3>
                 <p class="cat-desc">{{ course.description }}</p>
                 <div class="cc-meta-row">
@@ -142,7 +276,7 @@
                   <span>⏱ {{ course.durationMinutes }} {{ lang.t().courseDurationUnit }}</span>
                 </div>
 
-                <div class="cc-stats" aria-label="Course statistics">
+                <div class="cc-stats" [attr.aria-label]="lang.t().courseStatsLabel">
                   <div class="cc-stat"><b>{{ course.enrollmentCount }}</b><small>{{ lang.t().cdStudents }}</small></div>
                   <div class="cc-stat"><b>{{ course.videoCount }}</b><small>{{ lang.t().cdTotalVideos }}</small></div>
                   <div class="cc-stat"><b>{{ course.practiceCount }}</b><small>{{ lang.t().cdTotalPractice }}</small></div>
@@ -151,7 +285,7 @@
                 @if (course.totalRatings && course.totalRatings > 0) {
                   <div class="cat-rating">
                     <span class="cat-rating-star">⭐ {{ course.averageRating?.toFixed(1) }}</span>
-                    <span class="cat-rating-count">({{ course.totalRatings }} ratings)</span>
+                    <span class="cat-rating-count">({{ course.totalRatings }} {{ lang.t().ratingsLabel }})</span>
                   </div>
                 }
 
@@ -168,7 +302,7 @@
                         class="cat-wish"
                         [class.wishlisted]="course.isWishlisted"
                         [disabled]="wishlistToggleId() === course.id"
-                        [title]="course.isWishlisted ? '✓ In Wishlist' : '♡ Add to Wishlist'"
+                        [title]="course.isWishlisted ? lang.t().wishlistRemove : lang.t().wishlistAdd"
                         (click)="toggleWishlist(course)">
                         {{ course.isWishlisted ? '♥' : '♡' }}
                       </button>
@@ -183,6 +317,29 @@
             </article>
           }
         </section>
+
+        <!-- Pager -->
+        @if (totalPages() > 1) {
+          <nav class="pager" [attr.aria-label]="lang.t().paginationLabel">
+            <button type="button" class="pager-arrow" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+              ← {{ lang.t().paginationPrev }}
+            </button>
+            <ul class="pager-list">
+              @for (p of pageNumbers(); track $index) {
+                <li>
+                  @if (p === '…') {
+                    <span class="pager-gap">…</span>
+                  } @else {
+                    <button type="button" class="pager-num" [class.active]="p === page()" (click)="goToPage(p)">{{ p }}</button>
+                  }
+                </li>
+              }
+            </ul>
+            <button type="button" class="pager-arrow" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+              {{ lang.t().paginationNext }} →
+            </button>
+          </nav>
+        }
       }
     </div>
   </div>

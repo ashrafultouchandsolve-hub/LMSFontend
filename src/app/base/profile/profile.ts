@@ -342,6 +342,9 @@ export class Profile implements OnInit {
   protected readonly wishlist = signal<WishlistItem[]>([]);
   protected readonly isLoadingWishlist = signal(false);
 
+  /** The student's position on the global leaderboard (null until known / if unranked). */
+  protected readonly globalRank = signal<number | null>(null);
+
   readonly lessonNotifCount = signal(0);
 readonly quizNotifCount   = signal(0);
 readonly certNotifCount   = signal(0);
@@ -357,8 +360,10 @@ readonly certNotifCount   = signal(0);
     if (currentUser) this.user.set(currentUser);
     this.loadForRole();
 
-    // Restore the requested dashboard section on refresh / deep link (e.g. /profile?tab=courses).
-    const tab = this.route.snapshot.queryParamMap.get('tab') as StudentTab | null;
+    // Restore the requested dashboard section on refresh / deep link (e.g. /profile?tab=courses),
+    // or the tab requested by a dedicated route like /wishlist (route data).
+    const tab = (this.route.snapshot.queryParamMap.get('tab')
+      ?? this.route.snapshot.data['defaultTab']) as StudentTab | null;
     if (tab && STUDENT_TABS.includes(tab)) this.activeTab.set(tab);
   }
 
@@ -377,6 +382,7 @@ readonly certNotifCount   = signal(0);
       void this.loadPerformance();
       void this.loadProfile();
       void this.loadLearningDashboard();
+      void this.loadGlobalRank();
     } else if (this.isTeacher()) {
       void this.loadTeacherProfile();
     }
@@ -686,6 +692,21 @@ private loadNotifCounts(): void {
       this.courseProgress.set(await firstValueFrom(this.progressService.getMyProgress()));
     } catch {
       /* keep fallback */
+    }
+  }
+
+  /** Find the student's rank on the global leaderboard (best-effort; badge just hides if absent). */
+  private async loadGlobalRank(): Promise<void> {
+    const userId = this.authService.getCurrentUser()?.id ?? '';
+    if (!userId) return;
+    try {
+      const res = await firstValueFrom(this.learningApi.getLeaderboard());
+      const data = (res as any)?.data ?? (res as any)?.Data ?? [];
+      const list = Array.isArray(data) ? data : [];
+      const idx = list.findIndex((e: any) => String(e?.userId ?? e?.UserId ?? '') === String(userId));
+      this.globalRank.set(idx >= 0 ? idx + 1 : null);
+    } catch {
+      this.globalRank.set(null);
     }
   }
 

@@ -1,0 +1,43 @@
+<main class="ann-page">
+  <app-navbar></app-navbar>
+
+  <div class="ann-shell">
+    <header class="ann-hero">
+      <span class="ann-eyebrow">📢 {{ lang.t().annEyebrow }}</span>
+      <h1 class="ann-title">{{ lang.t().annTitle }}</h1>
+      <p class="ann-sub">{{ lang.t().annSub }}</p>
+    </header>
+
+    @if (isLoading()) {
+      <div class="ann-list">
+        @for (s of [1,2,3]; track s) {
+          <div class="ann-skel"><span class="sk-bar"></span><span class="sk-bar short"></span></div>
+        }
+      </div>
+    } @else if (items().length === 0) {
+      <div class="ann-empty">
+        <span class="ann-empty-emoji" aria-hidden="true">🗒️</span>
+        <h3>{{ lang.t().annEmpty }}</h3>
+        <p>{{ lang.t().annEmptyDesc }}</p>
+      </div>
+    } @else {
+      <ul class="ann-list">
+        @for (a of items(); track a.id) {
+          <li class="ann-card" [attr.data-type]="a.type">
+            <span class="ann-card-icon">{{ icon(a.type) }}</span>
+            <div class="ann-card-body">
+              <div class="ann-card-top">
+                <h3 class="ann-card-title">{{ a.title }}</h3>
+                <span class="ann-card-tag">{{ a.type }}</span>
+              </div>
+              <p class="ann-card-msg">{{ a.message }}</p>
+              @if (a.expiresAt) {
+                <span class="ann-card-expiry">⏳ {{ lang.t().annExpires }} {{ formatDate(a.expiresAt) }}</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</main>

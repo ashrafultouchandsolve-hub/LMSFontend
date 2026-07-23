@@ -6,6 +6,8 @@ import { Service } from '../../Service/service';
 import { LanguageService } from '../../Service/language.service';
 import { LearningApiService, StudentOnboardingPayload } from '../../Service/learning-api.service';
 import { BD_ALL_UPAZILAS, BD_DISTRICTS, BD_UPAZILAS, filterSuggestions } from '../../Service/bd-locations';
+import { CategoryService } from '../../Service/category.service';
+import { RecommendationService } from '../../Service/recommendation.service';
 
 @Component({
   selector: 'app-onboarding-preferences',
@@ -18,6 +20,8 @@ export class OnboardingPreferences implements OnInit {
   private readonly router = inject(Router);
   private readonly service = inject(Service);
   private readonly learningApi = inject(LearningApiService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly reco = inject(RecommendationService);
   protected readonly lang = inject(LanguageService);
 
   protected readonly step = signal(1);
@@ -32,21 +36,13 @@ export class OnboardingPreferences implements OnInit {
   protected readonly skillLevelOptions = ['Beginner', 'Intermediate', 'Advanced'];
   protected readonly goalOptions = ['Get a Job', 'Freelancing', 'Skill Upgrade', 'Personal Interest'];
   protected readonly languageOptions = ['English', 'Bangla', 'Both'];
-  // Keep these labels in sync with INTEREST_TAXONOMY keys in recommendation.service.ts
-  // so each selection "catches" all matching courses (academic + skill tracks).
-  protected readonly interestOptions = [
-    'SSC',
-    'HSC',
-    'University Admission',
-    'Skills & Communication',
-    'Programming',
-    'Web Development',
-    'Mobile App Development',
-    'Data Science & AI',
-    'UI/UX Design',
-    'Cyber Security',
-    'Business & Marketing',
-  ];
+  // Interest options are derived from the LIVE admin categories (see loadInterestOptions):
+  // canonical buckets that match real categories + any category no bucket covers. This keeps
+  // every option mapped to real, recommendable courses. The list below is only a fallback
+  // shown if the category fetch fails.
+  protected readonly interestOptions = signal<string[]>([
+    'SSC', 'HSC', 'Admission', 'Skills', 'Communication', 'General',
+  ]);
 
   // ═══════════════════════════════════════════════════════════════════
   // Student info modal (steps 02–04) — registration is step 01, so the
@@ -134,6 +130,8 @@ export class OnboardingPreferences implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadInterestOptions();
+
     // Show the modal only while the student hasn't completed it yet — a refresh
     // mid-flow brings it back, an already-completed profile skips straight to
     // the course-preference steps. Transient failures (cold backend, network
@@ -158,6 +156,22 @@ export class OnboardingPreferences implements OnInit {
         // Retries exhausted (or not a student) → never block the preference flow.
         error: () => this.profileChecked.set(true),
       });
+  }
+
+  /**
+   * Build the interest choices from the live admin categories so every option maps to
+   * real, recommendable courses. Falls back to the static default if the fetch fails.
+   */
+  private loadInterestOptions(): void {
+    this.categoryService.getAll().subscribe({
+      next: (res: any) => {
+        const cats = (res?.data ?? res?.Data ?? []) as { name?: string }[];
+        const names = cats.map((c) => c?.name ?? '').filter(Boolean);
+        const options = this.reco.buildInterestOptions(names);
+        if (options.length > 0) this.interestOptions.set(options);
+      },
+      error: () => { /* keep the static fallback list */ },
+    });
   }
 
   private buildSscYears(): string[] {

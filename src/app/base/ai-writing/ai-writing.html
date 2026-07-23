@@ -77,6 +77,11 @@
         @if (r.hasFile) {
           <button type="button" class="aiw-file-btn" (click)="viewMyFile()">📎 {{ lang.t().aiwViewFile }}</button>
         }
+
+        <div class="aiw-retake-row">
+          <button type="button" class="aiw-retake" (click)="retake()">🔁 {{ lang.t().aiwRetake }}</button>
+          <span class="aiw-retake-note">{{ lang.t().aiwRetakeNote }}</span>
+        </div>
       </section>
 
     } @else if (isSubmitting()) {
@@ -93,7 +98,7 @@
 
       <!-- ══ ATTEMPT FORM ══ -->
       <section class="aiw-form" aria-label="Write your answer">
-        <p class="aiw-one-attempt">⚠️ {{ lang.t().aiwOneAttempt }}</p>
+        <p class="aiw-one-attempt">🔁 {{ lang.t().aiwRetakeNote }}</p>
 
         @if (t.topics.length > 0) {
           <div class="aiw-topics">

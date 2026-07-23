@@ -85,7 +85,11 @@ export class LiveExamResponses implements OnInit {
     if (window.history.length > 1) { this.location.back(); return; }
     // Router navigation (not window.location.href) — keeps the SPA alive and
     // respects the base href on the GitHub-Pages subpath deploy.
-    this.router.navigateByUrl(this.isAdmin() ? '/course-manager' : '/teacher');
+    // ?course/?section reopen the course's Live Classes panel instead of the bare course list.
+    const courseId = this.exam()?.courseId;
+    void this.router.navigate([this.isAdmin() ? '/course-manager' : '/teacher'], {
+      queryParams: courseId ? { course: courseId, section: 'live' } : {},
+    });
   }
 
   protected async load(): Promise<void> {

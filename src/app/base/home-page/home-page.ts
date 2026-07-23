@@ -462,7 +462,8 @@ private reviewInterval: any;
     try { prefs = await firstValueFrom(this.learningApi.getUserPreferences()); }
     catch { prefs = null; } // 404 = no preferences saved yet
 
-    const ranked = this.reco.rankCourses(candidates, prefs, { limit: 8 });
+    const categoryNames = this.categories().map((c) => c.name);
+    const ranked = this.reco.rankCourses(candidates, prefs, { limit: 8, categories: categoryNames });
     if (ranked.length > 0) {
       this.recoUsedPrefs.set(true);
       this.recommendedCourses.set(ranked);

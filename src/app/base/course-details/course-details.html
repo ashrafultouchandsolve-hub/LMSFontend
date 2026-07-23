@@ -96,6 +96,85 @@
 							</li>
 						</ul>
 					</section>
+
+					<!-- Curriculum / syllabus -->
+					<section class="details-section cd-curriculum">
+						<div class="cd-curr-head">
+							<h2>{{ lang.t().cdCurriculum }}</h2>
+							@if (lessons().length > 0) {
+								<span class="cd-curr-meta">
+									{{ lessons().length }} {{ lang.t().cdLessonsWord }}
+									@if (freePreviewCount() > 0) { · {{ freePreviewCount() }} {{ lang.t().cdFreePreview }} }
+								</span>
+							}
+						</div>
+
+						@if (isLoadingLessons()) {
+							<div class="cd-curr-loading">
+								@for (s of [1,2,3,4]; track s) { <span class="cd-curr-skel"></span> }
+							</div>
+						} @else if (lessons().length === 0) {
+							<p class="cd-curr-empty">{{ lang.t().cdCurriculumEmpty }}</p>
+						} @else {
+							<ol class="cd-curr-list">
+								@for (l of lessons(); track l.id; let i = $index) {
+									<li class="cd-curr-item">
+										<span class="cd-curr-num">{{ i + 1 }}</span>
+										<span class="cd-curr-ic" aria-hidden="true">{{ l.hasVideo ? '🎬' : '📄' }}</span>
+										<span class="cd-curr-title">{{ l.title }}</span>
+										<span class="cd-curr-tags">
+											@if (l.quizCount > 0) { <span class="cd-curr-tag">📝 {{ l.quizCount }}</span> }
+											@if (l.isFreePreview) { <span class="cd-curr-tag cd-curr-tag--free">{{ lang.t().cdFree }}</span> }
+											@if (l.durationMinutes > 0) { <span class="cd-curr-dur">{{ l.durationMinutes }} {{ lang.t().cdMinShort }}</span> }
+										</span>
+									</li>
+								}
+							</ol>
+						}
+					</section>
+
+					<!-- Ratings & reviews -->
+					@if (totalRatings() > 0) {
+						<section class="details-section cd-reviews">
+							<h2>{{ lang.t().cdReviewsTitle }}</h2>
+							<div class="cd-rev-summary">
+								<div class="cd-rev-score">
+									<span class="cd-rev-avg">{{ averageRating().toFixed(1) }}</span>
+									<span class="cd-rev-out">/ 5</span>
+									<div class="cd-rev-stars" aria-hidden="true">
+										@for (s of getStarArray(); track s) {
+											<span class="cd-rev-star" [class.filled]="s <= averageRating()">★</span>
+										}
+									</div>
+									<span class="cd-rev-total">{{ totalRatings() }} {{ lang.t().cdRatings }}</span>
+								</div>
+								<div class="cd-rev-bars">
+									@for (bar of ratingBars(); track bar.star) {
+										<div class="cd-rev-bar-row">
+											<span class="cd-rev-bar-star">{{ bar.star }} ★</span>
+											<span class="cd-rev-bar-track"><span class="cd-rev-bar-fill" [style.width.%]="bar.percent"></span></span>
+											<span class="cd-rev-bar-count">{{ bar.count }}</span>
+										</div>
+									}
+								</div>
+							</div>
+
+							@if (recentReviews().length > 0) {
+								<ul class="cd-rev-list">
+									@for (r of recentReviews(); track $index) {
+										<li class="cd-rev-item">
+											<div class="cd-rev-item-stars" aria-hidden="true">
+												@for (s of getStarArray(); track s) {
+													<span class="cd-rev-star" [class.filled]="s <= r.rating">★</span>
+												}
+											</div>
+											<p class="cd-rev-text">{{ r.feedback }}</p>
+										</li>
+									}
+								</ul>
+							}
+						</section>
+					}
 				</article>
 			</section>
 

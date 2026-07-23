@@ -1173,6 +1173,15 @@
 }
 .sd-badge strong { font-size: 1.35rem; font-weight: 800; line-height: 1; }
 .sd-badge span { font-size: 0.74rem; color: rgba(255, 255, 255, 0.85); margin-top: 3px; }
+.sd-badge--rank {
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+	background: rgba(245, 200, 66, 0.22);
+	border-color: rgba(245, 200, 66, 0.45);
+	transition: transform .14s, background .14s;
+}
+.sd-badge--rank:hover { transform: translateY(-2px); background: rgba(245, 200, 66, 0.32); }
 
 /* Metric row: overall progress + weekly goal */
 .sd-metric-row {

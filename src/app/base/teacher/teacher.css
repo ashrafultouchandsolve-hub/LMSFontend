@@ -149,10 +149,16 @@
   min-height: 100vh;
 }
 
+/* Pinned to the viewport: `min-height` + the grid's default `align-self: stretch`
+   made this as tall as the whole page, so `position: sticky` had nothing to stick
+   to and the nav scrolled away with the content. `align-self: start` + a fixed
+   `height` gives sticky a real box; the nav itself scrolls internally when a role
+   has more sections than fit. */
 .sidebar {
   position: sticky;
   top: 0;
-  min-height: 100vh;
+  align-self: start;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   /* top clearance for the fixed floating navbar — dark bg fills the top so no empty gap */
@@ -177,8 +183,22 @@
 .sidebar-nav {
   display: grid;
   gap: 6px;
+  align-content: start;
   padding-top: 14px;
+  /* min-height:0 lets this flex child shrink so overflow actually kicks in and
+     the "back to site" button below stays pinned to the bottom. */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
+.sidebar-nav::-webkit-scrollbar { width: 6px; }
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
 
 .side-link {
   width: 100%;
@@ -650,41 +670,149 @@ tr:last-child td {
   font-size: 0.92rem;
 }
 
+/* ── Live-class list toolbar (search + status tabs) ── */
+.live-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+}
+
+.live-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.live-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e0e5f2;
+  border-radius: 999px;
+  background: #fff;
+  color: #4b5675;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.live-filter:hover:not(:disabled) { border-color: #b9c8ec; color: #1d4ed8; }
+.live-filter.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+.live-filter:disabled { opacity: 0.45; cursor: default; }
+.live-filter-count {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(23, 27, 47, 0.08);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.live-filter.active .live-filter-count { background: rgba(255, 255, 255, 0.22); }
+
+.live-search {
+  flex: 0 1 240px;
+  min-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid #e0e5f2;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.86rem;
+  color: #171b2f;
+}
+.live-search:focus {
+  outline: none;
+  border-color: #9db6ee;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
 .live-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .live-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1px solid #e3e7f4;
   border-radius: 12px;
   background: #ffffff;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
+.live-item:hover { border-color: #cfd8ee; box-shadow: 0 4px 14px -10px rgba(23, 27, 47, 0.45); }
 
 .live-item.active {
   border-color: #c9dcff;
   box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.04);
 }
 
+/* Finished classes are archive material — dial them back so live/upcoming stand out. */
+.live-item.ended { background: #fbfcfe; }
+.live-item.ended .live-item-title strong { color: rgba(23, 27, 47, 0.78); }
+
 .live-item-info {
   display: grid;
-  gap: 4px;
+  gap: 3px;
+  min-width: 0;
 }
 
-.live-item-info strong {
-  font-size: 1rem;
+.live-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
-.live-item-info span,
-.live-item-info p {
+.live-item-title strong {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  animation: live-pulse 1.6s ease-out infinite;
+  flex: none;
+}
+@keyframes live-pulse {
+  70% { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.live-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: rgba(23, 27, 47, 0.6);
+  font-size: 0.82rem;
+}
+.live-item-meta .chip { margin-top: 0; }
+
+/* One line only — a long description used to blow the row height up. */
+.live-item-desc {
   margin: 0;
-  color: rgba(23, 27, 47, 0.66);
-  font-size: 0.88rem;
+  color: rgba(23, 27, 47, 0.6);
+  font-size: 0.84rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .live-item-actions {
@@ -692,12 +820,60 @@ tr:last-child td {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.live-upcoming {
+  background: #eef4ff;
+  border: 1px solid #cfdefb;
+  color: #1d4ed8;
+}
+
+.live-more {
+  justify-self: center;
+  padding: 9px 18px;
+  border: 1px dashed #c8d2ea;
+  border-radius: 999px;
+  background: #fff;
+  color: #34406a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.live-more:hover { background: #f3f6fd; border-color: #9db6ee; color: #1d4ed8; }
+
+/* Publish an attached exam straight from the list */
+.btn-publish {
+  background: #16a34a;
+  border: 1px solid #16a34a;
+  color: #fff;
+  font-weight: 700;
+}
+.btn-publish:hover:not(:disabled) { background: #15803d; border-color: #15803d; }
+.btn-publish:disabled { opacity: 0.6; cursor: default; }
+
+@media (max-width: 720px) {
+  .live-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .live-item-actions { justify-content: flex-start; }
 }
 
 .live-ended {
   background: #f1f5f9;
   border: 1px solid #dbe3ef;
   color: #63708d;
+}
+.live-rec-ready {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+.live-rec-none {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
 }
 
 /* ── Live-class exam (Google-Forms style) chips & buttons ── */

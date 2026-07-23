@@ -50,6 +50,8 @@ export class Register {
       nonNullable: true,
       validators: [Validators.required, Validators.pattern(/^[+]?[0-9][0-9\s\-]{6,14}$/)],
     }),
+    // Academic group (Science/Commerce/Arts/Others) — students only, optional.
+    group: new FormControl('', { nonNullable: true }),
     // Parent/guardian info এখন post-registration onboarding modal-এ (step 04) নেওয়া হয়।
     password: new FormControl('', {
       nonNullable: true,
@@ -79,8 +81,11 @@ export class Register {
 
     this.isSubmitting.set(true);
 
+    // Group is only meaningful for students; teachers send nothing.
+    const group = Number(value.role) === 0 ? (value.group || undefined) : undefined;
+
     this.authService
-      .register(value.fullname, value.email, value.password, Number(value.role), value.mobileNumber)
+      .register(value.fullname, value.email, value.password, Number(value.role), value.mobileNumber, group)
       .subscribe({
         next: (response: any) => {
           this.isSubmitting.set(false);

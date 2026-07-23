@@ -33,8 +33,9 @@ export class LiveClassService {
   private readonly http    = inject(HttpClient);
   private readonly baseUrl = environment.baseUrl +'/LiveClass';
 
-  getByCourse(courseId: string): Observable<{ data: LiveClass[] }> {
-    return this.http.get<any>(`${this.baseUrl}/course/${courseId}`);
+  getByCourse(courseId: string, includeEnded = false): Observable<{ data: LiveClass[] }> {
+    const q = includeEnded ? '?includeEnded=true' : '';
+    return this.http.get<any>(`${this.baseUrl}/course/${courseId}${q}`);
   }
 
   create(dto: { courseId: string; title: string; description: string; scheduledAt: string }): Observable<any> {

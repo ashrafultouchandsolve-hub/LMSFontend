@@ -128,3 +128,17 @@
 }
 .notif-empty span { font-size: 36px; }
 .notif-empty p { font-size: 13px; }
+.notif-viewall {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-top: 1px solid #eef0f4;
+  background: #f8fafc;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+  transition: background .15s;
+}
+.notif-viewall:hover { background: #eff6ff; }
