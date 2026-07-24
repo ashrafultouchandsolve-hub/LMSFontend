@@ -64,3 +64,13 @@
   transition: transform 0.2s;
 }
 .fc-btn:hover { transform: translateY(-2px); }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .fc-hero { padding: 52px 6% 40px; }
+  .fc-hero p { font-size: 14px; }
+  .fc-body { padding: 40px 5%; }
+  .fc-coming-soon { padding: 40px 22px; }
+  .fc-coming-soon h2 { font-size: 21px; }
+  .top-navbar { padding: 0 5%; }
+}

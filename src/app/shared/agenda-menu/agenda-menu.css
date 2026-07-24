@@ -267,5 +267,23 @@
 /* ── Mobile ── */
 @media (max-width: 640px) {
 	.agenda-pill-text { max-width: 120px; }
-	.agenda-dd { right: -8px; }
+	/* was right:-8px — that pushed the panel PAST the right edge; keep it aligned. */
+	.agenda-dd { right: 0; }
+}
+
+/* ── Mobile / narrow screens ────────────────────────────────────────
+   Anchored (right:0) to the "upcoming" pill, which sits mid-navbar — on
+   narrow screens that pushes the 400px panel off the LEFT edge. Pin it to
+   the viewport's top-right instead so it can never spill off either edge. */
+@media (max-width: 820px) {
+	.agenda-dd {
+		position: fixed;
+		top: 70px;
+		right: 14px;
+		left: auto;
+		width: min(400px, calc(100vw - 28px));
+		max-width: none;
+	}
+	/* the little caret would point at nothing once the panel is viewport-pinned */
+	.agenda-dd::before { display: none; }
 }

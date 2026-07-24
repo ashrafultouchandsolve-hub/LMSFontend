@@ -1,4 +1,4 @@
-<header class="topbar">
+<header class="topbar" [class.topbar--menu-open]="mobileMenuOpen()">
   <a class="brand" routerLink="/homepage" aria-label="Learning platform home">
     <img src="./nirvoor-logo.png" alt="Nirvoor e-learning" class="brand-logo" />
   </a>
@@ -7,6 +7,7 @@
     class="hamburger"
     (click)="toggleMobileMenu()"
     [class.hamburger--open]="mobileMenuOpen()"
+    [attr.aria-expanded]="mobileMenuOpen()"
     aria-label="Toggle menu">
     <span></span><span></span><span></span>
   </button>

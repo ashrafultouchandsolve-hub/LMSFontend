@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;   /* dvh → Jitsi controls aren't hidden under the mobile address bar */
   background: #0d0f14;
   font-family: 'Sora', sans-serif;
 }
@@ -255,4 +256,23 @@
   height: 100%;
   background: linear-gradient(90deg, #6366f1, #8b5cf6);
   transition: width 0.2s ease;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────
+   The header packs back-link + title + exam button + chip + end button
+   into one row; let it wrap and shrink so nothing spills off a phone. */
+@media (max-width: 640px) {
+  .lc-header {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 10px 12px;
+  }
+  .lc-title-wrap h1 { font-size: 13.5px; }
+  .lc-back { font-size: 12px; }
+  .lc-exam-btn,
+  .lc-end-btn { padding: 6px 12px; font-size: 12px; margin-right: 0; }
+  .lc-exam-chip { font-size: 11px; padding: 6px 10px; margin-right: 0; }
+  .lc-rec-note { padding: 8px 12px; font-size: 12px; }
+  .lc-rec-prompt { padding: 26px 20px; }
+  .lc-rec-prompt-actions { flex-direction: column-reverse; }
 }

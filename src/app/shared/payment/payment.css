@@ -200,6 +200,21 @@ small {
 	.field-grid {
 		grid-template-columns: 1fr;
 	}
+
+	/* Full-width, thumb-friendly primary CTA on phones. */
+	.pay-button {
+		width: 100%;
+		min-height: 50px;
+	}
+	.method-btn { min-height: 44px; }
+}
+
+@media (max-width: 480px) {
+	.summary-card,
+	.form-card { padding: 1rem 0.9rem; }
+	/* Keep coupon input + Apply on one row but let the button shrink to fit. */
+	.coupon-apply { white-space: nowrap; }
+	.summary-card h1 { font-size: 1.2rem; }
 }
 /* ── payment.css এর একদম শেষে এই CSS টা যোগ করো ── */
 

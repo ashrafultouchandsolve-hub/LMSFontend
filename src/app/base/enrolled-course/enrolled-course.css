@@ -849,6 +849,13 @@
     grid-template-columns: 1fr;
   }
 
+  /* Stacked below the video on mobile: let the lesson list flow with the page
+     instead of trapping it in a short nested scroll area. */
+  .lesson-sidebar {
+    max-height: none;
+    overflow-y: visible;
+  }
+
   .comment-top,
   .comments-header {
     flex-direction: column;

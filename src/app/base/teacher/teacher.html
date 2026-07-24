@@ -8,7 +8,7 @@
   @if (!embedded()) {
     <aside class="sidebar" aria-label="Teacher dashboard navigation">
       <div class="sidebar-head">
-        <h2>⚙ {{ lang.t().tcAdminPanel }}</h2>
+        <h2>⚙ {{ isAdminMode() ? lang.t().tcAdminPanel : lang.t().tcTeacherPanel }}</h2>
       </div>
 
       <nav class="sidebar-nav">
@@ -147,7 +147,7 @@
           (input)="updateSearchTerm($any($event.target).value)" />
 
         <div class="table-wrap">
-          <table>
+          <table class="tc-courses-table">
             <thead>
               <tr>
                 <th>{{ lang.t().tcThTitle }}</th>
@@ -164,7 +164,7 @@
             <tbody>
               @for (course of filteredCourses(); track course.id) {
                 <tr>
-                  <td>
+                  <td class="td-title">
                     <div class="course-title-cell">
                       @if (canRenderThumbnail(course.thumbnailUrl)) {
                         <img [src]="course.thumbnailUrl" [alt]="course.title + ' thumbnail'" class="thumb" />
@@ -174,19 +174,19 @@
                       <span>{{ course.title }}</span>
                     </div>
                   </td>
-                  <td><span class="chip">{{ course.category }}</span></td>
-                  <td>{{ course.level }}</td>
-                  <td>{{ formatPrice(course.price) }}</td>
-                  <td>{{ course.lessonCount }}</td>
-                  <td>{{ course.students }}</td>
-                  <td>
+                  <td [attr.data-label]="lang.t().tcThCategory"><span class="chip">{{ course.category }}</span></td>
+                  <td [attr.data-label]="lang.t().tcThLevel">{{ course.level }}</td>
+                  <td [attr.data-label]="lang.t().tcThPrice">{{ formatPrice(course.price) }}</td>
+                  <td [attr.data-label]="lang.t().tcThLessons">{{ course.lessonCount }}</td>
+                  <td [attr.data-label]="lang.t().tcThStudents">{{ course.students }}</td>
+                  <td [attr.data-label]="lang.t().tcThRating">
                     @if (course.totalRatings > 0) {
                       <span class="rating-pill">⭐ {{ course.averageRating.toFixed(1) }} ({{ course.totalRatings }})</span>
                     } @else {
                       <span class="rating-pill rating-pill-empty">{{ lang.t().tcNoRatings }}</span>
                     }
                   </td>
-                  <td>
+                  <td [attr.data-label]="lang.t().tcThStatus">
                     <span class="status" [class.live]="course.published">
                       {{ course.published ? lang.t().cdPublished : lang.t().cdDraft }}
                     </span>
@@ -1120,6 +1120,7 @@
         <h3>📋 {{ lang.t().esTitle }} — {{ selectedCourse()?.title }}</h3>
         <button (click)="showStudentsPanel.set(false)">✕</button>
       </div>
+      <div class="table-scroll">
       <table class="students-table">
         <thead>
           <tr>
@@ -1151,6 +1152,7 @@
           }
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 }

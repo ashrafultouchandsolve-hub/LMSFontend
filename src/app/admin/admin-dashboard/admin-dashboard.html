@@ -176,10 +176,10 @@
         <tbody>
           @for (teacher of filteredTeachers(); track teacher.id) {
           <tr>
-            <td>{{ teacher.fullName }}</td>
-            <td class="email-cell">{{ teacher.email }}</td>
-            <td>{{ teacher.courseCount }}</td>
-            <td><span class="badge" [class]="'badge-' + teacher.status.toLowerCase()">{{ teacher.status }}</span></td>
+            <td class="td-name">{{ teacher.fullName }}</td>
+            <td class="email-cell" [attr.data-label]="lang.t().commonEmail">{{ teacher.email }}</td>
+            <td [attr.data-label]="lang.t().adThCourses">{{ teacher.courseCount }}</td>
+            <td [attr.data-label]="lang.t().tcThStatus"><span class="badge" [class]="'badge-' + teacher.status.toLowerCase()">{{ teacher.status }}</span></td>
             <td class="actions-cell">
               @if (teacher.status === 'Pending') {
               <button class="btn btn-approve" (click)="approveTeacher(teacher.id)">{{ lang.t().adApprove }}</button>
@@ -229,10 +229,10 @@
         <tbody>
           @for (student of filteredStudents(); track student.id) {
           <tr>
-            <td>{{ student.fullName }}</td>
-            <td class="email-cell">{{ student.email }}</td>
-            <td>{{ student.enrolledCourses }}</td>
-            <td><span class="badge" [class]="'badge-' + student.status.toLowerCase()">{{ student.status }}</span></td>
+            <td class="td-name">{{ student.fullName }}</td>
+            <td class="email-cell" [attr.data-label]="lang.t().commonEmail">{{ student.email }}</td>
+            <td [attr.data-label]="lang.t().tcEnrolled">{{ student.enrolledCourses }}</td>
+            <td [attr.data-label]="lang.t().tcThStatus"><span class="badge" [class]="'badge-' + student.status.toLowerCase()">{{ student.status }}</span></td>
             <td class="actions-cell">
               @if (student.status === 'Active') {
               <button class="btn btn-block" (click)="blockStudent(student.id)">{{ lang.t().adBlock }}</button>
@@ -308,8 +308,8 @@
         <tbody>
           @for (student of filteredPrStudents(); track student.id) {
           <tr>
-            <td>{{ student.fullName }}</td>
-            <td class="email-cell">{{ student.email }}</td>
+            <td class="td-name">{{ student.fullName }}</td>
+            <td class="email-cell" [attr.data-label]="lang.t().commonEmail">{{ student.email }}</td>
             <td class="actions-cell">
               <button class="btn btn-approve" (click)="openPrPreview(student)">
                 👁️ {{ lang.isBangla() ? 'রিপোর্ট দেখো' : 'Preview report' }}

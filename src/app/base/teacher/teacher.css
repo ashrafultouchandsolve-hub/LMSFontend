@@ -1210,24 +1210,50 @@ label.full,
     grid-template-columns: 1fr;
   }
 
+  /* Sidebar → a compact top bar (like the admin dashboard), not a tall dark
+     column. The 84px top padding was navbar clearance for the desktop sticky
+     column; on mobile the app-navbar already reserves that space, so it just
+     made a big empty dark block. */
   .sidebar {
     position: static;
     min-height: auto;
+    height: auto;
+    padding: 12px 12px 12px;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  /* sidebar (with its own top clearance) sits on top now, so the content area starts normally */
-  .dashboard-area {
-    padding-top: 24px;
+  .sidebar-head {
+    padding: 2px 6px 10px;
+  }
+  .sidebar-head h2 {
+    font-size: 1.15rem;
   }
 
+  /* Nav links become a single horizontal scrolling row of pills. */
   .sidebar-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-top: 0;
+    gap: 6px;
+  }
+  .side-link,
+  .side-course-name {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .dashboard-area {
+    padding-top: 20px;
   }
 
   .back-site {
     margin-top: 10px;
+    align-self: flex-start;
   }
 }
 
@@ -1576,3 +1602,67 @@ label.full,
 }
 .aiw-sub-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .aiw-override-input { flex: 0 0 90px; min-width: 90px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   Courses table → cards on mobile (Part 10 fix)
+   9 columns + 5 action buttons don't fit a phone; horizontal scrolling to
+   reach the actions is poor UX. On small screens each course row becomes a
+   self-contained card: thumbnail+title on top, labelled fields, then the
+   full action button row — everything visible, no sideways scrolling.
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 820px) {
+  .table-wrap { overflow-x: visible; }
+  .tc-courses-table { min-width: 0; }
+  .tc-courses-table,
+  .tc-courses-table tbody { display: block; width: 100%; }
+  .tc-courses-table thead { display: none; }
+
+  .tc-courses-table tr {
+    display: block;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+  }
+
+  .tc-courses-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    border: none;
+    text-align: right;
+  }
+  .tc-courses-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #6b7280;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Title = card header (thumbnail + title, no label). */
+  .tc-courses-table td.td-title {
+    justify-content: flex-start;
+    padding: 2px 0 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .tc-courses-table td.td-title::before { display: none; }
+  .tc-courses-table td.td-title .course-title-cell span { font-weight: 800; font-size: 15px; }
+
+  /* Actions = full-width button row at the bottom of the card, no label. */
+  .tc-courses-table td.actions-cell {
+    justify-content: flex-start;
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .tc-courses-table td.actions-cell::before { display: none; }
+  .tc-courses-table td.actions-cell .row-actions { flex-wrap: wrap; }
+}

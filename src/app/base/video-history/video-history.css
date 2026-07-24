@@ -64,3 +64,18 @@
 .vh-resume-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,0.30); }
 .vh-resume-btn.completed { background: #10b981; }
 .vh-resume-btn.completed:hover { box-shadow: 0 4px 14px rgba(16,185,129,0.30); }
+
+/* ── Mobile ─────────────────────────────────────────────────────────
+   The card body is a row (info · % circle · resume) on desktop; on phones
+   it would cram the title, so stack it: info on top, then a row with the
+   % circle and a full-width resume button that's easy to tap. */
+@media (max-width: 600px) {
+  .vh-page { padding: 20px 14px 64px; }
+  .vh-header { gap: 10px; margin-bottom: 22px; }
+  .vh-header h1 { font-size: 1.4rem; }
+
+  .vh-card-body { flex-direction: column; align-items: stretch; gap: 14px; padding: 16px; }
+  .vh-right { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; gap: 12px; }
+  .vh-percent-circle { width: 52px; height: 52px; flex-shrink: 0; }
+  .vh-resume-btn { flex: 1; justify-content: center; min-height: 44px; }
+}

@@ -4,6 +4,7 @@
 
 .onboarding-page {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 24px;
   display: grid;
   place-items: center;
@@ -170,6 +171,7 @@
 .info-modal {
   width: min(680px, 100%);
   max-height: calc(100vh - 36px);
+  max-height: calc(100dvh - 36px);
   overflow-y: auto;
   background: #ffffff;
   border: 1px solid rgba(37, 99, 235, 0.16);

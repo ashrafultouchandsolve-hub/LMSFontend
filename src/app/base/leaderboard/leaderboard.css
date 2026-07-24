@@ -631,6 +631,11 @@
   .p-av-2, .p-av-3 { width: 48px; height: 48px; font-size: 1.05rem; }
   .p-name { font-size: 0.78rem; max-width: 90px; }
   .lb-table th, .lb-table td { padding: 10px 10px; }
+  /* The ranking table is wider than a phone; let it scroll sideways inside
+     its rounded card instead of clipping the Total/Score columns.
+     overflow-y stays hidden (from the base rule) so the corners stay round. */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .lb-table { min-width: 460px; }
   .bar-bg { display: none; }
   .my-rank-bar {
     flex-direction: column;

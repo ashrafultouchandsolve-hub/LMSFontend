@@ -156,6 +156,13 @@
 @media (max-width: 640px) {
   .es-table th, .es-table td { padding: 10px 10px; }
   .td-email { display: none; }
+  /* Let the student table scroll sideways instead of clipping its right
+     columns (overflow-y stays hidden from the base rule → corners stay round). */
+  .es-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .es-table { min-width: 520px; }
+  /* Stack the header so the Back button doesn't overlap the title. */
+  .es-header { flex-direction: column; gap: 10px; }
+  .es-header h1 { font-size: 1.25rem; }
 }
 /* ── Composite progress column (certificate decisions) ─── */
 .td-progress { min-width: 130px; }

@@ -63,6 +63,17 @@
 .save-btn:hover { background: #6d28d9; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124,58,237,0.38); }
 .save-btn:disabled { background: #d1d5db; box-shadow: none; cursor: not-allowed; transform: none; }
 
+/* ── Mobile ─────────────────────────────────────────────────────────
+   Option inputs go single-column so each A/B/C/D text field is full-width
+   and comfortable to type in on a phone. */
+@media (max-width: 600px) {
+  .quiz-page { padding: 20px 14px 72px; }
+  .quiz-header { gap: 12px; }
+  .quiz-header h1 { font-size: 1.3rem; }
+  .options-grid { grid-template-columns: 1fr; }
+  .quiz-form-card { padding: 16px; }
+}
+
 /* Existing quizzes */
 .existing-quizzes { margin-top: 40px; }
 .existing-quizzes h2 {color: #111827;  font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; }

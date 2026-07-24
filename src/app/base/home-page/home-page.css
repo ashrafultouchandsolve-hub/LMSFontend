@@ -2288,6 +2288,9 @@ p {
 
   .review-card-left {
     padding: 24px 20px;
+    /* Drop the desktop side-by-side min-width so the stacked card can
+       never exceed the viewport on very narrow phones. */
+    min-width: 0;
   }
 
   .review-arrow {
@@ -2435,18 +2438,25 @@ p {
     font-size: 10px;
   }
 
+  /* Narrow carousel cards: stack the footer with a full-width CTA button
+     and the link centred below (matches the ≤480 treatment). */
   .cat-footer {
-    padding: 8px 0 0;
+    padding: 10px 0 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .cat-btn {
-    height: 30px;
+    width: 100%;
+    height: 36px;
     padding: 0 12px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .cat-link {
-    font-size: 10px;
+    font-size: 10.5px;
+    text-align: center;
   }
 
   /* ── Footer ── */
@@ -2463,8 +2473,12 @@ p {
 @media (max-width: 480px) {
 
   /* ── Categories ── */
+  /* On phones the side arrows are hidden (touch users swipe the track), so
+     the whole width is free for the card. 88% is measured against the track
+     itself (not the screen), so the card always fits fully with a small peek
+     of the next card regardless of the page's side padding. */
   .cats-viewport {
-    grid-auto-columns: 88vw;
+    grid-auto-columns: 88%;
   }
 
   .category-grid {
@@ -2481,14 +2495,13 @@ p {
     margin-bottom: 16px;
   }
 
+  /* No arrows on phones → the shell is just the full-width swipe track. */
   .cats-carousel-shell {
-    gap: 6px;
+    gap: 0;
   }
 
   .cats-arrow {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
+    display: none;
   }
 
   .cat-card {
@@ -2542,19 +2555,21 @@ p {
   }
 
   .cat-footer {
-    padding: 6px 0 0;
-    gap: 4px;
+    padding: 10px 0 0;
+    gap: 8px;
   }
 
   .cat-btn {
-    height: 28px;
-    padding: 0 10px;
-    font-size: 9px;
-    border-radius: 8px;
+    /* Full-width CTA instead of a tiny pill floating in the centre. */
+    width: 100%;
+    height: 38px;
+    padding: 0 14px;
+    font-size: 12px;
+    border-radius: 10px;
   }
 
   .cat-link {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .cat-card--browse {
@@ -2590,9 +2605,13 @@ p {
     grid-template-columns: 1fr 1fr;
   }
 
-  /* ── Course card footer ── */
+  /* ── Course card footer: full-width button on top, link centred below ── */
   .cat-footer {
     flex-direction: column;
+    align-items: stretch;
+  }
+  .cat-footer .cat-link {
+    text-align: center;
   }
 
   /* ── Footer CTA ── */

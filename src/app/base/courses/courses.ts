@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../Service/auth.service';
@@ -223,6 +223,13 @@ export class Courses {
     this.loadCategories();
     void this.initPersonalization();
     void this.load();
+
+    // Lock page scroll while the mobile filter drawer is open.
+    effect(() => {
+      if (typeof document !== 'undefined') {
+        document.body.classList.toggle('rp-scroll-lock', this.filtersOpen());
+      }
+    });
   }
 
   /** Enrollment/wishlist first (so recommendations can exclude enrolled courses), then reco. */

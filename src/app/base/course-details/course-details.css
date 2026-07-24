@@ -641,6 +641,22 @@
 	.course-layout {
 		grid-template-columns: 1fr;
 	}
+
+	/* Lift the purchase card (image · rating · price · Enroll) above the long
+	   content so students see the price and CTA first, not after scrolling
+	   past teacher/description/curriculum/reviews. */
+	.course-side-card {
+		order: -1;
+	}
+}
+
+@media (max-width: 480px) {
+	.course-details-page {
+		padding: 0.75rem 0.7rem 1.5rem;
+	}
+	.card-body { padding: 1.1rem; }
+	/* Teacher cards stack to one column so names/bios never get squeezed. */
+	.cd-teacher-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Course teachers (instructor cards) ─────────────────────────── */

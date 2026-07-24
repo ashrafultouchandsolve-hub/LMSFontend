@@ -197,7 +197,7 @@ export interface Translations {
   // Common actions
   commonEdit: string; commonDelete: string; commonName: string; commonTitle: string; commonDescription: string;
   // Teacher dashboard
-  tcAdminPanel: string; tcSideDashboard: string; tcSideCourses: string; tcSideUsers: string;
+  tcAdminPanel: string; tcTeacherPanel: string; tcSideDashboard: string; tcSideCourses: string; tcSideUsers: string;
   tcSideEnrollments: string; tcSideProfile: string; tcBackToSite: string; tcSideLive: string;
   // Teacher free live class panel
   tcLiveTitle: string; tcLiveSub: string; tcLiveStartHeading: string; tcLivePickCourse: string;
@@ -574,7 +574,7 @@ const EN: Translations = {
   qeQuestionPlaceholder: 'Enter question...', qeCorrect: 'Correct', qeOption: 'Option', qeSaveAll: 'Save All Quiz',
   qeSaving: 'Saving...', qeSavedQuizzes: 'Saved Quizzes',
   commonEdit: 'Edit', commonDelete: 'Delete', commonName: 'Name', commonTitle: 'Title', commonDescription: 'Description',
-  tcAdminPanel: 'Admin Panel', tcSideDashboard: 'Dashboard', tcSideCourses: 'Courses', tcSideUsers: 'Users',
+  tcAdminPanel: 'Admin Panel', tcTeacherPanel: 'Teacher Panel', tcSideDashboard: 'Dashboard', tcSideCourses: 'Courses', tcSideUsers: 'Users',
   tcSideEnrollments: 'Enrollments', tcSideProfile: 'My Profile', tcBackToSite: 'Back to Site', tcSideLive: 'Free Live Class',
   tcLiveTitle: 'Free Live Class', tcLiveSub: 'Start a public live class anyone can join — no login or registration needed.',
   tcLiveStartHeading: 'Start a new free live class',
@@ -1011,7 +1011,7 @@ const BN: Translations = {
   qeQuestionPlaceholder: 'প্রশ্ন লিখুন...', qeCorrect: 'সঠিক', qeOption: 'অপশন', qeSaveAll: 'সব কুইজ সংরক্ষণ',
   qeSaving: 'সংরক্ষণ হচ্ছে...', qeSavedQuizzes: 'সংরক্ষিত কুইজ',
   commonEdit: 'এডিট', commonDelete: 'মুছুন', commonName: 'নাম', commonTitle: 'শিরোনাম', commonDescription: 'বিবরণ',
-  tcAdminPanel: 'অ্যাডমিন প্যানেল', tcSideDashboard: 'ড্যাশবোর্ড', tcSideCourses: 'কোর্স', tcSideUsers: 'ব্যবহারকারী',
+  tcAdminPanel: 'অ্যাডমিন প্যানেল', tcTeacherPanel: 'শিক্ষক প্যানেল', tcSideDashboard: 'ড্যাশবোর্ড', tcSideCourses: 'কোর্স', tcSideUsers: 'ব্যবহারকারী',
   tcSideEnrollments: 'এনরোলমেন্ট', tcSideProfile: 'আমার প্রোফাইল', tcBackToSite: 'সাইটে ফিরুন', tcSideLive: 'ফ্রি লাইভ ক্লাস',
   tcLiveTitle: 'ফ্রি লাইভ ক্লাস', tcLiveSub: 'এমন একটি পাবলিক লাইভ ক্লাস শুরু করুন যেখানে যে কেউ লগইন বা রেজিস্ট্রেশন ছাড়াই যোগ দিতে পারে।',
   tcLiveStartHeading: 'নতুন ফ্রি লাইভ ক্লাস শুরু করুন',

@@ -562,6 +562,8 @@
 .hamburger {
   display: none;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
   background: none;
   border: none;
@@ -569,6 +571,9 @@
   padding: 6px;
   margin-left: auto;
   z-index: 100;
+  /* Comfortable thumb target (≥44px) on touch screens. */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .hamburger span {
@@ -661,40 +666,55 @@
     display: none;
   }
 
-  /* OPEN state (hamburger toggled) → the card becomes a scrollable menu */
-  .topbar:has(.topbar-nav--open) {
+  /* OPEN state (hamburger toggled) → the card becomes a scrollable menu.
+     Driven by an explicit [class.topbar--menu-open] binding rather than
+     :has() so it works on browsers without :has() support too. */
+  .topbar--menu-open {
     max-height: calc(100dvh - 24px);
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     align-items: flex-start;
+    padding-bottom: 16px;
   }
 
-  /* Course / link sections: full-width vertical lists */
-  .topbar:has(.topbar-nav--open) .mobile-nav-section {
+  /* Course / link sections: full-width vertical lists.
+     order:2 → they sit BELOW the actions cluster (see below). */
+  .topbar--menu-open .mobile-nav-section {
     display: flex;
     flex-direction: column;
     width: 100%;
     gap: 2px;
+    order: 2;
   }
 
-  .topbar:has(.topbar-nav--open) .mobile-nav-divider {
+  .topbar--menu-open .mobile-nav-divider {
     display: block;
     width: 100%;
     margin: 6px 0;
+    order: 2;
   }
 
-  /* Actions (lang, notifications, user, logout): full-width stacked controls */
-  .topbar:has(.topbar-nav--open) .topbar-actions {
+  /* Actions (lang, notifications, user, logout): full-width stacked controls.
+     order:1 lifts the whole cluster to the TOP of the open menu — right under
+     the logo — so the notification bell + profile sit up top (where the bell's
+     dropdown opens), not buried at the bottom. */
+  .topbar--menu-open .topbar-actions {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
     gap: 10px;
-    padding-top: 12px;
-    margin-top: 4px;
-    border-top: 1px solid var(--c-border);
+    order: 1;
+    padding-bottom: 14px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid var(--c-border);
   }
+
+  /* Within the cluster, put the bell + profile first, then language + logout. */
+  .topbar--menu-open .topbar-actions app-notification-bell { order: -3; }
+  .topbar--menu-open .topbar-actions app-agenda-menu { order: -2; }
+  .topbar--menu-open .topbar-actions .user-menu { order: -1; }
 
   .topbar-actions .lang-toggle-btn,
   .topbar-actions .nav-button {

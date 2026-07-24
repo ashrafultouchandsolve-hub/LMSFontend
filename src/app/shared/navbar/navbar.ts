@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../Service/auth.service';
 import { LanguageService } from '../../Service/language.service';
 import { LiveClassService } from '../../Service/live-class-service';
@@ -28,7 +29,19 @@ export class Navbar implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly liveClassService = inject(LiveClassService);
   private readonly learningApi = inject(LearningApiService);
+  private readonly host = inject(ElementRef<HTMLElement>);
   readonly lang = inject(LanguageService);
+
+  constructor() {
+    // Lock <body> scroll while the mobile menu is open (covers every code
+    // path that flips the signal — toggle, route change, logout, etc.).
+    effect(() => {
+      const open = this.mobileMenuOpen();
+      if (typeof document !== 'undefined') {
+        document.body.classList.toggle('rp-scroll-lock', open);
+      }
+    });
+  }
 
   protected readonly isLoggedIn = signal(false);
   protected readonly userName = signal('');
@@ -74,6 +87,14 @@ export class Navbar implements OnInit, OnDestroy {
         this.userRole.set(typeof user?.role === 'number' ? user.role : null);
         void this.refreshLiveStatus();
       })
+    );
+
+    // Close the mobile menu on every completed navigation (covers links,
+    // programmatic navigation, and back/forward).
+    this.subs.add(
+      this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe(() => this.mobileMenuOpen.set(false))
     );
 
     const user = this.authService.getCurrentUser();
@@ -198,6 +219,22 @@ export class Navbar implements OnInit, OnDestroy {
 
   protected toggleMobileMenu(): void {
     this.mobileMenuOpen.update((v) => !v);
+  }
+
+  /** Tap anywhere outside the navbar closes the open mobile menu. */
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(ev: MouseEvent): void {
+    if (!this.mobileMenuOpen()) return;
+    const el = this.host.nativeElement as HTMLElement | null;
+    if (el && !el.contains(ev.target as Node)) {
+      this.mobileMenuOpen.set(false);
+    }
+  }
+
+  /** Esc closes the open mobile menu. */
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.mobileMenuOpen()) this.mobileMenuOpen.set(false);
   }
 
   /** "Vision" nav link → smooth-scroll to the "Nirvor Nije Sikhi" About section on the home page. */
